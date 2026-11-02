@@ -1,0 +1,50 @@
+{% extends "base.html" %}{% load i18n %}
+{% block title %}{{ object.reference }} {{ object.name }}{% endblock %}
+{% block breadcrumbs %}
+<nav class="govuk-breadcrumbs" aria-label="Breadcrumb"><ol class="govuk-breadcrumbs__list">
+  <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="{% url 'properties:list' %}">{% translate "Properties" %}</a></li>
+  {% for a in object.ancestors %}<li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="{{ a.get_absolute_url }}">{{ a.name }}</a></li>{% endfor %}
+  <li class="govuk-breadcrumbs__list-item">{{ object.name }}</li>
+</ol></nav>
+{% endblock %}
+{% block content %}
+<span class="govuk-caption-l">{{ object.reference }} · {{ object.get_property_type_display }}</span>
+<h1 class="govuk-heading-xl">{{ object.name }}</h1>
+{% if user.is_staff %}<p class="govuk-body"><a class="govuk-link" href="{% url 'admin:properties_property_change' object.pk %}">{% translate "Edit this property" %}</a></p>{% endif %}
+
+<div class="govuk-grid-row">
+<div class="govuk-grid-column-two-thirds">
+  <h2 class="govuk-heading-m">{% translate "Details" %}</h2>
+  <dl class="govuk-summary-list">
+    <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Address" %}</dt><dd class="govuk-summary-list__value">{{ object.address|default:"–" }}</dd></div>
+    <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">UPRN</dt><dd class="govuk-summary-list__value">{{ object.uprn|default:"–" }}</dd></div>
+    <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Holding purpose" %}</dt><dd class="govuk-summary-list__value">{{ object.get_holding_purpose_display|default:"–" }}</dd></div>
+    <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Tenure" %}</dt><dd class="govuk-summary-list__value">{{ object.get_tenure_display|default:"–" }}</dd></div>
+    <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Occupation" %}</dt><dd class="govuk-summary-list__value">{{ object.get_occupation_display|default:"–" }}</dd></div>
+    <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Use" %}</dt><dd class="govuk-summary-list__value">{{ object.use_description|default:"–" }}{% if object.use_class %} ({{ object.use_class }}){% endif %}</dd></div>
+    <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Areas" %}</dt><dd class="govuk-summary-list__value">
+      {% if object.gia_sqm %}GIA {{ object.gia_sqm }} m²<br>{% endif %}{% if object.nia_sqm %}NIA {{ object.nia_sqm }} m²<br>{% endif %}{% if object.site_area_ha %}{% translate "Site" %} {{ object.site_area_ha }} ha{% endif %}
+      {% if not object.gia_sqm and not object.nia_sqm and not object.site_area_ha %}–{% endif %}</dd></div>
+    <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Grid reference" %}</dt><dd class="govuk-summary-list__value">{% if object.easting %}{{ object.easting }}, {{ object.northing }}{% else %}–{% endif %}</dd></div>
+    {% if object.exclude_from_publication %}<div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Open data" %}</dt><dd class="govuk-summary-list__value"><strong class="govuk-tag govuk-tag--red">{% translate "Excluded from publication" %}</strong></dd></div>{% endif %}
+  </dl>
+  {% if object.notes %}<h2 class="govuk-heading-m">{% translate "Notes" %}</h2><p class="govuk-body">{{ object.notes|linebreaksbr }}</p>{% endif %}
+
+  <h2 class="govuk-heading-m">{% translate "Parts of this property" %}</h2>
+  {% if children %}
+  <ul class="govuk-list">{% for c in children %}<li><a class="govuk-link" href="{{ c.get_absolute_url }}">{{ c.reference }} {{ c.name }}</a> – {{ c.get_property_type_display }}</li>{% endfor %}</ul>
+  {% else %}<p class="govuk-body">{% translate "None recorded." %}</p>{% endif %}
+</div>
+<div class="govuk-grid-column-one-third">
+  <h2 class="govuk-heading-m">{% translate "Titles" %}</h2>
+  {% if titles %}
+  <ul class="govuk-list">{% for t in titles %}<li><strong>{{ t }}</strong> – {{ t.get_tenure_display }}{% if t.title_class %}, {{ t.get_title_class_display|lower }}{% endif %}</li>{% endfor %}</ul>
+  {% else %}<p class="govuk-body">{% translate "No titles linked." %}</p>{% endif %}
+
+  <h2 class="govuk-heading-m">{% translate "History" %}</h2>
+  {% if history %}
+  <ul class="govuk-list govuk-body-s">{% for e in history %}<li>{{ e.timestamp|date:"j M Y H:i" }} – {{ e.get_action_display }}{% if e.user %} {% translate "by" %} {{ e.user }}{% endif %}{% if e.action == "update" %}: {{ e.changes.keys|join:", " }}{% endif %}</li>{% endfor %}</ul>
+  {% else %}<p class="govuk-body">{% translate "No history." %}</p>{% endif %}
+</div>
+</div>
+{% endblock %}

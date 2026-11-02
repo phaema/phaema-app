@@ -1,0 +1,39 @@
+{% extends "base.html" %}{% load i18n %}
+{% block title %}{% translate "Dashboard" %}{% endblock %}
+{% block content %}
+<h1 class="govuk-heading-xl">{% translate "Dashboard" %}</h1>
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-one-quarter">
+    <div class="phaema-stat"><span class="phaema-stat__value">{{ property_count }}</span><span class="govuk-body">{% translate "properties in the register" %}</span></div>
+  </div>
+  <div class="govuk-grid-column-one-quarter">
+    <div class="phaema-stat"><span class="phaema-stat__value">{{ vacant_count }}</span><a class="govuk-link" href="{% url 'properties:list' %}?occupation=vacant">{% translate "vacant" %}</a></div>
+  </div>
+</div>
+
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-one-third">
+    <h2 class="govuk-heading-m">{% translate "Register by type" %}</h2>
+    {% if by_type %}
+    <table class="govuk-table">
+      <thead class="govuk-table__head"><tr class="govuk-table__row"><th scope="col" class="govuk-table__header">{% translate "Type" %}</th><th scope="col" class="govuk-table__header govuk-table__header--numeric">{% translate "Number" %}</th></tr></thead>
+      <tbody class="govuk-table__body">
+      {% for label, n in by_type %}<tr class="govuk-table__row"><td class="govuk-table__cell">{{ label }}</td><td class="govuk-table__cell govuk-table__cell--numeric">{{ n }}</td></tr>{% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <p class="govuk-body">{% translate "No properties yet." %}{% if user.is_staff %} <a class="govuk-link" href="{% url 'admin:properties_property_add' %}">{% translate "Add the first property" %}</a>.{% endif %}</p>
+    {% endif %}
+  </div>
+  <div class="govuk-grid-column-two-thirds">
+    <h2 class="govuk-heading-m">{% translate "Recent changes" %}</h2>
+    {% if recent_changes %}
+    <ul class="govuk-list">
+      {% for e in recent_changes %}
+      <li>{{ e.timestamp|date:"j M Y H:i" }} – {{ e.get_action_display }} {{ e.content_type.name }} <strong>{{ e.object_repr }}</strong>{% if e.user %} {% translate "by" %} {{ e.user }}{% endif %}</li>
+      {% endfor %}
+    </ul>
+    {% else %}<p class="govuk-body">{% translate "Nothing changed yet." %}</p>{% endif %}
+  </div>
+</div>
+{% endblock %}

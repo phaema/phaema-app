@@ -1,0 +1,64 @@
+{% load static i18n %}<!DOCTYPE html>
+{% get_current_language as LANG %}
+<html lang="{{ LANG }}" class="govuk-template">
+<head>
+  <meta charset="utf-8">
+  <title>{% block title %}PHAEMA{% endblock %} – PHAEMA</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <link rel="stylesheet" href="{% static 'vendor/govuk-frontend/govuk-frontend.min.css' %}">
+  <link rel="stylesheet" href="{% static 'css/phaema.css' %}">
+</head>
+<body class="govuk-template__body">
+  <script>document.body.className += ' js-enabled' + ('noModule' in HTMLScriptElement.prototype ? ' govuk-frontend-supported' : '');</script>
+  <a href="#main-content" class="govuk-skip-link" data-module="govuk-skip-link">{% translate "Skip to main content" %}</a>
+
+  <header class="phaema-header" role="banner">
+    <div class="govuk-width-container phaema-header__inner">
+      <a href="{% url 'dashboard' %}" class="phaema-header__brand">PHAEMA</a>
+      <span class="phaema-header__org">{{ organisation_name }}</span>
+      {% if user.is_authenticated %}
+      <nav class="phaema-header__nav" aria-label="{% translate 'Main menu' %}">
+        <a href="{% url 'dashboard' %}">{% translate "Dashboard" %}</a>
+        <a href="{% url 'properties:list' %}">{% translate "Properties" %}</a>
+        {% if user.is_staff %}<a href="{% url 'admin:index' %}">{% translate "Manage data" %}</a>{% endif %}
+        <form method="post" action="{% url 'logout' %}" class="phaema-header__logout">
+          {% csrf_token %}<button type="submit">{% translate "Sign out" %}</button>
+        </form>
+      </nav>
+      {% endif %}
+    </div>
+  </header>
+
+  <div class="govuk-width-container">
+    <div class="govuk-phase-banner">
+      <p class="govuk-phase-banner__content">
+        <strong class="govuk-tag govuk-phase-banner__content__tag">{% translate "Alpha" %}</strong>
+        <span class="govuk-phase-banner__text">{% translate "This is a development version. Do not rely on it for live estate management." %}</span>
+      </p>
+    </div>
+    {% block breadcrumbs %}{% endblock %}
+    <main class="govuk-main-wrapper" id="main-content" role="main">
+      {% if messages %}
+        {% for message in messages %}
+        <div class="govuk-notification-banner" role="region" data-module="govuk-notification-banner">
+          <div class="govuk-notification-banner__content"><p class="govuk-notification-banner__heading">{{ message }}</p></div>
+        </div>
+        {% endfor %}
+      {% endif %}
+      {% block content %}{% endblock %}
+    </main>
+  </div>
+
+  <footer class="govuk-footer" role="contentinfo">
+    <div class="govuk-width-container">
+      <p class="govuk-body-s">
+        PHAEMA – Property Holding and Estate Management Application.
+        {% translate "Open-source software licensed under" %} <a class="govuk-footer__link" href="https://www.gnu.org/licenses/agpl-3.0.html">AGPL-3.0</a>.
+        <a class="govuk-footer__link" href="https://github.com/phaema/phaema-app">{% translate "Source code" %}</a>
+        {% if user.is_authenticated %}· <a class="govuk-footer__link" href="{% url 'api-docs' %}">{% translate "API" %}</a>{% endif %}
+      </p>
+    </div>
+  </footer>
+  <script type="module">import { initAll } from "{% static 'vendor/govuk-frontend/govuk-frontend.min.js' %}"; initAll();</script>
+</body>
+</html>

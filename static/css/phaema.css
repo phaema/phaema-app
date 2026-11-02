@@ -1,0 +1,16 @@
+/* SPDX-License-Identifier: AGPL-3.0-or-later */
+/* PHAEMA's own header: deliberately not the GOV.UK header or crown. */
+.phaema-header { background: #1d3557; color: #fff; border-bottom: 8px solid #457b9d; }
+.phaema-header__inner { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 24px; padding: 14px 0; }
+.phaema-header__brand { color: #fff; font-weight: 700; font-size: 1.5rem; text-decoration: none; letter-spacing: .05em; }
+.phaema-header__brand:focus { color: #0b0c0c; background: #fd0; box-shadow: 0 -2px #fd0, 0 4px #0b0c0c; outline: none; }
+.phaema-header__org { font-size: 1rem; opacity: .9; }
+.phaema-header__nav { margin-left: auto; display: flex; flex-wrap: wrap; align-items: center; gap: 4px 20px; }
+.phaema-header__nav a, .phaema-header__logout button { color: #fff; font: inherit; font-weight: 700; font-size: 1rem; }
+.phaema-header__nav a:focus { color: #0b0c0c; background: #fd0; outline: none; }
+.phaema-header__logout { margin: 0; }
+.phaema-header__logout button { background: none; border: 0; padding: 0; text-decoration: underline; cursor: pointer; }
+.phaema-stat { border-left: 5px solid #1d3557; padding-left: 15px; margin-bottom: 20px; }
+.phaema-stat__value { font-size: 2.5rem; font-weight: 700; line-height: 1.1; display: block; }
+.phaema-filters { background: #f3f2f1; padding: 15px; margin-bottom: 20px; }
+.phaema-filters .govuk-form-group { margin-bottom: 15px; }
