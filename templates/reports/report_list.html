@@ -5,10 +5,13 @@
 <h1 class="govuk-heading-xl">{% translate "Reports" %}</h1>
 <p class="govuk-body">{% translate "Run a report on screen or download it as an Excel or CSV file. Make your own by choosing the records, columns, filters and order you need." %}</p>
 <a class="govuk-button" href="{% url 'reports:new' %}" data-module="govuk-button">{% translate "Make a new report" %}</a>
-<h2 class="govuk-heading-m">{% translate "Ready-made reports" %}</h2>
-{% include "reports/_report_table.html" with reports=starters %}
-<h2 class="govuk-heading-m">{% translate "My reports" %}</h2>
+<h2 class="govuk-heading-l govuk-!-margin-top-6">{% translate "Ready-made reports" %}</h2>
+{% for heading, reports in starter_groups %}
+<h3 class="govuk-heading-m">{{ heading }}</h3>
+{% include "reports/_report_table.html" with reports=reports %}
+{% endfor %}
+<h2 class="govuk-heading-l govuk-!-margin-top-6">{% translate "My reports" %}</h2>
 {% if mine %}{% include "reports/_report_table.html" with reports=mine %}{% else %}<p class="govuk-body">{% translate "You have not saved any reports yet. Make a new one, or copy a ready-made report and change it." %}</p>{% endif %}
-<h2 class="govuk-heading-m">{% translate "Shared by colleagues" %}</h2>
+<h2 class="govuk-heading-l govuk-!-margin-top-6">{% translate "Shared by colleagues" %}</h2>
 {% if shared %}{% include "reports/_report_table.html" with reports=shared show_owner=True %}{% else %}<p class="govuk-body">{% translate "None yet." %}</p>{% endif %}
 {% endblock %}

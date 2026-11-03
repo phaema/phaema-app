@@ -142,3 +142,41 @@ def test_themes(client, viewer, db):
     assert 'data-theme="dark"' in client.get("/").content.decode()
     client.get("/theme/nonsense/")
     assert 'data-theme="dark"' in client.get("/").content.decode()
+
+
+def test_more_filters(demo):
+    from apps.properties.models import Property as P
+
+    ds = datasets.get("properties")
+    blank = datasets.apply_filters(ds, ds.queryset(), {"uprn": {"blank": True}})
+    assert blank.count() == P.objects.filter(uprn="").count()
+    leases = datasets.get("leases")
+    upto = datasets.apply_filters(leases, leases.queryset(), {"term_end": {"upto_days": 30}})
+    assert all(lease.term_end <= date.today() + timedelta(days=30) for lease in upto)
+    assert any(lease.term_end < date.today() for lease in upto)  # past dates are included
+
+
+def test_arrears_reports_match_the_ledger(client, viewer, demo):
+    from apps.ledger import billing
+
+    summary = billing.arrears_summary()
+    report = Report.objects.get(starter="rent_arrears")
+    client.force_login(viewer)
+    page = client.get(report.get_absolute_url())
+    assert page.context["count"] == summary["count"]
+    overdue_col = [f.key for f in page.context["fields"]].index("overdue")
+    assert page.context["totals"][overdue_col] == summary["total"]
+    invoices = client.get(Report.objects.get(starter="overdue_invoices").get_absolute_url())
+    assert invoices.context["count"] >= summary["count"]
+
+
+def test_ready_made_reports_are_grouped_and_ledger_ones_hidden_when_off(client, viewer, demo):
+    from apps.core.models import ModuleSettings
+
+    client.force_login(viewer)
+    groups = dict(client.get("/reports/").context["starter_groups"])
+    assert "Rents and income" in groups and "Data quality" in groups
+    settings = ModuleSettings.load()
+    settings.rent_ledger_enabled = False
+    settings.save()
+    assert "Rents and income" not in dict(client.get("/reports/").context["starter_groups"])
