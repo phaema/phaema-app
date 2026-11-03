@@ -23,6 +23,8 @@ PHAEMA has three roles. Give each person one role in **Manage data > Users** (ti
 | Change the ready-made reports | ✓ | – | – |
 | See rent accounts, statements, arrears and receipts | ✓ | ✓ | ✓ |
 | Raise rent, issue credit notes, import receipts, create finance exports | ✓ | – | – |
+| See service charge schedules, years and tenant statements | ✓ | ✓ | ✓ |
+| Set up schedules, budgets and spending; approve budgets; reconcile years | ✓ | – | – |
 | Module settings (OS Maps key, reminder lead times, brand colour, rent ledger) | ✓ | – | – |
 | Add users and give them roles | ✓ (not superusers) | – | – |
 | Use the API | Read and write | Read; change what they can change on screen | Read only |

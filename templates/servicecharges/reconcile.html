@@ -1,0 +1,35 @@
+{% extends "base.html" %}{% load i18n humanize phaema %}
+{% block title %}{% translate "Reconcile" %} {{ year }}{% endblock %}
+{% block help_page %}service-charges{% endblock %}
+{% block content %}
+<span class="govuk-caption-l">{{ year.schedule.name }} {{ year.label }}</span>
+<h1 class="govuk-heading-l">{% translate "Year-end reconciliation" %}</h1>
+<p class="govuk-body">{% translate "Each lease's share of the actual spending, for the days it was in force in the year and within any cap, compared with what it was charged on account. The difference becomes a balancing charge or a credit on the tenant's rent account." %}</p>
+<dl class="govuk-summary-list">
+  <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Budget" %}</dt><dd class="govuk-summary-list__value">£{{ recon.budget|floatformat:2|intcomma }}</dd></div>
+  <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Actual spending" %}</dt><dd class="govuk-summary-list__value">£{{ recon.actual|floatformat:2|intcomma }}</dd></div>
+  <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Recovered from tenants" %}</dt><dd class="govuk-summary-list__value">£{{ recon.recovered|floatformat:2|intcomma }}</dd></div>
+  <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Borne by the council" %}</dt><dd class="govuk-summary-list__value">£{{ recon.council|floatformat:2|intcomma }} <span class="govuk-body-s">({% translate "empty units, part years and caps" %})</span></dd></div>
+</dl>
+<table class="govuk-table phaema-report">
+  <thead class="govuk-table__head"><tr class="govuk-table__row">
+    <th scope="col" class="govuk-table__header">{% translate "Lease" %}</th><th scope="col" class="govuk-table__header govuk-table__header--numeric">{% translate "Share" %}</th><th scope="col" class="govuk-table__header govuk-table__header--numeric">{% translate "Days" %}</th>
+    <th scope="col" class="govuk-table__header govuk-table__header--numeric">{% translate "Due" %}</th><th scope="col" class="govuk-table__header govuk-table__header--numeric">{% translate "Charged on account" %}</th><th scope="col" class="govuk-table__header govuk-table__header--numeric">{% translate "Balance (net)" %}</th>
+  </tr></thead>
+  <tbody class="govuk-table__body">
+  {% for line in recon.lines %}<tr class="govuk-table__row">
+    <td class="govuk-table__cell">{{ line.share.member.lease.reference }}<br><span class="govuk-body-s">{{ line.share.member.lease.counterparty.name }}</span>{% if line.capped %} <strong class="govuk-tag govuk-tag--yellow">{% translate "Capped" %}</strong>{% endif %}</td>
+    <td class="govuk-table__cell govuk-table__cell--numeric">{{ line.share.share|percent }}</td><td class="govuk-table__cell govuk-table__cell--numeric">{{ line.days }}</td>
+    <td class="govuk-table__cell govuk-table__cell--numeric">£{{ line.due|floatformat:2|intcomma }}</td><td class="govuk-table__cell govuk-table__cell--numeric">£{{ line.demanded|floatformat:2|intcomma }}</td>
+    <td class="govuk-table__cell govuk-table__cell--numeric"><strong>{% if line.balance > 0 %}£{{ line.balance|floatformat:2|intcomma }} {% translate "to pay" %}{% elif line.balance < 0 %}£{{ line.balance|floatformat:2|cut:"-"|intcomma }} {% translate "credit" %}{% else %}–{% endif %}</strong></td>
+  </tr>{% endfor %}
+  </tbody>
+</table>
+{% if year.status == "approved" %}
+<form method="post">{% csrf_token %}
+  {% if not ended %}<div class="govuk-warning-text"><span class="govuk-warning-text__icon" aria-hidden="true">!</span><strong class="govuk-warning-text__text"><span class="govuk-visually-hidden">{% translate "Warning" %}</span>{% translate "This year has not ended. Only reconcile early if all the spending is in." %}</strong></div>
+  <div class="govuk-checkboxes govuk-checkboxes--small govuk-!-margin-bottom-4"><div class="govuk-checkboxes__item"><input class="govuk-checkboxes__input" id="confirm_early" name="confirm_early" type="checkbox" value="1"><label class="govuk-label govuk-checkboxes__label" for="confirm_early">{% translate "Reconcile before the year ends" %}</label></div></div>{% endif %}
+  <div class="govuk-button-group"><button class="govuk-button" data-module="govuk-button">{% translate "Raise balancing charges and credits" %}</button><a class="govuk-link" href="{{ year.get_absolute_url }}">{% translate "Cancel" %}</a></div>
+</form>
+{% endif %}
+{% endblock %}

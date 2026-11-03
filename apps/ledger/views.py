@@ -72,6 +72,9 @@ def run_new(request):
     due_to = _date(data.get("due_to"), _quarter_end(today + timedelta(days=1)))
     issue_date = _date(data.get("issue_date"), today)
     errors = []
+    settings = ModuleSettings.load()
+    include = data.get("include", "all") if settings.service_charges_enabled else "rent"
+    rent, service = include in ("all", "rent"), include in ("all", "service")
     if None in (due_from, due_to, issue_date):
         errors.append(_("Enter dates as day, month and year."))
     elif due_to < due_from:
@@ -79,19 +82,21 @@ def run_new(request):
     elif (due_to - due_from).days > 400:
         errors.append(_("A demand run can cover up to 13 months."))
     if request.method == "POST" and "confirm" in request.POST and not errors:
-        run = billing.issue_run(due_from, due_to, issue_date, request.POST.get("notes", "")[:500])
+        run = billing.issue_run(due_from, due_to, issue_date, request.POST.get("notes", "")[:500], rent=rent,
+                                service=service)
         if run is None:
             messages.info(request, _("There was nothing new to charge for those dates."))
             return redirect("ledger:home")
         messages.success(request, _("Demand run complete: %(n)s charges raised.") % {"n": run.charges.count()})
         return redirect(run)
-    charges = billing.proposed_charges(due_from, due_to, issue_date) if not errors and "due_from" in data else None
+    charges = billing.proposed_charges(due_from, due_to, issue_date, rent=rent, service=service) \
+        if not errors and "due_from" in data else None
     totals = None
     if charges:
         totals = {k: sum((getattr(c, k) for c in charges), Decimal("0")) for k in ("net", "vat", "gross")}
     return render(request, "ledger/run_new.html", {
         "due_from": due_from or today, "due_to": due_to or today, "issue_date": issue_date or today,
-        "errors": errors, "charges": charges, "totals": totals, "settings": ModuleSettings.load(),
+        "errors": errors, "charges": charges, "totals": totals, "settings": settings, "include": include,
     })
 
 

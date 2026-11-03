@@ -1,0 +1,30 @@
+{% extends "base.html" %}{% load i18n humanize phaema %}
+{% block title %}{% translate "Service charge statement" %} {{ member.lease.reference }}{% endblock %}
+{% block help_page %}service-charges{% endblock %}
+{% block content %}
+<span class="govuk-caption-l">{{ year.schedule.name }}</span>
+<h1 class="govuk-heading-l">{% translate "Service charge statement" %} {{ year.label }}</h1>
+<dl class="govuk-summary-list govuk-summary-list--no-border">
+  <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Tenant" %}</dt><dd class="govuk-summary-list__value">{{ member.lease.counterparty.name }}{% if member.lease.counterparty.address %}<br>{{ member.lease.counterparty.address|linebreaksbr }}{% endif %}</dd></div>
+  <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Lease" %}</dt><dd class="govuk-summary-list__value">{{ member.lease.reference }}: {% for p in member.lease.properties.all %}{{ p.name }}{% if not forloop.last %}; {% endif %}{% endfor %}</dd></div>
+  <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Service charge year" %}</dt><dd class="govuk-summary-list__value">{{ year.start|date:"j F Y" }} {% translate "to" %} {{ year.end|date:"j F Y" }}</dd></div>
+  <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Your share" %}</dt><dd class="govuk-summary-list__value">{{ percent }}% ({% translate "shared by" %} {{ year.schedule.get_basis_display }}){% if line.days < year.days %}, {% blocktranslate with d=line.days t=year.days %}for {{ d }} of {{ t }} days{% endblocktranslate %}{% endif %}{% if member.annual_cap %}, {% translate "capped at" %} £{{ member.annual_cap|floatformat:2|intcomma }} {% translate "a year" %}{% endif %}</dd></div>
+  <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Statement date" %}</dt><dd class="govuk-summary-list__value">{{ today|date:"j F Y" }}</dd></div>
+</dl>
+<h2 class="govuk-heading-m">{% translate "Costs for the whole schedule" %}</h2>
+<table class="govuk-table">
+  <thead class="govuk-table__head"><tr class="govuk-table__row"><th scope="col" class="govuk-table__header">{% translate "Heading" %}</th><th scope="col" class="govuk-table__header govuk-table__header--numeric">{% translate "Budget" %}</th><th scope="col" class="govuk-table__header govuk-table__header--numeric">{% translate "Actual" %}</th></tr></thead>
+  <tbody class="govuk-table__body">
+  {% for h, b, a in recon.rows %}<tr class="govuk-table__row"><td class="govuk-table__cell">{{ h.name }}</td><td class="govuk-table__cell govuk-table__cell--numeric">£{{ b|floatformat:2|intcomma }}</td><td class="govuk-table__cell govuk-table__cell--numeric">£{{ a|floatformat:2|intcomma }}</td></tr>{% endfor %}
+  <tr class="govuk-table__row phaema-total-row"><td class="govuk-table__cell"><strong>{% translate "Total" %}</strong></td><td class="govuk-table__cell govuk-table__cell--numeric"><strong>£{{ recon.budget|floatformat:2|intcomma }}</strong></td><td class="govuk-table__cell govuk-table__cell--numeric"><strong>£{{ recon.actual|floatformat:2|intcomma }}</strong></td></tr>
+  </tbody>
+</table>
+<h2 class="govuk-heading-m">{% translate "Your account for the year" %}</h2>
+<dl class="govuk-summary-list">
+  <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Your share of the actual costs" %}</dt><dd class="govuk-summary-list__value">£{{ line.due|floatformat:2|intcomma }}</dd></div>
+  <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Charged on account" %}</dt><dd class="govuk-summary-list__value">£{{ line.demanded|floatformat:2|intcomma }}</dd></div>
+  <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% if line.balance >= 0 %}{% translate "Balance due from you" %}{% else %}{% translate "Credit due to you" %}{% endif %}</dt><dd class="govuk-summary-list__value"><strong>£{{ line.balance|floatformat:2|cut:"-"|intcomma }}</strong> {% translate "plus VAT where charged" %}</dd></div>
+</dl>
+{% if balancing %}<p class="govuk-body">{% translate "Raised as" %} {% for c in balancing %}{{ c.reference }} (£{{ c.gross|floatformat:2|intcomma }}){% if not forloop.last %}, {% endif %}{% endfor %}.</p>{% elif year.status != "reconciled" %}<p class="govuk-body"><strong class="govuk-tag govuk-tag--yellow">{% translate "Draft" %}</strong> {% translate "This year has not been reconciled yet, so the figures may change." %}</p>{% endif %}
+<p class="govuk-body-s govuk-!-display-none-print"><a class="govuk-link" href="{{ year.get_absolute_url }}">{% translate "Back to the year" %}</a></p>
+{% endblock %}

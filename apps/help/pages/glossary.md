@@ -67,6 +67,13 @@ Rent review
 Rent roll
 :   The total rent receivable from all current lettings.
 
+Service charge
+:   A tenant's share of the landlord's costs of shared services, paid on account against a budget and balanced
+    against the actual costs after the year end. See [service charges](service-charges.md).
+
+Void share
+:   The share of service charge costs that falls on empty units, which the landlord pays.
+
 Tenancy at will
 :   A tenancy that either side can end at any time, often used for short-term occupation.
 

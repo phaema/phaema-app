@@ -49,8 +49,15 @@ def _rows(charges, settings):
             party.address.replace("\n", ", "), lease.reference, "; ".join(p.name for p in props),
             "; ".join(p.uprn for p in props if p.uprn), c.description, c.period_start, c.period_end,
             c.issue_date, c.due_date, c.net, settings.vat_code_standard if c.vat_rate else settings.vat_code_exempt,
-            c.vat_rate, c.vat, c.gross, settings.rent_income_code,
+            c.vat_rate, c.vat, c.gross, _income_code(c, settings),
         ]
+
+
+def _income_code(charge, settings):
+    source = charge.credit_for or charge
+    if source.kind == Charge.Kind.SERVICE and settings.service_charge_income_code:
+        return settings.service_charge_income_code
+    return settings.rent_income_code
 
 
 def download(batch, fmt, settings):

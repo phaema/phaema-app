@@ -255,8 +255,9 @@ class LeaseWorkbook(Workbook):
 
 def _workbooks():
     from apps.ledger.importing import ReceiptWorkbook
+    from apps.servicecharges.importing import ExpenditureWorkbook
 
-    return {wb.key: wb for wb in (PartyWorkbook, LeaseWorkbook, ReceiptWorkbook)}  # in the order to import them
+    return {wb.key: wb for wb in (PartyWorkbook, LeaseWorkbook, ReceiptWorkbook, ExpenditureWorkbook)}  # in the order to import them
 
 
 class _LazyWorkbooks(dict):

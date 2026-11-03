@@ -1,0 +1,8 @@
+{% extends "base.html" %}{% load i18n %}
+{% block title %}{% translate "Service charges" %}{% endblock %}
+{% block help_page %}service-charges{% endblock %}
+{% block content %}
+<h1 class="govuk-heading-l">{% translate "Service charges are switched off" %}</h1>
+<p class="govuk-body">{% translate "Your council has not switched on the service charge module in PHAEMA." %}</p>
+{% if is_administrator %}<p class="govuk-body">{% translate "To switch it on, go to Manage data, then Module settings, and tick Service charge ledger. The rent ledger must be on too, as service charges are demanded through it." %}</p>{% endif %}
+{% endblock %}
