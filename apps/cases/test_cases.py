@@ -9,7 +9,7 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from apps.cases import workflow
 from apps.cases.models import Case, CaseNote, CaseType, Correspondence
 from apps.core.dates import add_working_days
-from apps.core.models import ModuleSettings
+from apps.core.models import ModuleSettings, StaffProfile
 from apps.leases.models import Lease, LeaseEvent, Party
 from apps.properties.models import Property
 
@@ -98,8 +98,9 @@ def test_confidential_notes(client, make_user, setup):
     assert "Secret price" in client.get(case.get_absolute_url()).content.decode()
 
 
-def test_decisions_need_reasons_under_the_1988_act(client, setup):
+def test_decisions_need_reasons_under_the_1988_act(client, make_user, setup):
     case = workflow.open_case(CaseType.objects.get(code="assignment"), title="A", lease=setup["lease"])
+    _approved(case, setup["surveyor"], make_user)
     client.force_login(setup["surveyor"])
     client.post(case.get_absolute_url(), {"action": "decide", "decision": "refused", "reasons": ""})
     case.refresh_from_db()
@@ -220,5 +221,118 @@ def test_demo_cases(db):
     call_command("load_demo_data", verbosity=0)
     assert Case.objects.filter(crm_reference__startswith="DEMO").count() == 5
     assert Case.objects.filter(how_received="event").exists()
+    assert Case.objects.get(crm_reference="DEMO-1").approvals.filter(status="pending").exists()
     call_command("load_demo_data", "--reset", verbosity=0)
     assert Case.objects.filter(crm_reference__startswith="DEMO").count() == 5
+
+
+def _supervise(user, supervisor):
+    StaffProfile.objects.update_or_create(user=user, defaults={"supervisor": supervisor})
+
+
+def _approved(case, surveyor, make_user):
+    head = make_user("head", "Surveyors")
+    _supervise(surveyor, head)
+    workflow.decide_approval(workflow.request_approval(case, surveyor, "decision", "Approve"), head, True)
+    case.refresh_from_db()
+
+
+def test_approval_is_needed_before_the_decision(client, make_user, mailoutbox, setup):
+    head = make_user("head", "Surveyors", email="head@example.org")
+    surveyor = setup["surveyor"]
+    surveyor.email = "surv@example.org"
+    surveyor.save()
+    case = workflow.open_case(CaseType.objects.get(code="assignment"), title="A", lease=setup["lease"])
+    case.stage = "assessing"
+    case.save()
+    url = case.get_absolute_url()
+    client.force_login(surveyor)
+    assert "No supervisor" in client.get(url).content.decode()
+    client.post(url, {"action": "next_stage"})
+    client.post(url, {"action": "decide", "decision": "approved", "date": "2026-11-20"})
+    case.refresh_from_db()
+    assert case.stage == "assessing" and case.decision == ""
+    _supervise(surveyor, head)
+    client.post(url, {"action": "request_approval", "stage": "decision", "recommendation": "Grant, with an AGA"})
+    approval = case.approvals.get()
+    assert approval.approver == head and approval.status == "pending"
+    assert mailoutbox[-1].to == ["head@example.org"] and case.display_reference in mailoutbox[-1].subject
+    # The surveyor cannot approve their own request.
+    assert client.post(url, {"action": "approve"}).status_code == 403
+    # The supervisor returns it, then approves the revised recommendation.
+    client.force_login(head)
+    assert client.get("/cases/?approval=mine").context["paginator"].count == 1
+    assert "1 case waiting for your approval" in client.get("/").content.decode()
+    client.post(url, {"action": "return", "comments": ""})  # comments are needed to return
+    approval.refresh_from_db()
+    assert approval.status == "pending"
+    client.post(url, {"action": "return", "comments": "Ask for a rent deposit too"})
+    approval.refresh_from_db()
+    assert approval.status == "returned" and approval.decided_by == head and mailoutbox[-1].to == ["surv@example.org"]
+    client.force_login(surveyor)
+    client.post(url, {"action": "request_approval", "stage": "decision", "recommendation": "Grant, AGA and deposit"})
+    client.force_login(head)
+    client.post(url, {"action": "approve", "comments": "Agreed"})
+    case.refresh_from_db()
+    assert case.stage == "decision" and case.approvals.filter(status="approved").count() == 1
+    client.force_login(surveyor)
+    client.post(url, {"action": "decide", "decision": "conditions", "reasons": "AGA and deposit",
+                      "date": "2026-11-20"})
+    case.refresh_from_db()
+    assert case.decision == "conditions"
+    assert "Grant, AGA and deposit" in client.get(url).content.decode()  # the approval history
+
+
+def test_other_users_and_administrators(client, make_user, setup):
+    head, other = make_user("head", "Surveyors"), make_user("other", "Surveyors")
+    admin_user = make_user("admin", "Administrators")
+    _supervise(setup["surveyor"], head)
+    case = workflow.open_case(CaseType.objects.get(code="assignment"), title="A", lease=setup["lease"])
+    approval = workflow.request_approval(case, setup["surveyor"], "decision", "Grant")
+    with pytest.raises(ValueError):
+        workflow.request_approval(case, setup["surveyor"], "decision", "Again")
+    client.force_login(other)
+    assert client.post(case.get_absolute_url(), {"action": "approve"}).status_code == 403
+    client.force_login(admin_user)
+    client.post(case.get_absolute_url(), {"action": "reassign_approval", "approver": other.pk})
+    approval.refresh_from_db()
+    assert approval.approver == other
+    client.post(case.get_absolute_url(), {"action": "approve"})  # administrators can approve
+    approval.refresh_from_db()
+    assert approval.status == "approved" and approval.decided_by == admin_user
+    _supervise(head, head)
+    with pytest.raises(ValueError):
+        workflow.request_approval(case, head, "decision", "Mine")
+
+
+def test_types_without_approval_move_freely(client, setup):
+    case = workflow.open_case(CaseType.objects.get(code="enquiry"), title="Q", lease=setup["lease"])
+    assert not CaseType.objects.get(code="enquiry").approval_stages
+    client.force_login(setup["surveyor"])
+    for _i in range(3):
+        client.post(case.get_absolute_url(), {"action": "next_stage"})
+    case.refresh_from_db()
+    assert case.stage == "decision"
+
+
+def test_lease_event_outcome_waits_for_approval(client, make_user, setup):
+    workflow.auto_open()
+    review = LeaseEvent.objects.get(lease=setup["lease"], event_type="review")
+    case = review.cases.get()
+    client.force_login(setup["surveyor"])
+    data = {"record_outcome": "1", "new_rent": "11000", "effective_from": review.due_date.isoformat(),
+            "notes": "Agreed"}
+    response = client.post(review.get_absolute_url(), data)
+    review.refresh_from_db()
+    assert response.status_code == 200 and review.is_open and "Approval needed" in response.content.decode()
+    _approved(case, setup["surveyor"], make_user)
+    client.post(review.get_absolute_url(), data)
+    review.refresh_from_db()
+    assert not review.is_open
+
+
+def test_dashboard_lists_surveyors_without_a_supervisor(client, make_user, setup):
+    client.force_login(make_user("admin", "Administrators"))
+    assert "No supervisor" in client.get("/").content.decode()
+    _supervise(setup["surveyor"], make_user("head", "Administrators"))
+    assert "No supervisor" not in client.get("/").content.decode()

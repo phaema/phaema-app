@@ -147,3 +147,97 @@ def raise_fee(case, issue_date=None):
     case.fee_charge = charge
     case.save(update_fields=["fee_charge", "updated_at"])
     return charge
+
+
+# ------------------------------------------------------------------ approvals
+
+class ApprovalNeeded(Exception):
+    """The case cannot enter this stage until the supervisor approves."""
+
+
+def needs_approval(case, stage):
+    """True if the case may not enter `stage` yet."""
+    if stage not in (case.case_type.approval_stages or []):
+        return False
+    return not case.approvals.filter(stage=stage, status="approved").exists()
+
+
+def pending_approval(case):
+    return case.approvals.filter(status="pending").select_related("approver", "requested_by").first()
+
+
+def approver_for(user):
+    from apps.core.models import supervisor_of
+
+    return supervisor_of(user)
+
+
+def can_decide_approval(user, approval):
+    """The named approver, or an administrator, but never the person who asked."""
+    if approval.status != "pending" or user.pk == approval.requested_by_id:
+        return False
+    return user.pk == approval.approver_id or is_administrator(user)
+
+
+@transaction.atomic
+def request_approval(case, user, stage, recommendation, base_url=""):
+    from .models import Approval
+
+    approver = approver_for(user)
+    if approver is None:
+        raise ValueError("You have no supervisor in PHAEMA to approve this. Ask an administrator to set one.")
+    if approver.pk == user.pk:
+        raise ValueError("You cannot approve your own work. Ask an administrator to change your supervisor.")
+    if pending_approval(case):
+        raise ValueError("This case is already waiting for approval.")
+    approval = Approval.objects.create(case=case, stage=stage, requested_by=user, approver=approver,
+                                       recommendation=recommendation.strip())
+    _notify(approval.approver, f"Approval needed: {case.display_reference}", "cases/email/approval_requested.txt",
+            approval, base_url)
+    return approval
+
+
+@transaction.atomic
+def decide_approval(approval, user, approve, comments="", base_url=""):
+    from django.utils import timezone
+
+    if not can_decide_approval(user, approval):
+        raise PermissionError("You cannot decide this approval.")
+    approval.status = "approved" if approve else "returned"
+    approval.decided_by, approval.decided_at, approval.comments = user, timezone.now(), comments.strip()
+    approval.save()
+    case = approval.case
+    if approve and STAGE_ORDER.index(case.stage) < STAGE_ORDER.index(approval.stage):
+        case.stage = approval.stage
+        case.save(update_fields=["stage", "updated_at"])
+    _notify(approval.requested_by, f"{'Approved' if approve else 'Returned'}: {case.display_reference}",
+            "cases/email/approval_decided.txt", approval, base_url)
+    return approval
+
+
+def reassign_approval(approval, approver):
+    approval.approver = approver
+    approval.save(update_fields=["approver", "updated_at"])
+    _notify(approver, f"Approval needed: {approval.case.display_reference}", "cases/email/approval_requested.txt",
+            approval, "")
+
+
+def _notify(user, subject, template, approval, base_url):
+    from django.conf import settings
+    from django.core.mail import send_mail
+    from django.template.loader import render_to_string
+
+    if not user.email:
+        return
+    base = base_url or getattr(settings, "PHAEMA_BASE_URL", "")
+    body = render_to_string(template, {"approval": approval, "case": approval.case, "user": user,
+                                       "base_url": base.rstrip("/")})
+    send_mail(f"PHAEMA: {subject}", body, settings.DEFAULT_FROM_EMAIL, [user.email], fail_silently=True)
+
+
+def event_blocked(event):
+    """If a lease event's case still needs approval before its decision, the case; otherwise None."""
+    for case in event.cases.exclude(status="closed").select_related("case_type"):
+        if needs_approval(case, "decision"):
+            return case
+    return None

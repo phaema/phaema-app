@@ -1,9 +1,21 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
+from django import forms
 from django.contrib import admin
 
 from apps.core.admin_roles import RoleAdminMixin
 
-from .models import Case, CaseType, CaseTypeTask
+from .models import STAGE_ORDER, Case, CaseType, CaseTypeTask, Stage
+
+
+class CaseTypeForm(forms.ModelForm):
+    approval_stages = forms.MultipleChoiceField(
+        label="Supervisor approval needed before", required=False, widget=forms.CheckboxSelectMultiple,
+        choices=[(s, label) for s, label in Stage.choices if s != STAGE_ORDER[0]],
+        help_text="The case cannot move to these stages until the owner's supervisor approves.")
+
+    class Meta:
+        model = CaseType
+        fields = "__all__"
 
 
 class TaskTemplateInline(admin.TabularInline):
@@ -13,10 +25,17 @@ class TaskTemplateInline(admin.TabularInline):
 
 @admin.register(CaseType)
 class CaseTypeAdmin(RoleAdminMixin, admin.ModelAdmin):
-    list_display = ("name", "group", "target_days", "acknowledge_working_days", "fee", "event_type", "active")
+    form = CaseTypeForm
+    list_display = ("name", "group", "target_days", "acknowledge_working_days", "fee", "approval", "event_type",
+                    "active")
     list_filter = ("group", "active")
     search_fields = ("name", "code")
     inlines = [TaskTemplateInline]
+
+    @admin.display(description="approval before")
+    def approval(self, obj):
+        labels = dict(Stage.choices)
+        return ", ".join(str(labels.get(s, s)) for s in obj.approval_stages or []) or "–"
 
 
 @admin.register(Case)

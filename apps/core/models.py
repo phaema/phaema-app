@@ -163,3 +163,25 @@ class AuditEntry(models.Model):
 
     def delete(self, *args, **kwargs):
         raise ValueError("Audit entries cannot be deleted.")
+
+
+class StaffProfile(models.Model):
+    """Extra details for a PHAEMA user: who supervises them and approves their work."""
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="staff_profile")
+    job_title = models.CharField(_("job title"), max_length=100, blank=True)
+    supervisor = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name="supervisees",
+        verbose_name=_("supervisor and approver"),
+        help_text=_("Approves this person's work at the approval points in cases, such as decisions on consents."))
+
+    class Meta:
+        verbose_name = _("supervisor and job title")
+        verbose_name_plural = _("supervisor and job title")
+
+    def __str__(self):
+        return f"{self.user}"
+
+
+def supervisor_of(user):
+    profile = StaffProfile.objects.filter(user=user).select_related("supervisor").first()
+    return profile.supervisor if profile and profile.supervisor and profile.supervisor.is_active else None

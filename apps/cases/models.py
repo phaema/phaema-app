@@ -58,12 +58,21 @@ class CaseType(models.Model):
     open_days_before = models.PositiveSmallIntegerField(
         _("open automatically (days before the event)"), null=True, blank=True,
         help_text=_("Leave blank to open cases for this event type only by hand."))
+    approval_stages = models.JSONField(
+        _("approval needed before"), default=list, blank=True,
+        help_text=_("Stages a case of this type can only enter once the owner's supervisor has approved, for "
+                    "example [\"decision\"]. Choose from: received, information, assessing, decision, completing."))
     active = models.BooleanField(_("active"), default=True)
     order = models.PositiveSmallIntegerField(_("order"), default=0)
 
     class Meta:
         ordering = ["group", "order", "name"]
         verbose_name = _("case type")
+
+    def clean(self):
+        bad = [s for s in (self.approval_stages or []) if s not in STAGE_ORDER]
+        if bad or not isinstance(self.approval_stages, list):
+            raise ValidationError({"approval_stages": _("Use a list of stages, for example [\"decision\"].")})
 
     def __str__(self):
         return self.name
@@ -323,3 +332,32 @@ class CaseDocument(TimeStampedModel):
 
     def __str__(self):
         return self.description
+
+
+class Approval(TimeStampedModel):
+    """A request for the supervisor's approval before a case enters a stage."""
+
+    class Status(models.TextChoices):
+        PENDING = "pending", _("Waiting for approval")
+        APPROVED = "approved", _("Approved")
+        RETURNED = "returned", _("Returned with comments")
+        WITHDRAWN = "withdrawn", _("Withdrawn")
+
+    case = models.ForeignKey(Case, on_delete=models.CASCADE, related_name="approvals")
+    stage = models.CharField(_("to move to"), max_length=12, choices=Stage.choices)
+    requested_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT,
+                                     related_name="approvals_requested")
+    approver = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT,
+                                 related_name="approvals_to_give")
+    recommendation = models.TextField(_("recommendation"))
+    status = models.CharField(_("status"), max_length=10, choices=Status.choices, default=Status.PENDING)
+    decided_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True,
+                                   related_name="+")
+    decided_at = models.DateTimeField(_("decided"), null=True, blank=True)
+    comments = models.TextField(_("approver's comments"), blank=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"Approval for {self.case.reference}: {self.get_stage_display()}"

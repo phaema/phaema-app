@@ -60,6 +60,10 @@ class CaseListView(LoginRequiredMixin, ExportMixin, ListView):
             qs = qs.filter(owner__isnull=True)
         elif who.isdigit():
             qs = qs.filter(owner_id=int(who))
+        if get.get("approval") == "mine":
+            qs = qs.filter(approvals__status="pending", approvals__approver=self.request.user).distinct()
+        elif get.get("approval") == "waiting":
+            qs = qs.filter(approvals__status="pending").distinct()
         if get.get("when") == "past":
             qs = qs.exclude(status=Case.Status.CLOSED).filter(target_date__lt=today, decision_on__isnull=True)
         q = get.get("q", "").strip()
@@ -85,6 +89,8 @@ class CaseListView(LoginRequiredMixin, ExportMixin, ListView):
                 ("group", "Group", CaseType.Group.choices, get.get("group", ""), True),
                 ("stage", "Stage", Stage.choices, get.get("stage", ""), True),
                 ("when", "Target", [("past", "Past target")], get.get("when", ""), True),
+                ("approval", "Approval", [("mine", "Waiting for my approval"), ("waiting", "Waiting for approval")],
+                 get.get("approval", ""), True),
                 ("owner", "Owner", [("me", "Mine"), ("none", "Nobody")]
                  + [(str(u.pk), u.get_full_name() or u.username) for u in people], get.get("owner", ""), True),
             ],
@@ -203,7 +209,8 @@ def _file_email(case, upload, direction):
 
 
 ACTIONS_WORK = {"next_stage", "hold", "resume", "acknowledge", "complete_application", "decide", "close", "reopen",
-                "add_task", "task_done", "assign", "raise_fee", "links"}
+                "add_task", "task_done", "assign", "raise_fee", "links", "request_approval", "withdraw_approval"}
+ACTIONS_APPROVER = {"approve", "return", "reassign_approval"}
 ACTIONS_CONTRIBUTE = {"add_note", "add_correspondence", "add_document", "file_email"}
 
 
@@ -215,6 +222,9 @@ def case_detail(request, pk):
     can_contribute = workflow.can_contribute(request.user, case)
     if request.method == "POST":
         action = request.POST.get("action", "")
+        if action in ACTIONS_APPROVER:
+            _approval_action(request, case, action)
+            return redirect(case)
         if (action in ACTIONS_WORK and not can_work) or (action in ACTIONS_CONTRIBUTE and not can_contribute) \
                 or action not in ACTIONS_WORK | ACTIONS_CONTRIBUTE:
             raise PermissionDenied
@@ -228,6 +238,8 @@ def case_detail(request, pk):
     timeline = [("note", n.created_at.date(), n) for n in notes]
     timeline += [("correspondence", c.on, c) for c in case.correspondence.all()]
     timeline += [("document", d.created_at.date(), d) for d in case.documents.filter(correspondence__isnull=True)]
+    timeline += [("approval", a.created_at.date(), a)
+                 for a in case.approvals.select_related("requested_by", "approver", "decided_by")]
     timeline.sort(key=lambda item: (item[1], getattr(item[2], "created_at", None) or today), reverse=True)
     tasks = list(case.tasks.select_related("owner", "done_by"))
     stages = [(s, label, [t for t in tasks if t.stage == s]) for s, label in Stage.choices]
@@ -239,12 +251,64 @@ def case_detail(request, pk):
         "lease": case.lease, "show_confidential": show_confidential,
         "hidden_notes": case.notes.filter(confidential=True).count() if not show_confidential else 0,
         "is_administrator": is_administrator(request.user),
+        **_approval_context(request.user, case),
     })
+
+
+def _next_stage(case):
+    i = STAGE_ORDER.index(case.stage)
+    return STAGE_ORDER[i + 1] if i + 1 < len(STAGE_ORDER) else None
+
+
+def _approval_context(user, case):
+    pending = workflow.pending_approval(case)
+    upcoming = _next_stage(case)
+    gate = upcoming if upcoming and workflow.needs_approval(case, upcoming) else None
+    return {
+        "pending_approval": pending,
+        "can_decide_approval": bool(pending and workflow.can_decide_approval(user, pending)),
+        "approval_gate": gate, "approval_gate_label": dict(Stage.choices).get(gate, ""),
+        "decision_needs_approval": workflow.needs_approval(case, "decision"),
+        "my_approver": workflow.approver_for(user),
+        "approvals": case.approvals.select_related("requested_by", "approver", "decided_by"),
+        "approvers": _people(ADMINISTRATORS, SURVEYORS),
+    }
+
+
+def _approval_action(request, case, action):
+    approval = workflow.pending_approval(case)
+    if approval is None:
+        messages.error(request, _("There is no approval waiting on this case."))
+        return
+    if action == "reassign_approval":
+        if not is_administrator(request.user):
+            raise PermissionDenied
+        new = get_user_model().objects.filter(pk=request.POST.get("approver") or 0, is_active=True).first()
+        if new is None or new.pk == approval.requested_by_id:
+            messages.error(request, _("Choose someone other than the person who asked."))
+            return
+        workflow.reassign_approval(approval, new)
+        messages.success(request, _("Approval sent to %(name)s.") % {"name": new.get_full_name() or new.username})
+        return
+    if not workflow.can_decide_approval(request.user, approval):
+        raise PermissionDenied
+    comments = request.POST.get("comments", "")
+    if action == "return" and not comments.strip():
+        messages.error(request, _("Say why you are returning it."))
+        return
+    workflow.decide_approval(approval, request.user, action == "approve", comments)
+    messages.success(request, _("Approved: the case has moved to %(stage)s.") % {"stage": case.get_stage_display()}
+                     if action == "approve" else _("Returned to %(name)s with your comments.")
+                     % {"name": approval.requested_by.get_full_name() or approval.requested_by.username})
 
 
 def _do(request, case, action):  # noqa: C901 - one branch per action keeps each one short
     post, today = request.POST, date.today()
     if action == "next_stage":
+        upcoming = _next_stage(case)
+        if upcoming and workflow.needs_approval(case, upcoming):
+            messages.error(request, _("This stage needs your supervisor's approval first. Ask for approval below."))
+            return
         if workflow.next_stage(case):
             messages.success(request, _("Moved to %(stage)s.") % {"stage": case.get_stage_display()})
     elif action == "hold":
@@ -270,6 +334,10 @@ def _do(request, case, action):  # noqa: C901 - one branch per action keeps each
         if decision not in Case.Decision.values:
             messages.error(request, _("Choose a decision."))
             return
+        if decision != Case.Decision.WITHDRAWN and workflow.needs_approval(case, "decision"):
+            messages.error(request, _("The decision needs your supervisor's approval first. Ask for approval, "
+                                      "with your recommendation."))
+            return
         if case.case_type.statutory_1988 and decision in (Case.Decision.CONDITIONS, Case.Decision.REFUSED) \
                 and not reasons:
             messages.error(request, _("The Landlord and Tenant Act 1988 requires written reasons for conditions or "
@@ -281,6 +349,10 @@ def _do(request, case, action):  # noqa: C901 - one branch per action keeps each
         case.save(update_fields=["decision", "reasons", "decision_on", "stage", "updated_at"])
         messages.success(request, _("Decision recorded."))
     elif action == "close":
+        if workflow.needs_approval(case, "decision") and case.decision != Case.Decision.WITHDRAWN:
+            messages.error(request, _("This case needs approval before a decision. If the request was withdrawn, "
+                                      "record the decision as Withdrawn first."))
+            return
         if case.event_id and case.event.status in workflow.OPEN_EVENT:
             messages.error(request, _("Record the outcome on the lease event first; the case then closes itself."))
             return
@@ -289,6 +361,26 @@ def _do(request, case, action):  # noqa: C901 - one branch per action keeps each
     elif action == "reopen":
         case.status, case.closed_on = Case.Status.OPEN, None
         case.save(update_fields=["status", "closed_on", "updated_at"])
+    elif action == "request_approval":
+        stage = post.get("stage", "")
+        if stage not in STAGE_ORDER or not workflow.needs_approval(case, stage):
+            messages.error(request, _("No approval is needed for that stage."))
+            return
+        if not post.get("recommendation", "").strip():
+            messages.error(request, _("Write your recommendation for the approver."))
+            return
+        try:
+            approval = workflow.request_approval(case, request.user, stage, post["recommendation"])
+        except ValueError as exc:
+            messages.error(request, str(exc))
+            return
+        messages.success(request, _("Sent to %(name)s for approval.")
+                         % {"name": approval.approver.get_full_name() or approval.approver.username})
+    elif action == "withdraw_approval":
+        approval = workflow.pending_approval(case)
+        if approval and approval.requested_by_id == request.user.pk:
+            approval.status = "withdrawn"
+            approval.save(update_fields=["status", "updated_at"])
     elif action == "add_task":
         if post.get("description", "").strip():
             CaseTask.objects.create(case=case, stage=post.get("stage") if post.get("stage") in STAGE_ORDER
@@ -376,4 +468,14 @@ def cases_summary(user):
         "mine": open_cases.filter(owner=user).count(),
         "by_stage": dict(open_cases.values_list("stage").annotate(n=Count("pk"))),
         "tasks_overdue": CaseTask.objects.filter(case__in=open_cases, done_on__isnull=True, due_date__lt=today).count(),
+        "to_approve": Case.objects.filter(approvals__status="pending", approvals__approver=user).distinct().count(),
+        "no_supervisor": _without_supervisor() if is_administrator(user) else [],
     }
+
+
+def _without_supervisor():
+    """Surveyors with no supervisor to approve their work."""
+    from apps.core.models import StaffProfile
+
+    have = StaffProfile.objects.filter(supervisor__isnull=False).values_list("user_id", flat=True)
+    return list(_people(SURVEYORS).exclude(pk__in=have))

@@ -36,5 +36,12 @@ Administrators: select **Manage data**, then **Users**, then **Add user**. Set a
 then on the next page add their name and email address and choose one group: **Administrators**, **Surveyors**,
 **Contributors** or **Viewers**. Their email address is used for [reminders](reminders.md).
 
+## Supervisors
+
+Each surveyor needs a **supervisor and approver**, who approves their recommendations on [cases](cases.md#approvals).
+On the user record, under **Staff details**, choose the supervisor and add a job title. The supervisor can be a
+surveyor or an administrator, but nobody can approve their own work. The users
+list shows each person's supervisor, and the dashboard tells administrators about any surveyor without one.
+
 To stop someone using PHAEMA, untick **Active** on their user record rather than deleting it, so their name stays
 on the records they changed.

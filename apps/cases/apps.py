@@ -12,13 +12,18 @@ class CasesConfig(AppConfig):
         from apps.core import audit
         from apps.leases.models import LeaseEvent
 
-        from .models import Case, CaseDocument, CaseNote, CaseTask, CaseType, CaseTypeTask, Correspondence
+        from apps.core.models import StaffProfile
 
-        for model in (Case, CaseDocument, CaseNote, CaseTask, CaseType, CaseTypeTask, Correspondence):
+        from .models import Approval, Case, CaseDocument, CaseNote, CaseTask, CaseType, CaseTypeTask, Correspondence
+
+        for model in (Approval, Case, CaseDocument, CaseNote, CaseTask, CaseType, CaseTypeTask, Correspondence,
+                      StaffProfile):
             audit.register(model)
 
         def seed(sender, **kwargs):
-            if sender.label == "cases":
+            from django.db import connection
+
+            if sender.label == "cases" and "cases_casetype" in connection.introspection.table_names():
                 from .seed import ensure_case_types
 
                 ensure_case_types()

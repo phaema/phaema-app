@@ -1,0 +1,14 @@
+{% autoescape off %}Hello {{ user.get_full_name|default:user.username }},
+
+{{ approval.requested_by.get_full_name|default:approval.requested_by.username }} asks for your approval to move this case to {{ approval.get_stage_display|lower }}:
+
+{{ case.display_reference }}: {{ case.title }}
+{{ case.case_type.name }}{% if case.lease %}, agreement {{ case.lease.reference }}{% endif %}
+
+Recommendation:
+{{ approval.recommendation }}
+{% if base_url %}
+Approve or return it here: {{ base_url }}{{ case.get_absolute_url }}
+{% endif %}
+PHAEMA – Property Holding and Estate Management Application
+{% endautoescape %}

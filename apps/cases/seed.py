@@ -98,6 +98,19 @@ TYPES = [
 ]
 
 
+# Where a supervisor's approval is needed by default: before the decision on anything that commits the
+# council (consents, settlements, disposals, lettings). Administrators change this per case type.
+APPROVAL_GROUPS = {"consent", "event", "management", "valuation"}
+APPROVAL_CODES = {"new_letting", "wayleave", "land_purchase", "other_activity"}
+NO_APPROVAL = {"other_event", "deposit_return"}
+
+
+def default_approval(code, group):
+    if code in NO_APPROVAL:
+        return []
+    return ["decision"] if group in APPROVAL_GROUPS or code in APPROVAL_CODES else []
+
+
 def ensure_case_types():
     from .models import CaseType, CaseTypeTask
 
@@ -106,6 +119,7 @@ def ensure_case_types():
             "name": name, "group": group, "target_days": target, "statutory_1988": statutory,
             "fee": Decimal(fee) if fee else None,  # shipped blank: councils set their own fees
             "event_type": event_type, "open_days_before": before,
+            "approval_stages": default_approval(code, group),
             "order": i * 10})
         if created:
             CaseTypeTask.objects.bulk_create([CaseTypeTask(case_type=case_type, stage=stage, description=text,

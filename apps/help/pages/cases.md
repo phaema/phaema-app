@@ -26,6 +26,30 @@ hold** with a reason, and closed cases can be reopened.
 Each case type comes with a task list for each stage, for example *Covenant strength check* and *Check rent
 arrears on the rent account* for an assignment. Tick tasks off as you go, and add your own.
 
+## Approvals
+
+Every surveyor has a **supervisor**, who approves their recommendations. Most case types need the supervisor's
+approval before the case moves to **Decision**: consents, lease event cases, lease management, asset valuations,
+new lettings, wayleaves, land purchases and other activities. Enquiries, complaints and similar case types do not.
+
+When a case reaches a stage that needs approval, **Move to next stage** is replaced by **Ask for approval**:
+
+1. Write your recommendation, for example "Grant consent to assign, subject to an authorised guarantee agreement
+   and a rent deposit of six months' rent", and select **Ask *your supervisor* for approval**.
+2. Your supervisor is emailed, and the case appears under **Cases waiting for your approval** on their dashboard.
+3. They either **Approve**, which moves the case to the next stage, or **Return with comments**, which sends it
+   back to you to revise and ask again.
+
+Until it is approved you cannot record a decision (other than **Withdrawn**), close the case, or record the
+outcome on its lease event, such as a settled rent review. Every request, the recommendation, the decision and
+the comments stay in the case history, with who made them and when.
+
+Nobody can approve their own request. If your supervisor is away, an administrator can send a waiting request to
+someone else, or approve it themselves. You can withdraw a request you made while it is waiting.
+
+Administrators choose which stages need approval for each case type, under **Manage data**, **Case types**. The
+supervisor for each person is set on their user record (see [Users and roles](users-and-roles.md#supervisors)).
+
 ## Dates and targets
 
 | Date | What it is |
@@ -48,7 +72,8 @@ dates that show how long the council took, and will not save conditions or a ref
 ## Lease event cases
 
 For a rent review, break or expiry, record the outcome on the **lease event** as before, for example the new rent.
-Doing so updates the lease and closes the case automatically, so nothing is recorded twice.
+Doing so updates the lease and closes the case automatically, so nothing is recorded twice. If the case type
+needs approval, ask for it on the case first: the outcome can be recorded once your supervisor has approved.
 
 ## Notes, emails, letters and documents
 

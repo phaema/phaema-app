@@ -122,8 +122,14 @@ def event_detail(request, pk):
                 messages.success(request, _("Event updated."))
                 return redirect(event)
         elif "record_outcome" in request.POST and event.is_open:
+            from apps.cases.workflow import event_blocked
+
+            blocked = event_blocked(event)
             outcome_form = _outcome_form(event, request.POST)
-            if outcome_form.is_valid():
+            if blocked:
+                messages.error(request, _("Case %(ref)s needs the supervisor's approval before the outcome is "
+                                          "recorded. Ask for approval on the case.") % {"ref": blocked.display_reference})
+            elif outcome_form.is_valid():
                 d = outcome_form.cleaned_data
                 if event.event_type == LeaseEvent.EventType.REVIEW:
                     workflow.complete_review(event, request.user, d["new_rent"], d["effective_from"],
@@ -138,8 +144,14 @@ def event_detail(request, pk):
                 return redirect(event.lease)
     return render(request, "leases/event_detail.html", {
         "event": event, "editable": editable, "outcome_form": outcome_form, "edit_form": edit_form,
-        "rag": event.rag(),
+        "rag": event.rag(), "blocked_case": _blocked(event),
     })
+
+
+def _blocked(event):
+    from apps.cases.workflow import event_blocked
+
+    return event_blocked(event) if event.is_open else None
 
 
 @login_required

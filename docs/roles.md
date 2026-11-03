@@ -24,6 +24,7 @@ PHAEMA has three roles. Give each person one role in **Manage data > Users** (ti
 | See rent accounts, statements, arrears and receipts | ✓ | ✓ | ✓ |
 | Start and work on cases | All | Own cases, or on properties they manage | – |
 | See confidential case notes | ✓ | Cases they own | – |
+| Approve a case stage | Any waiting request (not their own); redirect requests | Requests from the people they supervise | – |
 | Raise rent, issue credit notes, import receipts, create finance exports | ✓ | – | – |
 | See service charge schedules, years and tenant statements | ✓ | ✓ | ✓ |
 | Set up schedules, budgets and spending; approve budgets; reconcile years | ✓ | – | – |

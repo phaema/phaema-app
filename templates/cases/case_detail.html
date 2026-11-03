@@ -32,9 +32,11 @@
   {% if case.closed_on %}<div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Closed" %}</dt><dd class="govuk-summary-list__value">{{ case.closed_on|date:"j M Y" }}{% if case.outcome %}<br><span class="govuk-body-s">{{ case.outcome|linebreaksbr }}</span>{% endif %}</dd></div>{% endif %}
 </dl>
 
+{% include "cases/_approval.html" %}
+
 {% if can_work and case.is_open %}
 <div class="govuk-button-group">
-  {% if stage_index < 4 %}<form method="post">{% csrf_token %}<input type="hidden" name="action" value="next_stage"><button class="govuk-button" data-module="govuk-button">{% translate "Move to next stage" %}</button></form>{% endif %}
+  {% if stage_index < 4 and not approval_gate %}<form method="post">{% csrf_token %}<input type="hidden" name="action" value="next_stage"><button class="govuk-button" data-module="govuk-button">{% translate "Move to next stage" %}</button></form>{% endif %}
   {% if case.status == "on_hold" %}<form method="post">{% csrf_token %}<input type="hidden" name="action" value="resume"><button class="govuk-button govuk-button--secondary" data-module="govuk-button">{% translate "Take off hold" %}</button></form>{% endif %}
 </div>
 {% if not case.event %}<details class="govuk-details" data-module="govuk-details"{% if case.stage == "decision" and not case.decision %} open{% endif %}><summary class="govuk-details__summary"><span class="govuk-details__summary-text">{% translate "Record the decision" %}</span></summary><div class="govuk-details__text">
@@ -44,6 +46,7 @@
     </div></fieldset></div>
     <div class="govuk-form-group"><label class="govuk-label govuk-label--s" for="reasons">{% translate "Reasons and conditions" %}</label>{% if case.case_type.statutory_1988 %}<div class="govuk-hint">{% translate "Required for conditions or a refusal." %}</div>{% endif %}<textarea class="govuk-textarea" id="reasons" name="reasons" rows="4">{{ case.reasons }}</textarea></div>
     <div class="govuk-form-group"><label class="govuk-label govuk-label--s" for="decision-date">{% translate "Date the decision was sent" %}</label><input class="govuk-input govuk-input--width-10" type="date" id="decision-date" name="date" value="{{ case.decision_on|default:today|date:'Y-m-d' }}"></div>
+    {% if decision_needs_approval %}<p class="govuk-body-s">{% translate "Only Withdrawn can be recorded until the supervisor approves the recommendation." %}</p>{% endif %}
     <button class="govuk-button" data-module="govuk-button">{% translate "Save the decision" %}</button>
   </form></div></details>
 <details class="govuk-details" data-module="govuk-details"><summary class="govuk-details__summary"><span class="govuk-details__summary-text">{% translate "Close the case" %}</span></summary><div class="govuk-details__text">
@@ -106,6 +109,10 @@
       {% if item.summary %}<details class="govuk-details govuk-!-margin-bottom-1" data-module="govuk-details"><summary class="govuk-details__summary"><span class="govuk-details__summary-text">{% translate "Text" %}</span></summary><div class="govuk-details__text phaema-email-text">{{ item.summary|linebreaksbr }}</div></details>{% endif %}
       {% if item.file %}<br><a class="govuk-link" href="{{ item.file.url }}">{{ item.original_filename|default:"File" }}</a> ({{ item.file|file_size }}){% endif %}
       {% for a in item.attachments.all %}<br><span class="govuk-body-s">{% translate "Attachment:" %} <a class="govuk-link" href="{{ a.file.url }}">{{ a.original_filename }}</a> ({{ a.file|file_size }})</span>{% endfor %}
+    {% elif kind == "approval" %}<strong>{% translate "Approval" %}: {{ item.get_stage_display }}</strong> <strong class="govuk-tag govuk-tag--{% if item.status == 'approved' %}green{% elif item.status == 'returned' %}orange{% elif item.status == 'pending' %}blue{% else %}grey{% endif %}">{{ item.get_status_display }}</strong>
+      <span class="govuk-body-s">{% translate "asked by" %} {{ item.requested_by|person:"PHAEMA" }}, {% translate "sent to" %} {{ item.approver|person:"–" }}{% if item.decided_by %}; {% translate "decided by" %} {{ item.decided_by|person:"–" }} {{ item.decided_at|date:"j M Y" }}{% endif %}</span>
+      <br><span class="govuk-body-s">{% translate "Recommendation:" %}</span> {{ item.recommendation|linebreaksbr }}
+      {% if item.comments %}<br><span class="govuk-body-s">{% translate "Comments:" %}</span> {{ item.comments|linebreaksbr }}{% endif %}
     {% else %}<strong>{% translate "Document" %}</strong> <a class="govuk-link" href="{{ item.file.url }}">{{ item.description }}</a> <span class="govuk-body-s">({{ item.file|file_size }})</span>{% endif %}
   </li>
 {% empty %}<li class="govuk-body">{% translate "Nothing yet." %}</li>{% endfor %}
