@@ -1,0 +1,63 @@
+{% extends "base.html" %}{% load i18n humanize %}
+{% block title %}{% translate "Rent account" %} {{ lease.reference }}{% endblock %}
+{% block help_page %}rent-ledger{% endblock %}
+{% block content %}
+<span class="govuk-caption-l">{% translate "Rent account" %}</span>
+<h1 class="govuk-heading-l">{{ lease.counterparty.name }} – {{ lease.reference }}</h1>
+{% if not statement %}{% include "ledger/_nav.html" %}{% endif %}
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+    <dl class="govuk-summary-list govuk-summary-list--no-border">
+      <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Agreement" %}</dt><dd class="govuk-summary-list__value"><a class="govuk-link" href="{{ lease.get_absolute_url }}">{{ lease.reference }}</a>: {% for p in lease.properties.all %}{{ p.name }}{% if not forloop.last %}; {% endif %}{% endfor %}</dd></div>
+      {% if lease.counterparty.address %}<div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Address" %}</dt><dd class="govuk-summary-list__value">{{ lease.counterparty.address|linebreaksbr }}</dd></div>{% endif %}
+      {% if lease.counterparty.finance_customer_ref %}<div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Customer reference" %}</dt><dd class="govuk-summary-list__value">{{ lease.counterparty.finance_customer_ref }}</dd></div>{% endif %}
+      <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Statement date" %}</dt><dd class="govuk-summary-list__value">{{ today|date:"j F Y" }}</dd></div>
+    </dl>
+  </div>
+  <div class="govuk-grid-column-one-third phaema-stat">
+    <span class="phaema-stat__value">£{{ account.balance|floatformat:2|intcomma }}</span>
+    {% if account.balance < 0 %}{% translate "in credit" %}{% else %}{% translate "balance" %}{% endif %}{% if account.overdue %}<br><strong class="govuk-tag govuk-tag--red">£{{ account.overdue|floatformat:2|intcomma }} {% translate "overdue" %}</strong>{% endif %}
+  </div>
+</div>
+{% if not statement %}<p class="govuk-body govuk-!-display-none-print">{% translate "Download:" %} <a class="govuk-link" href="?format=xlsx">Excel</a> · <a class="govuk-link" href="?format=csv">CSV</a> · <a class="govuk-link" href="?print=1">{% translate "Printable statement" %}</a></p>{% endif %}
+<table class="govuk-table phaema-report">
+  <thead class="govuk-table__head"><tr class="govuk-table__row">
+    <th scope="col" class="govuk-table__header">{% translate "Date" %}</th><th scope="col" class="govuk-table__header">{% translate "Reference" %}</th><th scope="col" class="govuk-table__header">{% translate "Details" %}</th>
+    <th scope="col" class="govuk-table__header govuk-table__header--numeric">{% translate "Charged" %}</th><th scope="col" class="govuk-table__header govuk-table__header--numeric">{% translate "Paid or credited" %}</th><th scope="col" class="govuk-table__header govuk-table__header--numeric">{% translate "Balance" %}</th>
+  </tr></thead>
+  <tbody class="govuk-table__body">
+  {% for line in account.lines %}{% with o=line.obj %}
+    <tr class="govuk-table__row" id="{{ line.kind }}-{{ o.pk }}">
+      <td class="govuk-table__cell">{{ line.when|date:"j M Y" }}</td>
+      {% if line.kind == "receipt" %}
+        <td class="govuk-table__cell">{{ o.payment_reference }}</td><td class="govuk-table__cell">{% translate "Payment received" %}{% if o.quoted_reference %} ({{ o.quoted_reference }}){% endif %}</td>
+        <td class="govuk-table__cell"></td><td class="govuk-table__cell govuk-table__cell--numeric">£{{ line.credit|floatformat:2|intcomma }}</td>
+      {% else %}
+        <td class="govuk-table__cell">{{ o.reference }}</td>
+        <td class="govuk-table__cell">{{ o.description }}{% if o.vat %}<br><span class="govuk-body-s">{% translate "includes VAT" %} £{{ o.vat|floatformat:2|intcomma }}</span>{% endif %}
+          {% if line.outstanding %}<br><strong class="govuk-tag {% if o.due_date < today %}govuk-tag--red{% else %}govuk-tag--grey{% endif %}">£{{ line.outstanding|floatformat:2|intcomma }} {% if o.due_date < today %}{% translate "overdue" %}{% else %}{% translate "not yet due" %}{% endif %}</strong>{% endif %}
+          {% if can_credit and not statement and o.gross > 0 %}
+          <details class="govuk-details govuk-!-margin-top-2 govuk-!-margin-bottom-0" data-module="govuk-details"><summary class="govuk-details__summary"><span class="govuk-details__summary-text">{% translate "Credit this charge" %}</span></summary>
+            <div class="govuk-details__text"><form method="post" action="{% url 'ledger:credit' o.pk %}">{% csrf_token %}
+              <div class="govuk-form-group"><label class="govuk-label" for="amount-{{ o.pk }}">{% translate "Amount to credit, including VAT" %}</label><div class="govuk-hint">{% translate "Leave blank to credit the whole charge." %}</div><input class="govuk-input govuk-input--width-10" id="amount-{{ o.pk }}" name="amount" inputmode="decimal"></div>
+              <div class="govuk-form-group"><label class="govuk-label" for="reason-{{ o.pk }}">{% translate "Reason" %}</label><input class="govuk-input" id="reason-{{ o.pk }}" name="reason" maxlength="150"></div>
+              <button class="govuk-button govuk-button--warning govuk-!-margin-bottom-0" data-module="govuk-button">{% translate "Issue credit note" %}</button>
+            </form></div></details>
+          {% endif %}
+        </td>
+        {% if line.debit >= 0 %}<td class="govuk-table__cell govuk-table__cell--numeric">£{{ line.debit|floatformat:2|intcomma }}</td><td class="govuk-table__cell"></td>
+        {% else %}<td class="govuk-table__cell"></td><td class="govuk-table__cell govuk-table__cell--numeric">£{{ o.gross|floatformat:2|cut:"-"|intcomma }}</td>{% endif %}
+      {% endif %}
+      <td class="govuk-table__cell govuk-table__cell--numeric">£{{ line.balance|floatformat:2|intcomma }}</td>
+    </tr>
+  {% endwith %}{% empty %}
+    <tr class="govuk-table__row"><td class="govuk-table__cell" colspan="6">{% translate "No rent has been charged or paid on this agreement yet." %}</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% if account.overdue %}
+<h2 class="govuk-heading-m">{% translate "Overdue by age" %}</h2>
+<table class="govuk-table"><tbody class="govuk-table__body">{% for label, amount in account.aged %}{% if amount %}<tr class="govuk-table__row"><th scope="row" class="govuk-table__header">{{ label }}</th><td class="govuk-table__cell govuk-table__cell--numeric">£{{ amount|floatformat:2|intcomma }}</td></tr>{% endif %}{% endfor %}</tbody></table>
+{% endif %}
+{% if statement %}<p class="govuk-body-s">{% translate "Payments are set against the oldest amounts owed first." %}</p>{% endif %}
+{% endblock %}

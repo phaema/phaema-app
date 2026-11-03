@@ -244,6 +244,53 @@ def _rent_fields():
     ]
 
 
+def _charges():
+    from apps.ledger.models import Charge
+
+    return Charge.objects.select_related("lease", "lease__counterparty", "export")
+
+
+def _charge_fields():
+    from apps.ledger.models import Charge as C
+
+    return [
+        Field("reference", "Reference", getter=lambda c: c.reference, default=True),
+        Field("invoice_number", "Invoice number", path="invoice_number"),
+        Field("kind", "Type", "choice", "kind", choices=_choices(C, "kind"), default=True),
+        Field("lease", "Agreement", path="lease__reference", default=True),
+        Field("tenant", "Tenant", path="lease__counterparty__name", default=True),
+        Field("customer_ref", "Customer reference", path="lease__counterparty__finance_customer_ref"),
+        Field("description", "Description", path="description", default=True),
+        Field("period_start", "Period from", "date", "period_start"),
+        Field("period_end", "Period to", "date", "period_end"),
+        Field("issue_date", "Issued", "date", "issue_date"),
+        Field("due_date", "Due", "date", "due_date", default=True),
+        Field("net", "Net", "money", "net", default=True),
+        Field("vat", "VAT", "money", "vat", default=True),
+        Field("gross", "Total", "money", "gross", default=True),
+        Field("waiting", "Waiting to go to finance", "bool", "export__isnull",
+              getter=lambda c: c.export_id is None),
+    ]
+
+
+def _receipts():
+    from apps.ledger.models import Receipt
+
+    return Receipt.objects.select_related("lease", "lease__counterparty")
+
+
+def _receipt_fields():
+    return [
+        Field("received_on", "Received", "date", "received_on", default=True),
+        Field("payment_reference", "Payment reference", path="payment_reference", default=True),
+        Field("lease", "Agreement", path="lease__reference", default=True),
+        Field("tenant", "Tenant", path="lease__counterparty__name", default=True),
+        Field("quoted_reference", "Reference quoted", path="quoted_reference", default=True),
+        Field("amount", "Amount", "money", "amount", default=True),
+        Field("notes", "Notes", path="notes"),
+    ]
+
+
 def _titles():
     from apps.properties.models import Title
 
@@ -299,6 +346,10 @@ def registry():
                     _parties, _party_fields()),
             Dataset("rents", "Rent schedule", "Every rent: initial rents, reviews, steps and concessions.",
                     _rents, _rent_fields()),
+            Dataset("charges", "Rent charges", "Rent invoices and credit notes raised by the rent ledger.",
+                    _charges, _charge_fields()),
+            Dataset("receipts", "Rent receipts", "Payments received, from the finance system.",
+                    _receipts, _receipt_fields()),
             Dataset("titles", "Titles", "Registered and unregistered titles.", _titles, _title_fields()),
             Dataset("changes", "Change log", "Every change made in PHAEMA.", _audit, _audit_fields()),
         ]}

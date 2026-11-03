@@ -1,0 +1,30 @@
+{% extends "base.html" %}{% load i18n humanize %}
+{% block title %}{% translate "Rent receipts" %}{% endblock %}
+{% block help_page %}rent-ledger{% endblock %}
+{% block content %}
+<h1 class="govuk-heading-xl">{% translate "Rent receipts" %}</h1>
+{% include "ledger/_nav.html" with section="receipts" %}
+<form method="get" class="phaema-filters phaema-inline-fields">
+  <div class="govuk-form-group"><label class="govuk-label govuk-label--s" for="from">{% translate "Received from" %}</label><input class="govuk-input govuk-input--width-10" type="date" id="from" name="from" value="{{ since|date:'Y-m-d' }}"></div>
+  <div class="govuk-form-group"><label class="govuk-label govuk-label--s" for="to">{% translate "Received to" %}</label><input class="govuk-input govuk-input--width-10" type="date" id="to" name="to" value="{{ until|date:'Y-m-d' }}"></div>
+  <div class="govuk-form-group"><button class="govuk-button govuk-button--secondary govuk-!-margin-bottom-0" data-module="govuk-button">{% translate "Apply" %}</button></div>
+</form>
+<p class="govuk-body">{% blocktranslate count n=page_obj.paginator.count %}{{ n }} payment{% plural %}{{ n }} payments{% endblocktranslate %}{% if total %}, £{{ total|floatformat:2|intcomma }}{% endif %}.
+  {% translate "Download:" %} <a class="govuk-link" href="?{{ querystring }}&amp;format=xlsx">Excel</a> · <a class="govuk-link" href="?{{ querystring }}&amp;format=csv">CSV</a>
+  {% if is_administrator %} · <a class="govuk-link" href="{% url 'imports:upload' 'receipts' %}">{% translate "Import receipts from finance" %}</a>{% endif %}</p>
+<table class="govuk-table phaema-report">
+  <thead class="govuk-table__head"><tr class="govuk-table__row">
+    <th scope="col" class="govuk-table__header">{% translate "Received" %}</th><th scope="col" class="govuk-table__header">{% translate "Payment reference" %}</th>
+    <th scope="col" class="govuk-table__header">{% translate "Agreement" %}</th><th scope="col" class="govuk-table__header">{% translate "Reference quoted" %}</th>
+    <th scope="col" class="govuk-table__header govuk-table__header--numeric">{% translate "Amount" %}</th>
+  </tr></thead>
+  <tbody class="govuk-table__body">
+  {% for r in page_obj %}<tr class="govuk-table__row">
+    <td class="govuk-table__cell">{{ r.received_on|date:"j M Y" }}</td><td class="govuk-table__cell">{{ r.payment_reference }}</td>
+    <td class="govuk-table__cell"><a class="govuk-link" href="{{ r.get_absolute_url }}">{{ r.lease.reference }}</a><br><span class="govuk-body-s">{{ r.lease.counterparty.name }}</span></td>
+    <td class="govuk-table__cell">{{ r.quoted_reference }}</td><td class="govuk-table__cell govuk-table__cell--numeric">£{{ r.amount|floatformat:2|intcomma }}</td>
+  </tr>{% empty %}<tr class="govuk-table__row"><td class="govuk-table__cell" colspan="5">{% translate "No payments recorded." %}</td></tr>{% endfor %}
+  </tbody>
+</table>
+{% include "core/_pagination.html" %}
+{% endblock %}

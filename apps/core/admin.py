@@ -7,6 +7,17 @@ from .models import AuditEntry, ModuleSettings
 
 @admin.register(ModuleSettings)
 class ModuleSettingsAdmin(admin.ModelAdmin):
+    fieldsets = [
+        (None, {"fields": ["organisation_name", "brand_colour"]}),
+        ("Modules", {"fields": ["rent_ledger_enabled", "service_charges_enabled", "maintenance_enabled",
+                                "compliance_enabled", "golden_thread_enabled"]}),
+        ("Rent ledger", {"fields": ["invoicing", "invoice_prefix", "next_invoice_number", "vat_rate",
+                                    "rent_income_code", "vat_code_standard", "vat_code_exempt"]}),
+        ("Maps", {"fields": ["os_maps_api_key", "os_map_style"]}),
+        ("Reminders", {"fields": ["reminder_days_review", "reminder_days_notice", "reminder_days_break",
+                                  "reminder_days_expiry", "reminder_days_other", "overdue_reminders"]}),
+    ]
+
     def has_add_permission(self, request):
         return not ModuleSettings.objects.exists()
 

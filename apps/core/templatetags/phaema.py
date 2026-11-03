@@ -41,3 +41,11 @@ def file_size(fieldfile):
         return filesizeformat(fieldfile.size)
     except (OSError, ValueError):
         return "file missing"
+
+
+@register.filter
+def person(user, empty=""):
+    """A user's full name, or their username, or `empty` if there is no user."""
+    if not user:
+        return empty
+    return user.get_full_name() or user.get_username()

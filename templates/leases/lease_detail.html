@@ -28,7 +28,7 @@
       <tr class="govuk-table__row">
         <td class="govuk-table__cell">{{ e.due_date|date:"j M Y" }}</td>
         <td class="govuk-table__cell"><a class="govuk-link" href="{{ e.get_absolute_url }}">{{ e.display_title }}</a>{% if e.status == "in_progress" %}<br><span class="govuk-body-s">{% translate "In progress" %}</span>{% endif %}</td>
-        <td class="govuk-table__cell">{{ e.assigned_to.get_full_name|default:e.assigned_to.username|default:"–" }}</td>
+        <td class="govuk-table__cell">{{ e.assigned_to|person:"–" }}</td>
         <td class="govuk-table__cell"><strong class="govuk-tag govuk-tag--{{ rag.0 }}">{{ rag.1 }}</strong>{% if e.days_to_go >= 0 %}<br><span class="govuk-body-s">{% blocktranslate count n=e.days_to_go %}in {{ n }} day{% plural %}in {{ n }} days{% endblocktranslate %}</span>{% endif %}</td>
       </tr>
     {% endwith %}{% endfor %}
@@ -69,6 +69,14 @@
     <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Permitted use" %}</dt><dd class="govuk-summary-list__value">{{ object.permitted_use|default:"–" }}</dd></div>
     <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Assignment and subletting" %}</dt><dd class="govuk-summary-list__value">{{ object.alienation|linebreaksbr|default:"–" }}</dd></div>
   </dl>
+  {% if rent_account %}
+  <div class="phaema-account-summary govuk-!-margin-bottom-6">
+    <h2 class="govuk-heading-m govuk-!-margin-bottom-2">{% translate "Rent account" %}</h2>
+    <p class="govuk-body govuk-!-margin-bottom-1">{% translate "Balance" %} <strong>£{{ rent_account.balance|floatformat:2|intcomma }}</strong>{% if rent_account.balance < 0 %} ({% translate "in credit" %}){% endif %}
+      {% if rent_account.overdue %} · <strong class="govuk-tag govuk-tag--red">£{{ rent_account.overdue|floatformat:2|intcomma }} {% translate "overdue" %}</strong>{% endif %}</p>
+    <p class="govuk-body"><a class="govuk-link" href="{% url 'ledger:account' lease.pk %}">{% translate "See the account and statement" %}</a></p>
+  </div>
+  {% endif %}
   <h2 class="govuk-heading-m">{% translate "Rent schedule" %}</h2>
   {% include "core/_hint.html" with summary=_("How does the rent schedule work?") text=_("The current rent is the latest entry that has taken effect, and it updates itself each day. Add future stepped rents in advance. Rent reviews add their own entries when you record the outcome.") page="rent-schedule" %}
   <table class="govuk-table">

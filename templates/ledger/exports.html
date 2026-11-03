@@ -1,0 +1,24 @@
+{% extends "base.html" %}{% load i18n humanize %}
+{% block title %}{% translate "Finance exports" %}{% endblock %}
+{% block help_page %}rent-ledger{% endblock %}
+{% block content %}
+<h1 class="govuk-heading-xl">{% translate "Finance exports" %}</h1>
+{% include "ledger/_nav.html" with section="exports" %}
+<p class="govuk-body">{% translate "Each export holds the charges and credit notes raised since the last one, in a fixed layout the finance system loads. A charge is only ever in one export." %} <a class="govuk-link" href="{% url 'help:page' 'rent-ledger' %}#the-finance-export">{% translate "See the columns" %}</a>.</p>
+<div class="govuk-inset-text">{% blocktranslate count n=pending.n %}{{ n }} charge is waiting to be exported{% plural %}{{ n }} charges are waiting to be exported{% endblocktranslate %}{% if pending.t %} (£{{ pending.t|floatformat:2|intcomma }}){% endif %}.</div>
+{% if is_administrator and pending.n %}<form method="post">{% csrf_token %}<button class="govuk-button" data-module="govuk-button">{% translate "Create a finance export" %}</button></form>{% endif %}
+<table class="govuk-table">
+  <thead class="govuk-table__head"><tr class="govuk-table__row">
+    <th scope="col" class="govuk-table__header">{% translate "Export" %}</th><th scope="col" class="govuk-table__header">{% translate "Created" %}</th>
+    <th scope="col" class="govuk-table__header govuk-table__header--numeric">{% translate "Charges" %}</th><th scope="col" class="govuk-table__header govuk-table__header--numeric">{% translate "Total" %}</th>
+    <th scope="col" class="govuk-table__header">{% translate "Download" %}</th>
+  </tr></thead>
+  <tbody class="govuk-table__body">
+  {% for b in batches %}<tr class="govuk-table__row">
+    <td class="govuk-table__cell">{{ b.pk }}</td><td class="govuk-table__cell">{{ b.created_at|date:"j M Y H:i" }}{% if b.created_by %}<br><span class="govuk-body-s">{{ b.created_by.get_full_name|default:b.created_by.username }}</span>{% endif %}</td>
+    <td class="govuk-table__cell govuk-table__cell--numeric">{{ b.n }}</td><td class="govuk-table__cell govuk-table__cell--numeric">£{{ b.t|floatformat:2|intcomma }}</td>
+    <td class="govuk-table__cell"><a class="govuk-link" href="{% url 'ledger:export' b.pk %}">Excel</a> · <a class="govuk-link" href="{% url 'ledger:export' b.pk %}?format=csv">CSV</a></td>
+  </tr>{% empty %}<tr class="govuk-table__row"><td class="govuk-table__cell" colspan="5">{% translate "No exports yet." %}</td></tr>{% endfor %}
+  </tbody>
+</table>
+{% endblock %}

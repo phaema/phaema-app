@@ -25,6 +25,7 @@
         <a href="{% url 'properties:map' %}">{% translate "Map" %}</a>
         <a href="{% url 'leases:list' %}">{% translate "Leases" %}</a>
         <a href="{% url 'leases:events' %}">{% translate "Events" %}</a>
+        {% if modules.rent_ledger_enabled %}<a href="{% url 'ledger:home' %}">{% translate "Rents" %}</a>{% endif %}
         <a href="{% url 'reports:list' %}">{% translate "Reports" %}</a>
         <a href="{% url 'changes' %}">{% translate "Changes" %}</a>
         {% if is_administrator %}<a href="{% url 'imports:hub' %}">{% translate "Import" %}</a>{% endif %}

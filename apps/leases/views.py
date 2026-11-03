@@ -103,6 +103,7 @@ class LeaseDetailView(LoginRequiredMixin, DetailView):
         current = max((e for e in schedule if e.effective_from <= today), key=lambda e: e.effective_from, default=None)
         ctx["schedule"] = [(e, e == current, e.effective_from > today) for e in schedule]
         ctx["payments"] = workflow.payments_preview(lease, today, 4)
+        ctx["rent_account"] = _rent_account(lease)
         return ctx
 
 
@@ -118,7 +119,29 @@ class PartyDetailView(LoginRequiredMixin, DetailView):
         current = [r for r in rows if r["lease"].status in ("current", "holding_over") and r["lease"].counterparty_id == self.object.pk]
         ctx["current_count"] = len(current)
         ctx["current_rent"] = sum(r["lease"].annual_rent for r in current)
+        if _ledger_on():
+            from apps.ledger import billing
+
+            tenant_leases = Lease.objects.filter(counterparty=self.object)
+            ctx["rent_accounts"] = [a for a in billing.accounts(leases=tenant_leases) if a.lines]
+            ctx["rent_balance"] = sum(a.balance for a in ctx["rent_accounts"])
+            ctx["rent_overdue"] = sum(a.overdue for a in ctx["rent_accounts"])
         return ctx
+
+
+def _ledger_on():
+    from apps.core.models import ModuleSettings
+
+    return ModuleSettings.load().rent_ledger_enabled
+
+
+def _rent_account(lease):
+    """The lease's rent account summary, if the council uses the rent ledger."""
+    if not _ledger_on() or lease.direction != Lease.Direction.OUT:
+        return None
+    from apps.ledger import billing
+
+    return billing.account(lease)
 
 
 PARTY_COLUMNS = {

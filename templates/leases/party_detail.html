@@ -37,6 +37,11 @@
     </tbody>
   </table>
   {% else %}<p class="govuk-body">{% translate "No agreements recorded." %}</p>{% endif %}
+  {% if rent_accounts %}
+  <h2 class="govuk-heading-m">{% translate "Rent accounts" %}</h2>
+  <p class="govuk-body">{% translate "Total balance" %} <strong>£{{ rent_balance|floatformat:2|intcomma }}</strong>{% if rent_overdue %} · <strong class="govuk-tag govuk-tag--red">£{{ rent_overdue|floatformat:2|intcomma }} {% translate "overdue" %}</strong>{% endif %}</p>
+  <ul class="govuk-list">{% for a in rent_accounts %}<li><a class="govuk-link" href="{% url 'ledger:account' a.lease.pk %}">{{ a.lease.reference }}</a>: £{{ a.balance|floatformat:2|intcomma }}{% if a.overdue %} ({% translate "overdue" %} £{{ a.overdue|floatformat:2|intcomma }}){% endif %}</li>{% endfor %}</ul>
+  {% endif %}
 
   <h2 class="govuk-heading-m">{% translate "Properties" %}</h2>
   {% if properties %}

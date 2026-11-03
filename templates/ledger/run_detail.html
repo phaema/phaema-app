@@ -1,0 +1,11 @@
+{% extends "base.html" %}{% load i18n %}
+{% block title %}{{ run }}{% endblock %}
+{% block help_page %}rent-ledger{% endblock %}
+{% block content %}
+<span class="govuk-caption-l">{% translate "Demand run" %}</span>
+<h1 class="govuk-heading-l">{% translate "Rent due" %} {{ run.due_from|date:"j M Y" }} – {{ run.due_to|date:"j M Y" }}</h1>
+{% include "ledger/_nav.html" %}
+<p class="govuk-body">{% translate "Issued" %} {{ run.issue_date|date:"j M Y" }}{% if run.created_by %} {% translate "by" %} {{ run.created_by.get_full_name|default:run.created_by.username }}{% endif %}. {{ run.notes }}</p>
+<p class="govuk-body">{% translate "Download:" %} <a class="govuk-link" href="?format=xlsx">Excel</a> · <a class="govuk-link" href="?format=csv">CSV</a></p>
+{% include "ledger/_charge_table.html" %}
+{% endblock %}

@@ -25,7 +25,8 @@ It also shows:
   left out.
 - **WAULT to first break**: the same, but counting to the first break date where there is one.
 
-Payments and arrears will appear here once the rent ledger is added.
+When the [rent ledger](rent-ledger.md) is switched on, this section also shows the total **rent arrears** and the
+**collection rate** over the last 12 months.
 
 ## Register and vacancies
 
