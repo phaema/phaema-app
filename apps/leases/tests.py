@@ -7,7 +7,8 @@ from django.core.exceptions import ValidationError
 from django.core.management import call_command
 from django.urls import reverse
 
-from apps.leases.demo import add_months, quarter_day_on_or_before
+from apps.core.dates import add_months
+from apps.leases.demo import quarter_day_on_or_before
 from apps.leases.models import BreakOption, Lease, Party
 from apps.properties.models import Property
 

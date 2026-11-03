@@ -136,7 +136,8 @@ def test_surveyor_leases_limited_to_own_properties(client, surveyor, own_and_oth
     data = {"reference": "S-L1", "direction": "out", "agreement_type": "licence", "status": "current",
             "counterparty": party.pk, "term_start": "2026-01-01", "annual_rent": "100",
             "rent_frequency": "annually", "security_of_tenure": "na", "review_basis": "none",
-            "breaks-TOTAL_FORMS": "0", "breaks-INITIAL_FORMS": "0"}
+            "breaks-TOTAL_FORMS": "0", "breaks-INITIAL_FORMS": "0",
+            "documents-TOTAL_FORMS": "0", "documents-INITIAL_FORMS": "0"}
     resp = client.post(reverse("admin:leases_lease_add"), {**data, "properties": [other.pk]})
     assert resp.status_code == 200 and b"only add leases on properties you manage" in resp.content
     resp = client.post(reverse("admin:leases_lease_add"), {**data, "properties": [own.pk]})

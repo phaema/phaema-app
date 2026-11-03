@@ -6,20 +6,13 @@ Companies House does not issue, emails use example.org and phone numbers come fr
 Ofcom's range reserved for drama (01632 960xxx). Dates are set relative to today so
 that the key-date warnings always show a realistic mix.
 """
-from calendar import monthrange
 from datetime import date, timedelta
 from decimal import Decimal
 
+from apps.core.dates import add_months
 from apps.properties.models import Property
 
 from .models import BreakOption, Lease, Party
-
-
-def add_months(d, months):
-    month = d.month - 1 + months
-    year = d.year + month // 12
-    month = month % 12 + 1
-    return date(year, month, min(d.day, monthrange(year, month)[1]))
 
 
 def quarter_day_on_or_before(d):
@@ -186,7 +179,39 @@ def load(today=None):
           annual_rent=Decimal("250"), rent_frequency="annually", review_basis="none",
           premises_description="Underground cable route beneath the estate roads",
           notes="Terminable wayleave, 12 months' notice.")
+    _documents()
     return Lease.objects.filter(reference__startswith="DL-").count()
+
+
+def _documents():
+    from django.core.files.base import ContentFile
+
+    from apps.properties.demo_media import placeholder_pdf
+
+    from .models import LeaseDocument
+
+    banner = "FICTIONAL DEMONSTRATION DOCUMENT - NOT A REAL LEASE"
+    for ref in ("DL-0001", "DL-0003", "DL-0004", "DL-0021"):
+        lease = Lease.objects.get(reference=ref)
+        if lease.documents.exists():
+            continue
+        lines = [f"Agreement reference {lease.reference}", "Landlord: Demonstration District Council",
+                 f"Tenant: {lease.counterparty.name}",
+                 f"Premises: {'; '.join(p.name for p in lease.properties.all())}",
+                 f"Term: {lease.term_description} from {lease.term_start:%d %B %Y}",
+                 f"Rent: £{lease.annual_rent:,.2f} a year", f"Repairing: {lease.get_repairing_display()}"]
+        LeaseDocument.objects.create(
+            lease=lease, document_type="lease", description=f"Signed lease {lease.reference}",
+            document_date=lease.lease_date,
+            file=ContentFile(placeholder_pdf(f"Lease - {lease.counterparty.name}", lines, banner), name="lease.pdf"))
+        if ref == "DL-0004":
+            LeaseDocument.objects.create(
+                lease=lease, document_type="notice", description="Section 25 notice (landlord's)",
+                document_date=lease.term_end,
+                file=ContentFile(placeholder_pdf("Landlord's notice under section 25", [
+                    "Landlord and Tenant Act 1954, section 25 (demonstration only).",
+                    f"Tenant: {lease.counterparty.name}", "The landlord does not oppose a new tenancy."], banner),
+                    name="s25.pdf"))
 
 
 def remove():

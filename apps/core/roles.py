@@ -27,6 +27,7 @@ SURVEYOR_PERMISSIONS = {
     "leases.add_lease", "leases.change_lease",
     "leases.add_breakoption", "leases.change_breakoption", "leases.delete_breakoption",
     "leases.add_party", "leases.change_party",
+    "leases.add_leasedocument", "leases.change_leasedocument", "leases.delete_leasedocument",
 }
 ADMIN_EXTRA = {
     "auth.view_user", "auth.add_user", "auth.change_user",
@@ -96,7 +97,7 @@ def can_edit(user, obj):
         return True
     if role != SURVEYORS or obj is None:
         return False
-    from apps.leases.models import BreakOption, Lease, Party
+    from apps.leases.models import BreakOption, Lease, LeaseDocument, Party
     from apps.properties.models import Property, PropertyPhoto
 
     if isinstance(obj, Property):
@@ -105,7 +106,7 @@ def can_edit(user, obj):
         return manages(user, obj.property)
     if isinstance(obj, Lease):
         return obj.pk is None or obj.properties.filter(managing_surveyor=user).exists()
-    if isinstance(obj, BreakOption):
+    if isinstance(obj, (BreakOption, LeaseDocument)):
         return can_edit(user, obj.lease)
     if isinstance(obj, Party):
         return True  # contact details are shared; changes are in the audit trail

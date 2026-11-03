@@ -2,6 +2,7 @@
 {% block title %}{% translate "Leases and licences" %}{% endblock %}
 {% block content %}
 <h1 class="govuk-heading-xl">{% translate "Leases and licences" %}</h1>
+{% if event_label %}<p class="govuk-body"><strong class="govuk-tag govuk-tag--orange">{{ event_label }}</strong> <a class="govuk-link govuk-body-s" href="{% url 'leases:list' %}">{% translate "Show all" %}</a></p>{% endif %}
 <div class="govuk-grid-row">
   <div class="govuk-grid-column-one-quarter">
     <form method="get" class="phaema-filters">
@@ -26,6 +27,7 @@
   </div>
   <div class="govuk-grid-column-three-quarters">
     <p class="govuk-body">{% blocktranslate count n=paginator.count %}{{ n }} agreement{% plural %}{{ n }} agreements{% endblocktranslate %}{% if rent_total %} · {% translate "total rent" %} £{{ rent_total|floatformat:0|intcomma }} {% translate "a year" %}{% endif %}
+      · <a class="govuk-link" href="{% url 'leases:parties' %}">{% translate "Tenants and other parties" %}</a>
       {% if perms.leases.add_lease %}· <a class="govuk-link" href="{% url 'admin:leases_lease_add' %}">{% translate "Add a lease or licence" %}</a>{% endif %}</p>
     <table class="govuk-table">
       {% include "core/_sortable_head.html" %}

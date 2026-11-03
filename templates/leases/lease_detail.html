@@ -61,6 +61,29 @@
   <h2 class="govuk-heading-m">{% translate "Break options" %}</h2>
   <ul class="govuk-list">{% for b in breaks %}<li><strong>{{ b.break_date|date:"j F Y" }}</strong> – {{ b.get_exercisable_by_display }}{% if b.notice_months %}, {% blocktranslate count n=b.notice_months %}{{ n }} month's notice{% plural %}{{ n }} months' notice{% endblocktranslate %} ({% translate "by" %} {{ b.notice_deadline|date:"j F Y" }}){% endif %}{% if b.conditions %}<br><span class="govuk-body-s">{{ b.conditions }}</span>{% endif %}</li>{% endfor %}</ul>
   {% endif %}{% endwith %}
+  <h2 class="govuk-heading-m">{% translate "Documents" %}</h2>
+  {% with docs=object.documents.all %}
+  {% if docs %}
+  <table class="govuk-table">
+    <thead class="govuk-table__head"><tr class="govuk-table__row">
+      <th scope="col" class="govuk-table__header">{% translate "Document" %}</th>
+      <th scope="col" class="govuk-table__header">{% translate "Type" %}</th>
+      <th scope="col" class="govuk-table__header">{% translate "Date" %}</th>
+    </tr></thead>
+    <tbody class="govuk-table__body">
+    {% for d in docs %}
+      <tr class="govuk-table__row">
+        <td class="govuk-table__cell"><a class="govuk-link" href="{{ d.file.url }}" target="_blank" rel="noopener">{{ d.description|default:d.get_document_type_display }} (PDF, {{ d.file.size|filesizeformat }})</a></td>
+        <td class="govuk-table__cell">{{ d.get_document_type_display }}</td>
+        <td class="govuk-table__cell">{{ d.document_date|date:"j M Y"|default:"–" }}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  {% else %}<p class="govuk-body">{% translate "No documents stored." %}</p>{% endif %}
+  {% endwith %}
+  {% if user|can_edit:object %}<p class="govuk-body-s"><a class="govuk-link" href="{% url 'admin:leases_lease_change' object.pk %}#documents-group">{% translate "Add a document" %}</a></p>{% endif %}
+
   {% if object.notes %}<h2 class="govuk-heading-m">{% translate "Notes" %}</h2><p class="govuk-body">{{ object.notes|linebreaksbr }}</p>{% endif %}
 </div>
 <div class="govuk-grid-column-one-third">

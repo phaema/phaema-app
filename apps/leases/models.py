@@ -2,12 +2,15 @@
 """Leases, licences and other occupational agreements, and the parties to them."""
 from datetime import date, timedelta
 
+import uuid
+
 from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator
 from django.db import models
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 
+from apps.core.files import validate_pdf
 from apps.core.models import TimeStampedModel
 from apps.properties.models import Property
 
@@ -48,6 +51,28 @@ class Party(TimeStampedModel):
 
     def get_absolute_url(self):
         return reverse("leases:party", args=[self.pk])
+
+    def arrangements(self):
+        """Every agreement this party is involved in, with its role, newest first within status."""
+        rows = []
+        qs = Lease.objects.filter(models.Q(counterparty=self) | models.Q(guarantor=self)).distinct()
+        for lease in qs.select_related("counterparty").prefetch_related("properties").order_by("status", "-term_start"):
+            if lease.guarantor_id == self.pk and lease.counterparty_id != self.pk:
+                role = _("Guarantor")
+            elif lease.direction == Lease.Direction.IN:
+                role = _("Landlord")
+            else:
+                role = _("Tenant") if lease.agreement_type != Lease.AgreementType.LICENCE else _("Licensee")
+            rows.append({"lease": lease, "role": role, "properties": list(lease.properties.all())})
+        return rows
+
+    def properties_involved(self):
+        """Distinct properties across all of this party's agreements."""
+        seen = {}
+        for row in self.arrangements():
+            for p in row["properties"]:
+                seen.setdefault(p.pk, p)
+        return sorted(seen.values(), key=lambda p: p.reference)
 
 
 class Lease(TimeStampedModel):
@@ -251,3 +276,47 @@ class BreakOption(TimeStampedModel):
 
         day = min(self.break_date.day, monthrange(year, month)[1])
         return date(year, month, day)
+
+
+def _lease_document_path(instance, filename):
+    return f"leases/{instance.lease_id}/{uuid.uuid4().hex}.pdf"
+
+
+class LeaseDocument(TimeStampedModel):
+    """A PDF held against an agreement: the lease itself, licences, variations, memoranda and notices."""
+
+    class DocumentType(models.TextChoices):
+        LEASE = "lease", _("Lease or licence (signed copy)")
+        COUNTERPART = "counterpart", _("Counterpart")
+        VARIATION = "variation", _("Deed of variation")
+        LICENCE_ASSIGN = "licence_assign", _("Licence to assign or underlet")
+        LICENCE_ALTER = "licence_alter", _("Licence for alterations")
+        RENT_REVIEW = "rent_review", _("Rent review memorandum")
+        SCHEDULE = "schedule", _("Schedule of condition")
+        NOTICE = "notice", _("Notice (e.g. section 25 or 26, break)")
+        HEADS_OF_TERMS = "heads", _("Heads of terms")
+        OTHER = "other", _("Other document")
+
+    lease = models.ForeignKey(Lease, on_delete=models.CASCADE, related_name="documents")
+    document_type = models.CharField(_("document type"), max_length=20, choices=DocumentType.choices)
+    file = models.FileField(_("PDF file"), upload_to=_lease_document_path, validators=[validate_pdf],
+                            help_text=_("PDF up to 25 MB."))
+    original_filename = models.CharField(_("original file name"), max_length=255, blank=True, editable=False)
+    description = models.CharField(_("description"), max_length=200, blank=True)
+    document_date = models.DateField(_("document date"), null=True, blank=True)
+
+    class Meta:
+        ordering = ["document_type", "-document_date"]
+        verbose_name = _("lease document")
+        verbose_name_plural = _("lease documents")
+
+    def __str__(self):
+        return self.description or self.get_document_type_display()
+
+    def get_absolute_url(self):
+        return self.lease.get_absolute_url()
+
+    def save(self, *args, **kwargs):
+        if self.file and not getattr(self.file, "_committed", True):
+            self.original_filename = self.file.name.rsplit("/", 1)[-1][:255]
+        super().save(*args, **kwargs)
