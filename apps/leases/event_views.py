@@ -15,6 +15,7 @@ from django.views.generic import ListView
 
 from apps.core.roles import can_edit, has_role
 from apps.core.tables import sortable
+from apps.reports.mixins import ExportMixin
 
 from . import forms as f
 from . import workflow
@@ -33,8 +34,9 @@ STATUS_FILTERS = [("open", _("To do or in progress")), ("done", _("Completed")),
                   ("all", _("All"))]
 
 
-class EventListView(LoginRequiredMixin, ListView):
+class EventListView(LoginRequiredMixin, ExportMixin, ListView):
     model = LeaseEvent
+    export_dataset, export_title = "events", "Lease events"
     paginate_by = 50
     template_name = "leases/event_list.html"
 

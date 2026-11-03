@@ -1,5 +1,6 @@
 {% extends "base.html" %}{% load i18n %}
 {% block title %}{% translate "Add an event" %}{% endblock %}
+{% block help_page %}events{% endblock %}
 {% block content %}
 <span class="govuk-caption-l">{{ lease.reference }} · {{ lease.counterparty.name }}</span>
 <h1 class="govuk-heading-l">{% translate "Add an event" %}</h1>

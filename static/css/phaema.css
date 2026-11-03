@@ -64,3 +64,19 @@ html.phaema-text-largest { font-size: 150%; }
 .govuk-link.phaema-overdue:link, .govuk-link.phaema-overdue:visited { color: #d4351c; font-weight: 700; }
 .phaema-code { font-family: monospace; word-break: break-all; font-size: 1rem; }
 .phaema-link-button { background: none; border: 0; padding: 0; color: #1d70b8; text-decoration: underline; cursor: pointer; font-family: inherit; }
+.phaema-inline-fields { display: flex; flex-wrap: wrap; gap: 10px 20px; }
+.phaema-table-scroll { overflow-x: auto; }
+.phaema-report .govuk-table__cell, .phaema-report .govuk-table__header { font-size: 1rem; padding-right: 15px; }
+.phaema-total-row .govuk-table__cell { border-top: 2px solid var(--ph-text, #0b0c0c); }
+.phaema-compact .govuk-table__cell { padding-top: 4px; padding-bottom: 4px; }
+.phaema-downloads { margin-bottom: 10px; }
+.phaema-help-link { margin-right: auto !important; }
+.phaema-help-link a::before { content: "? "; font-weight: bold; }
+.phaema-search-row { display: flex; gap: 5px; }
+.phaema-help-nav a[aria-current="page"] { font-weight: bold; text-decoration: none; }
+.phaema-on-this-page { border-left: 4px solid var(--ph-border, #b1b4b6); padding-left: 15px; margin-bottom: 20px; }
+.phaema-manual code { font-family: monospace; background: var(--ph-panel, #f3f2f1); padding: 0 4px; }
+.phaema-manual img { max-width: 100%; border: 1px solid var(--ph-border, #b1b4b6); }
+.phaema-hint { margin-bottom: 15px; }
+.phaema-glossary dt { font-weight: 700; margin-top: 20px; }
+.phaema-glossary dd { margin: 5px 0 0; }

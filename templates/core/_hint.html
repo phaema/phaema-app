@@ -1,0 +1,4 @@
+{% load i18n %}<details class="govuk-details phaema-hint" data-module="govuk-details">
+  <summary class="govuk-details__summary"><span class="govuk-details__summary-text">{{ summary }}</span></summary>
+  <div class="govuk-details__text">{{ text }}{% if page %} <a class="govuk-link" href="{% url 'help:page' page %}{% if anchor %}#{{ anchor }}{% endif %}">{% translate "Read more in the manual" %}</a>.{% endif %}</div>
+</details>

@@ -11,3 +11,4 @@ Pillow>=11,<13
 # Development and testing
 pytest>=8,<9
 pytest-django>=4.9,<5
+Markdown>=3.7,<4

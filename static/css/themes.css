@@ -1,0 +1,69 @@
+/* SPDX-License-Identifier: AGPL-3.0-or-later */
+/* PHAEMA colour themes. The standard values match GOV.UK Frontend, so the standard theme looks unchanged.
+   Themes: standard, dark, contrast (high contrast) and auto (follows the device's light/dark setting). */
+:root {
+  --ph-bg: #ffffff; --ph-text: #0b0c0c; --ph-secondary: #505a5f;
+  --ph-link: #1d70b8; --ph-link-visited: #4c2c92; --ph-link-hover: #003078;
+  --ph-border: #b1b4b6; --ph-panel: #f3f2f1; --ph-input-bg: #ffffff; --ph-input-border: #0b0c0c;
+  --ph-accent: #457b9d;
+}
+html[data-theme="dark"] {
+  --ph-bg: #121417; --ph-text: #e8eaed; --ph-secondary: #b8bec4;
+  --ph-link: #8ab4f8; --ph-link-visited: #c9a8f7; --ph-link-hover: #b8d0fb;
+  --ph-border: #4a4f55; --ph-panel: #1e2227; --ph-input-bg: #1a1d21; --ph-input-border: #c8ccd0;
+  --ph-accent: #5f8fb3;
+  color-scheme: dark;
+}
+@media (prefers-color-scheme: dark) {
+  html[data-theme="auto"] {
+    --ph-bg: #121417; --ph-text: #e8eaed; --ph-secondary: #b8bec4;
+    --ph-link: #8ab4f8; --ph-link-visited: #c9a8f7; --ph-link-hover: #b8d0fb;
+    --ph-border: #4a4f55; --ph-panel: #1e2227; --ph-input-bg: #1a1d21; --ph-input-border: #c8ccd0;
+    --ph-accent: #5f8fb3;
+    color-scheme: dark;
+  }
+}
+html[data-theme="contrast"] {
+  --ph-bg: #000000; --ph-text: #ffffff; --ph-secondary: #ffffff;
+  --ph-link: #ffdd00; --ph-link-visited: #ffdd00; --ph-link-hover: #ffffff;
+  --ph-border: #ffffff; --ph-panel: #000000; --ph-input-bg: #000000; --ph-input-border: #ffffff;
+  --ph-accent: #ffdd00;
+  color-scheme: dark;
+}
+html[data-theme="contrast"] .phaema-header { background: #000 !important; border-bottom-color: #ffdd00; }
+html[data-theme="contrast"] .govuk-table__header, html[data-theme="contrast"] .govuk-table__cell,
+html[data-theme="contrast"] .govuk-summary-list__row { border-bottom-width: 2px; }
+html[data-theme="contrast"] .govuk-tag { background: #000; color: #ffdd00; outline: 2px solid #ffdd00; }
+html[data-theme="contrast"] .phaema-filters { outline: 2px solid #fff; }
+
+/* Apply the variables to GOV.UK Frontend and PHAEMA styles. */
+html.govuk-template, body.govuk-template__body { background-color: var(--ph-bg); color: var(--ph-text); }
+.govuk-body, .govuk-body-s, .govuk-body-m, .govuk-body-l, .govuk-heading-xl, .govuk-heading-l, .govuk-heading-m,
+.govuk-heading-s, .govuk-label, .govuk-fieldset__legend, .govuk-table, .govuk-table__header, .govuk-table__cell,
+.govuk-table__caption, .govuk-summary-list, .govuk-list, .govuk-details, .govuk-inset-text, .govuk-phase-banner__text,
+.govuk-warning-text__text, .govuk-checkboxes__label, .govuk-radios__label, .govuk-error-summary, .govuk-error-summary__title,
+.govuk-breadcrumbs, .govuk-breadcrumbs__list, .govuk-pagination, .govuk-footer, .govuk-notification-banner__heading,
+.govuk-fieldset__legend--s, .govuk-label--s { color: var(--ph-text); }
+.govuk-caption-xl, .govuk-caption-l, .govuk-caption-m, .govuk-hint { color: var(--ph-secondary); }
+.govuk-link:link, .govuk-breadcrumbs__link:link, .govuk-footer__link:link, .govuk-details__summary,
+.phaema-link-button { color: var(--ph-link); }
+.govuk-link:visited, .govuk-breadcrumbs__link:visited, .govuk-footer__link:visited { color: var(--ph-link-visited); }
+.govuk-link:hover, .govuk-breadcrumbs__link:hover, .govuk-footer__link:hover { color: var(--ph-link-hover); }
+.govuk-link:focus, .govuk-breadcrumbs__link:focus, .govuk-footer__link:focus { color: #0b0c0c; }
+.govuk-table__header, .govuk-table__cell, .govuk-summary-list__row, .govuk-phase-banner { border-color: var(--ph-border); }
+.govuk-section-break--visible, .govuk-details__text, .govuk-inset-text { border-color: var(--ph-border); }
+.govuk-input, .govuk-select, .govuk-textarea, .govuk-file-upload {
+  background-color: var(--ph-input-bg); color: var(--ph-text); border-color: var(--ph-input-border);
+}
+.govuk-checkboxes__label::before, .govuk-radios__label::before { background: var(--ph-input-bg); border-color: var(--ph-input-border); }
+.govuk-checkboxes__label::after { border-color: var(--ph-text); }
+.govuk-radios__label::after { border-color: var(--ph-text); background: var(--ph-text); }
+.govuk-footer { background-color: var(--ph-panel); border-top-color: var(--ph-accent); }
+.govuk-button--secondary { background-color: var(--ph-panel); color: var(--ph-text); box-shadow: 0 2px 0 var(--ph-border); }
+.phaema-filters, .phaema-map { background-color: var(--ph-panel); }
+.phaema-stat { border-left-color: var(--ph-accent); }
+.phaema-header { background: var(--ph-brand, #1d3557); border-bottom-color: var(--ph-accent); }
+.phaema-sort { color: var(--ph-text); }
+html[data-theme="dark"] .phaema-map canvas, html[data-theme="dark"] .phaema-gallery__main { filter: brightness(0.9); }
+.phaema-settings-bar { display: flex; flex-wrap: wrap; gap: 4px 24px; justify-content: flex-end; padding-top: 10px; }
+.phaema-settings-bar .phaema-text-size { padding-top: 0; }

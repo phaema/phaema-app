@@ -1,0 +1,53 @@
+title: Leases and licences
+section: Records
+order: 3
+summary: Recording agreements, their terms, breaks and documents.
+---
+# Leases and licences
+
+PHAEMA records every agreement over council property: leases, licences, tenancies at will, agreements for lease,
+farm business tenancies, wayleaves, easements and concessions. It covers both directions:
+
+- **let out by the council**: the council is landlord and receives rent;
+- **held by the council**: the council is tenant and pays rent.
+
+## Adding an agreement
+
+Select **Add a lease or licence** on the lease list, or use **Manage data**. You need:
+
+- a unique **reference**;
+- the **tenant or landlord** (a [party](parties.md)), and a guarantor if there is one;
+- the **premises**: one or more properties from the register;
+- the **term start**, and the **term end** unless the agreement is periodic.
+
+To add many agreements at once, see [importing leases](import-export.md#leases-and-licences).
+
+## Terms
+
+| Field | Notes |
+|---|---|
+| Status | Proposed (heads of terms), Current, Holding over or Ended. |
+| Security of tenure | Whether the lease is inside the Landlord and Tenant Act 1954, Part II, or contracted out. |
+| Rent and frequency | The current rent comes from the [rent schedule](rent-schedule.md). |
+| Review basis and interval | How and how often the rent is reviewed. The next review date creates a [rent review event](events.md#rent-reviews). |
+| Repairing and insurance | Who repairs and insures. |
+| Service charge payable | Whether a service charge is due. |
+
+The agreement page shows the **term** in years and months, the **next payments due** (a guide only: part periods
+are not apportioned), and all key dates.
+
+## Break options
+
+Add break options in **Edit this agreement**. For each, record the break date, who can exercise it (tenant,
+landlord or either) and the notice period in months. PHAEMA works out the **last date to serve notice** and creates
+[events](events.md#breaks) for the notice deadline and the break date.
+
+## Documents
+
+Store PDFs of the lease, licence, deeds of variation and other documents in **Edit this agreement**, under
+Documents. Only signed-in users can open them.
+
+## Ending an agreement
+
+Record the outcome of the [expiry event](events.md#expiries), or set the status to Ended and fill in the
+**actual end** date. Open events for an ended agreement lapse automatically.

@@ -1,7 +1,9 @@
 {% extends "base.html" %}{% load i18n %}
 {% block title %}{% translate "Lease events" %}{% endblock %}
+{% block help_page %}events{% endblock %}
 {% block content %}
 <h1 class="govuk-heading-xl">{% translate "Lease events" %}</h1>
+  {% include "core/_hint.html" with summary=_("Where do these events come from?") text=_("PHAEMA creates rent reviews, break notice deadlines, breaks and expiries from each agreement's terms and keeps them up to date. You can add other events on an agreement's page.") page="events" %}
 <p class="govuk-body"><a class="govuk-link" href="{% url 'leases:events' %}?assigned=me">{% translate "My events" %}</a> ·
   <a class="govuk-link" href="{% url 'leases:events' %}?window=overdue">{% translate "Overdue" %}</a> ·
   <a class="govuk-link" href="{% url 'leases:calendar' %}">{% translate "Add to Outlook or another calendar" %}</a></p>
@@ -29,6 +31,7 @@
   </div>
   <div class="govuk-grid-column-three-quarters">
     <p class="govuk-body">{% blocktranslate count n=paginator.count %}{{ n }} event{% plural %}{{ n }} events{% endblocktranslate %}</p>
+    {% include "core/_downloads.html" %}
     <table class="govuk-table">
       {% include "core/_sortable_head.html" %}
       <tbody class="govuk-table__body">

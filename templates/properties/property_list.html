@@ -1,5 +1,6 @@
 {% extends "base.html" %}{% load i18n %}
 {% block title %}{% translate "Properties" %}{% endblock %}
+{% block help_page %}properties{% endblock %}
 {% block content %}
 <h1 class="govuk-heading-xl">{% translate "Property register" %}</h1>
 <div class="govuk-grid-row">
@@ -16,6 +17,7 @@
       {% if perms.properties.add_property %}· <a class="govuk-link" href="{% url 'admin:properties_property_add' %}">{% translate "Add a property" %}</a>{% endif %}
       {% if is_administrator %}· <a class="govuk-link" href="{% url 'admin:properties_property_changelist' %}">{% translate "Assign surveyors" %}</a> · <a class="govuk-link" href="{% url 'properties:import' %}">{% translate "Import from a spreadsheet" %}</a>{% endif %}
       · <a class="govuk-link" href="{% url 'properties:map' %}{% if querystring %}?{{ querystring }}{% endif %}">{% translate "Show on a map" %}</a></p>
+    {% include "core/_downloads.html" %}
     <table class="govuk-table">
       {% include "core/_sortable_head.html" %}
       <tbody class="govuk-table__body">

@@ -27,7 +27,7 @@ class CurrentUserMiddleware:
 class RoleRequiredMiddleware:
     """Signed-in users must have a PHAEMA role (or be a superuser) to see anything."""
 
-    OPEN_PREFIXES = ("/login/", "/logout/", "/health/", "/static/", "/text-size/", "/no-access/")
+    OPEN_PREFIXES = ("/login/", "/logout/", "/health/", "/static/", "/text-size/", "/theme/", "/no-access/", "/help/")
 
     def __init__(self, get_response):
         self.get_response = get_response
