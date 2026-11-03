@@ -13,6 +13,8 @@ Administrators: select **Manage data**, then **Module settings**. There is one s
 |---|---|
 | Organisation name | Shown in the header of every page. |
 | Modules | Turn on modules as they become available: rent ledger, service charges, maintenance, compliance and the Golden Thread. |
+| Publish open data | Publishes the Transparency Code land and assets list and the list of available property at /open-data/, without signing in. See [open data](compliance.md#open-data). |
+| Works orders needing approval | Works orders estimated above this need the supervisor's approval. See [maintenance](maintenance.md#works-orders-and-approval). |
 | OS Maps API key and style | Turns on Ordnance Survey base maps. See [maps](maps.md#base-maps). |
 | Brand colour | The colour of the header, as a hex code such as #003078. Choose a dark colour so the white text stays readable. Leave blank for the PHAEMA blue. |
 | Reminder timings | See [reminders](#reminders). |

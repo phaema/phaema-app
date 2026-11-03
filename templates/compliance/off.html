@@ -1,0 +1,8 @@
+{% extends "base.html" %}{% load i18n %}
+{% block title %}{% translate "Compliance" %}{% endblock %}
+{% block help_page %}compliance{% endblock %}
+{% block content %}
+<h1 class="govuk-heading-l">{% translate "Compliance is switched off" %}</h1>
+<p class="govuk-body">{% translate "Your council has not switched on the compliance module in PHAEMA." %}</p>
+{% if is_administrator %}<p class="govuk-body">{% translate "To switch it on, go to Manage data, then Module settings, and tick Compliance." %}</p>{% endif %}
+{% endblock %}

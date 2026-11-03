@@ -546,6 +546,104 @@ def _contractor_fields():
     ]
 
 
+def _requirements():
+    from django.db.models import OuterRef, Subquery
+
+    from apps.compliance.models import Certificate, Requirement
+
+    latest = Certificate.objects.filter(requirement=OuterRef("pk")).order_by("-issued_on", "-pk")
+    return (Requirement.objects.filter(active=True).select_related("property", "kind")
+            .annotate(latest_issued=Subquery(latest.values("issued_on")[:1]),
+                      latest_expiry=Subquery(latest.values("expires_on")[:1]),
+                      latest_result=Subquery(latest.values("result")[:1]),
+                      latest_rating=Subquery(latest.values("rating")[:1])))
+
+
+def _compliance_status(req):
+    if req.latest_expiry is None:
+        return "Missing"
+    if req.latest_expiry < date.today():
+        return "Expired"
+    if req.latest_result == "fail":
+        return "Unsatisfactory"
+    return "Expires within 60 days" if (req.latest_expiry - date.today()).days <= 60 else "Valid"
+
+
+def _requirement_fields():
+    from apps.compliance.models import Certificate, Requirement
+
+    return [
+        Field("property", "Property", path="property__reference", default=True),
+        Field("property_name", "Property name", path="property__name", default=True),
+        Field("kind", "Certificate", path="kind__name", default=True),
+        Field("statutory", "Statutory", "bool", "kind__statutory"),
+        Field("responsible", "Held by", "choice", "responsible", choices=_choices(Requirement, "responsible"),
+              default=True),
+        Field("latest_issued", "Latest", "date", "latest_issued", default=True),
+        Field("latest_expiry", "Valid until", "date", "latest_expiry", default=True),
+        Field("latest_result", "Result", "choice", "latest_result", choices=_choices(Certificate, "result")),
+        Field("latest_rating", "Rating", path="latest_rating"),
+        Field("status", "Status", getter=_compliance_status, default=True),
+    ]
+
+
+def _certificates():
+    from apps.compliance.models import Certificate
+
+    return Certificate.objects.select_related("requirement__property", "requirement__kind", "contractor")
+
+
+def _certificate_fields():
+    from apps.compliance.models import Certificate
+    from apps.properties.models import Property
+
+    bands = [(b, b) for b in "ABCDEFG"]
+    return [
+        Field("property", "Property", path="requirement__property__reference", default=True),
+        Field("property_name", "Property name", path="requirement__property__name", default=True),
+        Field("occupation", "Occupation", "choice", "requirement__property__occupation",
+              choices=_choices(Property, "occupation")),
+        Field("kind", "Certificate", "choice", "requirement__kind__code",
+              choices=_compliance_kinds(), default=True),
+        Field("issued_on", "Date", "date", "issued_on", default=True),
+        Field("expires_on", "Valid until", "date", "expires_on", default=True),
+        Field("result", "Result", "choice", "result", choices=_choices(Certificate, "result"), default=True),
+        Field("rating", "Rating", "choice", "rating", choices=bands),
+        Field("carried_out_by", "Carried out by", getter=lambda c: c.carried_out_by or str(c.contractor or "")),
+        Field("reference", "Certificate number", path="reference"),
+    ]
+
+
+def _compliance_kinds():
+    from apps.compliance.seed import TYPES
+
+    return [(code, name) for code, name, *_rest in TYPES]
+
+
+def _actions():
+    from django.db.models import BooleanField, ExpressionWrapper, Q as DQ
+
+    from apps.compliance.models import Action
+
+    return (Action.objects.select_related("certificate__requirement__property", "certificate__requirement__kind", "job")
+            .annotate(is_open=ExpressionWrapper(DQ(done_on__isnull=True), output_field=BooleanField())))
+
+
+def _action_fields():
+    from apps.compliance.models import Action
+
+    return [
+        Field("description", "Action", path="description", default=True),
+        Field("property", "Property", path="certificate__requirement__property__reference", default=True),
+        Field("kind", "From", path="certificate__requirement__kind__name", default=True),
+        Field("priority", "Priority", "choice", "priority", choices=_choices(Action, "priority"), default=True),
+        Field("due_on", "Due", "date", "due_on", default=True),
+        Field("is_open", "Open", "bool", "is_open"),
+        Field("done_on", "Done", "date", "done_on", default=True),
+        Field("job", "Job", getter=lambda a: a.job.reference if a.job else ""),
+    ]
+
+
 def _titles():
     from apps.properties.models import Title
 
@@ -618,6 +716,12 @@ def registry():
                     _contracts, _contract_fields()),
             Dataset("contractors", "Contractors", "Contractors, their insurance and accreditations.",
                     _contractors, _contractor_fields()),
+            Dataset("compliance", "Compliance register", "Each certificate a property needs, and whether it is in "
+                    "date.", _requirements, _requirement_fields()),
+            Dataset("certificates", "Compliance certificates", "Every certificate recorded, with results and ratings.",
+                    _certificates, _certificate_fields()),
+            Dataset("compliance_actions", "Remedial actions", "Actions from compliance certificates and assessments.",
+                    _actions, _action_fields()),
             Dataset("titles", "Titles", "Registered and unregistered titles.", _titles, _title_fields()),
             Dataset("changes", "Change log", "Every change made in PHAEMA.", _audit, _audit_fields()),
         ]}

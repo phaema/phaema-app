@@ -66,6 +66,10 @@ def dashboard(request):
         from apps.maintenance.workflow import summary
 
         context["maintenance"] = summary(request.user)
+    if ModuleSettings.load().compliance_enabled:
+        from apps.compliance.workflow import summary as compliance_summary
+
+        context["compliance"] = compliance_summary()
     if ModuleSettings.load().service_charges_enabled:
         from apps.servicecharges.deadlines import upcoming
 

@@ -68,6 +68,10 @@ class ModuleSettings(models.Model):
         help_text=_("Works orders estimated above this need the job owner's supervisor to approve them."))
     compliance_enabled = models.BooleanField(_("compliance"), default=True)
     golden_thread_enabled = models.BooleanField(_("Golden Thread"), default=True)
+    open_data_enabled = models.BooleanField(
+        _("publish open data"), default=False,
+        help_text=_("Publish the Transparency Code land and assets list and the available property list at "
+                    "/open-data/ under the Open Government Licence, without signing in."))
 
     class OsMapStyle(models.TextChoices):
         ROAD = "Road_3857", _("Road")

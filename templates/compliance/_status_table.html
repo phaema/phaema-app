@@ -1,0 +1,11 @@
+{% load i18n %}{% if rows %}
+<table class="govuk-table">
+  <thead class="govuk-table__head"><tr class="govuk-table__row"><th scope="col" class="govuk-table__header">{% translate "Certificate" %}</th>{% if not hide_property %}<th scope="col" class="govuk-table__header">{% translate "Property" %}</th>{% endif %}<th scope="col" class="govuk-table__header">{% translate "Latest" %}</th><th scope="col" class="govuk-table__header">{% translate "Status" %}</th></tr></thead>
+  <tbody class="govuk-table__body">{% for r, s in rows %}{% with c=r.latest %}<tr class="govuk-table__row">
+    <td class="govuk-table__cell">{{ r.kind.name }}{% if r.responsible == "tenant" %}<br><span class="govuk-body-s">{% translate "Tenant's: council holds a copy" %}</span>{% endif %}</td>
+    {% if not hide_property %}<td class="govuk-table__cell"><a class="govuk-link govuk-body-s" href="{% url 'compliance:property' r.property_id %}">{{ r.property.reference }}</a><br><span class="govuk-body-s">{{ r.property.name }}</span></td>{% endif %}
+    <td class="govuk-table__cell govuk-body-s">{% if c %}{{ c.issued_on|date:"j M Y" }}{% if c.rating %}, {% translate "rating" %} {{ c.rating }}{% endif %}<br>{% translate "Valid until" %} {{ c.expires_on|date:"j M Y" }}{% if c.file %}<br><a class="govuk-link" href="{{ c.file.url }}">{% translate "Certificate" %}</a>{% endif %}{% else %}–{% endif %}</td>
+    <td class="govuk-table__cell"><strong class="govuk-tag govuk-tag--{{ s.0 }}">{{ s.1 }}</strong></td>
+  </tr>{% endwith %}{% endfor %}</tbody>
+</table>
+{% else %}<p class="govuk-body">{{ empty }}</p>{% endif %}

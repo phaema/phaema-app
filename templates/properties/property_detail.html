@@ -140,8 +140,11 @@
   <h2 class="govuk-heading-m">{% translate "Cases" %}</h2>
   {% include "cases/_case_rows.html" with cases=object.cases.all %}
   {% if user|can_edit:object %}<p class="govuk-body-s"><a class="govuk-link" href="{% url 'cases:new' %}?property={{ object.pk }}">{% translate "Start a case" %}</a></p>{% endif %}
-  {% if modules.maintenance_enabled %}<h2 class="govuk-heading-m">{% translate "Maintenance" %}</h2>
-  <p class="govuk-body"><a class="govuk-link" href="{% url 'maintenance:property' object.pk %}">{% translate "Components, planned maintenance, jobs and who pays for repairs" %}</a></p>{% endif %}
+  {% if modules.maintenance_enabled or modules.compliance_enabled %}<h2 class="govuk-heading-m">{% translate "Building management" %}</h2>
+  <ul class="govuk-list">
+    {% if modules.maintenance_enabled %}<li><a class="govuk-link" href="{% url 'maintenance:property' object.pk %}">{% translate "Maintenance: components, planned maintenance, jobs and who pays for repairs" %}</a></li>{% endif %}
+    {% if modules.compliance_enabled %}<li><a class="govuk-link" href="{% url 'compliance:property' object.pk %}">{% translate "Compliance: certificates, Golden Thread screening and building information" %}</a></li>{% endif %}
+  </ul>{% endif %}
 
   <h2 class="govuk-heading-m">{% translate "History" %}</h2>
   {% if history %}

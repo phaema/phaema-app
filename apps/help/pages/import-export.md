@@ -17,7 +17,8 @@ Import in this order, so each record can find the records it links to:
 4. [Land Registry boundaries](maps.md#land-registry-inspire-boundaries), if you use them
 
 Rent receipts from the finance system are imported the same way when the rent ledger is on. See
-[receipts](rent-ledger.md#receipts). So is [service charge spending](service-charges.md#spending).
+[receipts](rent-ledger.md#receipts). So is [service charge spending](service-charges.md#spending), and, with
+maintenance on, [contractors and components](#contractors-and-components).
 
 ### How every import works
 
@@ -66,6 +67,18 @@ For a new agreement, the annual rent becomes the first entry in its [rent schedu
 [events](events.md) are created from its review date, breaks and term end.
 
 To change the rent of an existing agreement, use its rent schedule, not an import.
+
+### Contractors and components
+
+With [maintenance](maintenance.md) switched on, the **Contractors and components** template has two sheets. Either
+can be left out.
+
+| Sheet | Matched by | Notes |
+|---|---|---|
+| Contractors | Name | Contact details, approved list, insurer, cover, insurance expiry and accreditations. |
+| Components | Property reference and component name | Category, Uniclass 2015 and NRM3 codes, quantity, year installed, expected life, condition (A to D) and replacement cost. |
+
+Use it to load a condition survey or an existing asset register in one go, then re-import corrected files.
 
 ## Exporting
 

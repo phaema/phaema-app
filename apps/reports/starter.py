@@ -1,10 +1,11 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 """Reports PHAEMA provides out of the box. Administrators can adjust them; anyone can copy them."""
 
-CATEGORIES = ["Property and assets", "Leases and key dates", "Cases", "Rents and income", "Maintenance", "Contacts",
-              "Data quality"]
+CATEGORIES = ["Property and assets", "Leases and key dates", "Cases", "Rents and income", "Maintenance",
+              "Compliance", "Contacts", "Data quality"]
 LEDGER_CATEGORY = "Rents and income"  # shown only when the rent ledger is switched on
 MAINTENANCE_CATEGORY = "Maintenance"  # shown only when maintenance is switched on
+COMPLIANCE_CATEGORY = "Compliance"  # shown only when compliance is switched on
 
 LIVE = {"in": ["current", "holding_over"]}
 OPEN = {"in": ["open", "in_progress"]}
@@ -192,6 +193,23 @@ STARTERS = [
      "columns": ["name", "trades", "insurer", "public_liability", "insurance_expires", "email"],
      "filters": {"approved": {"is": True}, "active": {"is": True}, "insurance_expires": {"upto_days": 30}},
      "sort_by": "insurance_expires"},
+    {"starter": "certificates_expired", "category": "Compliance", "name": "Certificates expired",
+     "dataset": "compliance", "description": "Required certificates whose latest one has expired.",
+     "columns": ["property", "property_name", "kind", "responsible", "latest_issued", "latest_expiry"],
+     "filters": {"latest_expiry": {"before_today": True}}, "sort_by": "latest_expiry"},
+    {"starter": "certificates_60", "category": "Compliance", "name": "Certificates expiring in the next 60 days",
+     "dataset": "compliance", "description": "Book the inspections now.",
+     "columns": ["property", "property_name", "kind", "responsible", "latest_issued", "latest_expiry"],
+     "filters": {"latest_expiry": {"next_days": 60}}, "sort_by": "latest_expiry"},
+    {"starter": "actions_overdue", "category": "Compliance", "name": "Remedial actions overdue",
+     "dataset": "compliance_actions", "description": "Actions from certificates and risk assessments past their due date.",
+     "columns": ["description", "property", "kind", "priority", "due_on", "job"],
+     "filters": {"is_open": {"is": True}, "due_on": {"before_today": True}}, "sort_by": "due_on"},
+    {"starter": "epc_f_g", "category": "Compliance", "name": "EPC rated F or G",
+     "dataset": "certificates", "description": "Properties below the minimum energy efficiency standard (E) for "
+                                            "letting: check before granting or renewing a lease.",
+     "columns": ["property", "property_name", "occupation", "issued_on", "expires_on", "rating"],
+     "filters": {"kind": {"in": ["epc"]}, "rating": {"in": ["F", "G"]}}, "sort_by": "rating"},
     {"starter": "missing_uprn", "category": "Data quality",
      "name": "Properties without a UPRN", "dataset": "properties",
      "description": "The UPRN links PHAEMA to GIS, council tax, business rates and the Transparency Code list.",

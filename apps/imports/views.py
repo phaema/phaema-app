@@ -23,7 +23,8 @@ def _available():
     from apps.core.models import ModuleSettings
 
     settings = ModuleSettings.load()
-    needs = {"receipts": settings.rent_ledger_enabled, "expenditure": settings.service_charges_enabled}
+    needs = {"receipts": settings.rent_ledger_enabled, "expenditure": settings.service_charges_enabled,
+             "maintenance": settings.maintenance_enabled}
     return [wb for wb in WORKBOOKS.values() if needs.get(wb.key, True)]
 
 

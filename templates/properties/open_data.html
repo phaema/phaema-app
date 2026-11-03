@@ -1,0 +1,17 @@
+{% extends "base.html" %}{% load i18n %}
+{% block title %}{% translate "Open data" %}{% endblock %}
+{% block help_link %}{% endblock %}
+{% block content %}
+<h1 class="govuk-heading-xl">{% translate "Open data" %}</h1>
+<p class="govuk-body-l">{% blocktranslate with org=settings.organisation_name|default:"The council" %}{{ org }} publishes these lists of its land and property. They are updated as the council's records change.{% endblocktranslate %}</p>
+{% for slug, title, description in datasets %}
+<h2 class="govuk-heading-m">{{ title }}</h2>
+<p class="govuk-body">{{ description }}</p>
+<ul class="govuk-list">
+  <li><a class="govuk-link" href="{% url 'open-data-file' slug 'csv' %}">{{ title }} (CSV)</a></li>
+  <li><a class="govuk-link" href="{% url 'open-data-file' slug 'json' %}">{{ title }} (JSON)</a></li>
+  <li><a class="govuk-link" href="{% url 'open-data-file' slug 'geojson' %}">{{ title }} (GeoJSON, for maps)</a></li>
+</ul>
+{% endfor %}
+<p class="govuk-body">{% blocktranslate %}Published under the <a class="govuk-link" href="{{ licence_url }}">{{ licence }}</a>. Sensitive locations are left out.{% endblocktranslate %}</p>
+{% endblock %}
