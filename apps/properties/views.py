@@ -22,8 +22,9 @@ from django.views.decorators.http import require_http_methods
 from django.views.generic import DetailView, ListView
 
 from apps.core.models import AuditEntry, ModuleSettings
-from apps.core.roles import can_edit, is_administrator
+from apps.core.roles import administrators_only, can_edit
 from apps.core.tables import sortable
+from apps.reports.mixins import ExportMixin
 
 from . import importer
 from .inspire import InspireImportError, import_uploaded_file
@@ -99,8 +100,9 @@ def map_config():
     }
 
 
-class PropertyListView(LoginRequiredMixin, ListView):
+class PropertyListView(LoginRequiredMixin, ExportMixin, ListView):
     model = Property
+    export_dataset, export_title = "properties", "Properties"
     paginate_by = 50
     template_name = "properties/property_list.html"
 
@@ -232,16 +234,6 @@ def inspire_geojson(request):
 
 
 # ---------------------------------------------------------------- boundary from INSPIRE
-
-def administrators_only(view):
-    def wrapped(request, *args, **kwargs):
-        if not is_administrator(request.user):
-            raise PermissionDenied
-        return view(request, *args, **kwargs)
-
-    wrapped.__name__, wrapped.__doc__ = view.__name__, view.__doc__
-    return login_required(wrapped)
-
 
 @login_required
 @require_http_methods(["GET", "POST"])

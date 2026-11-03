@@ -1,5 +1,6 @@
-{% extends "base.html" %}{% load i18n %}
+{% extends "base.html" %}{% load i18n phaema %}
 {% block title %}{% translate "Title" %} {{ object }}{% endblock %}
+{% block help_page %}properties{% endblock %}
 {% block breadcrumbs %}
 <nav class="govuk-breadcrumbs" aria-label="Breadcrumb"><ol class="govuk-breadcrumbs__list">
   <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="{% url 'properties:list' %}">{% translate "Properties" %}</a></li>
@@ -32,7 +33,7 @@
     <tbody class="govuk-table__body">
     {% for d in docs %}
       <tr class="govuk-table__row">
-        <td class="govuk-table__cell"><a class="govuk-link" href="{{ d.file.url }}" target="_blank" rel="noopener">{{ d.description|default:d.get_document_type_display }} (PDF, {{ d.file.size|filesizeformat }})</a></td>
+        <td class="govuk-table__cell"><a class="govuk-link" href="{{ d.file.url }}" target="_blank" rel="noopener">{{ d.description|default:d.get_document_type_display }} (PDF, {{ d.file|file_size }})</a></td>
         <td class="govuk-table__cell">{{ d.get_document_type_display }}</td>
         <td class="govuk-table__cell">{{ d.document_date|date:"j M Y"|default:"–" }}</td>
       </tr>

@@ -124,3 +124,19 @@ def sync_staff_status(user):
     if user.is_staff != staff:
         user.is_staff = staff
         user.save(update_fields=["is_staff"])
+
+
+def administrators_only(view):
+    """View decorator: signed-in Administrators only."""
+    from functools import wraps
+
+    from django.contrib.auth.decorators import login_required
+    from django.core.exceptions import PermissionDenied
+
+    @wraps(view)
+    def wrapped(request, *args, **kwargs):
+        if not is_administrator(request.user):
+            raise PermissionDenied
+        return view(request, *args, **kwargs)
+
+    return login_required(wrapped)

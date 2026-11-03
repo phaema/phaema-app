@@ -1,0 +1,18 @@
+{% load i18n %}<table class="govuk-table">
+  <thead class="govuk-table__head"><tr class="govuk-table__row">
+    <th scope="col" class="govuk-table__header">{% translate "Report" %}</th>
+    <th scope="col" class="govuk-table__header">{% translate "Records" %}</th>
+    {% if show_owner %}<th scope="col" class="govuk-table__header">{% translate "By" %}</th>{% endif %}
+    <th scope="col" class="govuk-table__header">{% translate "Download" %}</th>
+  </tr></thead>
+  <tbody class="govuk-table__body">
+  {% for r in reports %}
+    <tr class="govuk-table__row">
+      <td class="govuk-table__cell"><a class="govuk-link" href="{{ r.get_absolute_url }}">{{ r.name }}</a>{% if r.description %}<br><span class="govuk-body-s">{{ r.description }}</span>{% endif %}{% if r.shared and not r.starter and not show_owner %}<br><strong class="govuk-tag govuk-tag--blue">{% translate "Shared" %}</strong>{% endif %}</td>
+      <td class="govuk-table__cell">{% for d in datasets %}{% if d.key == r.dataset %}{{ d.label }}{% endif %}{% endfor %}</td>
+      {% if show_owner %}<td class="govuk-table__cell">{{ r.owner.get_full_name|default:r.owner.username }}</td>{% endif %}
+      <td class="govuk-table__cell"><a class="govuk-link" href="{{ r.get_absolute_url }}?format=xlsx">Excel</a> · <a class="govuk-link" href="{{ r.get_absolute_url }}?format=csv">CSV</a></td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>

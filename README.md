@@ -17,7 +17,10 @@ PHAEMA helps a council's estates team manage its land and property: the property
 - A full, tamper-proof audit trail, with a change log showing who changed what and when, field by field
 - Maps on every property and a register map, with OpenStreetMap or Ordnance Survey background mapping (OS Maps API key under the PSGA)
 - HM Land Registry INSPIRE polygons: import for your area, show on maps, and set property boundaries from them
-- Spreadsheet import of properties (Excel template with drop-downs; preview with row-by-row checks before saving)
+- Spreadsheet import of properties, parties, and leases with their break options (Excel templates with drop-downs and guidance; a preview with row-by-row checks; nothing is saved unless every row is clean)
+- Excel and CSV download of every list, honouring the current filters and sort order
+- A report builder: choose records, columns, filters (including rolling dates such as "in the next 90 days"), sort and totals; save, share, copy, and run on screen or download. Six ready-made reports (rent roll, expiries, vacant properties, overdue events, terrier, tenant contacts)
+- A user manual built into the application, with search, cross-links, and a "Help with this page" link and short hints on the main screens. The manual is written in Markdown in [`apps/help/pages`](apps/help/pages) so it also reads on GitHub
 - Leases, licences, wayleaves and other agreements, both let out and held by the council: parties, term, 1954 Act status, rent, reviews, breaks with notice deadlines, repairing and insurance terms
 - Key dates with red/amber/green warnings, and a lease register with filters (including expiring soon and overdue events) and sorting
 - Signed leases, notices and other agreement documents stored as PDFs against each lease
@@ -27,7 +30,7 @@ PHAEMA helps a council's estates team manage its land and property: the property
 - Rent schedules: rent history, review outcomes, fixed steps, concessions and indexation, with future rents taking effect automatically; next payments preview
 - Dashboard: overdue and upcoming lease events by type, rent roll by holding purpose, WAULT to expiry and to first break
 - Three roles: Administrators (change anything), Surveyors (change the properties they manage) and Viewers (read only), applied on every screen, in data entry and in the API. See [users and roles](docs/roles.md)
-- Adjustable text size (standard, large, largest)
+- Adjustable text size (standard, large, largest) and colour themes: standard, dark, high contrast, or match the device; plus a council brand colour for the header
 - Photos and documents are only available to signed-in users; photos are stripped of location data on upload
 - Optional modules that each council switches on or off (rent ledger, service charges, maintenance, compliance, Golden Thread)
 - An open REST API with OpenAPI documentation at `/api/docs/`

@@ -16,8 +16,12 @@ PHAEMA has three roles. Give each person one role in **Manage data > Users** (ti
 | Delete properties and leases | ✓ | – | – |
 | Titles and title documents | Change | View | View |
 | Assign managing surveyors | ✓ | – | – |
-| Spreadsheet import and INSPIRE import | ✓ | – | – |
-| Module settings (OS Maps key, reminder lead times) | ✓ | – | – |
+| Spreadsheet import (properties, parties, leases and breaks) and INSPIRE import | ✓ | – | – |
+| Download lists to Excel or CSV, run reports | ✓ | ✓ | ✓ |
+| Save their own reports and share them | ✓ | ✓ | ✓ |
+| Change or delete another person's report | ✓ | – | – |
+| Change the ready-made reports | ✓ | – | – |
+| Module settings (OS Maps key, reminder lead times, brand colour) | ✓ | – | – |
 | Add users and give them roles | ✓ (not superusers) | – | – |
 | Use the API | Read and write | Read; change what they can change on screen | Read only |
 

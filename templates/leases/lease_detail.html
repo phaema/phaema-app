@@ -1,5 +1,6 @@
-{% extends "base.html" %}{% load i18n humanize phaema_roles %}
+{% extends "base.html" %}{% load i18n humanize phaema phaema_roles %}
 {% block title %}{{ object.reference }}{% endblock %}
+{% block help_page %}leases{% endblock %}
 {% block breadcrumbs %}
 <nav class="govuk-breadcrumbs" aria-label="Breadcrumb"><ol class="govuk-breadcrumbs__list">
   <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="{% url 'leases:list' %}">{% translate "Leases and licences" %}</a></li>
@@ -69,6 +70,7 @@
     <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Assignment and subletting" %}</dt><dd class="govuk-summary-list__value">{{ object.alienation|linebreaksbr|default:"–" }}</dd></div>
   </dl>
   <h2 class="govuk-heading-m">{% translate "Rent schedule" %}</h2>
+  {% include "core/_hint.html" with summary=_("How does the rent schedule work?") text=_("The current rent is the latest entry that has taken effect, and it updates itself each day. Add future stepped rents in advance. Rent reviews add their own entries when you record the outcome.") page="rent-schedule" %}
   <table class="govuk-table">
     <thead class="govuk-table__head"><tr class="govuk-table__row">
       <th scope="col" class="govuk-table__header">{% translate "From" %}</th>
@@ -96,6 +98,7 @@
 
   {% with breaks=object.breaks.all %}{% if breaks %}
   <h2 class="govuk-heading-m">{% translate "Break options" %}</h2>
+  {% include "core/_hint.html" with summary=_("How are break dates tracked?") text=_("Each break creates an event for the last date to serve notice and for the break date itself, assigned to the managing surveyor.") page="events" anchor="breaks" %}
   <ul class="govuk-list">{% for b in breaks %}<li><strong>{{ b.break_date|date:"j F Y" }}</strong> – {{ b.get_exercisable_by_display }}{% if b.notice_months %}, {% blocktranslate count n=b.notice_months %}{{ n }} month's notice{% plural %}{{ n }} months' notice{% endblocktranslate %} ({% translate "by" %} {{ b.notice_deadline|date:"j F Y" }}){% endif %}{% if b.conditions %}<br><span class="govuk-body-s">{{ b.conditions }}</span>{% endif %}</li>{% endfor %}</ul>
   {% endif %}{% endwith %}
   <h2 class="govuk-heading-m">{% translate "Documents" %}</h2>
@@ -110,7 +113,7 @@
     <tbody class="govuk-table__body">
     {% for d in docs %}
       <tr class="govuk-table__row">
-        <td class="govuk-table__cell"><a class="govuk-link" href="{{ d.file.url }}" target="_blank" rel="noopener">{{ d.description|default:d.get_document_type_display }} (PDF, {{ d.file.size|filesizeformat }})</a></td>
+        <td class="govuk-table__cell"><a class="govuk-link" href="{{ d.file.url }}" target="_blank" rel="noopener">{{ d.description|default:d.get_document_type_display }} (PDF, {{ d.file|file_size }})</a></td>
         <td class="govuk-table__cell">{{ d.get_document_type_display }}</td>
         <td class="govuk-table__cell">{{ d.document_date|date:"j M Y"|default:"–" }}</td>
       </tr>

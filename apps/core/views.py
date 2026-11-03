@@ -21,6 +21,7 @@ from apps.properties.models import Property
 from .models import AuditEntry
 
 TEXT_SIZES = {"standard": "Standard", "large": "Large", "largest": "Largest"}
+THEMES = {"standard": "Standard", "dark": "Dark", "contrast": "High contrast", "auto": "Match my device"}
 
 
 @login_required
@@ -87,10 +88,18 @@ def change_list(request):
         qs = qs.filter(user__isnull=True)
     elif user_id.isdigit():
         qs = qs.filter(user_id=int(user_id))
+    from apps.reports import datasets, export
+
+    exported = export.download(request, "Change log", datasets.get("changes"), qs)
+    if exported:
+        return exported
     page = Paginator(qs, 50).get_page(request.GET.get("page"))
     page.object_list = _with_targets(page.object_list)
     users = get_user_model().objects.filter(auditentry__isnull=False).distinct().order_by("first_name", "username")
-    return render(request, "core/change_list.html", {"page_obj": page, "users": users, "selected_user": user_id})
+    params = request.GET.copy()
+    params.pop("page", None)
+    return render(request, "core/change_list.html", {"page_obj": page, "users": users, "selected_user": user_id,
+                                                     "querystring": params.urlencode()})
 
 
 @login_required
@@ -145,15 +154,25 @@ def protected_file(request, path):
     return response
 
 
-def set_text_size(request, size):
-    if size not in TEXT_SIZES:
-        raise Http404
+def _remember(request, cookie, value):
     target = request.GET.get("next") or "/"
     if not url_has_allowed_host_and_scheme(target, allowed_hosts={request.get_host()}):
         target = "/"
     response = HttpResponseRedirect(target)
-    response.set_cookie("phaema_text_size", size, max_age=365 * 24 * 3600, samesite="Lax")
+    response.set_cookie(cookie, value, max_age=365 * 24 * 3600, samesite="Lax")
     return response
+
+
+def set_text_size(request, size):
+    if size not in TEXT_SIZES:
+        raise Http404
+    return _remember(request, "phaema_text_size", size)
+
+
+def set_theme(request, theme):
+    if theme not in THEMES:
+        raise Http404
+    return _remember(request, "phaema_theme", theme)
 
 
 def health(request):

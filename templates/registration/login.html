@@ -22,5 +22,6 @@
     <input type="hidden" name="next" value="{{ next }}">
     <button type="submit" class="govuk-button" data-module="govuk-button">{% translate "Sign in" %}</button>
   </form>
+  <p class="govuk-body"><a class="govuk-link" href="{% url 'help:index' %}">{% translate "Read the user manual" %}</a></p>
 </div></div>
 {% endblock %}

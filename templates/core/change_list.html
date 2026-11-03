@@ -1,5 +1,6 @@
 {% extends "base.html" %}{% load i18n %}
 {% block title %}{% translate "Changes" %}{% endblock %}
+{% block help_page %}change-log{% endblock %}
 {% block content %}
 <h1 class="govuk-heading-xl">{% translate "Change log" %}</h1>
 <p class="govuk-body">{% translate "Every change to PHAEMA records is logged here and cannot be edited or deleted." %}</p>
@@ -14,6 +15,7 @@
   </div>
   <button class="govuk-button govuk-!-margin-bottom-0" data-module="govuk-button">{% translate "Apply" %}</button>
 </form>
+{% include "core/_downloads.html" %}
 <table class="govuk-table">
   <thead class="govuk-table__head"><tr class="govuk-table__row">
     <th scope="col" class="govuk-table__header">{% translate "When" %}</th>

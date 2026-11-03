@@ -3,7 +3,7 @@ from django.conf import settings
 from django.db import DatabaseError
 
 from .models import ModuleSettings
-from .views import TEXT_SIZES
+from .views import TEXT_SIZES, THEMES
 
 
 def phaema(request):
@@ -23,4 +23,7 @@ def phaema(request):
         "organisation_name": org,
         "text_size": size if size in TEXT_SIZES else "standard",
         "text_sizes": TEXT_SIZES,
+        "theme": request.COOKIES.get("phaema_theme") if request.COOKIES.get("phaema_theme") in THEMES else "standard",
+        "themes": THEMES,
+        "brand_colour": getattr(modules, "brand_colour", "") if modules else "",
     }

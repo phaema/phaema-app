@@ -16,3 +16,28 @@ def field_labels(entry):
         except (FieldDoesNotExist, AttributeError):
             labels.append(name)
     return ", ".join(labels)
+
+
+@register.filter
+def get_item(sequence, index):
+    """{{ list|get_item:i }}"""
+    try:
+        return sequence[index]
+    except (IndexError, KeyError, TypeError):
+        return None
+
+
+@register.filter
+def attr_type(field):
+    return getattr(field, "type", "")
+
+
+@register.filter
+def file_size(fieldfile):
+    """Size of a stored file, e.g. "1.2 MB", or "file missing" if it is no longer in storage."""
+    from django.template.defaultfilters import filesizeformat
+
+    try:
+        return filesizeformat(fieldfile.size)
+    except (OSError, ValueError):
+        return "file missing"

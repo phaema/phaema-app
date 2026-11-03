@@ -1,0 +1,110 @@
+{% extends "base.html" %}{% load i18n %}
+{% block title %}{% if new %}{% translate "New report" %}{% else %}{% translate "Change report" %}{% endif %}{% endblock %}
+{% block help_page %}reports{% endblock %}
+{% block content %}
+<span class="govuk-caption-l">{{ dataset.label }}</span>
+<h1 class="govuk-heading-l">{% if new %}{% translate "New report" %}{% else %}{{ report.name }}{% endif %}</h1>
+{% if errors %}
+<div class="govuk-error-summary" data-module="govuk-error-summary"><div role="alert">
+  <h2 class="govuk-error-summary__title">{% translate "There is a problem" %}</h2>
+  <div class="govuk-error-summary__body"><ul class="govuk-list govuk-error-summary__list">{% for e in errors %}<li>{{ e }}</li>{% endfor %}</ul></div>
+</div></div>
+{% endif %}
+<form method="post" novalidate>{% csrf_token %}
+<div class="govuk-grid-row"><div class="govuk-grid-column-two-thirds">
+  <div class="govuk-form-group">
+    <label class="govuk-label govuk-label--s" for="name">{% translate "Report name" %}</label>
+    <input class="govuk-input" id="name" name="name" value="{{ report.name }}" maxlength="120">
+  </div>
+  <div class="govuk-form-group">
+    <label class="govuk-label govuk-label--s" for="description">{% translate "Description" %} <span class="govuk-body-s">({% translate "optional" %})</span></label>
+    <input class="govuk-input" id="description" name="description" value="{{ report.description }}" maxlength="255">
+  </div>
+
+  <h2 class="govuk-heading-m">{% translate "Columns" %}</h2>
+  <p class="govuk-hint">{% translate "Tick the columns you want. To change their order, number them: 1 is the first column. Unnumbered columns follow in the order shown." %}</p>
+  <table class="govuk-table phaema-compact">
+    <thead class="govuk-table__head"><tr class="govuk-table__row">
+      <th scope="col" class="govuk-table__header">{% translate "Column" %}</th>
+      <th scope="col" class="govuk-table__header">{% translate "Position" %}</th>
+    </tr></thead>
+    <tbody class="govuk-table__body">
+    {% for f, on, pos in columns %}
+      <tr class="govuk-table__row">
+        <td class="govuk-table__cell"><div class="govuk-checkboxes govuk-checkboxes--small"><div class="govuk-checkboxes__item">
+          <input class="govuk-checkboxes__input" id="col_{{ f.key }}" name="col_{{ f.key }}" type="checkbox" value="1"{% if on %} checked{% endif %}>
+          <label class="govuk-label govuk-checkboxes__label" for="col_{{ f.key }}">{{ f.label }}</label></div></div></td>
+        <td class="govuk-table__cell"><label class="govuk-visually-hidden" for="pos_{{ f.key }}">{% translate "Position of" %} {{ f.label }}</label>
+          <input class="govuk-input govuk-input--width-3" id="pos_{{ f.key }}" name="pos_{{ f.key }}" inputmode="numeric" value="{{ pos }}"></td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+
+  <h2 class="govuk-heading-m">{% translate "Filters" %}</h2>
+  <p class="govuk-hint">{% translate "Only include records that match. Leave a filter empty to include everything." %}</p>
+  {% for row in filter_rows %}{% with f=row.field %}
+  <details class="govuk-details govuk-!-margin-bottom-3" data-module="govuk-details"{% if row.spec %} open{% endif %}>
+    <summary class="govuk-details__summary"><span class="govuk-details__summary-text">{{ f.label }}{% if row.spec %} ({% translate "filtered" %}){% endif %}</span></summary>
+    <div class="govuk-details__text">
+    {% if f.type == "choice" or f.type == "user" %}
+      <div class="govuk-checkboxes govuk-checkboxes--small">
+      {% for value, label in row.options %}
+        <div class="govuk-checkboxes__item">
+          <input class="govuk-checkboxes__input" id="f_{{ f.key }}_{{ forloop.counter }}" name="f_{{ f.key }}" type="checkbox" value="{{ value }}"{% if value in row.spec.in %} checked{% endif %}>
+          <label class="govuk-label govuk-checkboxes__label" for="f_{{ f.key }}_{{ forloop.counter }}">{{ label }}</label>
+        </div>
+      {% endfor %}
+      </div>
+    {% elif f.type == "text" %}
+      <label class="govuk-label" for="f_{{ f.key }}">{% translate "Contains" %}</label>
+      <input class="govuk-input govuk-input--width-20" id="f_{{ f.key }}" name="f_{{ f.key }}" value="{{ row.spec.contains|default:'' }}">
+    {% elif f.type == "bool" %}
+      <label class="govuk-label" for="f_{{ f.key }}">{{ f.label }}</label>
+      <select class="govuk-select" id="f_{{ f.key }}" name="f_{{ f.key }}">
+        <option value="">{% translate "Any" %}</option>
+        <option value="yes"{% if row.spec.is is True %} selected{% endif %}>{% translate "Yes" %}</option>
+        <option value="no"{% if row.spec.is is False %} selected{% endif %}>{% translate "No" %}</option>
+      </select>
+    {% elif f.type == "date" %}
+      <div class="govuk-form-group">
+        <label class="govuk-label" for="f_{{ f.key }}_mode">{% translate "Dates" %}</label>
+        <select class="govuk-select" id="f_{{ f.key }}_mode" name="f_{{ f.key }}_mode">
+          {% for value, label in date_modes %}<option value="{{ value }}"{% if value == row.mode %} selected{% endif %}>{{ label }}</option>{% endfor %}
+        </select>
+      </div>
+      <div class="phaema-inline-fields">
+        <div><label class="govuk-label" for="f_{{ f.key }}_days">{% translate "Days" %}</label><input class="govuk-input govuk-input--width-4" id="f_{{ f.key }}_days" name="f_{{ f.key }}_days" inputmode="numeric" value="{{ row.days }}"></div>
+        <div><label class="govuk-label" for="f_{{ f.key }}_from">{% translate "From" %}</label><input class="govuk-input govuk-input--width-10" type="date" id="f_{{ f.key }}_from" name="f_{{ f.key }}_from" value="{{ row.spec.from|default:'' }}"></div>
+        <div><label class="govuk-label" for="f_{{ f.key }}_to">{% translate "To" %}</label><input class="govuk-input govuk-input--width-10" type="date" id="f_{{ f.key }}_to" name="f_{{ f.key }}_to" value="{{ row.spec.to|default:'' }}"></div>
+      </div>
+    {% else %}
+      <div class="phaema-inline-fields">
+        <div><label class="govuk-label" for="f_{{ f.key }}_min">{% translate "At least" %}</label><input class="govuk-input govuk-input--width-10" id="f_{{ f.key }}_min" name="f_{{ f.key }}_min" inputmode="decimal" value="{{ row.spec.min|default_if_none:'' }}"></div>
+        <div><label class="govuk-label" for="f_{{ f.key }}_max">{% translate "At most" %}</label><input class="govuk-input govuk-input--width-10" id="f_{{ f.key }}_max" name="f_{{ f.key }}_max" inputmode="decimal" value="{{ row.spec.max|default_if_none:'' }}"></div>
+      </div>
+    {% endif %}
+    </div>
+  </details>
+  {% endwith %}{% endfor %}
+
+  <h2 class="govuk-heading-m">{% translate "Order and totals" %}</h2>
+  <div class="govuk-form-group">
+    <label class="govuk-label govuk-label--s" for="sort_by">{% translate "Sort by" %}</label>
+    <select class="govuk-select" id="sort_by" name="sort_by">
+      <option value="">{% translate "Default order" %}</option>
+      {% for f in sortable %}<option value="{{ f.key }}"{% if f.key == report.sort_by %} selected{% endif %}>{{ f.label }}</option>{% endfor %}
+    </select>
+  </div>
+  <div class="govuk-checkboxes govuk-checkboxes--small govuk-!-margin-bottom-6">
+    <div class="govuk-checkboxes__item"><input class="govuk-checkboxes__input" id="sort_descending" name="sort_descending" type="checkbox" value="1"{% if report.sort_descending %} checked{% endif %}><label class="govuk-label govuk-checkboxes__label" for="sort_descending">{% translate "Largest or latest first" %}</label></div>
+    <div class="govuk-checkboxes__item"><input class="govuk-checkboxes__input" id="show_totals" name="show_totals" type="checkbox" value="1"{% if report.show_totals %} checked{% endif %}><label class="govuk-label govuk-checkboxes__label" for="show_totals">{% translate "Show totals for money and area columns" %}</label></div>
+    {% if not report.starter %}<div class="govuk-checkboxes__item"><input class="govuk-checkboxes__input" id="shared" name="shared" type="checkbox" value="1"{% if report.shared %} checked{% endif %}><label class="govuk-label govuk-checkboxes__label" for="shared">{% translate "Share this report with everyone" %}</label></div>{% endif %}
+  </div>
+  <div class="govuk-button-group">
+    <button class="govuk-button" data-module="govuk-button">{% translate "Save and run" %}</button>
+    <a class="govuk-link" href="{% if report.pk %}{{ report.get_absolute_url }}{% else %}{% url 'reports:list' %}{% endif %}">{% translate "Cancel" %}</a>
+  </div>
+</div></div>
+</form>
+{% endblock %}
