@@ -20,7 +20,7 @@ from apps.leases.models import Lease, LeaseEvent
 from apps.properties.models import Property
 from apps.reports.mixins import ExportMixin
 
-from . import emails, workflow
+from . import emails, leasing, workflow
 from .models import STAGE_ORDER, Case, CaseDocument, CaseNote, CaseTask, CaseType, Correspondence, Stage
 
 COLUMNS = {
@@ -209,7 +209,8 @@ def _file_email(case, upload, direction):
 
 
 ACTIONS_WORK = {"next_stage", "hold", "resume", "acknowledge", "complete_application", "decide", "close", "reopen",
-                "add_task", "task_done", "assign", "raise_fee", "links", "request_approval", "withdraw_approval"}
+                "add_task", "task_done", "assign", "raise_fee", "links", "request_approval", "withdraw_approval",
+                "save_heads", "save_notice"}
 ACTIONS_APPROVER = {"approve", "return", "reassign_approval"}
 ACTIONS_CONTRIBUTE = {"add_note", "add_correspondence", "add_document", "file_email"}
 
@@ -252,7 +253,37 @@ def case_detail(request, pk):
         "hidden_notes": case.notes.filter(confidential=True).count() if not show_confidential else 0,
         "is_administrator": is_administrator(request.user),
         **_approval_context(request.user, case),
+        **_leasing_context(case),
     })
+
+
+def _optional_date(text):
+    try:
+        return date.fromisoformat(text or "")
+    except ValueError:
+        return None
+
+
+def _blocked_by_terms(request, case, stage):
+    if stage != "decision":
+        return False
+    problems = leasing.problems(case)
+    for problem in problems:
+        messages.error(request, problem)
+    return bool(problems)
+
+
+def _leasing_context(case):
+    if not (case.case_type.heads_of_terms or case.case_type.code == "renewal"):
+        return {}
+    terms, current = case.heads_of_terms or {}, leasing.from_lease(case.lease)
+    return {
+        "heads": [(k, label, hint, terms.get(k, ""), current.get(k, "")) for k, label, hint in leasing.ITEMS],
+        "heads_answered": len(leasing.answered(case)), "heads_total": len(leasing.KEYS),
+        "terms_problems": leasing.problems(case),
+        "notice": leasing.notice_dates(case) if case.case_type.code == "renewal" else None,
+        "notice_kinds": Case._meta.get_field("notice_kind").choices,
+    }
 
 
 def _next_stage(case):
@@ -306,6 +337,8 @@ def _do(request, case, action):  # noqa: C901 - one branch per action keeps each
     post, today = request.POST, date.today()
     if action == "next_stage":
         upcoming = _next_stage(case)
+        if _blocked_by_terms(request, case, upcoming):
+            return
         if upcoming and workflow.needs_approval(case, upcoming):
             messages.error(request, _("This stage needs your supervisor's approval first. Ask for approval below."))
             return
@@ -366,6 +399,8 @@ def _do(request, case, action):  # noqa: C901 - one branch per action keeps each
         if stage not in STAGE_ORDER or not workflow.needs_approval(case, stage):
             messages.error(request, _("No approval is needed for that stage."))
             return
+        if _blocked_by_terms(request, case, stage):
+            return
         if not post.get("recommendation", "").strip():
             messages.error(request, _("Write your recommendation for the approver."))
             return
@@ -376,6 +411,29 @@ def _do(request, case, action):  # noqa: C901 - one branch per action keeps each
             return
         messages.success(request, _("Sent to %(name)s for approval.")
                          % {"name": approval.approver.get_full_name() or approval.approver.username})
+    elif action == "save_heads":
+        case.heads_of_terms = {k: post.get(f"hot_{k}", "").strip() for k in leasing.KEYS
+                               if post.get(f"hot_{k}", "").strip()}
+        case.tenant_represented = post.get("tenant_represented", "") if post.get("tenant_represented") in ("yes", "no") \
+            else ""
+        case.code_given_on = _optional_date(post.get("code_given_on"))
+        case.save(update_fields=["heads_of_terms", "tenant_represented", "code_given_on", "updated_at"])
+        messages.success(request, _("Heads of terms saved: %(n)s of %(t)s items covered.")
+                         % {"n": len(leasing.answered(case)), "t": len(leasing.KEYS)})
+    elif action == "save_notice":
+        kind = post.get("notice_kind", "")
+        case.notice_kind = kind if kind in ("s25", "s26") else ""
+        case.notice_served_on = _optional_date(post.get("notice_served_on"))
+        case.notice_date = _optional_date(post.get("notice_date"))
+        case.landlord_opposes = post.get("landlord_opposes") == "1"
+        case.opposition_grounds = post.get("opposition_grounds", "").strip()[:100]
+        deadline = leasing.notice_dates(case).court_deadline
+        if deadline and not case.case_type.target_days:
+            case.target_date = deadline
+        case.save()
+        messages.success(request, _("Notice dates saved."))
+        for warning in leasing.notice_dates(case).warnings:
+            messages.warning(request, warning)
     elif action == "withdraw_approval":
         approval = workflow.pending_approval(case)
         if approval and approval.requested_by_id == request.user.pk:

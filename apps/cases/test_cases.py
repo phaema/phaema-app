@@ -219,11 +219,11 @@ def test_demo_cases(db):
     from django.core.management import call_command
 
     call_command("load_demo_data", verbosity=0)
-    assert Case.objects.filter(crm_reference__startswith="DEMO").count() == 5
+    assert Case.objects.filter(crm_reference__startswith="DEMO").count() == 7
     assert Case.objects.filter(how_received="event").exists()
     assert Case.objects.get(crm_reference="DEMO-1").approvals.filter(status="pending").exists()
     call_command("load_demo_data", "--reset", verbosity=0)
-    assert Case.objects.filter(crm_reference__startswith="DEMO").count() == 5
+    assert Case.objects.filter(crm_reference__startswith="DEMO").count() == 7
 
 
 def _supervise(user, supervisor):
@@ -336,3 +336,59 @@ def test_dashboard_lists_surveyors_without_a_supervisor(client, make_user, setup
     assert "No supervisor" in client.get("/").content.decode()
     _supervise(setup["surveyor"], make_user("head", "Administrators"))
     assert "No supervisor" not in client.get("/").content.decode()
+
+
+def test_heads_of_terms_before_a_new_letting_decision(client, make_user, setup):
+    from apps.cases import leasing
+
+    case = workflow.open_case(CaseType.objects.get(code="new_letting"), title="Let", property=setup["unit"])
+    case.stage = "assessing"
+    case.save()
+    _supervise(setup["surveyor"], make_user("head", "Surveyors"))
+    client.force_login(setup["surveyor"])
+    url = case.get_absolute_url()
+    assert "0 of 16 items covered" in client.get(url).content.decode()
+    client.post(url, {"action": "request_approval", "stage": "decision", "recommendation": "Let it"})
+    assert not case.approvals.exists()
+    data = {f"hot_{k}": "Agreed" for k in leasing.KEYS}
+    data.update(action="save_heads", tenant_represented="no")
+    client.post(url, data)
+    case.refresh_from_db()
+    assert len(leasing.answered(case)) == 16
+    assert leasing.problems(case) and "supplemental guide" in str(leasing.problems(case)[0])
+    data["code_given_on"] = "2026-11-02"
+    client.post(url, data)
+    case.refresh_from_db()
+    assert leasing.problems(case) == [] and case.code_given_on == date(2026, 11, 2)
+    client.post(url, {"action": "request_approval", "stage": "decision", "recommendation": "Let it"})
+    assert case.approvals.filter(status="pending").exists()
+
+
+def test_renewal_notice_dates(client, setup):
+    from apps.cases import leasing
+
+    case = workflow.open_case(CaseType.objects.get(code="renewal"), title="Renew", lease=setup["lease"])
+    assert leasing.from_lease(setup["lease"])["rent"].startswith("£10,000.00 a year")
+    client.force_login(setup["surveyor"])
+    url = case.get_absolute_url()
+    client.post(url, {"action": "save_notice", "notice_kind": "s26", "notice_served_on": "2026-01-10",
+                      "notice_date": "2026-11-01"})
+    case.refresh_from_db()
+    dates = leasing.notice_dates(case)
+    assert dates.counter_notice_due == date(2026, 3, 10) and dates.court_deadline == date(2026, 10, 31)
+    assert case.target_date == date(2026, 10, 31)
+    assert any("before the lease" in str(w) for w in dates.warnings)  # the lease runs beyond that date
+    case.notice_kind, case.notice_date = "s25", date(2026, 3, 1)
+    dates = leasing.notice_dates(case)
+    assert dates.court_deadline == date(2026, 3, 1) and any("6 and 12 months" in str(w) for w in dates.warnings)
+    assert "Last day to apply to court" in client.get(url).content.decode()
+
+
+def test_new_lease_fields(client, setup):
+    lease = setup["lease"]
+    lease.special_rights, lease.rates_excluded, lease.deposit = "Two parking spaces", False, Decimal("2500")
+    lease.deposit_held = "Council deposit account"
+    lease.save()
+    client.force_login(setup["surveyor"])
+    page = client.get(lease.get_absolute_url()).content.decode()
+    assert "Two parking spaces" in page and "Includes business rates" in page and "Council deposit account" in page

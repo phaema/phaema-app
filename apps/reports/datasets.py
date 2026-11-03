@@ -155,6 +155,9 @@ def _lease_fields():
         Field("rent_frequency", "Rent payable", "choice", "rent_frequency", choices=_choices(L, "rent_frequency")),
         Field("vat_chargeable", "VAT charged", "bool", "vat_chargeable"),
         Field("deposit", "Rent deposit £", "money", "deposit"),
+        Field("deposit_held", "Deposit held", path="deposit_held"),
+        Field("rates_excluded", "Rent excludes rates", "bool", "rates_excluded"),
+        Field("incentives", "Incentives", path="incentives"),
         Field("review_basis", "Review basis", "choice", "review_basis", choices=_choices(L, "review_basis")),
         Field("review_interval_years", "Review every (years)", "number", "review_interval_years"),
         Field("next_review_date", "Next rent review", "date", "next_review_date", default=True),
@@ -162,6 +165,8 @@ def _lease_fields():
         Field("insurance", "Insurance", "choice", "insurance", choices=_choices(L, "insurance")),
         Field("service_charge_payable", "Service charge payable", "bool", "service_charge_payable"),
         Field("permitted_use", "Permitted use", path="permitted_use"),
+        Field("alterations", "Alterations", path="alterations"),
+        Field("special_rights", "Special rights", path="special_rights"),
         Field("surveyor", "Managing surveyor", getter=lambda lease: next(
             (_user_name(p.managing_surveyor) for p in lease.properties.all() if p.managing_surveyor), "")),
         Field("notes", "Notes", path="notes"),

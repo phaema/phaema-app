@@ -105,6 +105,13 @@ class LeaseSheet(Sheet):
         Column("Service charge payable", "service_charge_payable", "bool"),
         Column("Permitted use", "permitted_use", example="Retail (Class E(a))"),
         Column("Notes", "notes"),
+        Column("Rates excluded", "rates_excluded", "bool", example="Yes",
+               guidance="Yes if the rent excludes business rates (the usual case)."),
+        Column("Incentives", "incentives", example="Six months rent free"),
+        Column("Alterations", "alterations", example="Internal non-structural alterations without consent"),
+        Column("Special rights", "special_rights", example="Two parking spaces"),
+        Column("Deposit held", "deposit_held"),
+        Column("Deposit interest", "deposit_interest"),
     ]
 
     def find(self, values):

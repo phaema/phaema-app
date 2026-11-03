@@ -32,6 +32,14 @@ To add many agreements at once, see [importing leases](import-export.md#leases-a
 | Review basis and interval | How and how often the rent is reviewed. The next review date creates a [rent review event](events.md#rent-reviews). |
 | Repairing and insurance | Who repairs and insures. |
 | Service charge payable | Whether a service charge is due. |
+| Rent excludes business rates | Ticked unless the rent includes rates. |
+| Incentives | Any rent-free period or other incentive. |
+| Rent deposit, where held, interest | The amount, where it is held (for example the deposit account and the deed's date) and who the interest goes to and when. |
+| Alterations and reinstatement | What the tenant may alter, and whether they must reinstate at the end. |
+| Special rights | Parking, rights of way, telecoms access and so on. |
+
+These match the items the RICS Code for leasing business premises asks heads of terms to cover, so a renewal case
+can start from what the current agreement says.
 
 The agreement page shows the **term** in years and months, the **next payments due** (a guide only: part periods
 are not apportioned), and all key dates.

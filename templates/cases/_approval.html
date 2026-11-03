@@ -28,7 +28,9 @@
 {% elif approval_gate and can_work and case.is_open %}
 <div class="govuk-inset-text">
   <h2 class="govuk-heading-s govuk-!-margin-bottom-2">{% blocktranslate with stage=approval_gate_label %}Approval needed to move to {{ stage }}{% endblocktranslate %}</h2>
-  {% if my_approver %}
+  {% if terms_problems and approval_gate == "decision" %}
+  <p class="govuk-body">{% translate "Cover every heads of terms item first (see above)." %}</p>
+  {% elif my_approver %}
   <form method="post">{% csrf_token %}<input type="hidden" name="action" value="request_approval"><input type="hidden" name="stage" value="{{ approval_gate }}">
     <div class="govuk-form-group"><label class="govuk-label govuk-label--s" for="recommendation">{% translate "Your recommendation" %}</label><div class="govuk-hint">{% translate "What you propose, and why. For a consent, include any conditions." %}</div><textarea class="govuk-textarea" id="recommendation" name="recommendation" rows="5"></textarea></div>
     <button class="govuk-button govuk-!-margin-bottom-0" data-module="govuk-button">{% blocktranslate with name=my_approver.get_full_name|default:my_approver.username %}Ask {{ name }} for approval{% endblocktranslate %}</button>

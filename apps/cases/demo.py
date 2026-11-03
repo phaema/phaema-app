@@ -135,6 +135,37 @@ def load(today=None):
         today - timedelta(days=70)
     c.outcome = "Materials removed after a letter; verge reinstated by the tenant."
     c.save()
+    # 6. A new letting of a vacant unit, heads of terms part agreed with an unrepresented tenant.
+    vacant = Property.objects.filter(reference="DM-E01-U08").first()
+    if vacant:
+        c = workflow.open_case(t["new_letting"], title="New lease of Unit 8 to a local bakery", property=vacant,
+                               received_on=today - timedelta(days=35), how_received=Case.Received.EMAIL,
+                               crm_reference=f"{MARK}-6")
+        c.acknowledged_on, c.stage = today - timedelta(days=33), "assessing"
+        c.tenant_represented, c.code_given_on = "no", today - timedelta(days=30)
+        c.heads_of_terms = {
+            "premises": "Unit 8, Exampleton Business Park, as edged red on the attached plan",
+            "rights": "Two parking spaces in the shared car park", "term": "6 years, contracted out of the 1954 Act",
+            "renewal_break": "Tenant break at year 3 on six months' notice", "security": "Three months' rent deposit",
+            "rent": "£14,500 a year, quarterly in advance, excluding business rates", "vat": "VAT charged",
+            "incentives": "Three months rent free from completion", "review": "Open market, upwards only, at year 3",
+            "service_insurance": "Estate service charge; council insures and recharges",
+            "repairs": "Internal repairing, with a schedule of condition",
+        }
+        c.save()
+    # 7. A renewal: the tenant has served a section 26 request.
+    if "DL-0004" in lease:
+        served = today - timedelta(days=40)
+        c = workflow.open_case(t["renewal"], title="Renewal request from Brookside Joinery", lease=lease["DL-0004"],
+                               received_on=served, how_received=Case.Received.LETTER, crm_reference=f"{MARK}-7")
+        c.stage, c.notice_kind, c.notice_served_on = "assessing", "s26", served
+        c.acknowledged_on = served + timedelta(days=3)
+        c.notice_date = served + timedelta(days=280)
+        c.tenant_represented = "yes"
+        from .leasing import notice_dates
+
+        c.target_date = notice_dates(c).court_deadline
+        c.save()
     # Cases for the rent reviews, breaks and expiries coming up.
     workflow.auto_open(today)
     return Case.objects.count()
