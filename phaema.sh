@@ -13,6 +13,7 @@ Usage: ./phaema.sh <command>
   update       Download the latest code from GitHub, rebuild and restart
   admin        Create a user who can sign in and manage data
   demo-data    Load the fictional Exampleton demonstration estate
+  import-inspire FILE  Import HM Land Registry INSPIRE parcels from a zip file
   logs         Show live logs (press Ctrl+C to stop watching)
   status       Show whether PHAEMA is running
   backup       Save a copy of the database to the backups folder
@@ -38,6 +39,10 @@ case "${1:-}" in
   update)  git pull --ff-only && "$0" start ;;
   admin)   compose exec web python manage.py createsuperuser ;;
   demo-data) compose exec web python manage.py load_demo_data "${@:2}" ;;
+  import-inspire)
+    [ -f "${2:-}" ] || { echo "Usage: ./phaema.sh import-inspire path/to/inspire.zip"; exit 1; }
+    compose cp "$2" web:/tmp/inspire-upload
+    compose exec web python manage.py import_inspire /tmp/inspire-upload ;;
   logs)    compose logs -f ;;
   status)  compose ps ;;
   backup)

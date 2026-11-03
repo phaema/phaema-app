@@ -114,6 +114,10 @@ class Property(TimeStampedModel):
     easting = models.PositiveIntegerField(_("easting"), null=True, blank=True)
     northing = models.PositiveIntegerField(_("northing"), null=True, blank=True)
     boundary = models.MultiPolygonField(_("boundary"), srid=27700, null=True, blank=True)
+    boundary_source = models.CharField(
+        _("boundary source"), max_length=255, blank=True,
+        help_text=_("Where the boundary came from, e.g. HM Land Registry INSPIRE parcel 12345678, or drawn by hand."),
+    )
 
     # Publication
     exclude_from_publication = models.BooleanField(
@@ -361,3 +365,36 @@ class TitleDocument(TimeStampedModel):
         if self.file and not getattr(self.file, "_committed", True):
             self.original_filename = self.file.name.rsplit("/", 1)[-1][:255]
         super().save(*args, **kwargs)
+
+
+class InspireParcel(models.Model):
+    """HM Land Registry INSPIRE Index Polygon: the indicative extent of a registered freehold title.
+
+    Open data under the Open Government Licence. Display must carry the attribution in
+    inspire_attribution(). Title numbers are not included in the open data.
+    """
+
+    inspire_id = models.CharField(_("INSPIRE ID"), max_length=50, unique=True)
+    geometry = models.MultiPolygonField(srid=27700)
+    valid_from = models.DateField(null=True, blank=True)
+    source_file = models.CharField(max_length=255, blank=True)
+    imported_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = _("INSPIRE parcel")
+        verbose_name_plural = _("INSPIRE parcels")
+
+    def __str__(self):
+        return self.inspire_id
+
+
+def inspire_attribution():
+    """Attribution HM Land Registry requires wherever INSPIRE polygons are shown."""
+    from datetime import date
+
+    year = date.today().year
+    return (
+        f"This information is subject to Crown copyright and database rights {year} and is reproduced with "
+        "the permission of HM Land Registry. The polygons (including the associated geometry, namely x, y "
+        f"co-ordinates) are subject to Crown copyright and database rights {year} Ordnance Survey AC0000851063."
+    )

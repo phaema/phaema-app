@@ -1,0 +1,21 @@
+{% load i18n %}      <div class="govuk-form-group">
+        <label class="govuk-label govuk-label--s" for="q">{% translate "Search" %}</label>
+        <div class="govuk-hint" id="q-hint">{% translate "Reference, name, address, postcode, UPRN or title number" %}</div>
+        <input class="govuk-input" id="q" name="q" type="search" value="{{ q }}" aria-describedby="q-hint">
+      </div>
+      {% for name, label, choices, current in filters %}
+      <div class="govuk-form-group">
+        <label class="govuk-label govuk-label--s" for="f-{{ name }}">{{ label|capfirst }}</label>
+        <select class="govuk-select" id="f-{{ name }}" name="{{ name }}">
+          <option value="">{% translate "Any" %}</option>
+          {% for value, text in choices %}<option value="{{ value }}"{% if value == current %} selected{% endif %}>{{ text }}</option>{% endfor %}
+        </select>
+      </div>
+      {% endfor %}
+      <div class="govuk-form-group">
+        <label class="govuk-label govuk-label--s" for="f-surveyor">{% translate "Managed by" %}</label>
+        <select class="govuk-select" id="f-surveyor" name="surveyor">
+          <option value="">{% translate "Anyone" %}</option>
+          {% for value, text in surveyor_options %}<option value="{{ value }}"{% if value == surveyor_selected %} selected{% endif %}>{{ text }}</option>{% endfor %}
+        </select>
+      </div>

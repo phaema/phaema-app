@@ -92,6 +92,27 @@
   </details>
   {% endif %}
 
+  <h2 class="govuk-heading-m">{% translate "Leases and licences" %}</h2>
+  {% if leases %}
+  <table class="govuk-table">
+    <thead class="govuk-table__head"><tr class="govuk-table__row">
+      <th scope="col" class="govuk-table__header">{% translate "Agreement" %}</th>
+      <th scope="col" class="govuk-table__header">{% translate "Term" %}</th>
+      <th scope="col" class="govuk-table__header govuk-table__header--numeric">{% translate "Rent £ a year" %}</th>
+    </tr></thead>
+    <tbody class="govuk-table__body">
+    {% for l in leases %}
+      <tr class="govuk-table__row">
+        <td class="govuk-table__cell"><a class="govuk-link" href="{{ l.get_absolute_url }}">{{ l.counterparty.name }}</a><br><span class="govuk-body-s">{{ l.reference }} · {{ l.get_agreement_type_display }} · {{ l.get_status_display }}{% if l.direction == "in" %} · {% translate "held by the council" %}{% endif %}</span></td>
+        <td class="govuk-table__cell">{{ l.term_start|date:"j M Y" }} – {{ l.term_end|date:"j M Y"|default:"periodic" }}</td>
+        <td class="govuk-table__cell govuk-table__cell--numeric">{{ l.annual_rent|floatformat:0|intcomma }}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  {% else %}<p class="govuk-body">{% translate "No leases or licences recorded for this property." %}</p>{% endif %}
+  {% if perms.leases.add_lease %}<p class="govuk-body-s"><a class="govuk-link" href="{% url 'admin:leases_lease_add' %}?properties={{ object.pk }}">{% translate "Add a lease or licence" %}</a></p>{% endif %}
+
   <h2 class="govuk-heading-m">{% translate "Parts of this property" %}</h2>
   {% if children %}
   <ul class="govuk-list">{% for c in children %}<li><a class="govuk-link" href="{{ c.get_absolute_url }}">{{ c.reference }} {{ c.name }}</a> – {{ c.get_property_type_display }}</li>{% endfor %}</ul>
@@ -99,7 +120,14 @@
 </div>
 <div class="govuk-grid-column-one-third">
   <h2 class="govuk-heading-m">{% translate "Location" %}</h2>
-  <p class="govuk-body-s">{% translate "A map showing the location and boundaries will appear here (coming in week 2)." %}</p>
+  {% if has_location %}
+    {% url 'properties:detail-geojson' object.pk as features_url %}
+    {% include "properties/_map.html" with map_id="property-map" features_url=features_url height="340px" %}
+  {% else %}
+    <p class="govuk-body-s">{% translate "No boundary or grid reference recorded yet." %}</p>
+  {% endif %}
+  {% if object.boundary_source %}<p class="govuk-body-s">{% translate "Boundary source:" %} {{ object.boundary_source }}</p>{% endif %}
+  {% if perms.properties.change_property %}<p class="govuk-body-s"><a class="govuk-link" href="{% url 'properties:boundary' object.pk %}">{% translate "Set the boundary from Land Registry INSPIRE parcels" %}</a></p>{% endif %}
 
   <h2 class="govuk-heading-m">{% translate "Titles" %}</h2>
   {% if titles %}

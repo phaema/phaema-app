@@ -1,0 +1,50 @@
+{% extends "base.html" %}{% load i18n %}
+{% block title %}{% translate "Set boundary" %}{% endblock %}
+{% block breadcrumbs %}
+<nav class="govuk-breadcrumbs" aria-label="Breadcrumb"><ol class="govuk-breadcrumbs__list">
+  <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="{{ object.get_absolute_url }}">{{ object.name }}</a></li>
+  <li class="govuk-breadcrumbs__list-item">{% translate "Set boundary" %}</li>
+</ol></nav>
+{% endblock %}
+{% block content %}
+<span class="govuk-caption-l">{{ object.reference }} {{ object.name }}</span>
+<h1 class="govuk-heading-l">{% translate "Set the boundary from Land Registry INSPIRE parcels" %}</h1>
+{% if not inspire_count %}
+  <p class="govuk-body">{% translate "No INSPIRE parcels have been imported yet." %}
+  {% if perms.properties.add_inspireparcel %}<a class="govuk-link" href="{% url 'properties:inspire-upload' %}">{% translate "Import INSPIRE parcels for your area" %}</a>.{% endif %}</p>
+{% elif not has_location %}
+  <p class="govuk-body">{% translate "This property has no boundary or grid reference, so PHAEMA cannot find nearby parcels. Add an easting and northing first." %}
+  <a class="govuk-link" href="{% url 'admin:properties_property_change' object.pk %}">{% translate "Edit this property" %}</a></p>
+{% elif not parcels %}
+  <p class="govuk-body">{% translate "No INSPIRE parcels were found at this property's location." %}</p>
+{% else %}
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+    {% url 'properties:detail-geojson' object.pk as features_url %}
+    {% include "properties/_map.html" with map_id="boundary-map" features_url=features_url height="480px" select_form="parcel-form" %}
+    {% include "properties/_legend.html" %}
+  </div>
+  <div class="govuk-grid-column-one-third">
+    <form method="post" id="parcel-form" novalidate>
+      {% csrf_token %}
+      <div class="govuk-form-group">
+        <fieldset class="govuk-fieldset" aria-describedby="parcel-hint">
+          <legend class="govuk-fieldset__legend govuk-fieldset__legend--s">{% translate "Parcels at this location" %}</legend>
+          <div id="parcel-hint" class="govuk-hint">{% translate "Tick the parcels that make up this property, or click them on the map. They will be joined into one boundary, replacing any existing boundary." %}</div>
+          <div class="govuk-checkboxes govuk-checkboxes--small" data-module="govuk-checkboxes">
+          {% for p in parcels %}
+            <div class="govuk-checkboxes__item">
+              <input class="govuk-checkboxes__input" id="parcel-{{ forloop.counter }}" name="parcel" type="checkbox" value="{{ p.inspire_id }}">
+              <label class="govuk-label govuk-checkboxes__label" for="parcel-{{ forloop.counter }}">{% translate "INSPIRE ID" %} {{ p.inspire_id }} ({{ p.area_ha }} ha)</label>
+            </div>
+          {% endfor %}
+          </div>
+        </fieldset>
+      </div>
+      <button class="govuk-button" data-module="govuk-button">{% translate "Use as boundary" %}</button>
+    </form>
+    <p class="govuk-body-s">{% translate "INSPIRE polygons show the indicative extent of registered freehold titles. Check the title plan before relying on them." %}</p>
+  </div>
+</div>
+{% endif %}
+{% endblock %}

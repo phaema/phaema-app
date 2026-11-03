@@ -50,3 +50,13 @@ html.phaema-text-largest { font-size: 150%; }
 .phaema-indent-3 { padding-left: 40px !important; }
 .phaema-indent-4 { padding-left: 60px !important; }
 .phaema-lettable { font-weight: 700; }
+
+/* Maps */
+.phaema-map { width: 100%; border: 1px solid #b1b4b6; background: #f3f2f1; }
+.phaema-map__info { min-height: 1.5em; margin: 5px 0; }
+.phaema-map__controls { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 0; margin-bottom: 20px; }
+.phaema-map__controls .govuk-select { min-width: 0; }
+.phaema-map .ol-attribution { max-width: 90%; font-size: 12px; }
+.phaema-map .ol-attribution ul { white-space: normal; }
+.phaema-legend { display: flex; flex-wrap: wrap; gap: 6px 18px; padding: 0; list-style: none; }
+.phaema-legend li::before { content: ""; display: inline-block; width: 14px; height: 14px; margin-right: 6px; vertical-align: -2px; background: var(--c); }

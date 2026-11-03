@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 from django.contrib.gis import admin
 
-from .models import Property, PropertyPhoto, Title, TitleDocument
+from .models import InspireParcel, Property, PropertyPhoto, Title, TitleDocument
 
 
 class TitleInline(admin.TabularInline):
@@ -31,7 +31,7 @@ class PropertyAdmin(admin.GISModelAdmin):
         ("Identifiers and address", {"fields": ("uprn", "usrn", "address_line_1", "address_line_2", "town", "postcode")}),
         ("Classification", {"fields": ("holding_purpose", "tenure", "occupation", "use_description", "use_class")}),
         ("Areas", {"fields": ("gia_sqm", "nia_sqm", "site_area_ha")}),
-        ("Location", {"fields": ("easting", "northing", "boundary")}),
+        ("Location", {"fields": ("easting", "northing", "boundary", "boundary_source")}),
         ("Other", {"fields": ("exclude_from_publication", "notes")}),
     )
 
@@ -49,3 +49,14 @@ class TitleAdmin(admin.ModelAdmin):
     search_fields = ("title_number", "properties__reference", "properties__name")
     filter_horizontal = ("properties",)
     inlines = [DocumentInline]
+
+
+@admin.register(InspireParcel)
+class InspireParcelAdmin(admin.GISModelAdmin):
+    list_display = ("inspire_id", "source_file", "imported_at")
+    search_fields = ("inspire_id",)
+    readonly_fields = ("inspire_id", "source_file", "imported_at", "valid_from")
+    gis_widget_kwargs = {"attrs": {"default_lon": -1.5, "default_lat": 52.5, "default_zoom": 6}}
+
+    def has_add_permission(self, request):
+        return False  # import from HM Land Registry files instead

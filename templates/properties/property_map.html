@@ -1,0 +1,21 @@
+{% extends "base.html" %}{% load i18n %}
+{% block title %}{% translate "Property map" %}{% endblock %}
+{% block content %}
+<h1 class="govuk-heading-xl">{% translate "Property map" %}</h1>
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-one-quarter">
+    <form method="get" class="phaema-filters">
+      {% include "properties/_filters.html" %}
+      <button class="govuk-button govuk-!-margin-bottom-2" data-module="govuk-button">{% translate "Apply" %}</button>
+      <p class="govuk-body-s govuk-!-margin-bottom-0"><a class="govuk-link" href="{% url 'properties:map' %}">{% translate "Clear filters" %}</a></p>
+    </form>
+  </div>
+  <div class="govuk-grid-column-three-quarters">
+    <p class="govuk-body">{% blocktranslate count n=count %}{{ n }} property{% plural %}{{ n }} properties{% endblocktranslate %} ·
+      <a class="govuk-link" href="{% url 'properties:list' %}{% if querystring %}?{{ querystring }}{% endif %}">{% translate "Show as a list" %}</a></p>
+    {% translate "Select a property on the map to see its details." as hint %}
+    {% include "properties/_map.html" with map_id="register-map" features_url=features_url height="600px" info_default=hint %}
+    {% include "properties/_legend.html" %}
+  </div>
+</div>
+{% endblock %}

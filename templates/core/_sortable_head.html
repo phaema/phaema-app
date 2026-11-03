@@ -1,0 +1,3 @@
+<thead class="govuk-table__head"><tr class="govuk-table__row">
+  {% for h in headings %}<th scope="col" class="govuk-table__header{% if h.numeric %} govuk-table__header--numeric{% endif %}" aria-sort="{{ h.aria_sort }}"><a class="phaema-sort" href="{{ h.url }}" data-sort="{{ h.aria_sort }}">{{ h.label }}</a></th>{% endfor %}
+</tr></thead>

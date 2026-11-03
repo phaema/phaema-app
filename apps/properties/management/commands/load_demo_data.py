@@ -21,7 +21,7 @@ from django.db import transaction
 
 from apps.core.models import ModuleSettings
 from apps.properties.demo_media import placeholder_pdf, placeholder_photo
-from apps.properties.models import Property, PropertyPhoto, Title, TitleDocument
+from apps.properties.models import InspireParcel, Property, PropertyPhoto, Title, TitleDocument
 
 PREFIX = "DM-"
 TITLE_PREFIX = "ZZ"
@@ -280,6 +280,10 @@ class Command(BaseCommand):
         self.load_surveyors(refs)
         self.load_photos(refs)
         self.load_documents()
+        self.load_inspire(refs)
+        from apps.leases import demo as lease_demo
+
+        lease_count = lease_demo.load()
 
         modules = ModuleSettings.load()
         if not modules.organisation_name:
@@ -287,7 +291,8 @@ class Command(BaseCommand):
             modules.save()
 
         self.stdout.write(self.style.SUCCESS(
-            f"Demo data loaded: {created} properties added, {updated} refreshed, {len(TITLES)} titles."
+            f"Demo data loaded: {created} properties added, {updated} refreshed, {len(TITLES)} titles, "
+            f"{lease_count} leases and licences."
         ))
 
     def load_surveyors(self, refs):
@@ -335,7 +340,36 @@ class Command(BaseCommand):
                     file=ContentFile(placeholder_pdf(f"{description} - {number}", lines), name=f"{number}-{doc_type}.pdf"),
                 )
 
+    def load_inspire(self, refs):
+        """Fictional INSPIRE-style parcels: one per demo site, plus neighbouring land not owned by the council."""
+        if InspireParcel.objects.filter(inspire_id__startswith="DEMO-").exists():
+            return
+        n = 0
+
+        def parcel(geom):
+            nonlocal n
+            n += 1
+            InspireParcel.objects.create(inspire_id=f"DEMO-{n:05d}", geometry=geom, source_file="Demonstration data")
+
+        for ref, prop in refs.items():
+            if prop.parent_id or not prop.boundary or ref == "DM-S06":
+                continue
+            outline = prop.boundary.buffer(1).envelope  # registered extent slightly larger than the drawn boundary
+            parcel(MultiPolygon(outline, srid=27700))
+        # The former school site is registered as two titles, to show joining parcels into one boundary.
+        parcel(rect(300, 800, 80, 100))
+        parcel(rect(380, 800, 60, 100))
+        # Neighbouring land (not council-owned) so the map looks like a real parcel fabric.
+        for dx, dy, w, h in [(0, 200, 160, 120), (160, 200, 160, 120), (320, 0, 120, 190), (-150, 0, 150, 190),
+                             (440, 400, 80, 60), (720, 400, 60, 60), (600, 440, 120, 50), (440, 800, 120, 100),
+                             (180, 800, 120, 100), (-480, 600, 300, 300)]:
+            parcel(rect(dx, dy, w, h))
+
     def remove_demo_data(self):
+        from apps.leases import demo as lease_demo
+
+        lease_demo.remove()
+        InspireParcel.objects.filter(inspire_id__startswith="DEMO-").delete()
         demo = Property.objects.filter(reference__startswith=PREFIX)
         Title.objects.filter(title_number__startswith=TITLE_PREFIX).delete()
         Title.objects.filter(title_number=None, properties__in=demo).delete()

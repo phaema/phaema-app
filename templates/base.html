@@ -20,6 +20,8 @@
       <nav class="phaema-header__nav" aria-label="{% translate 'Main menu' %}">
         <a href="{% url 'dashboard' %}">{% translate "Dashboard" %}</a>
         <a href="{% url 'properties:list' %}">{% translate "Properties" %}</a>
+        <a href="{% url 'properties:map' %}">{% translate "Map" %}</a>
+        <a href="{% url 'leases:list' %}">{% translate "Leases" %}</a>
         <a href="{% url 'changes' %}">{% translate "Changes" %}</a>
         {% if user.is_staff %}<a href="{% url 'admin:index' %}">{% translate "Manage data" %}</a>{% endif %}
         <form method="post" action="{% url 'logout' %}" class="phaema-header__logout">

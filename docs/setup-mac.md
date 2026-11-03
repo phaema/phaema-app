@@ -66,6 +66,7 @@ Run these from the `phaema-app` folder (`cd ~/phaema-app`):
 | `./phaema.sh stop` | Stop PHAEMA (data is kept) |
 | `./phaema.sh update` | Get the latest version from GitHub and restart |
 | `./phaema.sh demo-data` | Load or refresh the demonstration estate |
+| `./phaema.sh import-inspire ~/Downloads/file.zip` | Import HM Land Registry INSPIRE parcels from a downloaded zip |
 | `./phaema.sh backup` | Save a copy of the database in the `backups` folder |
 | `./phaema.sh logs` | Show what PHAEMA is doing (Ctrl+C to stop watching) |
 
@@ -79,3 +80,7 @@ Run these from the `phaema-app` folder (`cd ~/phaema-app`):
 ## Keeping data safe
 
 PHAEMA on your Mac is reachable only from your Mac. Turn on FileVault and keep Time Machine running, and use `./phaema.sh backup` before updates. Do not load real tenant personal data until the council has agreed how it will be protected.
+
+## Maps
+
+Maps use OpenStreetMap by default. To use Ordnance Survey mapping, get a free OS Maps API key from the OS Data Hub (councils have free access under the Public Sector Geospatial Agreement), then enter it in **Manage data > Module settings**. Users can then switch between the two under each map.

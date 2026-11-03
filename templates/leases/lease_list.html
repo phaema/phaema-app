@@ -1,0 +1,52 @@
+{% extends "base.html" %}{% load i18n humanize %}
+{% block title %}{% translate "Leases and licences" %}{% endblock %}
+{% block content %}
+<h1 class="govuk-heading-xl">{% translate "Leases and licences" %}</h1>
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-one-quarter">
+    <form method="get" class="phaema-filters">
+      <div class="govuk-form-group">
+        <label class="govuk-label govuk-label--s" for="q">{% translate "Search" %}</label>
+        <div class="govuk-hint" id="q-hint">{% translate "Reference, tenant or landlord, property" %}</div>
+        <input class="govuk-input" id="q" name="q" type="search" value="{{ q }}" aria-describedby="q-hint">
+      </div>
+      {% for name, label, choices, current in filters %}
+      <div class="govuk-form-group">
+        <label class="govuk-label govuk-label--s" for="f-{{ name }}">{{ label|capfirst }}</label>
+        <select class="govuk-select" id="f-{{ name }}" name="{{ name }}">
+          <option value="">{% translate "Any" %}</option>
+          {% for value, text in choices %}<option value="{{ value }}"{% if value == current %} selected{% endif %}>{{ text }}</option>{% endfor %}
+        </select>
+      </div>
+      {% endfor %}
+      {% if request.GET.sort %}<input type="hidden" name="sort" value="{{ request.GET.sort }}">{% endif %}
+      <button class="govuk-button govuk-!-margin-bottom-2" data-module="govuk-button">{% translate "Apply" %}</button>
+      <p class="govuk-body-s govuk-!-margin-bottom-0"><a class="govuk-link" href="{% url 'leases:list' %}">{% translate "Clear filters" %}</a></p>
+    </form>
+  </div>
+  <div class="govuk-grid-column-three-quarters">
+    <p class="govuk-body">{% blocktranslate count n=paginator.count %}{{ n }} agreement{% plural %}{{ n }} agreements{% endblocktranslate %}{% if rent_total %} · {% translate "total rent" %} £{{ rent_total|floatformat:0|intcomma }} {% translate "a year" %}{% endif %}
+      {% if user.is_staff %}· <a class="govuk-link" href="{% url 'admin:leases_lease_add' %}">{% translate "Add a lease or licence" %}</a>{% endif %}</p>
+    <table class="govuk-table">
+      {% include "core/_sortable_head.html" %}
+      <tbody class="govuk-table__body">
+      {% for l in page_obj %}
+        <tr class="govuk-table__row">
+          <td class="govuk-table__cell"><a class="govuk-link" href="{{ l.get_absolute_url }}">{{ l.reference }}</a>{% if l.direction == "in" %}<br><strong class="govuk-tag govuk-tag--purple">{% translate "Held" %}</strong>{% endif %}</td>
+          <td class="govuk-table__cell">{{ l.counterparty.name }}<br><span class="govuk-body-s">{% for p in l.properties.all %}{{ p.name }}{% if not forloop.last %}; {% endif %}{% endfor %}</span></td>
+          <td class="govuk-table__cell">{{ l.get_agreement_type_display }}</td>
+          <td class="govuk-table__cell">{{ l.get_status_display }}</td>
+          <td class="govuk-table__cell">{{ l.term_start|date:"j M Y" }}</td>
+          <td class="govuk-table__cell">{% if l.term_end %}{{ l.term_end|date:"j M Y" }}{% if l.term_end < today and l.status != "ended" %}<br><strong class="govuk-tag govuk-tag--red">{% translate "Passed" %}</strong>{% endif %}{% else %}–{% endif %}</td>
+          <td class="govuk-table__cell">{{ l.next_review_date|date:"j M Y"|default:"–" }}</td>
+          <td class="govuk-table__cell govuk-table__cell--numeric">{{ l.annual_rent|floatformat:0|intcomma }}</td>
+        </tr>
+      {% empty %}
+        <tr class="govuk-table__row"><td class="govuk-table__cell" colspan="8">{% translate "No agreements match." %}</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+    {% include "core/_pagination.html" %}
+  </div>
+</div>
+{% endblock %}

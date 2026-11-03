@@ -1,0 +1,7 @@
+{% load i18n %}{% if page_obj.has_other_pages %}
+<nav class="govuk-pagination" aria-label="{% translate 'Pagination' %}">
+  {% if page_obj.has_previous %}<div class="govuk-pagination__prev"><a class="govuk-link govuk-pagination__link" href="?{{ querystring }}&amp;page={{ page_obj.previous_page_number }}" rel="prev"><span class="govuk-pagination__link-title">{% translate "Previous" %}</span></a></div>{% endif %}
+  <p class="govuk-body govuk-!-margin-0">{% blocktranslate with n=page_obj.number total=page_obj.paginator.num_pages %}Page {{ n }} of {{ total }}{% endblocktranslate %}</p>
+  {% if page_obj.has_next %}<div class="govuk-pagination__next"><a class="govuk-link govuk-pagination__link" href="?{{ querystring }}&amp;page={{ page_obj.next_page_number }}" rel="next"><span class="govuk-pagination__link-title">{% translate "Next" %}</span></a></div>{% endif %}
+</nav>
+{% endif %}
