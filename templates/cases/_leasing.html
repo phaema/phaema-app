@@ -1,0 +1,50 @@
+{% load i18n %}
+{% if notice %}
+<h2 class="govuk-heading-m">{% translate "1954 Act notices" %}</h2>
+<dl class="govuk-summary-list">
+  <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Notice" %}</dt><dd class="govuk-summary-list__value">{% if case.notice_kind %}{{ case.get_notice_kind_display }}, {% translate "given" %} {{ case.notice_served_on|date:"j M Y"|default:"–" }}{% else %}{% translate "None recorded" %}{% endif %}</dd></div>
+  {% if case.notice_date %}<div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% if case.notice_kind == "s25" %}{% translate "Termination date" %}{% else %}{% translate "New tenancy to start" %}{% endif %}</dt><dd class="govuk-summary-list__value">{{ case.notice_date|date:"j M Y" }}</dd></div>{% endif %}
+  {% if notice.counter_notice_due %}<div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Council's counter-notice due" %}</dt><dd class="govuk-summary-list__value">{{ notice.counter_notice_due|date:"j M Y" }}{% if notice.counter_notice_due < today and case.is_open %} <strong class="govuk-tag govuk-tag--red">{% translate "Passed" %}</strong>{% endif %}<br><span class="govuk-body-s">{% translate "Within two months of the request, if the council opposes a new tenancy." %}</span></dd></div>{% endif %}
+  {% if notice.court_deadline %}<div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Last day to apply to court" %}</dt><dd class="govuk-summary-list__value"><strong>{{ notice.court_deadline|date:"j M Y" }}</strong><br><span class="govuk-body-s">{% translate "Unless both sides agree in writing to extend it before then." %}</span></dd></div>{% endif %}
+  {% if case.landlord_opposes %}<div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Council opposes" %}</dt><dd class="govuk-summary-list__value">{% translate "Yes" %}{% if case.opposition_grounds %}: {{ case.opposition_grounds }}{% endif %}</dd></div>{% endif %}
+</dl>
+{% for w in notice.warnings %}<div class="govuk-warning-text"><span class="govuk-warning-text__icon" aria-hidden="true">!</span><strong class="govuk-warning-text__text"><span class="govuk-visually-hidden">{% translate "Warning" %}</span>{{ w }}</strong></div>{% endfor %}
+{% if can_work and case.is_open %}<details class="govuk-details" data-module="govuk-details"><summary class="govuk-details__summary"><span class="govuk-details__summary-text">{% translate "Record a notice" %}</span></summary><div class="govuk-details__text">
+  <form method="post">{% csrf_token %}<input type="hidden" name="action" value="save_notice">
+    <div class="govuk-form-group"><fieldset class="govuk-fieldset"><legend class="govuk-fieldset__legend govuk-fieldset__legend--s">{% translate "Notice" %}</legend><div class="govuk-radios govuk-radios--small">
+      {% for value, label in notice_kinds %}<div class="govuk-radios__item"><input class="govuk-radios__input" id="nk-{{ value }}" name="notice_kind" type="radio" value="{{ value }}"{% if value == case.notice_kind %} checked{% endif %}><label class="govuk-label govuk-radios__label" for="nk-{{ value }}">{{ label }}</label></div>{% endfor %}
+    </div></fieldset></div>
+    <div class="govuk-form-group"><label class="govuk-label govuk-label--s" for="notice-served">{% translate "Date given" %}</label><input class="govuk-input govuk-input--width-10" type="date" id="notice-served" name="notice_served_on" value="{{ case.notice_served_on|date:'Y-m-d' }}"></div>
+    <div class="govuk-form-group"><label class="govuk-label govuk-label--s" for="notice-date">{% translate "Date in the notice" %}</label><div class="govuk-hint">{% translate "The termination date in a section 25 notice, or the start date of the new tenancy in a section 26 request." %}</div><input class="govuk-input govuk-input--width-10" type="date" id="notice-date" name="notice_date" value="{{ case.notice_date|date:'Y-m-d' }}"></div>
+    <div class="govuk-form-group"><div class="govuk-checkboxes govuk-checkboxes--small"><div class="govuk-checkboxes__item"><input class="govuk-checkboxes__input" id="opposes" name="landlord_opposes" type="checkbox" value="1"{% if case.landlord_opposes %} checked{% endif %}><label class="govuk-label govuk-checkboxes__label" for="opposes">{% translate "The council opposes a new tenancy" %}</label></div></div></div>
+    <div class="govuk-form-group"><label class="govuk-label govuk-label--s" for="grounds">{% translate "Grounds of opposition" %}</label><div class="govuk-hint">{% translate "Section 30(1) paragraphs, for example (f) redevelopment." %}</div><input class="govuk-input govuk-input--width-20" id="grounds" name="opposition_grounds" maxlength="100" value="{{ case.opposition_grounds }}"></div>
+    <button class="govuk-button" data-module="govuk-button">{% translate "Save the notice" %}</button>
+  </form></div></details>{% endif %}
+{% endif %}
+
+{% if heads %}
+<h2 class="govuk-heading-m">{% translate "Heads of terms" %}</h2>
+<p class="govuk-body">{% blocktranslate with n=heads_answered t=heads_total %}{{ n }} of {{ t }} items covered.{% endblocktranslate %}
+  {% if case.tenant_represented == "yes" %}{% translate "The tenant has a professional adviser." %}{% elif case.tenant_represented == "no" %}{% translate "The tenant is unrepresented." %}{% if case.code_given_on %} {% blocktranslate with d=case.code_given_on|date:"j M Y" %}RICS Code given on {{ d }}.{% endblocktranslate %}{% endif %}{% endif %}</p>
+{% if terms_problems and case.is_open %}<div class="govuk-inset-text govuk-body-s">{% translate "Before the decision:" %}<ul class="govuk-list govuk-list--bullet govuk-body-s govuk-!-margin-bottom-0">{% for p in terms_problems %}<li>{{ p }}</li>{% endfor %}</ul></div>{% endif %}
+<details class="govuk-details" data-module="govuk-details"{% if case.stage == "assessing" and terms_problems and can_work %} open{% endif %}><summary class="govuk-details__summary"><span class="govuk-details__summary-text">{% if can_work and case.is_open %}{% translate "Fill in the heads of terms" %}{% else %}{% translate "See the heads of terms" %}{% endif %}</span></summary><div class="govuk-details__text">
+{% if can_work and case.is_open %}
+  <form method="post">{% csrf_token %}<input type="hidden" name="action" value="save_heads">
+    <p class="govuk-body-s">{% translate "Subject to contract. The RICS Code for leasing business premises requires heads of terms to cover each of these before a draft lease goes out." %}</p>
+    {% for key, label, hint, value, current in heads %}
+    <div class="govuk-form-group"><label class="govuk-label govuk-label--s" for="hot-{{ key }}">{{ forloop.counter }}. {{ label }}</label>
+      {% if hint or current %}<div class="govuk-hint">{{ hint }}{% if current %}{% if hint %} {% endif %}{% translate "Current agreement:" %} {{ current }}{% endif %}</div>{% endif %}
+      <textarea class="govuk-textarea" id="hot-{{ key }}" name="hot_{{ key }}" rows="2">{{ value }}</textarea></div>
+    {% endfor %}
+    <div class="govuk-form-group"><fieldset class="govuk-fieldset"><legend class="govuk-fieldset__legend govuk-fieldset__legend--s">{% translate "Does the tenant have a professional adviser?" %}</legend><div class="govuk-radios govuk-radios--small govuk-radios--inline">
+      <div class="govuk-radios__item"><input class="govuk-radios__input" id="rep-yes" name="tenant_represented" type="radio" value="yes"{% if case.tenant_represented == "yes" %} checked{% endif %}><label class="govuk-label govuk-radios__label" for="rep-yes">{% translate "Yes" %}</label></div>
+      <div class="govuk-radios__item"><input class="govuk-radios__input" id="rep-no" name="tenant_represented" type="radio" value="no"{% if case.tenant_represented == "no" %} checked{% endif %}><label class="govuk-label govuk-radios__label" for="rep-no">{% translate "No" %}</label></div>
+    </div></fieldset></div>
+    <div class="govuk-form-group"><label class="govuk-label govuk-label--s" for="code-given">{% translate "Date the RICS Code and supplemental guide were given to an unrepresented tenant" %}</label><div class="govuk-hint">{% translate "The Code requires this, with advice to get professional help." %}</div><input class="govuk-input govuk-input--width-10" type="date" id="code-given" name="code_given_on" value="{{ case.code_given_on|date:'Y-m-d' }}"></div>
+    <button class="govuk-button" data-module="govuk-button">{% translate "Save the heads of terms" %}</button>
+  </form>
+{% else %}
+  <dl class="govuk-summary-list">{% for key, label, hint, value, current in heads %}<div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{{ label }}</dt><dd class="govuk-summary-list__value">{{ value|linebreaksbr|default:"–" }}</dd></div>{% endfor %}</dl>
+{% endif %}
+</div></details>
+{% endif %}

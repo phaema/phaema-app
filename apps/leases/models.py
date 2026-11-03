@@ -171,6 +171,15 @@ class Lease(TimeStampedModel):
     vat_chargeable = models.BooleanField(_("VAT charged on rent"), default=False,
                                          help_text=_("Tick if the council has opted to tax and charges VAT."))
     deposit = models.DecimalField(_("rent deposit (£)"), max_digits=12, decimal_places=2, null=True, blank=True)
+    deposit_held = models.CharField(_("deposit held"), max_length=200, blank=True,
+                                    help_text=_("Where the deposit is held, for example the deposit account and the "
+                                                "deed's date."))
+    deposit_interest = models.CharField(_("interest on the deposit"), max_length=200, blank=True,
+                                        help_text=_("Who it belongs to and when it is paid, for example \"to the "
+                                                    "tenant, yearly, at base rate\"."))
+    rates_excluded = models.BooleanField(_("rent excludes business rates"), default=True,
+                                         help_text=_("Untick if the rent includes business rates."))
+    incentives = models.TextField(_("rent-free period or other incentive"), blank=True)
 
     # Reviews
     review_basis = models.CharField(_("rent review basis"), max_length=20, choices=ReviewBasis.choices,
@@ -184,6 +193,9 @@ class Lease(TimeStampedModel):
     service_charge_payable = models.BooleanField(_("service charge payable"), default=False)
     permitted_use = models.CharField(_("permitted use"), max_length=255, blank=True)
     alienation = models.TextField(_("assignment and subletting"), blank=True)
+    alterations = models.TextField(_("alterations and reinstatement"), blank=True)
+    special_rights = models.TextField(_("special rights"), blank=True,
+                                      help_text=_("For example parking spaces, rights of way, telecoms access."))
     notes = models.TextField(_("notes"), blank=True)
 
     class Meta:

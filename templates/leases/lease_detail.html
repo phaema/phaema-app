@@ -55,10 +55,11 @@
 
   <h2 class="govuk-heading-m">{% translate "Rent" %}</h2>
   <dl class="govuk-summary-list">
-    <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Current rent" %}</dt><dd class="govuk-summary-list__value">£{{ object.annual_rent|floatformat:2|intcomma }} {% translate "a year" %}{% if object.vat_chargeable %} {% translate "plus VAT" %}{% endif %}</dd></div>
+    <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Current rent" %}</dt><dd class="govuk-summary-list__value">£{{ object.annual_rent|floatformat:2|intcomma }} {% translate "a year" %}{% if object.vat_chargeable %} {% translate "plus VAT" %}{% endif %}{% if not object.rates_excluded %}<br><span class="govuk-body-s">{% translate "Includes business rates" %}</span>{% endif %}</dd></div>
+    {% if object.incentives %}<div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Incentives" %}</dt><dd class="govuk-summary-list__value">{{ object.incentives|linebreaksbr }}</dd></div>{% endif %}
     <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Payable" %}</dt><dd class="govuk-summary-list__value">{{ object.get_rent_frequency_display }}</dd></div>
     <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Rent review" %}</dt><dd class="govuk-summary-list__value">{{ object.get_review_basis_display }}{% if object.review_interval_years %}, {% blocktranslate count n=object.review_interval_years %}every year{% plural %}every {{ n }} years{% endblocktranslate %}{% endif %}{% if object.next_review_date %}<br><span class="govuk-body-s">{% translate "Next" %}: {{ object.next_review_date|date:"j F Y" }}</span>{% endif %}</dd></div>
-    {% if object.deposit %}<div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Rent deposit" %}</dt><dd class="govuk-summary-list__value">£{{ object.deposit|floatformat:2|intcomma }}</dd></div>{% endif %}
+    {% if object.deposit %}<div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Rent deposit" %}</dt><dd class="govuk-summary-list__value">£{{ object.deposit|floatformat:2|intcomma }}{% if object.deposit_held %}<br><span class="govuk-body-s">{% translate "Held:" %} {{ object.deposit_held }}</span>{% endif %}{% if object.deposit_interest %}<br><span class="govuk-body-s">{% translate "Interest:" %} {{ object.deposit_interest }}</span>{% endif %}</dd></div>{% endif %}
   </dl>
 
   <h2 class="govuk-heading-m">{% translate "Terms" %}</h2>
@@ -68,6 +69,8 @@
     <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Service charge" %}</dt><dd class="govuk-summary-list__value">{% if object.service_charge_payable %}{% translate "Payable" %}{% else %}{% translate "Not payable" %}{% endif %}</dd></div>
     <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Permitted use" %}</dt><dd class="govuk-summary-list__value">{{ object.permitted_use|default:"–" }}</dd></div>
     <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Assignment and subletting" %}</dt><dd class="govuk-summary-list__value">{{ object.alienation|linebreaksbr|default:"–" }}</dd></div>
+    <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Alterations" %}</dt><dd class="govuk-summary-list__value">{{ object.alterations|linebreaksbr|default:"–" }}</dd></div>
+    {% if object.special_rights %}<div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Special rights" %}</dt><dd class="govuk-summary-list__value">{{ object.special_rights|linebreaksbr }}</dd></div>{% endif %}
   </dl>
   {% if rent_account %}
   <div class="phaema-account-summary govuk-!-margin-bottom-6">

@@ -48,8 +48,8 @@ TYPES = [
         (D, "Record the decision"), (C, "Record the outcome on the lease event")]),
     ("other_event", "Other lease event", "event", None, False, None, "other", None, [(C, "Record the outcome")]),
     ("renewal", "Lease renewal (1954 Act)", "management", None, False, None, "", None, [
-        (R, "Check 1954 Act status"), (A, "Section 25 or 26 notice: dates served and received"),
-        (A, "Heads of terms agreed"), (C, "Instruct legal: new lease"), (C, "Set up the new agreement in PHAEMA")]),
+        (R, "Check 1954 Act status"), (A, "Section 25 or 26 notice: record the dates on the case"),
+        (A, "Heads of terms covering every item the RICS Code for leasing business premises requires"), (C, "Instruct legal: new lease"), (C, "Set up the new agreement in PHAEMA")]),
     ("surrender", "Surrender", "management", None, False, None, "", None, [
         (A, "Agree terms"), (A, "Inspect the premises"), (C, "Deed of surrender"), (C, "End the agreement in PHAEMA")]),
     ("variation", "Deed of variation", "management", None, False, None, "", None, [
@@ -105,6 +105,9 @@ APPROVAL_CODES = {"new_letting", "wayleave", "land_purchase", "other_activity"}
 NO_APPROVAL = {"other_event", "deposit_return"}
 
 
+HEADS_OF_TERMS = {"new_letting", "renewal"}
+
+
 def default_approval(code, group):
     if code in NO_APPROVAL:
         return []
@@ -120,6 +123,7 @@ def ensure_case_types():
             "fee": Decimal(fee) if fee else None,  # shipped blank: councils set their own fees
             "event_type": event_type, "open_days_before": before,
             "approval_stages": default_approval(code, group),
+            "heads_of_terms": code in HEADS_OF_TERMS,
             "order": i * 10})
         if created:
             CaseTypeTask.objects.bulk_create([CaseTypeTask(case_type=case_type, stage=stage, description=text,

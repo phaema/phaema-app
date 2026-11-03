@@ -62,6 +62,10 @@ class CaseType(models.Model):
         _("approval needed before"), default=list, blank=True,
         help_text=_("Stages a case of this type can only enter once the owner's supervisor has approved, for "
                     "example [\"decision\"]. Choose from: received, information, assessing, decision, completing."))
+    heads_of_terms = models.BooleanField(
+        _("heads of terms"), default=False,
+        help_text=_("Cases record heads of terms covering every item in the RICS Code for leasing business "
+                    "premises, and cannot move to the decision until they do."))
     active = models.BooleanField(_("active"), default=True)
     order = models.PositiveSmallIntegerField(_("order"), default=0)
 
@@ -150,6 +154,21 @@ class Case(TimeStampedModel):
     applicant_reference = models.CharField(_("applicant's reference"), max_length=60, blank=True)
     iken_matter = models.CharField(_("Iken matter number"), max_length=60, blank=True)
     crm_reference = models.CharField(_("CRM reference"), max_length=60, blank=True)
+    # New lettings and renewals
+    heads_of_terms = models.JSONField(_("heads of terms"), default=dict, blank=True)
+    tenant_represented = models.CharField(_("tenant has a professional adviser"), max_length=3, blank=True,
+                                          choices=[("yes", _("Yes")), ("no", _("No"))])
+    code_given_on = models.DateField(_("RICS Code given to the tenant"), null=True, blank=True)
+    notice_kind = models.CharField(_("1954 Act notice"), max_length=3, blank=True,
+                                   choices=[("s25", _("Section 25 notice from the council")),
+                                            ("s26", _("Section 26 request from the tenant"))])
+    notice_served_on = models.DateField(_("notice given"), null=True, blank=True)
+    notice_date = models.DateField(_("date in the notice"), null=True, blank=True,
+                                   help_text=_("The termination date in a section 25 notice, or the start date of "
+                                               "the new tenancy in a section 26 request."))
+    landlord_opposes = models.BooleanField(_("council opposes a new tenancy"), default=False)
+    opposition_grounds = models.CharField(_("grounds of opposition"), max_length=100, blank=True,
+                                          help_text=_("Section 30(1) paragraphs, for example (f) redevelopment."))
     fee_charge = models.ForeignKey("ledger.Charge", on_delete=models.SET_NULL, null=True, blank=True,
                                    related_name="cases", editable=False)
 

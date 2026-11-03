@@ -26,7 +26,7 @@ class TaskTemplateInline(admin.TabularInline):
 @admin.register(CaseType)
 class CaseTypeAdmin(RoleAdminMixin, admin.ModelAdmin):
     form = CaseTypeForm
-    list_display = ("name", "group", "target_days", "acknowledge_working_days", "fee", "approval", "event_type",
+    list_display = ("name", "group", "target_days", "acknowledge_working_days", "fee", "approval", "heads_of_terms", "event_type",
                     "active")
     list_filter = ("group", "active")
     search_fields = ("name", "code")

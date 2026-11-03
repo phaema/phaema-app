@@ -50,6 +50,33 @@ someone else, or approve it themselves. You can withdraw a request you made whil
 Administrators choose which stages need approval for each case type, under **Manage data**, **Case types**. The
 supervisor for each person is set on their user record (see [Users and roles](users-and-roles.md#supervisors)).
 
+## New lettings and renewals
+
+The **New letting** and **Lease renewal** case types follow the RICS *Code for leasing business premises*. Their
+case page has a **Heads of terms** section listing the 16 items the Code requires, from premises and rights to
+fit-out and conditions. For a renewal, each item shows what the current agreement says as a starting point. Write
+"None" where an item does not apply.
+
+Record whether the tenant has a professional adviser. If not, the Code requires the council to give them the Code
+and its supplemental guide and advise them to take professional advice: record the date you did.
+
+The case cannot move to **Decision**, or be sent for approval, until every item is covered and that question is
+answered. Administrators can turn the heads of terms check on for other case types under **Case types**.
+
+### 1954 Act notices
+
+Lease renewal cases also record a **section 25 notice** from the council or a **section 26 request** from the
+tenant: the date given and the date in the notice. PHAEMA then shows:
+
+| Date | Rule |
+|---|---|
+| Council's counter-notice due | Two months after a section 26 request, if the council opposes a new tenancy. |
+| Last day to apply to court | The termination date in a section 25 notice, or the day before the start date in a section 26 request, unless both sides agree in writing to extend it. |
+
+That last day becomes the case's target. PHAEMA warns if the date in the notice is not 6 to 12 months after it
+was given, or is before the lease's contractual expiry. Check the dates against the notice itself: PHAEMA is a
+reminder, not legal advice.
+
 ## Dates and targets
 
 | Date | What it is |
