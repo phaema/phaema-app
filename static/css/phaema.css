@@ -20,11 +20,13 @@ body, .phaema-header, .phaema-stat { font-family: arial, sans-serif; }
 .phaema-filters .govuk-form-group { margin-bottom: 15px; }
 
 /* Text size setting (GOV.UK Frontend uses rem units, so this scales all text). */
+html.phaema-text-smaller { font-size: 87.5%; }
 html.phaema-text-large { font-size: 125%; }
 html.phaema-text-largest { font-size: 150%; }
 .phaema-text-size { display: flex; flex-wrap: wrap; gap: 4px 12px; justify-content: flex-end; align-items: baseline; padding-top: 10px; }
 .phaema-text-size .govuk-body-s { margin: 0; }
 .phaema-text-size__current { font-weight: 700; }
+.phaema-text-size__smaller { font-size: 0.8rem; }
 .phaema-text-size__large { font-size: 1.1rem; }
 .phaema-text-size__largest { font-size: 1.3rem; }
 

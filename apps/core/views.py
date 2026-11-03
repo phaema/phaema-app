@@ -20,7 +20,7 @@ from apps.properties.models import Property
 
 from .models import AuditEntry
 
-TEXT_SIZES = {"standard": "Standard", "large": "Large", "largest": "Largest"}
+TEXT_SIZES = {"smaller": "Smaller", "standard": "Standard", "large": "Large", "largest": "Largest"}
 THEMES = {"standard": "Standard", "dark": "Dark", "contrast": "High contrast", "auto": "Match my device"}
 
 

@@ -30,7 +30,7 @@ PHAEMA helps a council's estates team manage its land and property: the property
 - Rent schedules: rent history, review outcomes, fixed steps, concessions and indexation, with future rents taking effect automatically; next payments preview
 - Dashboard: overdue and upcoming lease events by type, rent roll by holding purpose, WAULT to expiry and to first break
 - Three roles: Administrators (change anything), Surveyors (change the properties they manage) and Viewers (read only), applied on every screen, in data entry and in the API. See [users and roles](docs/roles.md)
-- Adjustable text size (standard, large, largest) and colour themes: standard, dark, high contrast, or match the device; plus a council brand colour for the header
+- Adjustable text size (smaller, standard, large, largest) and colour themes: standard, dark, high contrast, or match the device; plus a council brand colour for the header
 - Photos and documents are only available to signed-in users; photos are stripped of location data on upload
 - Optional modules that each council switches on or off (rent ledger, service charges, maintenance, compliance, Golden Thread)
 - An open REST API with OpenAPI documentation at `/api/docs/`

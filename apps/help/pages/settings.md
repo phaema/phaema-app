@@ -34,7 +34,7 @@ Each person can choose how PHAEMA looks, using the links under the menu. Your ch
 | High contrast | Low vision. Yellow and white text on black. |
 | Match my device | Follows your computer's or phone's light or dark mode. |
 
-**Text size** makes all text larger. Your browser's zoom (Ctrl and + on Windows, Cmd and + on a Mac) also works
+**Text size** makes all text smaller or larger. Your browser's zoom (Ctrl and + on Windows, Cmd and + on a Mac) also works
 on every page.
 
 PHAEMA is built with the GOV.UK Design System and aims to meet the Web Content Accessibility Guidelines (WCAG) 2.2
