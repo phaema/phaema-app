@@ -22,6 +22,9 @@ PHAEMA helps a council's estates team manage its land and property: the property
 - Key dates with red/amber/green warnings, and a lease register with filters (including expiring soon and overdue events) and sorting
 - Signed leases, notices and other agreement documents stored as PDFs against each lease
 - Tenants and other parties: a searchable list, and for each party every agreement (as tenant, landlord or guarantor) and every property involved
+- Lease events: rent reviews, break dates, break notice deadlines and expiries generated from each lease, plus events added by hand; assigned to the managing surveyor; outcomes recorded on screen (a settled review updates the rent schedule and sets up the next review)
+- Email reminders at lead times set by the council (e.g. 180, 90 and 30 days), weekly overdue reminders, and a private calendar feed for Outlook
+- Rent schedules: rent history, review outcomes, fixed steps, concessions and indexation, with future rents taking effect automatically; next payments preview
 - Dashboard: overdue and upcoming lease events by type, rent roll by holding purpose, WAULT to expiry and to first break
 - Three roles: Administrators (change anything), Surveyors (change the properties they manage) and Viewers (read only), applied on every screen, in data entry and in the API. See [users and roles](docs/roles.md)
 - Adjustable text size (standard, large, largest)

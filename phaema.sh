@@ -14,6 +14,7 @@ Usage: ./phaema.sh <command>
   admin        Create a user who can sign in and manage data
   demo-data    Load the fictional Exampleton demonstration estate
   import-inspire FILE  Import HM Land Registry INSPIRE parcels from a zip file
+  reminders    Send any lease event reminders that are due now
   logs         Show live logs (press Ctrl+C to stop watching)
   status       Show whether PHAEMA is running
   backup       Save a copy of the database to the backups folder
@@ -43,6 +44,7 @@ case "${1:-}" in
     [ -f "${2:-}" ] || { echo "Usage: ./phaema.sh import-inspire path/to/inspire.zip"; exit 1; }
     compose cp "$2" web:/tmp/inspire-upload
     compose exec web python manage.py import_inspire /tmp/inspire-upload ;;
+  reminders) compose exec web python manage.py send_reminders "${@:2}" ;;
   logs)    compose logs -f ;;
   status)  compose ps ;;
   backup)

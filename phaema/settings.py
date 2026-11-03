@@ -126,5 +126,19 @@ if not DEBUG:
     SECURE_CONTENT_TYPE_NOSNIFF = True
     X_FRAME_OPTIONS = "DENY"
 
+# Email (reminders). Without EMAIL_HOST, emails are written to the log instead of being sent.
+if env("EMAIL_HOST", default=""):
+    EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+    EMAIL_HOST = env("EMAIL_HOST")
+    EMAIL_PORT = env.int("EMAIL_PORT", default=587)
+    EMAIL_HOST_USER = env("EMAIL_HOST_USER", default="")
+    EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD", default="")
+    EMAIL_USE_TLS = env.bool("EMAIL_USE_TLS", default=True)
+else:
+    EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL", default="PHAEMA <phaema@localhost>")
+# The web address of this PHAEMA, used for links in emails, e.g. https://phaema.example.gov.uk
+PHAEMA_BASE_URL = env("PHAEMA_BASE_URL", default="http://localhost:8000")
+
 # Name of the organisation shown in the header, e.g. "Example District Council".
 PHAEMA_ORGANISATION_NAME = env("PHAEMA_ORGANISATION_NAME", default="Demonstration Council")

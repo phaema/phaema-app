@@ -43,11 +43,13 @@ def setup(db):
 
 
 def test_event_summary(setup):
-    rows = {str(r["label"]): r for r in events.event_summary(TODAY)}
-    assert rows["Rent reviews"]["overdue"] == 1 and rows["Rent reviews"]["due"] == 1
-    assert rows["Lease expiries"]["overdue"] == 1 and rows["Lease expiries"]["due"] == 1
-    assert rows["Holding over"]["overdue"] == 1
-    assert rows["Break notice deadlines"]["due"] == 1 and rows["Break dates"]["due"] == 0
+    rows = {r["type"]: r for r in events.event_summary(TODAY)}
+    assert rows["review"]["overdue"] == 1 and rows["review"]["due"] == 1       # A overdue, D due
+    assert rows["expiry"]["overdue"] == 1 and rows["expiry"]["due"] == 1       # B expired but current; D soon
+    assert rows["holding_over"]["overdue"] == 1                                # C (not double counted as expiry)
+    assert rows["notice"]["due"] == 1 and rows["notice"]["overdue"] is None
+    assert rows["break"]["due"] == 0
+    # the lease list filters (used from lease searches) agree
     assert [lease.reference for lease in events.filter_leases(Lease.objects.all(), "review_overdue", TODAY)] == ["A"]
     assert [lease.reference for lease in events.filter_leases(Lease.objects.all(), "notice_due", TODAY)] == ["D"]
 
@@ -88,7 +90,7 @@ def test_party_pages(client, make_user, setup):
 def test_dashboard_sections(client, make_user, setup):
     client.force_login(make_user("vic", "Viewers"))
     html = client.get(reverse("dashboard")).content.decode()
-    assert "Lease events" in html and "Rent roll" in html and "?event=" in html and "WAULT to expiry" in html
+    assert "Lease events" in html and "Rent roll" in html and "window=overdue" in html and "WAULT to expiry" in html
 
 
 def test_lease_documents(client, make_user, db, tmp_path):

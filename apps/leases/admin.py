@@ -8,12 +8,19 @@ from django.utils.html import format_html, format_html_join
 from apps.core.admin_roles import RoleAdminMixin, RoleInlineMixin
 from apps.core.roles import is_administrator
 
-from .models import BreakOption, Lease, LeaseDocument, Party
+from .models import BreakOption, Lease, LeaseDocument, LeaseEvent, Party, RentScheduleEntry
 
 
 class BreakInline(RoleInlineMixin, admin.TabularInline):
     model = BreakOption
     extra = 0
+
+
+class RentScheduleInline(RoleInlineMixin, admin.TabularInline):
+    model = RentScheduleEntry
+    extra = 0
+    fields = ("effective_from", "annual_rent", "reason", "notes")
+    verbose_name_plural = "Rent schedule (the current rent is taken from here)"
 
 
 class DocumentInline(RoleInlineMixin, admin.TabularInline):
@@ -30,7 +37,7 @@ class LeaseAdmin(RoleAdminMixin, admin.ModelAdmin):
     search_fields = ("reference", "counterparty__name", "properties__reference", "properties__name")
     autocomplete_fields = ("counterparty", "guarantor", "properties")
     date_hierarchy = "term_end"
-    inlines = [BreakInline, DocumentInline]
+    inlines = [BreakInline, RentScheduleInline, DocumentInline]
     fieldsets = (
         (None, {"fields": ("reference", "direction", "agreement_type", "status")}),
         ("Premises and parties", {"fields": ("properties", "premises_description", "counterparty", "guarantor")}),
@@ -40,6 +47,10 @@ class LeaseAdmin(RoleAdminMixin, admin.ModelAdmin):
         ("Terms", {"fields": ("repairing", "insurance", "service_charge_payable", "permitted_use", "alienation")}),
         ("Notes", {"fields": ("notes",)}),
     )
+
+    def get_readonly_fields(self, request, obj=None):
+        # Once a lease has a rent schedule, the current rent comes from it.
+        return ("annual_rent",) if obj is not None and obj.rent_schedule.exists() else ()
 
     def get_form(self, request, obj=None, **kwargs):
         form = super().get_form(request, obj, **kwargs)
@@ -111,3 +122,13 @@ class PartyAdmin(RoleAdminMixin, admin.ModelAdmin):
             "<p><strong>{} current agreement(s), £{} a year.</strong> <a href=\"{}\">Open the full party page</a></p>",
             body, len(current), f"{total:,.0f}", obj.get_absolute_url(),
         )
+
+
+@admin.register(LeaseEvent)
+class LeaseEventAdmin(RoleAdminMixin, admin.ModelAdmin):
+    list_display = ("due_date", "event_type", "title", "lease", "assigned_to", "status")
+    list_filter = ("event_type", "status", "assigned_to")
+    search_fields = ("lease__reference", "lease__counterparty__name", "title")
+    date_hierarchy = "due_date"
+    readonly_fields = ("source", "completed_by")
+    autocomplete_fields = ("lease",)

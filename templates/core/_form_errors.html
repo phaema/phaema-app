@@ -1,0 +1,9 @@
+{% load i18n %}{% if form.errors %}
+<div class="govuk-error-summary" data-module="govuk-error-summary"><div role="alert">
+  <h2 class="govuk-error-summary__title">{% translate "There is a problem" %}</h2>
+  <div class="govuk-error-summary__body"><ul class="govuk-list govuk-error-summary__list">
+    {% for field in form %}{% for e in field.errors %}<li><a href="#{{ field.id_for_label }}">{{ field.label }}: {{ e }}</a></li>{% endfor %}{% endfor %}
+    {% for e in form.non_field_errors %}<li>{{ e }}</li>{% endfor %}
+  </ul></div>
+</div></div>
+{% endif %}

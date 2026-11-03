@@ -6,6 +6,7 @@ from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 from rest_framework.routers import DefaultRouter
 
 from apps.core import views as core_views
+from apps.leases import event_views
 from apps.leases.api import LeaseViewSet, PartyViewSet
 from apps.properties.api import PropertyViewSet, TitleViewSet
 
@@ -29,6 +30,7 @@ urlpatterns = [
     path("files/<path:path>", core_views.protected_file, name="file"),
     path("properties/", include("apps.properties.urls")),
     path("leases/", include("apps.leases.urls")),
+    path("calendar/<str:token>.ics", event_views.calendar_feed, name="calendar-feed"),
     path("admin/", admin.site.urls),
     path("api/", include(router.urls)),
     path("api/schema/", SpectacularAPIView.as_view(), name="api-schema"),

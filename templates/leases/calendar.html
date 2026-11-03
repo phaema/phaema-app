@@ -1,0 +1,30 @@
+{% extends "base.html" %}{% load i18n %}
+{% block title %}{% translate "Calendar" %}{% endblock %}
+{% block content %}
+<h1 class="govuk-heading-l">{% translate "See lease events in Outlook or another calendar" %}</h1>
+<div class="govuk-grid-row"><div class="govuk-grid-column-two-thirds">
+<p class="govuk-body">{% translate "Subscribe to this private address and your open lease events appear in your calendar as all-day entries. The calendar updates itself (Outlook usually checks every few hours)." %}</p>
+<div class="govuk-inset-text"><code class="phaema-code" id="feed-url">{{ feed_url }}</code></div>
+<h2 class="govuk-heading-s">{% translate "Outlook" %}</h2>
+<ol class="govuk-list govuk-list--number">
+  <li>{% translate "In Outlook, go to Calendar, then Add calendar, then Subscribe from web (or From internet)." %}</li>
+  <li>{% translate "Paste the address above and give the calendar a name, such as PHAEMA." %}</li>
+</ol>
+<p class="govuk-body"><a class="govuk-link" href="{{ webcal_url }}">{% translate "Or open it directly in your calendar app" %}</a></p>
+<form method="post" class="govuk-!-margin-bottom-6">{% csrf_token %}
+  <div class="govuk-checkboxes govuk-checkboxes--small govuk-!-margin-bottom-4" data-module="govuk-checkboxes">
+    <div class="govuk-checkboxes__item">
+      <input class="govuk-checkboxes__input" id="include_all" name="include_all" type="checkbox" value="1"{% if feed.include_all %} checked{% endif %}>
+      <label class="govuk-label govuk-checkboxes__label" for="include_all">{% translate "Include everyone's events, not just those assigned to me" %}</label>
+    </div>
+  </div>
+  <button class="govuk-button govuk-button--secondary" data-module="govuk-button">{% translate "Save" %}</button>
+</form>
+<div class="govuk-warning-text"><span class="govuk-warning-text__icon" aria-hidden="true">!</span>
+  <strong class="govuk-warning-text__text"><span class="govuk-visually-hidden">{% translate "Warning" %}</span>{% translate "Anyone with this address can see the events in it. Do not share it. If it has been shared, make a new one." %}</strong></div>
+<form method="post">{% csrf_token %}
+  <button class="govuk-button govuk-button--warning" name="regenerate" value="1" data-module="govuk-button">{% translate "Make a new address" %}</button>
+</form>
+<p class="govuk-body-s">{% translate "PHAEMA must be reachable from the internet for calendar apps to fetch the feed, so this works once PHAEMA is on a server, not while it runs only on your own computer." %}</p>
+</div></div>
+{% endblock %}

@@ -83,6 +83,10 @@ Run these from the `phaema-app` folder (`cd ~/phaema-app`):
 
 PHAEMA on your Mac is reachable only from your Mac. Turn on FileVault and keep Time Machine running, and use `./phaema.sh backup` before updates. Do not load real tenant personal data until the council has agreed how it will be protected.
 
+## Reminder emails
+
+A background service checks every hour for stepped rents that take effect and lease event reminders that are due. Until an email server is set, reminders are written to the log instead of being sent: see them with `./phaema.sh logs`. To send real emails, copy `.env.example` to `.env`, fill in the `EMAIL_` settings (for example your council's or IONOS's SMTP details) and run `./phaema.sh start` again. Reminder lead times are set in **Manage data > Module settings**.
+
 ## Maps
 
 Maps use OpenStreetMap by default. To use Ordnance Survey mapping, get a free OS Maps API key from the OS Data Hub (councils have free access under the Public Sector Geospatial Agreement), then enter it in **Manage data > Module settings**. Users can then switch between the two under each map.

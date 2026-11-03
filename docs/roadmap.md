@@ -4,7 +4,7 @@
 |---|---|---|
 | 1 | Repository, licences, automated tests; Mac setup; data model; property register | Done |
 | 2 | Map with HM Land Registry INSPIRE polygon import; spreadsheet import; leases and licences | Done |
-| 3 | Lease event engine, reminders and dashboard; rent schedules | |
+| 3 | Lease event engine, reminders and dashboard; rent schedules | Done |
 | 4 | Rent ledger: demand runs, VAT, receipts and allocation, arrears, statements, finance export. Mid-point review | |
 | 5 | Service charge ledger: budgets, apportionment, on-account demands, year-end reconciliation | |
 | 6 | Maintenance: components, planned schedules, reactive jobs and works orders, contractors, recharges from lease repairing terms | |

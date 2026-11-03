@@ -62,3 +62,5 @@ html.phaema-text-largest { font-size: 150%; }
 .phaema-legend li::before { content: ""; display: inline-block; width: 14px; height: 14px; margin-right: 6px; vertical-align: -2px; background: var(--c); }
 .phaema-header__user { font-size: 0.9rem; opacity: .9; }
 .govuk-link.phaema-overdue:link, .govuk-link.phaema-overdue:visited { color: #d4351c; font-weight: 700; }
+.phaema-code { font-family: monospace; word-break: break-all; font-size: 1rem; }
+.phaema-link-button { background: none; border: 0; padding: 0; color: #1d70b8; text-decoration: underline; cursor: pointer; font-family: inherit; }

@@ -1,0 +1,23 @@
+{% load i18n %}{# A form field in GOV.UK Design System style. Usage: include with field=form.x #}
+<div class="govuk-form-group{% if field.errors %} govuk-form-group--error{% endif %}">
+{% if field.field.widget.input_type == "radio" %}
+  <fieldset class="govuk-fieldset"{% if field.help_text %} aria-describedby="{{ field.auto_id }}-hint"{% endif %}>
+    <legend class="govuk-fieldset__legend govuk-fieldset__legend--s">{{ field.label }}</legend>
+    {% if field.help_text %}<div id="{{ field.auto_id }}-hint" class="govuk-hint">{{ field.help_text }}</div>{% endif %}
+    {% for e in field.errors %}<p class="govuk-error-message"><span class="govuk-visually-hidden">{% translate "Error:" %}</span> {{ e }}</p>{% endfor %}
+    <div class="govuk-radios govuk-radios--small" data-module="govuk-radios">
+    {% for choice in field %}
+      <div class="govuk-radios__item">
+        <input class="govuk-radios__input" id="{{ choice.id_for_label }}" name="{{ field.html_name }}" type="radio" value="{{ choice.data.value }}"{% if choice.data.selected %} checked{% endif %}>
+        <label class="govuk-label govuk-radios__label" for="{{ choice.id_for_label }}">{{ choice.choice_label }}</label>
+      </div>
+    {% endfor %}
+    </div>
+  </fieldset>
+{% else %}
+  <label class="govuk-label govuk-label--s" for="{{ field.id_for_label }}">{{ field.label }}{% if not field.field.required and not field.field.disabled %} <span class="govuk-body-s">({% translate "optional" %})</span>{% endif %}</label>
+  {% if field.help_text %}<div id="{{ field.auto_id }}-hint" class="govuk-hint">{{ field.help_text }}</div>{% endif %}
+  {% for e in field.errors %}<p class="govuk-error-message"><span class="govuk-visually-hidden">{% translate "Error:" %}</span> {{ e }}</p>{% endfor %}
+  {{ field }}
+{% endif %}
+</div>

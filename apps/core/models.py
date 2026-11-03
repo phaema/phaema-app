@@ -23,6 +23,14 @@ class TimeStampedModel(models.Model):
         abstract = True
 
 
+def days_list_validator(value):
+    from django.core.exceptions import ValidationError
+
+    parts = [p for p in value.replace(" ", "").split(",") if p]
+    if not all(p.isdigit() and int(p) <= 1000 for p in parts):
+        raise ValidationError(_("Enter whole numbers of days separated by commas, e.g. 180,90,30."))
+
+
 class ModuleSettings(models.Model):
     """Single-row table holding which optional modules this council has switched on."""
 
@@ -49,6 +57,29 @@ class ModuleSettings(models.Model):
     )
     os_map_style = models.CharField(_("OS map style"), max_length=20, choices=OsMapStyle.choices,
                                     default=OsMapStyle.ROAD)
+
+    reminder_days_review = models.CharField(
+        _("rent review reminders (days before)"), max_length=60, default="180,90,30",
+        validators=[days_list_validator])
+    reminder_days_notice = models.CharField(
+        _("break notice reminders (days before)"), max_length=60, default="180,90,30,7",
+        validators=[days_list_validator])
+    reminder_days_break = models.CharField(
+        _("break date reminders (days before)"), max_length=60, default="30",
+        validators=[days_list_validator])
+    reminder_days_expiry = models.CharField(
+        _("lease expiry reminders (days before)"), max_length=60, default="365,180,90",
+        validators=[days_list_validator])
+    reminder_days_other = models.CharField(
+        _("other event reminders (days before)"), max_length=60, default="30,7",
+        validators=[days_list_validator])
+    overdue_reminders = models.BooleanField(
+        _("weekly overdue reminders"), default=True,
+        help_text=_("Every Monday, remind people of their overdue events."))
+
+    def reminder_days(self, event_type):
+        raw = getattr(self, f"reminder_days_{event_type}", "") or ""
+        return sorted({int(x) for x in raw.replace(" ", "").split(",") if x.isdigit()}, reverse=True)
 
     class Meta:
         verbose_name = _("module settings")
