@@ -59,6 +59,9 @@ def dashboard(request):
         "rent_roll": lease_events.rent_roll(),
         "recent_changes": _with_targets(AuditEntry.objects.select_related("user", "content_type")[:10]),
     }
+    from apps.cases.views import cases_summary
+
+    context["cases"] = cases_summary(request.user)
     if ModuleSettings.load().service_charges_enabled:
         from apps.servicecharges.deadlines import upcoming
 
@@ -158,7 +161,9 @@ def protected_file(request, path):
     except SuspiciousFileOperation:
         raise Http404
     content_type = mimetypes.guess_type(path)[0] or "application/octet-stream"
-    response = FileResponse(handle, content_type=content_type)
+    inline = content_type in ("application/pdf", "image/jpeg", "image/png")
+    response = FileResponse(handle, content_type=content_type, as_attachment=not inline,
+                            filename=path.rsplit("/", 1)[-1])
     response["Cache-Control"] = "private, max-age=3600"
     response["X-Content-Type-Options"] = "nosniff"
     return response

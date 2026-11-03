@@ -20,6 +20,8 @@
     <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Agreement" %}</dt><dd class="govuk-summary-list__value"><a class="govuk-link" href="{{ event.lease.get_absolute_url }}">{{ event.lease.reference }} {{ event.lease.get_agreement_type_display }}</a><br><span class="govuk-body-s">{% translate "Current rent" %} £{{ event.lease.annual_rent|floatformat:2|intcomma }} {% translate "a year" %} · {{ event.lease.get_review_basis_display }}</span></dd></div>
     {% if event.outcome %}<div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Notes and outcome" %}</dt><dd class="govuk-summary-list__value">{{ event.outcome|linebreaksbr }}</dd></div>{% endif %}
   </dl>
+  {% with ev_cases=event.cases.all %}{% if ev_cases %}<div class="govuk-inset-text">{% translate "Case:" %} {% for c in ev_cases %}<a class="govuk-link" href="{{ c.get_absolute_url }}">{{ c.display_reference }}</a> ({% if c.is_open %}{{ c.get_stage_display|lower }}{% else %}{% translate "closed" %}{% endif %}){% if not forloop.last %}, {% endif %}{% endfor %}</div>
+  {% elif editable and event.is_open %}<form method="post" action="{% url 'cases:new' %}" class="govuk-!-margin-bottom-6">{% csrf_token %}<input type="hidden" name="event" value="{{ event.pk }}"><button class="govuk-button govuk-button--secondary" data-module="govuk-button">{% translate "Start a case for this event" %}</button></form>{% endif %}{% endwith %}
 
   {% if outcome_form %}
   <h2 class="govuk-heading-m">{% translate "Record the outcome" %}</h2>

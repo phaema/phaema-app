@@ -137,6 +137,10 @@
     {% with docs=t.documents.all %}{% if docs %}<br><span class="govuk-body-s">{% blocktranslate count n=docs|length %}{{ n }} document{% plural %}{{ n }} documents{% endblocktranslate %}</span>{% endif %}{% endwith %}</li>{% endfor %}</ul>
   {% else %}<p class="govuk-body">{% translate "No titles linked." %}</p>{% endif %}
 
+  <h2 class="govuk-heading-m">{% translate "Cases" %}</h2>
+  {% include "cases/_case_rows.html" with cases=object.cases.all %}
+  {% if user|can_edit:object %}<p class="govuk-body-s"><a class="govuk-link" href="{% url 'cases:new' %}?property={{ object.pk }}">{% translate "Start a case" %}</a></p>{% endif %}
+
   <h2 class="govuk-heading-m">{% translate "History" %}</h2>
   {% if history %}
   <ul class="govuk-list govuk-body-s">{% for e in history %}<li><a class="govuk-link" href="{% url 'change' e.pk %}">{{ e.timestamp|date:"j M Y H:i" }}</a> – {{ e.get_action_display }}{% if e.user %} {% translate "by" %} {{ e.user.get_full_name|default:e.user.username }}{% endif %}{% if e.action == "update" %}: {{ e|field_labels }}{% endif %}</li>{% endfor %}</ul>

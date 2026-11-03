@@ -37,6 +37,7 @@ INSTALLED_APPS = [
     "apps.help",
     "apps.ledger",
     "apps.servicecharges",
+    "apps.cases",
 ]
 
 MIDDLEWARE = [

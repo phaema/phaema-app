@@ -290,6 +290,9 @@ class Command(BaseCommand):
 
         service_demo.setup()
         charge_count = ledger_demo.load()
+        from apps.cases import demo as case_demo
+
+        case_count = case_demo.load()
 
         modules = ModuleSettings.load()
         if not modules.organisation_name:
@@ -298,7 +301,7 @@ class Command(BaseCommand):
 
         self.stdout.write(self.style.SUCCESS(
             f"Demo data loaded: {created} properties added, {updated} refreshed, {len(TITLES)} titles, "
-            f"{lease_count} leases and licences, {charge_count} rent charges."
+            f"{lease_count} leases and licences, {charge_count} rent charges, {case_count} cases."
         ))
 
     def load_surveyors(self, refs):
@@ -378,6 +381,9 @@ class Command(BaseCommand):
 
         from apps.servicecharges import demo as service_demo
 
+        from apps.cases import demo as case_demo
+
+        case_demo.remove()
         ledger_demo.remove()
         service_demo.remove()
         lease_demo.remove()

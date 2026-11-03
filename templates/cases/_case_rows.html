@@ -1,0 +1,12 @@
+{% load i18n phaema %}{% if cases %}
+<table class="govuk-table">
+  <thead class="govuk-table__head"><tr class="govuk-table__row"><th scope="col" class="govuk-table__header">{% translate "Case" %}</th><th scope="col" class="govuk-table__header">{% translate "Stage" %}</th><th scope="col" class="govuk-table__header">{% translate "Owner" %}</th></tr></thead>
+  <tbody class="govuk-table__body">
+  {% for c in cases %}{% with rag=c.rag %}<tr class="govuk-table__row">
+    <td class="govuk-table__cell"><a class="govuk-link" href="{{ c.get_absolute_url }}">{{ c.display_reference }}</a><br><span class="govuk-body-s">{{ c.title }}</span></td>
+    <td class="govuk-table__cell">{% if c.status == "closed" %}{% translate "Closed" %} {{ c.closed_on|date:"j M Y" }}{% else %}{{ c.get_stage_display }} <strong class="govuk-tag govuk-tag--{{ rag.0 }}">{{ rag.1 }}</strong>{% endif %}</td>
+    <td class="govuk-table__cell">{{ c.owner|person:"–" }}</td>
+  </tr>{% endwith %}{% endfor %}
+  </tbody>
+</table>
+{% else %}<p class="govuk-body">{% translate "No cases." %}</p>{% endif %}

@@ -1,0 +1,14 @@
+{% extends "base.html" %}{% load i18n %}
+{% block title %}{% translate "Start a case" %}{% endblock %}
+{% block help_page %}cases{% endblock %}
+{% block content %}
+<h1 class="govuk-heading-l">{% translate "Start a case" %}</h1>
+<div class="govuk-grid-row"><div class="govuk-grid-column-two-thirds">
+<p class="govuk-body">{% translate "Cases for rent reviews, breaks and expiries open by themselves, or from the event's page. Use this for requests and other work." %}</p>
+<form method="post" novalidate>{% csrf_token %}
+  {% include "core/_form_errors.html" %}
+  {% for field in form %}{% include "core/_field.html" %}{% endfor %}
+  <button class="govuk-button" data-module="govuk-button">{% translate "Start the case" %}</button>
+</form>
+</div></div>
+{% endblock %}

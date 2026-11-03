@@ -22,6 +22,8 @@ PHAEMA has three roles. Give each person one role in **Manage data > Users** (ti
 | Change or delete another person's report | ✓ | – | – |
 | Change the ready-made reports | ✓ | – | – |
 | See rent accounts, statements, arrears and receipts | ✓ | ✓ | ✓ |
+| Start and work on cases | All | Own cases, or on properties they manage | – |
+| See confidential case notes | ✓ | Cases they own | – |
 | Raise rent, issue credit notes, import receipts, create finance exports | ✓ | – | – |
 | See service charge schedules, years and tenant statements | ✓ | ✓ | ✓ |
 | Set up schedules, budgets and spending; approve budgets; reconcile years | ✓ | – | – |
@@ -35,3 +37,5 @@ Notes:
 - Someone who signs in without a role sees a "no access yet" page until an administrator gives them one.
 - The person who installs PHAEMA creates a **superuser** with `./phaema.sh admin`. Superusers can do everything, including creating other superusers. Keep superuser accounts to a minimum and use the Administrators role day to day.
 - Every change, whoever makes it, is recorded in the change log.
+
+A fourth role, **Contributors**, can see everything and add notes, documents and correspondence to the cases they are added to (for example the legal team). They cannot change anything else.

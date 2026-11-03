@@ -25,6 +25,7 @@
         <a href="{% url 'properties:map' %}">{% translate "Map" %}</a>
         <a href="{% url 'leases:list' %}">{% translate "Leases" %}</a>
         <a href="{% url 'leases:events' %}">{% translate "Events" %}</a>
+        <a href="{% url 'cases:list' %}">{% translate "Cases" %}</a>
         {% if modules.rent_ledger_enabled %}<a href="{% url 'ledger:home' %}">{% translate "Rents" %}</a>{% endif %}
         {% if modules.service_charges_enabled %}<a href="{% url 'servicecharges:list' %}">{% translate "Service charges" %}</a>{% endif %}
         <a href="{% url 'reports:list' %}">{% translate "Reports" %}</a>

@@ -374,6 +374,45 @@ def _receipt_fields():
     ]
 
 
+def _cases():
+    from apps.cases.models import Case
+
+    return Case.objects.select_related("case_type", "owner", "lease", "property", "party").prefetch_related(
+        "lease__properties")
+
+
+def _days_to_decision(case):
+    start = case.application_complete_on or case.received_on
+    return (case.decision_on - start).days if case.decision_on and start else None
+
+
+def _case_fields():
+    from apps.cases.models import Case as K, CaseType as T
+
+    return [
+        Field("reference", "Case", getter=lambda c: c.display_reference, default=True),
+        Field("case_type", "Type", path="case_type__name", default=True),
+        Field("group", "Group", "choice", "case_type__group", choices=_choices(T, "group")),
+        Field("title", "Title", path="title", default=True),
+        Field("stage", "Stage", "choice", "stage", choices=_choices(K, "stage"), default=True),
+        Field("status", "Status", "choice", "status", choices=_choices(K, "status"), default=True),
+        Field("owner", "Owner", "user", "owner", default=True),
+        Field("received_on", "Received", "date", "received_on", default=True),
+        Field("acknowledged_on", "Acknowledged", "date", "acknowledged_on"),
+        Field("application_complete_on", "Application complete", "date", "application_complete_on"),
+        Field("target_date", "Target", "date", "target_date", default=True),
+        Field("decision", "Decision", "choice", "decision", choices=_choices(K, "decision")),
+        Field("decision_on", "Decision sent", "date", "decision_on"),
+        Field("days_to_decision", "Days to decision", "number", getter=_days_to_decision),
+        Field("closed_on", "Closed", "date", "closed_on"),
+        Field("lease", "Agreement", path="lease__reference"),
+        Field("property", "Property", path="property__reference"),
+        Field("applicant", "Applicant", path="party__name"),
+        Field("how_received", "Received by", "choice", "how_received", choices=_choices(K, "how_received")),
+        Field("iken_matter", "Iken matter", path="iken_matter"),
+    ]
+
+
 def _titles():
     from apps.properties.models import Title
 
@@ -435,6 +474,7 @@ def registry():
                     _receipts, _receipt_fields()),
             Dataset("rent_accounts", "Rent accounts", "Each agreement's rent balance, overdue rent by age and "
                     "last payment.", _rent_accounts, _rent_account_fields()),
+            Dataset("cases", "Cases", "Consents, lease events, enquiries and other estate work.", _cases, _case_fields()),
             Dataset("titles", "Titles", "Registered and unregistered titles.", _titles, _title_fields()),
             Dataset("changes", "Change log", "Every change made in PHAEMA.", _audit, _audit_fields()),
         ]}
