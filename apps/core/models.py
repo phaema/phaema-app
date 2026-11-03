@@ -55,6 +55,10 @@ class ModuleSettings(models.Model):
     rent_income_code = models.CharField(_("rent income code"), max_length=40, blank=True,
                                         help_text=_("Ledger code (cost centre and account) for rent income, "
                                                     "included in the finance export."))
+    service_charge_income_code = models.CharField(
+        _("service charge income code"), max_length=40, blank=True,
+        help_text=_("Ledger code for service charge income, included in the finance export. "
+                    "Leave blank to use the rent income code."))
     vat_code_standard = models.CharField(_("VAT code: standard rated"), max_length=10, default="S")
     vat_code_exempt = models.CharField(_("VAT code: exempt"), max_length=10, default="E")
     service_charges_enabled = models.BooleanField(_("service charge ledger"), default=False)

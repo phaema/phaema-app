@@ -76,10 +76,21 @@ def billable_leases():
             .select_related("counterparty").prefetch_related("rent_schedule", "properties"))
 
 
-def proposed_charges(due_from, due_to, issue_date=None):
-    """Unsaved rent charges due between two dates that have not been raised before."""
+def proposed_charges(due_from, due_to, issue_date=None, rent=True, service=None):
+    """Unsaved charges due between two dates that have not been raised before: rent, and service
+    charges on account when the service charge module is on (or `service` says so)."""
     issue_date = issue_date or date.today()
-    vat_rate = settings_row().vat_rate
+    settings = settings_row()
+    vat_rate = settings.vat_rate
+    if service is None:
+        service = settings.service_charges_enabled
+    extra = []
+    if service:
+        from apps.servicecharges.apportion import proposed_service_charges
+
+        extra = proposed_service_charges(due_from, due_to, issue_date, vat_rate)
+    if not rent:
+        return sorted(extra, key=lambda c: (c.due_date, c.lease.reference, c.kind))
     done = set(Charge.objects.filter(kind=Charge.Kind.RENT, period_start__isnull=False)
                .values_list("lease_id", "period_start"))
     out = []
@@ -96,7 +107,7 @@ def proposed_charges(due_from, due_to, issue_date=None):
             out.append(Charge(lease=lease, kind=Charge.Kind.RENT, period_start=start, period_end=end, due_date=due,
                               issue_date=issue_date, net=net, vat_rate=rate, vat=vat, gross=gross,
                               description=f"{label} {start:%d/%m/%Y} to {end:%d/%m/%Y}"))
-    return sorted(out, key=lambda c: (c.due_date, c.lease.reference))
+    return sorted(out + extra, key=lambda c: (c.due_date, c.lease.reference, c.kind))
 
 
 def _number(charges):
@@ -112,10 +123,10 @@ def _number(charges):
 
 
 @transaction.atomic
-def issue_run(due_from, due_to, issue_date=None, notes=""):
-    """Raise every outstanding rent charge due between the dates. Returns the run (None if nothing to raise)."""
+def issue_run(due_from, due_to, issue_date=None, notes="", rent=True, service=None):
+    """Raise every outstanding charge due between the dates. Returns the run (None if nothing to raise)."""
     issue_date = issue_date or date.today()
-    charges = proposed_charges(due_from, due_to, issue_date)
+    charges = proposed_charges(due_from, due_to, issue_date, rent=rent, service=service)
     if not charges:
         return None
     run = DemandRun.objects.create(due_from=due_from, due_to=due_to, issue_date=issue_date, notes=notes)

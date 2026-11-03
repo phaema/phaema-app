@@ -286,7 +286,9 @@ class Command(BaseCommand):
 
         lease_count = lease_demo.load()
         from apps.ledger import demo as ledger_demo
+        from apps.servicecharges import demo as service_demo
 
+        service_demo.setup()
         charge_count = ledger_demo.load()
 
         modules = ModuleSettings.load()
@@ -374,7 +376,10 @@ class Command(BaseCommand):
         from apps.leases import demo as lease_demo
         from apps.ledger import demo as ledger_demo
 
+        from apps.servicecharges import demo as service_demo
+
         ledger_demo.remove()
+        service_demo.remove()
         lease_demo.remove()
         InspireParcel.objects.filter(inspire_id__startswith="DEMO-").delete()
         demo = Property.objects.filter(reference__startswith=PREFIX)

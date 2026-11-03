@@ -22,6 +22,7 @@ The menu at the top of every page takes you to:
 | Leases | [Leases and licences](leases.md), with links to [parties](parties.md). |
 | Events | [Key dates](events.md) such as rent reviews, breaks and expiries. |
 | Rents | The [rent ledger](rent-ledger.md): raising rent, accounts, arrears and receipts. Shown when the council uses it. |
+| Service charges | [Service charge](service-charges.md) schedules, budgets, spending and reconciliation. Shown when the council uses it. |
 | Reports | Ready-made and your own [reports](reports.md), to view or download. |
 | Changes | The [change log](change-log.md): who changed what, and when. |
 | Import | Administrators only: [import from spreadsheets](import-export.md). |

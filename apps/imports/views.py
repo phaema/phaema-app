@@ -22,8 +22,9 @@ MAX_BYTES = 10 * 1024 * 1024
 def _available():
     from apps.core.models import ModuleSettings
 
-    ledger = ModuleSettings.load().rent_ledger_enabled
-    return [wb for wb in WORKBOOKS.values() if wb.key != "receipts" or ledger]
+    settings = ModuleSettings.load()
+    needs = {"receipts": settings.rent_ledger_enabled, "expenditure": settings.service_charges_enabled}
+    return [wb for wb in WORKBOOKS.values() if needs.get(wb.key, True)]
 
 
 def _workbook(key):

@@ -49,6 +49,7 @@ class ExportBatch(TimeStampedModel):
 class Charge(TimeStampedModel):
     class Kind(models.TextChoices):
         RENT = "rent", _("Rent")
+        SERVICE = "service", _("Service charge")
         CREDIT = "credit", _("Credit note")
         OTHER = "other", _("Other charge")
 
@@ -67,6 +68,8 @@ class Charge(TimeStampedModel):
     invoice_number = models.CharField(_("invoice number"), max_length=30, blank=True)
     credit_for = models.ForeignKey("self", on_delete=models.PROTECT, null=True, blank=True, related_name="credits",
                                    verbose_name=_("credit for"))
+    service_year = models.ForeignKey("servicecharges.ScheduleYear", on_delete=models.PROTECT, null=True, blank=True,
+                                     related_name="charges", verbose_name=_("service charge year"))
     export = models.ForeignKey(ExportBatch, on_delete=models.SET_NULL, null=True, blank=True, related_name="charges")
 
     class Meta:
@@ -76,6 +79,8 @@ class Charge(TimeStampedModel):
                                     name="ledger_unique_invoice_number"),
             models.UniqueConstraint(fields=["lease", "period_start"], condition=models.Q(kind="rent"),
                                     name="ledger_one_rent_charge_per_period"),
+            models.UniqueConstraint(fields=["lease", "period_start", "service_year"],
+                                    condition=models.Q(kind="service"), name="ledger_one_service_charge_per_period"),
         ]
 
     def __str__(self):

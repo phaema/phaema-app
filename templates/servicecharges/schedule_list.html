@@ -1,0 +1,24 @@
+{% extends "base.html" %}{% load i18n humanize %}
+{% block title %}{% translate "Service charges" %}{% endblock %}
+{% block help_page %}service-charges{% endblock %}
+{% block content %}
+<h1 class="govuk-heading-xl">{% translate "Service charges" %}</h1>
+{% if not ledger_on %}<div class="govuk-warning-text"><span class="govuk-warning-text__icon" aria-hidden="true">!</span><strong class="govuk-warning-text__text"><span class="govuk-visually-hidden">{% translate "Warning" %}</span>{% translate "The rent ledger is switched off, so service charges cannot be demanded. Switch it on in Module settings." %}</strong></div>{% endif %}
+<p class="govuk-body">{% translate "Each schedule is a pool of shared costs recovered from the tenants who benefit." %}{% if is_administrator %} <a class="govuk-link" href="{% url 'admin:servicecharges_schedule_add' %}">{% translate "Add a schedule" %}</a> · <a class="govuk-link" href="{% url 'admin:servicecharges_scheduleyear_add' %}">{% translate "Add a year and budget" %}</a>{% endif %}</p>
+<table class="govuk-table">
+  <thead class="govuk-table__head"><tr class="govuk-table__row">
+    <th scope="col" class="govuk-table__header">{% translate "Schedule" %}</th><th scope="col" class="govuk-table__header">{% translate "Current year" %}</th>
+    <th scope="col" class="govuk-table__header govuk-table__header--numeric">{% translate "Budget" %}</th><th scope="col" class="govuk-table__header govuk-table__header--numeric">{% translate "Spent so far" %}</th>
+    <th scope="col" class="govuk-table__header govuk-table__header--numeric">{% translate "Leases" %}</th>
+  </tr></thead>
+  <tbody class="govuk-table__body">
+  {% for r in rows %}<tr class="govuk-table__row">
+    <td class="govuk-table__cell"><a class="govuk-link" href="{{ r.schedule.get_absolute_url }}">{{ r.schedule.name }}</a>{% if not r.schedule.active %} <strong class="govuk-tag govuk-tag--grey">{% translate "Inactive" %}</strong>{% endif %}<br><span class="govuk-body-s">{% for p in r.schedule.properties.all %}{{ p.name }}{% if not forloop.last %}; {% endif %}{% endfor %}</span></td>
+    <td class="govuk-table__cell">{% if r.current %}<a class="govuk-link" href="{{ r.current.year.get_absolute_url }}">{{ r.current.year.label }}</a><br><span class="govuk-body-s">{{ r.current.year.get_status_display }}</span>{% else %}–{% endif %}</td>
+    <td class="govuk-table__cell govuk-table__cell--numeric">{% if r.current %}£{{ r.current.budget|floatformat:0|intcomma }}{% endif %}</td>
+    <td class="govuk-table__cell govuk-table__cell--numeric">{% if r.current %}£{{ r.current.actual|floatformat:0|intcomma }}{% endif %}</td>
+    <td class="govuk-table__cell govuk-table__cell--numeric">{{ r.schedule.members.all|length }}</td>
+  </tr>{% empty %}<tr class="govuk-table__row"><td class="govuk-table__cell" colspan="5">{% translate "No service charge schedules yet." %}</td></tr>{% endfor %}
+  </tbody>
+</table>
+{% endblock %}

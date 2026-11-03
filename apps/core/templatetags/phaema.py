@@ -49,3 +49,22 @@ def person(user, empty=""):
     if not user:
         return empty
     return user.get_full_name() or user.get_username()
+
+
+@register.filter
+def percent(fraction, places=2):
+    """0.12 → "12.00%"."""
+    from decimal import Decimal, InvalidOperation
+
+    try:
+        return f"{Decimal(fraction) * 100:.{int(places)}f}%"
+    except (InvalidOperation, TypeError, ValueError):
+        return ""
+
+
+@register.filter
+def subtract(a, b):
+    try:
+        return a - b
+    except TypeError:
+        return None

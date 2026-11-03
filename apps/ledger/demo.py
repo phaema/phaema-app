@@ -25,12 +25,14 @@ def load(today=None):
         modules.rent_ledger_enabled = True
         modules.rent_income_code = modules.rent_income_code or "EST-1000-9100"
         modules.save()
-    start = today - timedelta(days=365)
+    financial_year = date(today.year - 1 if today.month >= 4 else today.year - 2, 4, 1)
+    start = min(today - timedelta(days=365), financial_year - timedelta(days=31))  # includes the March quarter
     while start <= today:
         end = min(start + timedelta(days=91), today)
         billing.issue_run(start, end, issue_date=max(start - timedelta(days=21), date(2000, 1, 1)), notes=NOTE)
         start = end + timedelta(days=1)
-    demo = Charge.objects.filter(lease__reference__startswith="DL-", kind=Charge.Kind.RENT, due_date__lt=today)
+    demo = Charge.objects.filter(lease__reference__startswith="DL-", kind__in=[Charge.Kind.RENT, Charge.Kind.SERVICE],
+                                 due_date__lt=today)
     by_lease = {}
     for c in demo.select_related("lease").order_by("due_date"):
         by_lease.setdefault(c.lease.reference, []).append(c)

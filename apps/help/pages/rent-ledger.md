@@ -41,6 +41,8 @@ How PHAEMA works out each charge:
   ends part way through a period.
 - **VAT** is added at the standard rate where the agreement is marked VAT chargeable (the council has opted to tax).
 - Agreements at a peppercorn or no rent, and agreements where the council is the tenant, are not charged.
+- When the [service charge](service-charges.md) module is on, the same run also charges service charges on
+  account. Choose **Rent only**, **Service charges only**, or both.
 - **Rent for a period is only ever charged once**, so runs can overlap without charging twice.
 
 Charges cannot be deleted. Correct a mistake with a [credit note](#credit-notes).
@@ -104,7 +106,7 @@ The columns are fixed, so the finance team can map them once:
 | Description, Period from, Period to | What the charge is for. |
 | Issue date, Due date | |
 | Net, VAT code, VAT rate, VAT, Gross | Amounts in pounds; credit notes are negative. The VAT codes are set in settings. |
-| Income code | The rent income ledger code set in settings. |
+| Income code | The rent or service charge income ledger code set in settings. |
 
 ## Other reports
 

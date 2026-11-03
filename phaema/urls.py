@@ -35,6 +35,7 @@ urlpatterns = [
     path("import/", include("apps.imports.urls")),
     path("help/", include("apps.help.urls")),
     path("rents/", include("apps.ledger.urls")),
+    path("service-charges/", include("apps.servicecharges.urls")),
     path("calendar/<str:token>.ics", event_views.calendar_feed, name="calendar-feed"),
     path("admin/", admin.site.urls),
     path("api/", include(router.urls)),

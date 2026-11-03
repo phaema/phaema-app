@@ -26,6 +26,8 @@ Administrators: select **Manage data**, then **Module settings**. There is one s
 | Invoice number prefix and next invoice number | How PHAEMA numbers invoices and credit notes, for example PH000123. Set the next number when you start, so it does not clash with existing invoices. |
 | Standard VAT rate | Added to rent on agreements marked VAT chargeable. |
 | Rent income code | The finance ledger code for rent income, included in the finance export. |
+| Service charge ledger | Switches on [service charges](service-charges.md). Needs the rent ledger. |
+| Service charge income code | The finance ledger code for service charge income. If blank, the rent income code is used. |
 | VAT codes | The finance system's codes for standard-rated and exempt lines. |
 
 ### Reminders

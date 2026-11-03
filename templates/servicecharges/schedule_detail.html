@@ -1,0 +1,48 @@
+{% extends "base.html" %}{% load i18n humanize phaema %}
+{% block title %}{{ schedule.name }}{% endblock %}
+{% block help_page %}service-charges{% endblock %}
+{% block breadcrumbs %}<nav class="govuk-breadcrumbs" aria-label="Breadcrumb"><ol class="govuk-breadcrumbs__list"><li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="{% url 'servicecharges:list' %}">{% translate "Service charges" %}</a></li><li class="govuk-breadcrumbs__list-item">{{ schedule.name }}</li></ol></nav>{% endblock %}
+{% block content %}
+<span class="govuk-caption-l">{% translate "Service charge schedule" %}</span>
+<h1 class="govuk-heading-l">{{ schedule.name }}</h1>
+{% if schedule.description %}<p class="govuk-body">{{ schedule.description }}</p>{% endif %}
+<p class="govuk-body">{% translate "Costs shared by:" %} <strong>{{ schedule.get_basis_display }}</strong>. {% translate "Years start on" %} {{ schedule.year_start_day }}/{{ schedule.year_start_month }}.
+  {% if is_administrator %}<a class="govuk-link" href="{% url 'admin:servicecharges_schedule_change' schedule.pk %}">{% translate "Change this schedule or its leases" %}</a>{% endif %}</p>
+
+<h2 class="govuk-heading-m">{% translate "Shares" %}</h2>
+<table class="govuk-table">
+  <thead class="govuk-table__head"><tr class="govuk-table__row">
+    <th scope="col" class="govuk-table__header">{% translate "Lease" %}</th>
+    <th scope="col" class="govuk-table__header govuk-table__header--numeric">{% translate "NIA m²" %}</th>
+    <th scope="col" class="govuk-table__header govuk-table__header--numeric">{% translate "Share" %}</th>
+    <th scope="col" class="govuk-table__header govuk-table__header--numeric">{% translate "On account this year" %}</th>
+    <th scope="col" class="govuk-table__header govuk-table__header--numeric">{% translate "Cap" %}</th>
+  </tr></thead>
+  <tbody class="govuk-table__body">
+  {% for s, annual in rows %}<tr class="govuk-table__row">
+    <td class="govuk-table__cell"><a class="govuk-link" href="{{ s.member.lease.get_absolute_url }}">{{ s.member.lease.reference }}</a><br><span class="govuk-body-s">{{ s.member.lease.counterparty.name }}</span></td>
+    <td class="govuk-table__cell govuk-table__cell--numeric">{{ s.area|floatformat:0|intcomma }}</td>
+    <td class="govuk-table__cell govuk-table__cell--numeric">{{ s.share|percent }}</td>
+    <td class="govuk-table__cell govuk-table__cell--numeric">{% if annual is not None %}£{{ annual|floatformat:2|intcomma }}{% else %}–{% endif %}</td>
+    <td class="govuk-table__cell govuk-table__cell--numeric">{% if s.member.annual_cap %}£{{ s.member.annual_cap|floatformat:0|intcomma }}{% endif %}</td>
+  </tr>{% empty %}<tr class="govuk-table__row"><td class="govuk-table__cell" colspan="5">{% translate "No leases contribute yet." %}</td></tr>{% endfor %}
+  <tr class="govuk-table__row phaema-total-row"><td class="govuk-table__cell">{% translate "Council (empty units)" %}</td><td class="govuk-table__cell govuk-table__cell--numeric"></td><td class="govuk-table__cell govuk-table__cell--numeric">{{ void|percent }}</td><td class="govuk-table__cell" colspan="2"></td></tr>
+  </tbody>
+</table>
+<p class="govuk-body-s">{% blocktranslate count n=units|length with area=total_area|floatformat:0|intcomma %}Shares are worked out over {{ n }} lettable unit, {{ area }} m² in total, including empty ones.{% plural %}Shares are worked out over {{ n }} lettable units, {{ area }} m² in total, including empty ones.{% endblocktranslate %}</p>
+
+<h2 class="govuk-heading-m">{% translate "Years" %}</h2>
+<table class="govuk-table">
+  <thead class="govuk-table__head"><tr class="govuk-table__row">
+    <th scope="col" class="govuk-table__header">{% translate "Year" %}</th><th scope="col" class="govuk-table__header">{% translate "Status" %}</th>
+    <th scope="col" class="govuk-table__header govuk-table__header--numeric">{% translate "Budget" %}</th><th scope="col" class="govuk-table__header govuk-table__header--numeric">{% translate "Actual" %}</th><th scope="col" class="govuk-table__header govuk-table__header--numeric">{% translate "Demanded on account" %}</th>
+  </tr></thead>
+  <tbody class="govuk-table__body">
+  {% for y in years %}<tr class="govuk-table__row">
+    <td class="govuk-table__cell"><a class="govuk-link" href="{{ y.year.get_absolute_url }}">{{ y.year.label }}</a><br><span class="govuk-body-s">{{ y.year.start|date:"j M Y" }} – {{ y.year.end|date:"j M Y" }}</span></td>
+    <td class="govuk-table__cell">{{ y.year.get_status_display }}</td>
+    <td class="govuk-table__cell govuk-table__cell--numeric">£{{ y.budget|floatformat:0|intcomma }}</td><td class="govuk-table__cell govuk-table__cell--numeric">£{{ y.actual|floatformat:0|intcomma }}</td><td class="govuk-table__cell govuk-table__cell--numeric">£{{ y.demanded|floatformat:0|intcomma }}</td>
+  </tr>{% empty %}<tr class="govuk-table__row"><td class="govuk-table__cell" colspan="5">{% translate "No years set up yet." %}</td></tr>{% endfor %}
+  </tbody>
+</table>
+{% endblock %}
