@@ -36,6 +36,20 @@ class ModuleSettings(models.Model):
     compliance_enabled = models.BooleanField(_("compliance"), default=True)
     golden_thread_enabled = models.BooleanField(_("Golden Thread"), default=True)
 
+    class OsMapStyle(models.TextChoices):
+        ROAD = "Road_3857", _("Road")
+        OUTDOOR = "Outdoor_3857", _("Outdoor")
+        LIGHT = "Light_3857", _("Light")
+
+    os_maps_api_key = models.CharField(
+        _("OS Maps API key"), max_length=100, blank=True,
+        help_text=_("Your council's Ordnance Survey Data Hub key (free under the Public Sector Geospatial "
+                    "Agreement). Leave blank to use OpenStreetMap only. The key is sent to users' browsers, "
+                    "so restrict it to your PHAEMA web address in the OS Data Hub."),
+    )
+    os_map_style = models.CharField(_("OS map style"), max_length=20, choices=OsMapStyle.choices,
+                                    default=OsMapStyle.ROAD)
+
     class Meta:
         verbose_name = _("module settings")
         verbose_name_plural = _("module settings")

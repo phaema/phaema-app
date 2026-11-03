@@ -1,0 +1,7 @@
+{% extends "base.html" %}{% load i18n %}
+{% block title %}{% translate "No access yet" %}{% endblock %}
+{% block content %}
+<h1 class="govuk-heading-l">{% translate "You do not have access to PHAEMA yet" %}</h1>
+<p class="govuk-body">{% blocktranslate with name=user.get_username %}You are signed in as {{ name }}, but you have not been given a role.{% endblocktranslate %}</p>
+<p class="govuk-body">{% translate "Ask a PHAEMA administrator to add you to the Administrators, Surveyors or Viewers group." %}</p>
+{% endblock %}

@@ -1,0 +1,22 @@
+{% extends "base.html" %}{% load i18n humanize %}
+{% block title %}{% translate "Import INSPIRE parcels" %}{% endblock %}
+{% block content %}
+<h1 class="govuk-heading-l">{% translate "Import HM Land Registry INSPIRE parcels" %}</h1>
+<div class="govuk-grid-row"><div class="govuk-grid-column-two-thirds">
+<p class="govuk-body">{% blocktranslate with n=inspire_count|intcomma %}PHAEMA currently holds {{ n }} INSPIRE parcels.{% endblocktranslate %}</p>
+<ol class="govuk-list govuk-list--number">
+  <li>{% translate "Download the free INSPIRE Index Polygons for your council area from" %} <a class="govuk-link" href="https://use-land-property-data.service.gov.uk/datasets/inspire" rel="noopener" target="_blank">HM Land Registry</a> ({% translate "a zip file" %}).</li>
+  <li>{% translate "Upload the zip file below. Importing the same area again updates the parcels." %}</li>
+</ol>
+<form method="post" enctype="multipart/form-data" novalidate>
+  {% csrf_token %}
+  <div class="govuk-form-group">
+    <label class="govuk-label govuk-label--s" for="file">{% translate "INSPIRE zip or GML file" %}</label>
+    <div class="govuk-hint" id="file-hint">{% translate "A whole district can take a few minutes. Very large files are better imported with ./phaema.sh import-inspire." %}</div>
+    <input class="govuk-file-upload" id="file" name="file" type="file" accept=".zip,.gml" aria-describedby="file-hint">
+  </div>
+  <button class="govuk-button" data-module="govuk-button">{% translate "Import" %}</button>
+</form>
+<p class="govuk-body-s">{% translate "INSPIRE data is published under the Open Government Licence. PHAEMA shows HM Land Registry's required attribution wherever the parcels appear." %}</p>
+</div></div>
+{% endblock %}

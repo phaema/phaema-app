@@ -1,0 +1,12 @@
+{% load i18n static %}{# Usage: include with map_id features_url height [select_form] [info_default] [inspire] #}
+<link rel="stylesheet" href="{% static 'vendor/openlayers/ol.css' %}">
+{% with cfg_id=map_id|add:"-config" %}{{ map_config|json_script:cfg_id }}{% endwith %}
+<div id="{{ map_id }}" class="phaema-map" style="height: {{ height|default:'420px' }}" data-phaema-map
+     data-config="{{ map_id }}-config" data-features-url="{{ features_url }}" data-controls="{{ map_id }}-controls"
+     data-info="{{ map_id }}-info" data-empty="{{ map_id }}-empty"{% if select_form %} data-select-form="{{ select_form }}"{% endif %}{% if inspire %} data-inspire="on"{% endif %}
+     role="region" aria-label="{% translate 'Map' %}"></div>
+<p class="govuk-body-s phaema-map__info" id="{{ map_id }}-info" data-default="{{ info_default|default:'' }}" aria-live="polite">{{ info_default|default:"" }}</p>
+<p class="govuk-body-s" id="{{ map_id }}-empty" hidden>{% translate "No mapped locations yet. Add a boundary or easting and northing." %}</p>
+<div class="phaema-map__controls" id="{{ map_id }}-controls"></div>
+<script defer src="{% static 'vendor/openlayers/ol.js' %}"></script>
+<script defer src="{% static 'js/phaema-map.js' %}"></script>

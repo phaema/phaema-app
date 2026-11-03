@@ -1,0 +1,56 @@
+{% extends "base.html" %}{% load i18n humanize phaema_roles %}
+{% block title %}{{ object.name }}{% endblock %}
+{% block breadcrumbs %}
+<nav class="govuk-breadcrumbs" aria-label="Breadcrumb"><ol class="govuk-breadcrumbs__list">
+  <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="{% url 'leases:parties' %}">{% translate "Tenants and other parties" %}</a></li>
+  <li class="govuk-breadcrumbs__list-item">{{ object.name }}</li>
+</ol></nav>
+{% endblock %}
+{% block content %}
+<span class="govuk-caption-l">{{ object.get_party_type_display }}</span>
+<h1 class="govuk-heading-xl">{{ object.name }}</h1>
+{% if user|can_edit:object %}<p class="govuk-body"><a class="govuk-link" href="{% url 'admin:leases_party_change' object.pk %}">{% translate "Edit contact details" %}</a></p>{% endif %}
+<div class="govuk-grid-row">
+<div class="govuk-grid-column-two-thirds">
+  <h2 class="govuk-heading-m">{% translate "Agreements" %}</h2>
+  <p class="govuk-body">{% blocktranslate count n=current_count %}{{ n }} current agreement{% plural %}{{ n }} current agreements{% endblocktranslate %}{% if current_rent %}, £{{ current_rent|floatformat:0|intcomma }} {% translate "a year" %}{% endif %}</p>
+  {% if arrangements %}
+  <table class="govuk-table">
+    <thead class="govuk-table__head"><tr class="govuk-table__row">
+      <th scope="col" class="govuk-table__header">{% translate "Agreement" %}</th>
+      <th scope="col" class="govuk-table__header">{% translate "Role" %}</th>
+      <th scope="col" class="govuk-table__header">{% translate "Properties" %}</th>
+      <th scope="col" class="govuk-table__header">{% translate "Term" %}</th>
+      <th scope="col" class="govuk-table__header govuk-table__header--numeric">{% translate "Rent £ a year" %}</th>
+    </tr></thead>
+    <tbody class="govuk-table__body">
+    {% for r in arrangements %}{% with l=r.lease %}
+      <tr class="govuk-table__row">
+        <td class="govuk-table__cell"><a class="govuk-link" href="{{ l.get_absolute_url }}">{{ l.reference }}</a><br><span class="govuk-body-s">{{ l.get_agreement_type_display }} · {{ l.get_status_display }}</span></td>
+        <td class="govuk-table__cell">{{ r.role }}{% if r.role == "Guarantor" %}<br><span class="govuk-body-s">{% translate "for" %} {{ l.counterparty.name }}</span>{% endif %}</td>
+        <td class="govuk-table__cell">{% for p in r.properties %}<a class="govuk-link" href="{{ p.get_absolute_url }}">{{ p.name }}</a>{% if not forloop.last %}<br>{% endif %}{% endfor %}</td>
+        <td class="govuk-table__cell">{{ l.term_start|date:"j M Y" }} – {{ l.term_end|date:"j M Y"|default:"periodic" }}</td>
+        <td class="govuk-table__cell govuk-table__cell--numeric">{{ l.annual_rent|floatformat:0|intcomma }}</td>
+      </tr>
+    {% endwith %}{% endfor %}
+    </tbody>
+  </table>
+  {% else %}<p class="govuk-body">{% translate "No agreements recorded." %}</p>{% endif %}
+
+  <h2 class="govuk-heading-m">{% translate "Properties" %}</h2>
+  {% if properties %}
+  <ul class="govuk-list">{% for p in properties %}<li><a class="govuk-link" href="{{ p.get_absolute_url }}">{{ p.reference }} {{ p.name }}</a> – {{ p.get_occupation_display|default:p.get_property_type_display }}</li>{% endfor %}</ul>
+  {% else %}<p class="govuk-body">{% translate "None." %}</p>{% endif %}
+</div>
+<div class="govuk-grid-column-one-third">
+  <h2 class="govuk-heading-m">{% translate "Contact" %}</h2>
+  <dl class="govuk-summary-list govuk-summary-list--no-border">
+    <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Contact" %}</dt><dd class="govuk-summary-list__value">{{ object.contact_name|default:"–" }}{% if object.email %}<br>{{ object.email }}{% endif %}{% if object.phone %}<br>{{ object.phone }}{% endif %}</dd></div>
+    <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Address" %}</dt><dd class="govuk-summary-list__value">{{ object.address|linebreaksbr|default:"–" }}</dd></div>
+    {% if object.company_number %}<div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Company number" %}</dt><dd class="govuk-summary-list__value">{{ object.company_number }}</dd></div>{% endif %}
+    {% if object.charity_number %}<div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Charity number" %}</dt><dd class="govuk-summary-list__value">{{ object.charity_number }}</dd></div>{% endif %}
+    <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Finance customer number" %}</dt><dd class="govuk-summary-list__value">{{ object.finance_customer_ref|default:"–" }}</dd></div>
+  </dl>
+</div>
+</div>
+{% endblock %}

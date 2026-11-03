@@ -13,6 +13,7 @@ from django.http import FileResponse, Http404, HttpResponseRedirect, JsonRespons
 from django.shortcuts import get_object_or_404, render
 from django.utils.http import url_has_allowed_host_and_scheme
 
+from apps.leases import events as lease_events
 from apps.properties.models import Property
 
 from .models import AuditEntry
@@ -48,6 +49,8 @@ def dashboard(request):
         "vacancy_rate": vacancy_rate,
         "my_count": P.objects.filter(managing_surveyor=request.user).count(),
         "by_type": [(r["property_type"], labels.get(r["property_type"], r["property_type"]), r["n"]) for r in by_type],
+        "lease_events": lease_events.event_summary(),
+        "rent_roll": lease_events.rent_roll(),
         "recent_changes": _with_targets(AuditEntry.objects.select_related("user", "content_type")[:10]),
     }
     return render(request, "core/dashboard.html", context)

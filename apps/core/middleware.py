@@ -22,3 +22,23 @@ class CurrentUserMiddleware:
             return self.get_response(request)
         finally:
             _current_user.reset(token)
+
+
+class RoleRequiredMiddleware:
+    """Signed-in users must have a PHAEMA role (or be a superuser) to see anything."""
+
+    OPEN_PREFIXES = ("/login/", "/logout/", "/health/", "/static/", "/text-size/", "/no-access/")
+
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        from django.shortcuts import render
+
+        from .roles import has_role
+
+        user = getattr(request, "user", None)
+        if (user is not None and user.is_authenticated and not has_role(user)
+                and not request.path.startswith(self.OPEN_PREFIXES)):
+            return render(request, "core/no_access.html", status=403)
+        return self.get_response(request)

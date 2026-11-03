@@ -54,10 +54,10 @@ def _pdf_escape(text):
     return text.replace("\\", "\\\\").replace("(", "\\(").replace(")", "\\)")
 
 
-def placeholder_pdf(heading, lines):
+def placeholder_pdf(heading, lines, banner="FICTIONAL DEMONSTRATION DOCUMENT - NOT ISSUED BY HM LAND REGISTRY"):
     """A one-page PDF clearly marked as a fictional demonstration document."""
     body = [
-        "BT /F2 11 Tf 50 800 Td (FICTIONAL DEMONSTRATION DOCUMENT - NOT ISSUED BY HM LAND REGISTRY) Tj ET",
+        f"BT /F2 11 Tf 50 800 Td ({_pdf_escape(banner)}) Tj ET",
         f"BT /F2 18 Tf 50 760 Td ({_pdf_escape(heading)}) Tj ET",
     ]
     y = 725

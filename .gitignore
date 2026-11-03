@@ -9,3 +9,4 @@ backups/
 .pytest_cache/
 .DS_Store
 *.sqlite3
+*.gfs

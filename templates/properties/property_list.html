@@ -5,27 +5,7 @@
 <div class="govuk-grid-row">
   <div class="govuk-grid-column-one-quarter">
     <form method="get" class="phaema-filters">
-      <div class="govuk-form-group">
-        <label class="govuk-label govuk-label--s" for="q">{% translate "Search" %}</label>
-        <div class="govuk-hint" id="q-hint">{% translate "Reference, name, address, postcode, UPRN or title number" %}</div>
-        <input class="govuk-input" id="q" name="q" type="search" value="{{ q }}" aria-describedby="q-hint">
-      </div>
-      {% for name, label, choices, current in filters %}
-      <div class="govuk-form-group">
-        <label class="govuk-label govuk-label--s" for="f-{{ name }}">{{ label|capfirst }}</label>
-        <select class="govuk-select" id="f-{{ name }}" name="{{ name }}">
-          <option value="">{% translate "Any" %}</option>
-          {% for value, text in choices %}<option value="{{ value }}"{% if value == current %} selected{% endif %}>{{ text }}</option>{% endfor %}
-        </select>
-      </div>
-      {% endfor %}
-      <div class="govuk-form-group">
-        <label class="govuk-label govuk-label--s" for="f-surveyor">{% translate "Managed by" %}</label>
-        <select class="govuk-select" id="f-surveyor" name="surveyor">
-          <option value="">{% translate "Anyone" %}</option>
-          {% for value, text in surveyor_options %}<option value="{{ value }}"{% if value == surveyor_selected %} selected{% endif %}>{{ text }}</option>{% endfor %}
-        </select>
-      </div>
+      {% include "properties/_filters.html" %}
       {% if request.GET.sort %}<input type="hidden" name="sort" value="{{ request.GET.sort }}">{% endif %}
       <button class="govuk-button govuk-!-margin-bottom-2" data-module="govuk-button">{% translate "Apply" %}</button>
       <p class="govuk-body-s govuk-!-margin-bottom-0"><a class="govuk-link" href="{% url 'properties:list' %}">{% translate "Clear filters" %}</a></p>
@@ -33,11 +13,11 @@
   </div>
   <div class="govuk-grid-column-three-quarters">
     <p class="govuk-body">{% blocktranslate count n=paginator.count %}{{ n }} property{% plural %}{{ n }} properties{% endblocktranslate %}
-      {% if user.is_staff %}· <a class="govuk-link" href="{% url 'admin:properties_property_add' %}">{% translate "Add a property" %}</a> · <a class="govuk-link" href="{% url 'admin:properties_property_changelist' %}">{% translate "Assign surveyors" %}</a>{% endif %}</p>
+      {% if perms.properties.add_property %}· <a class="govuk-link" href="{% url 'admin:properties_property_add' %}">{% translate "Add a property" %}</a>{% endif %}
+      {% if is_administrator %}· <a class="govuk-link" href="{% url 'admin:properties_property_changelist' %}">{% translate "Assign surveyors" %}</a> · <a class="govuk-link" href="{% url 'properties:import' %}">{% translate "Import from a spreadsheet" %}</a>{% endif %}
+      · <a class="govuk-link" href="{% url 'properties:map' %}{% if querystring %}?{{ querystring }}{% endif %}">{% translate "Show on a map" %}</a></p>
     <table class="govuk-table">
-      <thead class="govuk-table__head"><tr class="govuk-table__row">
-        {% for h in headings %}<th scope="col" class="govuk-table__header{% if h.numeric %} govuk-table__header--numeric{% endif %}" aria-sort="{{ h.aria_sort }}"><a class="phaema-sort" href="{{ h.url }}" data-sort="{{ h.aria_sort }}">{{ h.label }}</a></th>{% endfor %}
-      </tr></thead>
+      {% include "core/_sortable_head.html" %}
       <tbody class="govuk-table__body">
       {% for p in page_obj %}
         <tr class="govuk-table__row">
@@ -55,13 +35,7 @@
       {% endfor %}
       </tbody>
     </table>
-    {% if page_obj.has_other_pages %}
-    <nav class="govuk-pagination" aria-label="{% translate 'Pagination' %}">
-      {% if page_obj.has_previous %}<div class="govuk-pagination__prev"><a class="govuk-link govuk-pagination__link" href="?{{ querystring }}&page={{ page_obj.previous_page_number }}" rel="prev"><span class="govuk-pagination__link-title">{% translate "Previous" %}</span></a></div>{% endif %}
-      <p class="govuk-body govuk-!-margin-0">{% blocktranslate with n=page_obj.number total=paginator.num_pages %}Page {{ n }} of {{ total }}{% endblocktranslate %}</p>
-      {% if page_obj.has_next %}<div class="govuk-pagination__next"><a class="govuk-link govuk-pagination__link" href="?{{ querystring }}&page={{ page_obj.next_page_number }}" rel="next"><span class="govuk-pagination__link-title">{% translate "Next" %}</span></a></div>{% endif %}
-    </nav>
-    {% endif %}
+    {% include "core/_pagination.html" %}
   </div>
 </div>
 {% endblock %}

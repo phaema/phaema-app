@@ -1,6 +1,5 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 import pytest
-from django.contrib.auth.models import User
 from django.contrib.gis.geos import MultiPolygon, Polygon
 from django.core.exceptions import ValidationError
 from django.urls import reverse
@@ -11,8 +10,8 @@ from apps.properties.models import Property, Title
 
 
 @pytest.fixture
-def user(db):
-    return User.objects.create_user("officer", password="a-long-test-password", is_staff=True)
+def user(make_user):
+    return make_user("officer", "Administrators")
 
 
 @pytest.fixture

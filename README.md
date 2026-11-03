@@ -15,6 +15,15 @@ PHAEMA helps a council's estates team manage its land and property: the property
 - Title records with stored PDF documents (official copies, plans, deeds, leases)
 - Dashboard: lettable units, vacant floor space (NIA and GIA), vacancy rate, and links into filtered lists
 - A full, tamper-proof audit trail, with a change log showing who changed what and when, field by field
+- Maps on every property and a register map, with OpenStreetMap or Ordnance Survey background mapping (OS Maps API key under the PSGA)
+- HM Land Registry INSPIRE polygons: import for your area, show on maps, and set property boundaries from them
+- Spreadsheet import of properties (Excel template with drop-downs; preview with row-by-row checks before saving)
+- Leases, licences, wayleaves and other agreements, both let out and held by the council: parties, term, 1954 Act status, rent, reviews, breaks with notice deadlines, repairing and insurance terms
+- Key dates with red/amber/green warnings, and a lease register with filters (including expiring soon and overdue events) and sorting
+- Signed leases, notices and other agreement documents stored as PDFs against each lease
+- Tenants and other parties: a searchable list, and for each party every agreement (as tenant, landlord or guarantor) and every property involved
+- Dashboard: overdue and upcoming lease events by type, rent roll by holding purpose, WAULT to expiry and to first break
+- Three roles: Administrators (change anything), Surveyors (change the properties they manage) and Viewers (read only), applied on every screen, in data entry and in the API. See [users and roles](docs/roles.md)
 - Adjustable text size (standard, large, largest)
 - Photos and documents are only available to signed-in users; photos are stripped of location data on upload
 - Optional modules that each council switches on or off (rent ledger, service charges, maintenance, compliance, Golden Thread)

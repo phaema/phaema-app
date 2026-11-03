@@ -1,7 +1,11 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 from django.contrib.gis import admin
+from django.core.exceptions import ValidationError
 
-from .models import Property, PropertyPhoto, Title, TitleDocument
+from apps.core.admin_roles import AdministratorOnlyEditingMixin, RoleAdminMixin, RoleInlineMixin
+from apps.core.roles import is_administrator
+
+from .models import InspireParcel, Property, PropertyPhoto, Title, TitleDocument
 
 
 class TitleInline(admin.TabularInline):
@@ -11,14 +15,14 @@ class TitleInline(admin.TabularInline):
     verbose_name_plural = "titles"
 
 
-class PhotoInline(admin.TabularInline):
+class PhotoInline(RoleInlineMixin, admin.TabularInline):
     model = PropertyPhoto
     extra = 1
     fields = ("image", "caption", "taken_on", "is_main", "order")
 
 
 @admin.register(Property)
-class PropertyAdmin(admin.GISModelAdmin):
+class PropertyAdmin(AdministratorOnlyEditingMixin, RoleAdminMixin, admin.GISModelAdmin):
     list_display = ("reference", "name", "property_type", "holding_purpose", "occupation", "managing_surveyor", "postcode")
     list_editable = ("managing_surveyor",)  # assign surveyors to many properties at once
     list_filter = ("property_type", "holding_purpose", "tenure", "occupation", "managing_surveyor")
@@ -31,21 +35,56 @@ class PropertyAdmin(admin.GISModelAdmin):
         ("Identifiers and address", {"fields": ("uprn", "usrn", "address_line_1", "address_line_2", "town", "postcode")}),
         ("Classification", {"fields": ("holding_purpose", "tenure", "occupation", "use_description", "use_class")}),
         ("Areas", {"fields": ("gia_sqm", "nia_sqm", "site_area_ha")}),
-        ("Location", {"fields": ("easting", "northing", "boundary")}),
+        ("Location", {"fields": ("easting", "northing", "boundary", "boundary_source")}),
         ("Other", {"fields": ("exclude_from_publication", "notes")}),
     )
 
+    def get_readonly_fields(self, request, obj=None):
+        # Only administrators assign surveyors; a surveyor's new properties are their own.
+        return () if is_administrator(request.user) else ("managing_surveyor",)
 
-class DocumentInline(admin.TabularInline):
+    def get_form(self, request, obj=None, **kwargs):
+        form = super().get_form(request, obj, **kwargs)
+        if is_administrator(request.user):
+            return form
+        user = request.user
+
+        class SurveyorPropertyForm(form):
+            def clean_parent(self):
+                parent = self.cleaned_data.get("parent")
+                if parent and parent.managing_surveyor_id != user.pk:
+                    raise ValidationError("You can only add parts to properties you manage.")
+                return parent
+
+        return SurveyorPropertyForm
+
+    def save_model(self, request, obj, form, change):
+        if not change and not is_administrator(request.user):
+            obj.managing_surveyor = request.user
+        super().save_model(request, obj, form, change)
+
+
+class DocumentInline(RoleInlineMixin, admin.TabularInline):
     model = TitleDocument
     extra = 1
     fields = ("document_type", "file", "description", "document_date")
 
 
 @admin.register(Title)
-class TitleAdmin(admin.ModelAdmin):
+class TitleAdmin(RoleAdminMixin, admin.ModelAdmin):
     list_display = ("__str__", "tenure", "title_class", "deeds_location")
     list_filter = ("tenure", "title_class")
     search_fields = ("title_number", "properties__reference", "properties__name")
     filter_horizontal = ("properties",)
     inlines = [DocumentInline]
+
+
+@admin.register(InspireParcel)
+class InspireParcelAdmin(admin.GISModelAdmin):
+    list_display = ("inspire_id", "source_file", "imported_at")
+    search_fields = ("inspire_id",)
+    readonly_fields = ("inspire_id", "source_file", "imported_at", "valid_from")
+    gis_widget_kwargs = {"attrs": {"default_lon": -1.5, "default_lat": 52.5, "default_zoom": 6}}
+
+    def has_add_permission(self, request):
+        return False  # import from HM Land Registry files instead

@@ -54,8 +54,47 @@
       </tbody>
     </table>
     {% else %}
-    <p class="govuk-body">{% translate "No properties yet." %}{% if user.is_staff %} <a class="govuk-link" href="{% url 'admin:properties_property_add' %}">{% translate "Add the first property" %}</a>.{% endif %}</p>
+    <p class="govuk-body">{% translate "No properties yet." %}{% if perms.properties.add_property %} <a class="govuk-link" href="{% url 'admin:properties_property_add' %}">{% translate "Add the first property" %}</a>.{% endif %}</p>
     {% endif %}
+  </div>
+</div>
+
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-one-half">
+    <h2 class="govuk-heading-m">{% translate "Lease events" %}</h2>
+    <table class="govuk-table">
+      <thead class="govuk-table__head"><tr class="govuk-table__row">
+        <th scope="col" class="govuk-table__header">{% translate "Event" %}</th>
+        <th scope="col" class="govuk-table__header govuk-table__header--numeric">{% translate "Overdue" %}</th>
+        <th scope="col" class="govuk-table__header govuk-table__header--numeric">{% translate "Next 6 months" %}</th>
+      </tr></thead>
+      <tbody class="govuk-table__body">
+      {% for ev in lease_events %}
+        <tr class="govuk-table__row">
+          <th scope="row" class="govuk-table__header">{{ ev.label }}</th>
+          <td class="govuk-table__cell govuk-table__cell--numeric">{% if ev.overdue is None %}<span class="govuk-body-s">–</span>{% elif ev.overdue %}<a class="govuk-link phaema-overdue" href="{% url 'leases:list' %}?event={{ ev.overdue_key }}">{{ ev.overdue }}</a>{% else %}0{% endif %}</td>
+          <td class="govuk-table__cell govuk-table__cell--numeric">{% if ev.due is None %}<span class="govuk-body-s">–</span>{% elif ev.due %}<a class="govuk-link" href="{% url 'leases:list' %}?event={{ ev.due_key }}">{{ ev.due }}</a>{% else %}0{% endif %}</td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+    <p class="govuk-body-s">{% translate "Overdue: a review date has passed without the new rent being recorded, an agreement has expired but is still marked current, or a tenant is holding over. Breaks and notice deadlines simply lapse once passed, so only upcoming ones are shown." %}</p>
+  </div>
+  <div class="govuk-grid-column-one-half">
+    <h2 class="govuk-heading-m">{% translate "Rent roll" %}</h2>
+    <div class="phaema-stat">
+      <span class="phaema-stat__value">£{{ rent_roll.total|floatformat:0|intcomma }}</span>
+      <span class="govuk-body">{% blocktranslate count n=rent_roll.agreements %}a year from {{ n }} live agreement{% plural %}a year from {{ n }} live agreements{% endblocktranslate %}{% if rent_roll.nil_rent %} ({{ rent_roll.nil_rent }} {% translate "at nil or peppercorn rent" %}){% endif %}</span>
+    </div>
+    <dl class="govuk-summary-list">
+      {% for label, row in rent_roll.by_purpose %}
+      <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{{ label }}</dt><dd class="govuk-summary-list__value">£{{ row.rent|floatformat:0|intcomma }} <span class="govuk-body-s">({{ row.count }})</span></dd></div>
+      {% endfor %}
+      <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "WAULT to expiry" %}</dt><dd class="govuk-summary-list__value">{% if rent_roll.wault_expiry is not None %}{{ rent_roll.wault_expiry }} {% translate "years" %}{% else %}–{% endif %}</dd></div>
+      <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "WAULT to first break" %}</dt><dd class="govuk-summary-list__value">{% if rent_roll.wault_break is not None %}{{ rent_roll.wault_break }} {% translate "years" %}{% else %}–{% endif %}</dd></div>
+      {% if rent_roll.payable_count %}<div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Rent paid by the council" %}</dt><dd class="govuk-summary-list__value">£{{ rent_roll.payable|floatformat:0|intcomma }} <span class="govuk-body-s">({{ rent_roll.payable_count }} {% translate "held" %})</span></dd></div>{% endif %}
+    </dl>
+    <p class="govuk-body-s">{% translate "WAULT: weighted average unexpired lease term, weighted by rent; periodic agreements are excluded. Payments, arrears and collection rates will appear here once the rent ledger is added." %}</p>
   </div>
 </div>
 
