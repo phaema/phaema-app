@@ -111,3 +111,27 @@ def test_api_requires_auth_and_lists(client, user, estate):
 
 def test_health(client, db):
     assert client.get("/health/").json() == {"status": "ok"}
+
+
+def test_demo_data_loads_valid_records_and_is_repeatable(db):
+    from django.core.management import call_command
+
+    call_command("load_demo_data", verbosity=0)
+    first_count = Property.objects.count()
+    assert first_count > 30
+    for p in Property.objects.all():
+        p.full_clean()
+    for t in Title.objects.all():
+        t.full_clean()
+    assert Property.objects.get(reference="DM-E01-U03").parent.parent.reference == "DM-E01"
+    assert Property.objects.filter(exclude_from_publication=True).count() == 1
+    assert ModuleSettings.load().organisation_name == "Demonstration District Council"
+
+    call_command("load_demo_data", verbosity=0)  # running again must not duplicate
+    assert Property.objects.count() == first_count
+    assert Title.objects.count() == 8
+
+    Property.objects.create(reference="REAL-1", name="A real council record", property_type="site")
+    call_command("load_demo_data", "--reset", verbosity=0)  # reset leaves real records alone
+    assert Property.objects.filter(reference="REAL-1").exists()
+    assert Property.objects.count() == first_count + 1

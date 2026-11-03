@@ -12,6 +12,7 @@ Usage: ./phaema.sh <command>
   stop         Stop PHAEMA (your data is kept)
   update       Download the latest code from GitHub, rebuild and restart
   admin        Create a user who can sign in and manage data
+  demo-data    Load the fictional Exampleton demonstration estate
   logs         Show live logs (press Ctrl+C to stop watching)
   status       Show whether PHAEMA is running
   backup       Save a copy of the database to the backups folder
@@ -36,6 +37,7 @@ case "${1:-}" in
   stop)    compose down ;;
   update)  git pull --ff-only && "$0" start ;;
   admin)   compose exec web python manage.py createsuperuser ;;
+  demo-data) compose exec web python manage.py load_demo_data "${@:2}" ;;
   logs)    compose logs -f ;;
   status)  compose ps ;;
   backup)
