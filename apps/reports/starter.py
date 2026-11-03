@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 """Reports PHAEMA provides out of the box. Administrators can adjust them; anyone can copy them."""
 
-CATEGORIES = ["Property and assets", "Leases and key dates", "Rents and income", "Contacts", "Data quality"]
+CATEGORIES = ["Property and assets", "Leases and key dates", "Cases", "Rents and income", "Contacts", "Data quality"]
 LEDGER_CATEGORY = "Rents and income"  # shown only when the rent ledger is switched on
 
 LIVE = {"in": ["current", "holding_over"]}
@@ -91,6 +91,29 @@ STARTERS = [
      "columns": ["reference", "counterparty", "premises", "term_end", "next_review_date", "annual_rent",
                  "rent_frequency", "surveyor"],
      "filters": {"status": LIVE, "direction": {"in": ["in"]}}, "sort_by": "annual_rent", "sort_descending": True},
+    # ---- cases
+    {"starter": "open_cases", "category": "Cases", "name": "Open cases by stage and owner", "dataset": "cases",
+     "description": "Every open or on-hold case, for workload and allocation.",
+     "columns": ["reference", "case_type", "title", "stage", "status", "owner", "received_on", "target_date"],
+     "filters": {"status": {"in": ["open", "on_hold"]}}, "sort_by": "owner"},
+    {"starter": "cases_past_target", "category": "Cases", "name": "Cases past their target date", "dataset": "cases",
+     "description": "Open cases whose target decision date has passed.",
+     "columns": ["reference", "case_type", "title", "stage", "owner", "received_on", "target_date"],
+     "filters": {"status": {"in": ["open", "on_hold"]}, "target_date": {"before_today": True}},
+     "sort_by": "target_date"},
+    {"starter": "consent_decisions", "category": "Cases", "name": "Consent decisions: time to decision",
+     "dataset": "cases",
+     "description": "Consent requests decided in the last 12 months, with the days from a complete application "
+                    "to the decision: evidence of deciding within a reasonable time under the 1988 Act.",
+     "columns": ["reference", "case_type", "applicant", "received_on", "application_complete_on", "decision",
+                 "decision_on", "days_to_decision", "owner"],
+     "filters": {"group": {"in": ["consent"]}, "decision_on": {"last_days": 365}}, "sort_by": "decision_on",
+     "sort_descending": True},
+    {"starter": "cases_closed_12m", "category": "Cases", "name": "Cases closed in the last 12 months",
+     "dataset": "cases", "description": "Closed cases by type and outcome, for annual reporting.",
+     "columns": ["reference", "case_type", "title", "decision", "received_on", "closed_on", "owner"],
+     "filters": {"status": {"in": ["closed"]}, "closed_on": {"last_days": 365}}, "sort_by": "closed_on",
+     "sort_descending": True},
     # ---- rents and income
     {"starter": "rent_arrears", "category": "Rents and income",
      "name": "Rent arrears (overdue payments)", "dataset": "rent_accounts",

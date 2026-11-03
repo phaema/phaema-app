@@ -87,3 +87,15 @@ html.phaema-text-largest { font-size: 150%; }
 @media print {
   .phaema-header, .phaema-settings-bar, .govuk-phase-banner, .phaema-subnav, .govuk-details, .govuk-footer { display: none !important; }
 }
+.phaema-stages { display: flex; flex-wrap: wrap; list-style: none; padding: 0; margin: 0 0 30px; counter-reset: stage; }
+.phaema-stages li { flex: 1 1 120px; padding: 8px 10px; border-bottom: 5px solid var(--ph-border, #b1b4b6); font-size: 1rem; color: var(--ph-secondary, #505a5f); }
+.phaema-stages li::before { counter-increment: stage; content: counter(stage) ". "; }
+.phaema-stages li.done { border-color: var(--ph-accent, #00703c); color: var(--ph-text, #0b0c0c); }
+.phaema-stages li.current { border-color: var(--ph-link, #1d70b8); font-weight: 700; color: var(--ph-text, #0b0c0c); }
+.phaema-tasks li { display: flex; gap: 10px; align-items: baseline; }
+.phaema-tick { width: 24px; height: 24px; flex: none; border: 2px solid var(--ph-text, #0b0c0c); background: var(--ph-input-bg, #fff); color: var(--ph-text, #0b0c0c); font-weight: 700; cursor: pointer; padding: 0; line-height: 18px; text-align: center; display: inline-block; }
+.phaema-tick.done { background: var(--ph-accent, #00703c); border-color: var(--ph-accent, #00703c); color: #fff; }
+.phaema-done { text-decoration: line-through; color: var(--ph-secondary, #505a5f); }
+.phaema-timeline li { border-left: 3px solid var(--ph-border, #b1b4b6); padding: 0 0 15px 15px; margin-bottom: 5px; }
+.phaema-timeline__when { display: block; color: var(--ph-secondary, #505a5f); }
+.phaema-email-text { white-space: normal; font-size: 1rem; max-height: 300px; overflow-y: auto; }

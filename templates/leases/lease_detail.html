@@ -133,6 +133,10 @@
   {% if user|can_edit:object %}<p class="govuk-body-s"><a class="govuk-link" href="{% url 'admin:leases_lease_change' object.pk %}#documents-group">{% translate "Add a document" %}</a></p>{% endif %}
 
   {% if object.notes %}<h2 class="govuk-heading-m">{% translate "Notes" %}</h2><p class="govuk-body">{{ object.notes|linebreaksbr }}</p>{% endif %}
+
+  <h2 class="govuk-heading-m">{% translate "Cases" %}</h2>
+  {% include "cases/_case_rows.html" with cases=object.cases.all %}
+  {% if user|can_edit:object %}<p class="govuk-body-s"><a class="govuk-link" href="{% url 'cases:new' %}?lease={{ object.pk }}">{% translate "Start a case" %}</a></p>{% endif %}
 </div>
 <div class="govuk-grid-column-one-third">
   <h2 class="govuk-heading-m">{% translate "Premises" %}</h2>

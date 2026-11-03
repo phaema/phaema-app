@@ -7,6 +7,10 @@ summary: What the dashboard figures mean and where they come from.
 
 The dashboard is the first page you see after signing in. Everything on it is a link to the records behind it.
 
+## Cases
+
+Open [cases](cases.md), how many are past their target date, how many are yours, and overdue case tasks.
+
 ## Lease events
 
 A count of open [events](events.md) by type (rent reviews, break notice deadlines, breaks, expiries and other

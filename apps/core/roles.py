@@ -5,6 +5,8 @@ Administrators  can view and change everything, manage users, import data and ch
 Surveyors       can view everything, and change the properties they manage (and those
                 properties' photos, leases and boundaries). They can add properties, which
                 become theirs, and add leases on their own properties.
+Contributors    can view everything, and add notes, documents and correspondence to the cases
+                they are added to (for example the legal team). They change nothing else.
 Viewers         can view everything and change nothing.
 
 Superusers (created with ./phaema.sh admin) can do everything. A signed-in user who is in
@@ -14,10 +16,11 @@ from django.contrib.auth.models import Group, Permission
 
 ADMINISTRATORS = "Administrators"
 SURVEYORS = "Surveyors"
+CONTRIBUTORS = "Contributors"
 VIEWERS = "Viewers"
-ROLES = (ADMINISTRATORS, SURVEYORS, VIEWERS)
+ROLES = (ADMINISTRATORS, SURVEYORS, CONTRIBUTORS, VIEWERS)
 
-PHAEMA_APPS = ("core", "properties", "leases", "ledger", "servicecharges")
+PHAEMA_APPS = ("core", "properties", "leases", "ledger", "servicecharges", "cases")
 
 # Permissions held by each role, as "app_label.codename". Object-level rules (only your
 # own properties) are applied on top of these by can_edit().
@@ -30,6 +33,7 @@ SURVEYOR_PERMISSIONS = {
     "leases.add_leasedocument", "leases.change_leasedocument", "leases.delete_leasedocument",
     "leases.add_leaseevent", "leases.change_leaseevent",
     "leases.add_rentscheduleentry", "leases.change_rentscheduleentry", "leases.delete_rentscheduleentry",
+    "cases.add_case", "cases.change_case",
 }
 ADMIN_EXTRA = {
     "auth.view_user", "auth.add_user", "auth.change_user",
@@ -52,6 +56,9 @@ def ensure_roles(**kwargs):
 
     viewers, _ = Group.objects.get_or_create(name=VIEWERS)
     viewers.permissions.set(view_all)
+
+    contributors, _ = Group.objects.get_or_create(name=CONTRIBUTORS)
+    contributors.permissions.set(view_all)
 
     surveyors, _ = Group.objects.get_or_create(name=SURVEYORS)
     surveyors.permissions.set(list(view_all) + _perms(SURVEYOR_PERMISSIONS))

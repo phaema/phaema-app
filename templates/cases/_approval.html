@@ -1,0 +1,40 @@
+{% load i18n phaema %}
+{% if pending_approval %}
+<div class="govuk-notification-banner" role="region" aria-labelledby="approval-title" data-module="govuk-notification-banner">
+  <div class="govuk-notification-banner__header"><h2 class="govuk-notification-banner__title" id="approval-title">{% translate "Waiting for approval" %}</h2></div>
+  <div class="govuk-notification-banner__content">
+    <p class="govuk-body">{% blocktranslate with who=pending_approval.requested_by|person:"PHAEMA" approver=pending_approval.approver|person:"–" stage=pending_approval.get_stage_display when=pending_approval.created_at|date:"j M Y" %}{{ who }} asked {{ approver }} on {{ when }} to approve moving to {{ stage }}.{% endblocktranslate %}</p>
+    <p class="govuk-body"><strong>{% translate "Recommendation" %}</strong><br>{{ pending_approval.recommendation|linebreaksbr }}</p>
+    {% if can_decide_approval %}
+    <form method="post">{% csrf_token %}
+      <div class="govuk-form-group"><label class="govuk-label govuk-label--s" for="approval-comments">{% translate "Your comments" %}</label><div class="govuk-hint">{% translate "Needed if you return it. Kept on the case." %}</div><textarea class="govuk-textarea" id="approval-comments" name="comments" rows="3"></textarea></div>
+      <div class="govuk-button-group">
+        <button class="govuk-button" name="action" value="approve" data-module="govuk-button">{% translate "Approve" %}</button>
+        <button class="govuk-button govuk-button--warning" name="action" value="return" data-module="govuk-button">{% translate "Return with comments" %}</button>
+      </div>
+    </form>
+    {% elif pending_approval.requested_by == request.user %}
+    <form method="post">{% csrf_token %}<input type="hidden" name="action" value="withdraw_approval"><button class="govuk-button govuk-button--secondary govuk-!-margin-bottom-0" data-module="govuk-button">{% translate "Withdraw the request" %}</button></form>
+    {% endif %}
+    {% if is_administrator %}
+    <form method="post" class="phaema-inline-fields govuk-!-margin-top-3">{% csrf_token %}<input type="hidden" name="action" value="reassign_approval">
+      <label class="govuk-label govuk-!-margin-right-2" for="reassign">{% translate "Send to someone else" %}</label>
+      <select class="govuk-select" id="reassign" name="approver">{% for p in approvers %}{% if p != pending_approval.requested_by %}<option value="{{ p.pk }}"{% if p == pending_approval.approver %} selected{% endif %}>{{ p.get_full_name|default:p.username }}</option>{% endif %}{% endfor %}</select>
+      <button class="govuk-button govuk-button--secondary govuk-!-margin-bottom-0" data-module="govuk-button">{% translate "Send" %}</button>
+    </form>
+    {% endif %}
+  </div>
+</div>
+{% elif approval_gate and can_work and case.is_open %}
+<div class="govuk-inset-text">
+  <h2 class="govuk-heading-s govuk-!-margin-bottom-2">{% blocktranslate with stage=approval_gate_label %}Approval needed to move to {{ stage }}{% endblocktranslate %}</h2>
+  {% if my_approver %}
+  <form method="post">{% csrf_token %}<input type="hidden" name="action" value="request_approval"><input type="hidden" name="stage" value="{{ approval_gate }}">
+    <div class="govuk-form-group"><label class="govuk-label govuk-label--s" for="recommendation">{% translate "Your recommendation" %}</label><div class="govuk-hint">{% translate "What you propose, and why. For a consent, include any conditions." %}</div><textarea class="govuk-textarea" id="recommendation" name="recommendation" rows="5"></textarea></div>
+    <button class="govuk-button govuk-!-margin-bottom-0" data-module="govuk-button">{% blocktranslate with name=my_approver.get_full_name|default:my_approver.username %}Ask {{ name }} for approval{% endblocktranslate %}</button>
+  </form>
+  {% else %}
+  <p class="govuk-body"><strong class="govuk-tag govuk-tag--red">{% translate "No supervisor" %}</strong> {% translate "You have no supervisor in PHAEMA to approve this. Ask an administrator to set one on your user record." %}</p>
+  {% endif %}
+</div>
+{% endif %}

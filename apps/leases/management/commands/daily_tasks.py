@@ -12,6 +12,9 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         rents = sync_all()
+        from apps.cases.workflow import auto_open
+
+        cases = auto_open()
         emails = send_reminders(base_url=settings.PHAEMA_BASE_URL)
         from apps.core.models import ModuleSettings
 
@@ -19,4 +22,4 @@ class Command(BaseCommand):
             from apps.servicecharges.deadlines import send_weekly
 
             emails += send_weekly(base_url=settings.PHAEMA_BASE_URL)
-        self.stdout.write(f"Rents updated: {rents}. Reminder emails sent: {emails}.")
+        self.stdout.write(f"Rents updated: {rents}. Cases opened: {cases}. Reminder emails sent: {emails}.")

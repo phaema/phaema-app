@@ -6,14 +6,27 @@ from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.models import Group
 
 from .roles import ROLES
+from apps.core.models import StaffProfile, supervisor_of
 
 User = get_user_model()
 admin.site.unregister(User)
 
 
+class StaffProfileInline(admin.StackedInline):
+    model = StaffProfile
+    can_delete = False
+    fk_name = "user"
+    extra = 1
+    verbose_name = verbose_name_plural = "Staff details"
+    max_num = 1
+    autocomplete_fields = ["supervisor"]
+
+
 @admin.register(User)
 class PhaemaUserAdmin(UserAdmin):
-    list_display = ("username", "first_name", "last_name", "email", "role", "is_active", "last_login")
+    inlines = [StaffProfileInline]
+    search_fields = ("username", "first_name", "last_name", "email")
+    list_display = ("username", "first_name", "last_name", "email", "role", "supervisor", "is_active", "last_login")
     list_filter = ("groups", "is_active", "is_superuser")
     fieldsets = (
         (None, {"fields": ("username", "password")}),
@@ -27,6 +40,11 @@ class PhaemaUserAdmin(UserAdmin):
         (None, {"classes": ("wide",), "fields": ("username", "first_name", "last_name", "email",
                                                  "password1", "password2", "groups")}),
     )
+
+    @admin.display(description="Supervisor")
+    def supervisor(self, obj):
+        boss = supervisor_of(obj)
+        return (boss.get_full_name() or boss.username) if boss else "–"
 
     @admin.display(description="Role")
     def role(self, obj):

@@ -1,0 +1,13 @@
+{% autoescape off %}Hello {{ user.get_full_name|default:user.username }},
+
+{{ approval.decided_by.get_full_name|default:approval.decided_by.username }} has {% if approval.status == "approved" %}approved{% else %}returned{% endif %} your request on this case:
+
+{{ case.display_reference }}: {{ case.title }}
+{% if approval.comments %}
+Comments:
+{{ approval.comments }}
+{% endif %}{% if base_url %}
+{{ base_url }}{{ case.get_absolute_url }}
+{% endif %}
+PHAEMA – Property Holding and Estate Management Application
+{% endautoescape %}

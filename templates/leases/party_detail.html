@@ -43,6 +43,8 @@
   <ul class="govuk-list">{% for a in rent_accounts %}<li><a class="govuk-link" href="{% url 'ledger:account' a.lease.pk %}">{{ a.lease.reference }}</a>: £{{ a.balance|floatformat:2|intcomma }}{% if a.overdue %} ({% translate "overdue" %} £{{ a.overdue|floatformat:2|intcomma }}){% endif %}</li>{% endfor %}</ul>
   {% endif %}
 
+  {% with party_cases=object.cases.all %}{% if party_cases %}<h2 class="govuk-heading-m">{% translate "Cases" %}</h2>
+  {% include "cases/_case_rows.html" with cases=party_cases %}{% endif %}{% endwith %}
   <h2 class="govuk-heading-m">{% translate "Properties" %}</h2>
   {% if properties %}
   <ul class="govuk-list">{% for p in properties %}<li><a class="govuk-link" href="{{ p.get_absolute_url }}">{{ p.reference }} {{ p.name }}</a> – {{ p.get_occupation_display|default:p.get_property_type_display }}</li>{% endfor %}</ul>

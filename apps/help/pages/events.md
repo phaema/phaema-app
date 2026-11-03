@@ -71,6 +71,11 @@ Record one of:
 
 Mark the event completed (or no longer needed) and add notes.
 
+## Cases
+
+PHAEMA opens a [case](cases.md) for each rent review, break and expiry ahead of its date, to hold the work:
+notes, emails, tasks and documents. Recording the event's outcome closes the case.
+
 ## Reminders
 
 PHAEMA emails people about their upcoming and overdue events, and events can appear in Outlook. See
