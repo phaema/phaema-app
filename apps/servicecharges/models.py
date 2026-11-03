@@ -22,6 +22,7 @@ HEADINGS = [
     ("GRN", "Landscaping and grounds"), ("ROAD", "Roads, paths and lighting"), ("UTIL", "Utilities for common parts"),
     ("INS", "Insurance"), ("WASTE", "Waste and recycling"), ("FIRE", "Fire safety and compliance"),
     ("LIFT", "Lifts and plant"), ("SINK", "Reserve or sinking fund"), ("OTH", "Other"),
+    ("INC", "Income and credits"),
 ]
 
 
@@ -108,7 +109,22 @@ class ScheduleYear(TimeStampedModel):
     end = models.DateField(_("year end"))
     status = models.CharField(_("status"), max_length=12, choices=Status.choices, default=Status.DRAFT)
     budget_approved_on = models.DateField(_("budget approved"), null=True, blank=True)
+    budget_commentary = models.TextField(
+        _("budget commentary"), blank=True,
+        help_text=_("Explains the budget to tenants: main changes from last year, planned works, contracts. "
+                    "Shown on the tenant budget statement."))
+    budget_issued_on = models.DateField(
+        _("budget issued to tenants"), null=True, blank=True,
+        help_text=_("RICS expects the budget to reach tenants at least one month before the year starts."))
     reconciled_on = models.DateField(_("reconciled"), null=True, blank=True)
+    statements_issued_on = models.DateField(
+        _("year-end statements issued"), null=True, blank=True,
+        help_text=_("RICS expects year-end statements within four months of the year end."))
+    certified_by = models.CharField(_("certified by"), max_length=150, blank=True,
+                                    help_text=_("Who certified the year-end statement."))
+    certification_notes = models.TextField(_("certification and review"), blank=True,
+                                           help_text=_("For example, the accountant's review or audit of the statement."))
+    apportionment = models.JSONField(_("apportionment at reconciliation"), default=dict, blank=True, editable=False)
     notes = models.TextField(_("notes"), blank=True)
 
     class Meta:
@@ -122,6 +138,18 @@ class ScheduleYear(TimeStampedModel):
     @property
     def label(self):
         return f"{self.start:%Y}/{self.end:%y}" if self.start.year != self.end.year else f"{self.start:%Y}"
+
+    @property
+    def budget_due(self):
+        from apps.core.dates import add_months
+
+        return add_months(self.start, -1)
+
+    @property
+    def statements_due(self):
+        from apps.core.dates import add_months
+
+        return add_months(self.end, 4)
 
     @property
     def days(self):
@@ -151,13 +179,25 @@ class BudgetLine(models.Model):
 
 
 class Expenditure(TimeStampedModel):
+    class Kind(models.TextChoices):
+        COST = "cost", _("Cost")
+        INCOME = "income", _("Income or credit (interest, rebate, commission)")
+
     year = models.ForeignKey(ScheduleYear, on_delete=models.CASCADE, related_name="expenditure")
     heading = models.ForeignKey(CostHeading, on_delete=models.PROTECT, related_name="expenditure")
     spent_on = models.DateField(_("date"))
     supplier = models.CharField(_("supplier"), max_length=150, blank=True)
     description = models.CharField(_("description"), max_length=200)
     invoice_reference = models.CharField(_("invoice or finance reference"), max_length=60, blank=True)
-    amount = models.DecimalField(_("amount (£, net of recoverable VAT)"), max_digits=12, decimal_places=2)
+    amount = models.DecimalField(_("amount (£, net of recoverable VAT)"), max_digits=12, decimal_places=2,
+                                 help_text=_("A positive amount, for costs and income alike."))
+    kind = models.CharField(_("type"), max_length=10, choices=Kind.choices, default=Kind.COST,
+                            help_text=_("Income such as interest, rebates and commissions is credited to the "
+                                        "service charge and reduces what tenants pay."))
+    recoverable = models.BooleanField(
+        _("recoverable from tenants"), default=True,
+        help_text=_("Untick for costs the council bears itself, such as improvements or costs the leases "
+                    "do not allow."))
 
     class Meta:
         ordering = ["spent_on", "pk"]

@@ -21,7 +21,12 @@ class ExpenditureSheet(Sheet):
                guidance="The supplier's invoice or the finance system's reference. A row with a reference already in "
                         "the same year is updated, not added twice."),
         Column("Amount", "amount", "decimal", required=True, example="420.00",
-               guidance="In pounds, net of any VAT the council recovers."),
+               guidance="In pounds, net of any VAT the council recovers. Always positive, for income too."),
+        Column("Type", "kind", "choice", example="Cost",
+               guidance="Cost (the default), or Income for interest, rebates and commissions credited to the "
+                        "service charge."),
+        Column("Recoverable", "recoverable", "bool", example="Yes",
+               guidance="No for costs the council bears itself, such as improvements. Defaults to Yes."),
     ]
 
     def duplicate_key(self, values):
@@ -72,6 +77,8 @@ class ExpenditureSheet(Sheet):
             if obj.pk and obj.heading_id != heading.pk:
                 result.changed.append("Heading")
             obj.heading = heading
+        if obj.amount is not None and obj.amount < 0:
+            result.errors.append("Amount: enter a positive amount; use Type = Income for credits.")
         if schedule and obj.spent_on and year is None:
             result.errors.append(f"Date: {schedule.name} has no service charge year covering "
                                  f"{obj.spent_on:%d/%m/%Y}. Add the year first.")

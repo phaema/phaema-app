@@ -52,9 +52,11 @@ def setup(today=None):
     current = _year_start(today)
     for start, growth in ((date(current.year - 1, 4, 1), Decimal("1")), (current, Decimal("1.04"))):
         end = date(start.year + 1, 3, 31)
-        year = ScheduleYear.objects.create(schedule=schedule, start=start, end=end,
-                                           status=ScheduleYear.Status.APPROVED,
-                                           budget_approved_on=start - timedelta(days=30))
+        year = ScheduleYear.objects.create(
+            schedule=schedule, start=start, end=end, status=ScheduleYear.Status.APPROVED,
+            budget_approved_on=start - timedelta(days=50), budget_issued_on=start - timedelta(days=40),
+            budget_commentary="Security patrols re-tendered last year; landscaping and waste contracts rise with "
+                              "inflation. Repairs allow for pothole repairs to the estate road.")
         for code, amount in BUDGET.items():
             BudgetLine.objects.create(year=year, heading=headings[code], amount=(Decimal(amount) * growth).quantize(
                 Decimal("1")))
@@ -73,6 +75,15 @@ def setup(today=None):
                     supplier=SUPPLIERS[code], description=f"{headings[code].name}, {month:%B %Y}",
                     invoice_reference=f"DEMO-SC-{start:%y}-{n:04d}", amount=value.quantize(Decimal("0.01")))
             month = add_months(month, 1)
+        if start < current:  # last year: interest earned, an insurance commission rebate, and an improvement
+            for code, desc, amount, kind, recoverable in [
+                    ("INC", "Interest on the service charge account", "185.40", "income", True),
+                    ("INC", "Insurance commission returned to the service charge", "240.00", "income", True),
+                    ("ROAD", "LED street lighting upgrade (improvement, not recoverable)", "3800.00", "cost", False)]:
+                n += 1
+                Expenditure.objects.create(year=year, heading=headings[code], spent_on=end - timedelta(days=20),
+                                           description=desc, invoice_reference=f"DEMO-SC-{start:%y}-{n:04d}",
+                                           amount=Decimal(amount), kind=kind, recoverable=recoverable)
     return schedule
 
 

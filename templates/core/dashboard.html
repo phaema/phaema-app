@@ -62,6 +62,8 @@
 
 <div class="govuk-grid-row">
   <div class="govuk-grid-column-one-half">
+    {% if service_deadlines %}<div class="govuk-inset-text govuk-!-margin-top-0"><strong>{% translate "Service charge deadlines" %}</strong>
+      <ul class="govuk-list govuk-body-s govuk-!-margin-bottom-0">{% for d in service_deadlines %}<li><strong class="govuk-tag govuk-tag--{{ d.colour }}">{% if d.days < 0 %}{% translate "Overdue" %}{% else %}{{ d.due|date:"j M" }}{% endif %}</strong> <a class="govuk-link" href="{% if d.year %}{{ d.year.get_absolute_url }}{% else %}{{ d.schedule.get_absolute_url }}{% endif %}">{{ d.schedule.name }}</a>: {{ d.what }}</li>{% endfor %}</ul></div>{% endif %}
     <h2 class="govuk-heading-m">{% translate "Lease events" %}</h2>
   {% include "core/_hint.html" with summary=_("What counts as overdue?") text=_("An event is overdue when its date has passed and nobody has recorded the outcome. Break dates and notice deadlines lapse on their own once passed.") page="events" anchor="status-and-colours" %}
     <table class="govuk-table">

@@ -109,6 +109,27 @@ class Property(TimeStampedModel):
         _("site area (hectares)"), max_digits=12, decimal_places=4, null=True, blank=True,
         validators=[MinValueValidator(0)],
     )
+    gea_sqm = models.DecimalField(
+        _("gross external area (m²)"), max_digits=12, decimal_places=2, null=True, blank=True,
+        validators=[MinValueValidator(0)],
+    )
+
+    class AreaStandard(models.TextChoices):
+        COMP6 = "comp6", _("RICS Code of Measuring Practice, 6th edition")
+        IPMS = "ipms", _("IPMS: All Buildings")
+        OTHER = "other", _("Other")
+
+    class AreaSource(models.TextChoices):
+        SURVEY = "survey", _("Measured survey")
+        DRAWINGS = "drawings", _("Taken from drawings")
+        PLAN = "plan", _("Lease or title plan")
+        ESTIMATE = "estimate", _("Estimate")
+
+    area_standard = models.CharField(
+        _("measured to"), max_length=10, choices=AreaStandard.choices, blank=True,
+        help_text=_("The measurement standard the floor areas follow. RICS asks for the basis to be recorded."))
+    area_source = models.CharField(_("source of areas"), max_length=10, choices=AreaSource.choices, blank=True)
+    areas_measured_on = models.DateField(_("areas measured on"), null=True, blank=True)
 
     # Location (British National Grid)
     easting = models.PositiveIntegerField(_("easting"), null=True, blank=True)

@@ -128,6 +128,12 @@ STARTERS = [
      "description": "Nobody is responsible for these, so their lease events are not assigned to anyone.",
      "columns": ["reference", "name", "property_type", "parent", "postcode", "occupation", "holding_purpose"],
      "filters": {"managing_surveyor": {"in": ["none"]}}, "sort_by": "reference"},
+    {"starter": "areas_unmeasured", "category": "Data quality",
+     "name": "Floor areas with no measurement basis", "dataset": "properties",
+     "description": "Properties with a net internal area but no record of the standard it was measured to, which "
+                    "RICS asks to be recorded.",
+     "columns": ["reference", "name", "property_type", "nia_sqm", "gia_sqm", "area_source", "managing_surveyor"],
+     "filters": {"area_standard": {"in": [""]}, "nia_sqm": {"min": 0.01}}, "sort_by": "reference"},
     {"starter": "missing_uprn", "category": "Data quality",
      "name": "Properties without a UPRN", "dataset": "properties",
      "description": "The UPRN links PHAEMA to GIS, council tax, business rates and the Transparency Code list.",

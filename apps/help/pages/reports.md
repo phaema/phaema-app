@@ -58,6 +58,7 @@ Ready-made reports are grouped by topic. Reports in **Rents and income** appear 
 |---|---|
 | Properties with no managing surveyor | Nobody is responsible for these, so their lease events are not assigned. |
 | Properties without a UPRN | Properties that cannot yet be linked to GIS and other systems, or published. |
+| Floor areas with no measurement basis | Areas recorded without the RICS measurement standard they follow. |
 
 Only administrators can change ready-made reports. Anyone can **copy** one to their own reports and change the copy.
 

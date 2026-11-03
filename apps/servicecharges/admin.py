@@ -32,7 +32,7 @@ class BudgetInline(RoleInlineMixin, admin.TabularInline):
 class ExpenditureInline(RoleInlineMixin, admin.TabularInline):
     model = Expenditure
     extra = 0
-    fields = ("spent_on", "heading", "supplier", "description", "invoice_reference", "amount")
+    fields = ("spent_on", "kind", "heading", "supplier", "description", "invoice_reference", "amount", "recoverable")
 
 
 @admin.register(ScheduleYear)
@@ -40,6 +40,8 @@ class ScheduleYearAdmin(RoleAdminMixin, admin.ModelAdmin):
     list_display = ("schedule", "start", "end", "status")
     list_filter = ("status", "schedule")
     readonly_fields = ("status", "budget_approved_on", "reconciled_on")
+    fields = ("schedule", "start", "end", "status", "budget_approved_on", "budget_commentary", "budget_issued_on",
+              "reconciled_on", "statements_issued_on", "certified_by", "certification_notes", "notes")
     inlines = [BudgetInline, ExpenditureInline]
 
     def view_on_site(self, obj):
