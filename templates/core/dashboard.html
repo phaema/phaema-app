@@ -54,7 +54,7 @@
       </tbody>
     </table>
     {% else %}
-    <p class="govuk-body">{% translate "No properties yet." %}{% if user.is_staff %} <a class="govuk-link" href="{% url 'admin:properties_property_add' %}">{% translate "Add the first property" %}</a>.{% endif %}</p>
+    <p class="govuk-body">{% translate "No properties yet." %}{% if perms.properties.add_property %} <a class="govuk-link" href="{% url 'admin:properties_property_add' %}">{% translate "Add the first property" %}</a>.{% endif %}</p>
     {% endif %}
   </div>
 </div>

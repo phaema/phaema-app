@@ -9,17 +9,18 @@ so the map has somewhere to show it.
     python manage.py load_demo_data            # add or refresh the demo records
     python manage.py load_demo_data --reset    # remove the demo records first
 """
+from datetime import date
 from decimal import Decimal
 
-from datetime import date
-
 from django.contrib.auth import get_user_model
+from django.contrib.auth.models import Group
 from django.contrib.gis.geos import MultiPolygon, Polygon
 from django.core.files.base import ContentFile
 from django.core.management.base import BaseCommand
 from django.db import transaction
 
 from apps.core.models import ModuleSettings
+from apps.core.roles import SURVEYORS as SURVEYOR_ROLE
 from apps.properties.demo_media import placeholder_pdf, placeholder_photo
 from apps.properties.models import InspireParcel, Property, PropertyPhoto, Title, TitleDocument
 
@@ -306,6 +307,7 @@ class Command(BaseCommand):
             if created:
                 user.set_unusable_password()
                 user.save()
+            user.groups.add(Group.objects.get(name=SURVEYOR_ROLE))
             users[username] = user
         for ref, prop in refs.items():
             # Use the nearest listed ancestor's surveyor, so units follow their estate.

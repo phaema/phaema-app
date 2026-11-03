@@ -3,7 +3,6 @@ from datetime import date
 from decimal import Decimal
 
 import pytest
-from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.core.management import call_command
 from django.urls import reverse
@@ -14,8 +13,8 @@ from apps.properties.models import Property
 
 
 @pytest.fixture
-def officer(db):
-    return User.objects.create_user("officer", password="a-long-test-password", is_staff=True)
+def officer(make_user):
+    return make_user("officer", "Administrators")
 
 
 @pytest.fixture

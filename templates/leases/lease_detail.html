@@ -1,4 +1,4 @@
-{% extends "base.html" %}{% load i18n humanize %}
+{% extends "base.html" %}{% load i18n humanize phaema_roles %}
 {% block title %}{{ object.reference }}{% endblock %}
 {% block breadcrumbs %}
 <nav class="govuk-breadcrumbs" aria-label="Breadcrumb"><ol class="govuk-breadcrumbs__list">
@@ -9,7 +9,7 @@
 {% block content %}
 <span class="govuk-caption-l">{{ object.reference }} · {{ object.get_agreement_type_display }} · {{ object.get_status_display }}</span>
 <h1 class="govuk-heading-xl">{{ object.counterparty.name }}</h1>
-<p class="govuk-body">{{ object.get_direction_display }}{% if user.is_staff %} · <a class="govuk-link" href="{% url 'admin:leases_lease_change' object.pk %}">{% translate "Edit this agreement" %}</a>{% endif %}</p>
+<p class="govuk-body">{{ object.get_direction_display }}{% if user|can_edit:object %} · <a class="govuk-link" href="{% url 'admin:leases_lease_change' object.pk %}">{% translate "Edit this agreement" %}</a>{% endif %}</p>
 
 <div class="govuk-grid-row">
 <div class="govuk-grid-column-two-thirds">

@@ -60,3 +60,4 @@ html.phaema-text-largest { font-size: 150%; }
 .phaema-map .ol-attribution ul { white-space: normal; }
 .phaema-legend { display: flex; flex-wrap: wrap; gap: 6px 18px; padding: 0; list-style: none; }
 .phaema-legend li::before { content: ""; display: inline-block; width: 14px; height: 14px; margin-right: 6px; vertical-align: -2px; background: var(--c); }
+.phaema-header__user { font-size: 0.9rem; opacity: .9; }

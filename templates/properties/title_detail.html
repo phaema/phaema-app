@@ -9,7 +9,7 @@
 {% block content %}
 <span class="govuk-caption-l">{% translate "Title" %}</span>
 <h1 class="govuk-heading-xl">{{ object }}</h1>
-{% if user.is_staff %}<p class="govuk-body"><a class="govuk-link" href="{% url 'admin:properties_title_change' object.pk %}">{% translate "Edit this title or add documents" %}</a></p>{% endif %}
+{% if is_administrator %}<p class="govuk-body"><a class="govuk-link" href="{% url 'admin:properties_title_change' object.pk %}">{% translate "Edit this title or add documents" %}</a></p>{% endif %}
 <div class="govuk-grid-row">
 <div class="govuk-grid-column-two-thirds">
   <dl class="govuk-summary-list">

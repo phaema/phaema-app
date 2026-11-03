@@ -11,7 +11,7 @@
 <h1 class="govuk-heading-l">{% translate "Set the boundary from Land Registry INSPIRE parcels" %}</h1>
 {% if not inspire_count %}
   <p class="govuk-body">{% translate "No INSPIRE parcels have been imported yet." %}
-  {% if perms.properties.add_inspireparcel %}<a class="govuk-link" href="{% url 'properties:inspire-upload' %}">{% translate "Import INSPIRE parcels for your area" %}</a>.{% endif %}</p>
+  {% if is_administrator %}<a class="govuk-link" href="{% url 'properties:inspire-upload' %}">{% translate "Import INSPIRE parcels for your area" %}</a>.{% endif %}</p>
 {% elif not has_location %}
   <p class="govuk-body">{% translate "This property has no boundary or grid reference, so PHAEMA cannot find nearby parcels. Add an easting and northing first." %}
   <a class="govuk-link" href="{% url 'admin:properties_property_change' object.pk %}">{% translate "Edit this property" %}</a></p>

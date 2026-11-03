@@ -16,7 +16,7 @@
     <div class="govuk-width-container phaema-header__inner">
       <a href="{% url 'dashboard' %}" class="phaema-header__brand">PHAEMA</a>
       <span class="phaema-header__org">{{ organisation_name }}</span>
-      {% if user.is_authenticated %}
+      {% if user.is_authenticated and role %}
       <nav class="phaema-header__nav" aria-label="{% translate 'Main menu' %}">
         <a href="{% url 'dashboard' %}">{% translate "Dashboard" %}</a>
         <a href="{% url 'properties:list' %}">{% translate "Properties" %}</a>
@@ -24,10 +24,13 @@
         <a href="{% url 'leases:list' %}">{% translate "Leases" %}</a>
         <a href="{% url 'changes' %}">{% translate "Changes" %}</a>
         {% if user.is_staff %}<a href="{% url 'admin:index' %}">{% translate "Manage data" %}</a>{% endif %}
+        <span class="phaema-header__user">{{ user.get_full_name|default:user.get_username }} ({{ role|lower|slice:":-1" }})</span>
         <form method="post" action="{% url 'logout' %}" class="phaema-header__logout">
           {% csrf_token %}<button type="submit">{% translate "Sign out" %}</button>
         </form>
       </nav>
+      {% elif user.is_authenticated %}
+      <form method="post" action="{% url 'logout' %}" class="phaema-header__logout phaema-header__nav">{% csrf_token %}<button type="submit">{% translate "Sign out" %}</button></form>
       {% endif %}
     </div>
   </header>

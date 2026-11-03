@@ -1,9 +1,9 @@
-{% extends "base.html" %}{% load i18n humanize %}
+{% extends "base.html" %}{% load i18n humanize phaema_roles %}
 {% block title %}{{ object.name }}{% endblock %}
 {% block content %}
 <span class="govuk-caption-l">{{ object.get_party_type_display }}</span>
 <h1 class="govuk-heading-xl">{{ object.name }}</h1>
-{% if user.is_staff %}<p class="govuk-body"><a class="govuk-link" href="{% url 'admin:leases_party_change' object.pk %}">{% translate "Edit contact details" %}</a></p>{% endif %}
+{% if user|can_edit:object %}<p class="govuk-body"><a class="govuk-link" href="{% url 'admin:leases_party_change' object.pk %}">{% translate "Edit contact details" %}</a></p>{% endif %}
 <div class="govuk-grid-row"><div class="govuk-grid-column-two-thirds">
 <dl class="govuk-summary-list">
   {% if object.company_number %}<div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Company number" %}</dt><dd class="govuk-summary-list__value">{{ object.company_number }}</dd></div>{% endif %}

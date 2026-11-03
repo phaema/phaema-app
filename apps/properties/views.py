@@ -6,12 +6,12 @@ from datetime import date
 
 from django.contrib import messages
 from django.contrib.auth import get_user_model
-from django.contrib.auth.decorators import login_required, permission_required
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.gis.db.models.functions import AsGeoJSON, Transform
 from django.contrib.gis.geos import Point, Polygon
-from django.core.exceptions import ValidationError
+from django.core.exceptions import PermissionDenied, ValidationError
 from django.core.files.storage import default_storage
 from django.db.models import Q
 from django.http import HttpResponse, JsonResponse
@@ -22,6 +22,7 @@ from django.views.decorators.http import require_http_methods
 from django.views.generic import DetailView, ListView
 
 from apps.core.models import AuditEntry, ModuleSettings
+from apps.core.roles import can_edit, is_administrator
 from apps.core.tables import sortable
 
 from . import importer
@@ -232,11 +233,22 @@ def inspire_geojson(request):
 
 # ---------------------------------------------------------------- boundary from INSPIRE
 
+def administrators_only(view):
+    def wrapped(request, *args, **kwargs):
+        if not is_administrator(request.user):
+            raise PermissionDenied
+        return view(request, *args, **kwargs)
+
+    wrapped.__name__, wrapped.__doc__ = view.__name__, view.__doc__
+    return login_required(wrapped)
+
+
 @login_required
-@permission_required("properties.change_property", raise_exception=True)
 @require_http_methods(["GET", "POST"])
 def boundary_from_inspire(request, pk):
     obj = get_object_or_404(Property, pk=pk)
+    if not can_edit(request.user, obj):
+        raise PermissionDenied
     if obj.boundary:
         search = obj.boundary.buffer(5)
     elif obj.easting and obj.northing:
@@ -276,8 +288,7 @@ def boundary_from_inspire(request, pk):
     })
 
 
-@login_required
-@permission_required("properties.add_inspireparcel", raise_exception=True)
+@administrators_only
 @require_http_methods(["GET", "POST"])
 def inspire_upload(request):
     if request.method == "POST" and request.FILES.get("file"):
@@ -307,8 +318,7 @@ def import_template(request):
 IMPORT_DIR = "imports"
 
 
-@login_required
-@permission_required(["properties.add_property", "properties.change_property"], raise_exception=True)
+@administrators_only
 @require_http_methods(["GET", "POST"])
 def import_properties(request):
     ctx = {}

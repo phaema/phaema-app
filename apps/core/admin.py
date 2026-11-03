@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 from django.contrib import admin
 
+from .admin_users import PhaemaUserAdmin
 from .models import AuditEntry, ModuleSettings
 
 
@@ -28,3 +29,5 @@ class AuditEntryAdmin(admin.ModelAdmin):
 
     def has_delete_permission(self, request, obj=None):
         return False
+
+__all__ = ["PhaemaUserAdmin", "ModuleSettingsAdmin", "AuditEntryAdmin"]

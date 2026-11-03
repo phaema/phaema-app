@@ -1,4 +1,4 @@
-{% extends "base.html" %}{% load i18n humanize phaema %}
+{% extends "base.html" %}{% load i18n humanize phaema phaema_roles %}
 {% block title %}{{ object.reference }} {{ object.name }}{% endblock %}
 {% block breadcrumbs %}
 <nav class="govuk-breadcrumbs" aria-label="Breadcrumb"><ol class="govuk-breadcrumbs__list">
@@ -10,7 +10,7 @@
 {% block content %}
 <span class="govuk-caption-l">{{ object.reference }} · {{ object.get_property_type_display }}</span>
 <h1 class="govuk-heading-xl">{{ object.name }}</h1>
-{% if user.is_staff %}<p class="govuk-body"><a class="govuk-link" href="{% url 'admin:properties_property_change' object.pk %}">{% translate "Edit this property, add photos or assign a surveyor" %}</a></p>{% endif %}
+{% if user|can_edit:object %}<p class="govuk-body"><a class="govuk-link" href="{% url 'admin:properties_property_change' object.pk %}">{% if is_administrator %}{% translate "Edit this property, add photos or assign a surveyor" %}{% else %}{% translate "Edit this property or add photos" %}{% endif %}</a></p>{% endif %}
 
 <div class="govuk-grid-row">
 <div class="govuk-grid-column-two-thirds">
@@ -111,7 +111,7 @@
     </tbody>
   </table>
   {% else %}<p class="govuk-body">{% translate "No leases or licences recorded for this property." %}</p>{% endif %}
-  {% if perms.leases.add_lease %}<p class="govuk-body-s"><a class="govuk-link" href="{% url 'admin:leases_lease_add' %}?properties={{ object.pk }}">{% translate "Add a lease or licence" %}</a></p>{% endif %}
+  {% if perms.leases.add_lease and user|can_edit:object %}<p class="govuk-body-s"><a class="govuk-link" href="{% url 'admin:leases_lease_add' %}?properties={{ object.pk }}">{% translate "Add a lease or licence" %}</a></p>{% endif %}
 
   <h2 class="govuk-heading-m">{% translate "Parts of this property" %}</h2>
   {% if children %}
@@ -127,7 +127,7 @@
     <p class="govuk-body-s">{% translate "No boundary or grid reference recorded yet." %}</p>
   {% endif %}
   {% if object.boundary_source %}<p class="govuk-body-s">{% translate "Boundary source:" %} {{ object.boundary_source }}</p>{% endif %}
-  {% if perms.properties.change_property %}<p class="govuk-body-s"><a class="govuk-link" href="{% url 'properties:boundary' object.pk %}">{% translate "Set the boundary from Land Registry INSPIRE parcels" %}</a></p>{% endif %}
+  {% if user|can_edit:object %}<p class="govuk-body-s"><a class="govuk-link" href="{% url 'properties:boundary' object.pk %}">{% translate "Set the boundary from Land Registry INSPIRE parcels" %}</a></p>{% endif %}
 
   <h2 class="govuk-heading-m">{% translate "Titles" %}</h2>
   {% if titles %}

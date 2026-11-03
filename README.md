@@ -20,6 +20,7 @@ PHAEMA helps a council's estates team manage its land and property: the property
 - Spreadsheet import of properties (Excel template with drop-downs; preview with row-by-row checks before saving)
 - Leases, licences, wayleaves and other agreements, both let out and held by the council: parties, term, 1954 Act status, rent, reviews, breaks with notice deadlines, repairing and insurance terms
 - Key dates with red/amber/green warnings, and a lease register with filters (including expiring soon) and sorting
+- Three roles: Administrators (change anything), Surveyors (change the properties they manage) and Viewers (read only), applied on every screen, in data entry and in the API. See [users and roles](docs/roles.md)
 - Adjustable text size (standard, large, largest)
 - Photos and documents are only available to signed-in users; photos are stripped of location data on upload
 - Optional modules that each council switches on or off (rent ledger, service charges, maintenance, compliance, Golden Thread)

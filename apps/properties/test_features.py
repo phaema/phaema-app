@@ -15,9 +15,8 @@ from apps.properties.models import Property, PropertyPhoto, Title, TitleDocument
 
 
 @pytest.fixture
-def officer(db):
-    return User.objects.create_user("officer", password="a-long-test-password", is_staff=True,
-                                    first_name="Sam", last_name="Officer")
+def officer(make_user):
+    return make_user("officer", "Administrators", first_name="Sam", last_name="Officer")
 
 
 @pytest.fixture

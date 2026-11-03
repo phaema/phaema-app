@@ -26,7 +26,7 @@
   </div>
   <div class="govuk-grid-column-three-quarters">
     <p class="govuk-body">{% blocktranslate count n=paginator.count %}{{ n }} agreement{% plural %}{{ n }} agreements{% endblocktranslate %}{% if rent_total %} · {% translate "total rent" %} £{{ rent_total|floatformat:0|intcomma }} {% translate "a year" %}{% endif %}
-      {% if user.is_staff %}· <a class="govuk-link" href="{% url 'admin:leases_lease_add' %}">{% translate "Add a lease or licence" %}</a>{% endif %}</p>
+      {% if perms.leases.add_lease %}· <a class="govuk-link" href="{% url 'admin:leases_lease_add' %}">{% translate "Add a lease or licence" %}</a>{% endif %}</p>
     <table class="govuk-table">
       {% include "core/_sortable_head.html" %}
       <tbody class="govuk-table__body">

@@ -54,6 +54,8 @@ To try PHAEMA with example records, load the demonstration estate of the fiction
 
 Everything in it is invented: ZZ99 postcodes, 9999… UPRNs and ZZ title numbers. Run it again at any time to refresh the demo records, or `./phaema.sh demo-data --reset` to remove and reload them. Your own records are never touched.
 
+To give other people access, use **Manage data > Users > Add user** and choose their role: Administrators, Surveyors or Viewers. See [users and roles](roles.md).
+
 To enter data, use **Manage data** in the menu. Start by switching on the modules you want under *Module settings*.
 
 ## Everyday commands
