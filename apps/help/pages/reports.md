@@ -26,7 +26,8 @@ Only administrators can change ready-made reports. Anyone can **copy** one to th
 Select **Make a new report** and choose what to report on:
 
 - **Properties**, **Leases and licences**, **Lease events**, **Tenants and other parties**, the **Rent schedule**
-  (every rent, past and future), **Titles** or the **Change log**.
+  (every rent, past and future), **Rent charges** and **Rent receipts** (from the [rent ledger](rent-ledger.md)),
+  **Titles** or the **Change log**.
 
 Then choose:
 

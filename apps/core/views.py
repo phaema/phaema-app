@@ -18,7 +18,7 @@ from apps.leases import events as lease_events
 from apps.leases.models import LeaseEvent
 from apps.properties.models import Property
 
-from .models import AuditEntry
+from .models import ModuleSettings, AuditEntry
 
 TEXT_SIZES = {"smaller": "Smaller", "standard": "Standard", "large": "Large", "largest": "Largest"}
 THEMES = {"standard": "Standard", "dark": "Dark", "contrast": "High contrast", "auto": "Match my device"}
@@ -59,6 +59,12 @@ def dashboard(request):
         "rent_roll": lease_events.rent_roll(),
         "recent_changes": _with_targets(AuditEntry.objects.select_related("user", "content_type")[:10]),
     }
+    if ModuleSettings.load().rent_ledger_enabled:
+        from apps.ledger import billing
+
+        summary = billing.arrears_summary()
+        context["ledger"] = {"arrears": summary["total"], "arrears_count": summary["count"],
+                             "collection": billing.collection()}
     return render(request, "core/dashboard.html", context)
 
 

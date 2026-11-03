@@ -97,8 +97,12 @@
       <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "WAULT to expiry" %}</dt><dd class="govuk-summary-list__value">{% if rent_roll.wault_expiry is not None %}{{ rent_roll.wault_expiry }} {% translate "years" %}{% else %}–{% endif %}</dd></div>
       <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "WAULT to first break" %}</dt><dd class="govuk-summary-list__value">{% if rent_roll.wault_break is not None %}{{ rent_roll.wault_break }} {% translate "years" %}{% else %}–{% endif %}</dd></div>
       {% if rent_roll.payable_count %}<div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Rent paid by the council" %}</dt><dd class="govuk-summary-list__value">£{{ rent_roll.payable|floatformat:0|intcomma }} <span class="govuk-body-s">({{ rent_roll.payable_count }} {% translate "held" %})</span></dd></div>{% endif %}
+      {% if ledger %}
+      <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Rent arrears" %}</dt><dd class="govuk-summary-list__value"><a class="govuk-link" href="{% url 'ledger:arrears' %}">£{{ ledger.arrears|floatformat:0|intcomma }}</a> <span class="govuk-body-s">({{ ledger.arrears_count }} {% translate "agreements" %})</span></dd></div>
+      <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Collected, last 12 months" %}</dt><dd class="govuk-summary-list__value">{% if ledger.collection.rate is not None %}<a class="govuk-link" href="{% url 'ledger:home' %}">{{ ledger.collection.rate }}%</a> <span class="govuk-body-s">(£{{ ledger.collection.received|floatformat:0|intcomma }} {% translate "of" %} £{{ ledger.collection.due|floatformat:0|intcomma }})</span>{% else %}–{% endif %}</dd></div>
+      {% endif %}
     </dl>
-    <p class="govuk-body-s">{% translate "WAULT: weighted average unexpired lease term, weighted by rent; periodic agreements are excluded. Payments, arrears and collection rates will appear here once the rent ledger is added." %}</p>
+    <p class="govuk-body-s">{% translate "WAULT: weighted average unexpired lease term, weighted by rent; periodic agreements are excluded." %}{% if not ledger %} {% translate "Arrears and collection rates appear here when the rent ledger is switched on." %}{% endif %}</p>
   </div>
 </div>
 

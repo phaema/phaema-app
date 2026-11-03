@@ -253,4 +253,26 @@ class LeaseWorkbook(Workbook):
     ]
 
 
-WORKBOOKS = {wb.key: wb for wb in (PartyWorkbook, LeaseWorkbook)}  # in the order to import them
+def _workbooks():
+    from apps.ledger.importing import ReceiptWorkbook
+
+    return {wb.key: wb for wb in (PartyWorkbook, LeaseWorkbook, ReceiptWorkbook)}  # in the order to import them
+
+
+class _LazyWorkbooks(dict):
+    """Filled on first use, so the ledger app can depend on this module without a circular import."""
+
+    def _fill(self):
+        if not self:
+            self.update(_workbooks())
+
+    def get(self, key, default=None):
+        self._fill()
+        return super().get(key, default)
+
+    def values(self):
+        self._fill()
+        return super().values()
+
+
+WORKBOOKS = _LazyWorkbooks()

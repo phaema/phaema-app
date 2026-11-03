@@ -1,4 +1,4 @@
-{% extends "base.html" %}{% load i18n humanize %}
+{% extends "base.html" %}{% load i18n humanize phaema %}
 {% block title %}{{ event.display_title }}{% endblock %}
 {% block help_page %}events{% endblock %}
 {% block breadcrumbs %}
@@ -15,7 +15,7 @@
 <div class="govuk-grid-column-two-thirds">
   <dl class="govuk-summary-list">
     <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Due" %}</dt><dd class="govuk-summary-list__value">{{ event.due_date|date:"l j F Y" }} <strong class="govuk-tag govuk-tag--{{ rag.0 }}">{{ rag.1 }}</strong></dd></div>
-    <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Assigned to" %}</dt><dd class="govuk-summary-list__value">{{ event.assigned_to.get_full_name|default:event.assigned_to.username|default:"Nobody" }}</dd></div>
+    <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Assigned to" %}</dt><dd class="govuk-summary-list__value">{{ event.assigned_to|person:"Nobody" }}</dd></div>
     <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Status" %}</dt><dd class="govuk-summary-list__value">{{ event.get_status_display }}{% if event.completed_on %} – {{ event.completed_on|date:"j M Y" }}{% if event.completed_by %} {% translate "by" %} {{ event.completed_by.get_full_name|default:event.completed_by.username }}{% endif %}{% endif %}</dd></div>
     <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Agreement" %}</dt><dd class="govuk-summary-list__value"><a class="govuk-link" href="{{ event.lease.get_absolute_url }}">{{ event.lease.reference }} {{ event.lease.get_agreement_type_display }}</a><br><span class="govuk-body-s">{% translate "Current rent" %} £{{ event.lease.annual_rent|floatformat:2|intcomma }} {% translate "a year" %} · {{ event.lease.get_review_basis_display }}</span></dd></div>
     {% if event.outcome %}<div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Notes and outcome" %}</dt><dd class="govuk-summary-list__value">{{ event.outcome|linebreaksbr }}</dd></div>{% endif %}

@@ -17,6 +17,17 @@ Administrators: select **Manage data**, then **Module settings**. There is one s
 | Brand colour | The colour of the header, as a hex code such as #003078. Choose a dark colour so the white text stays readable. Leave blank for the PHAEMA blue. |
 | Reminder timings | See [reminders](#reminders). |
 
+### Rent ledger settings
+
+| Setting | What it does |
+|---|---|
+| Rent ledger | Switches the [rent ledger](rent-ledger.md) on. |
+| Who raises rent invoices | PHAEMA numbers the invoices, or the finance system raises them. See [who raises the invoices](rent-ledger.md#who-raises-the-invoices). |
+| Invoice number prefix and next invoice number | How PHAEMA numbers invoices and credit notes, for example PH000123. Set the next number when you start, so it does not clash with existing invoices. |
+| Standard VAT rate | Added to rent on agreements marked VAT chargeable. |
+| Rent income code | The finance ledger code for rent income, included in the finance export. |
+| VAT codes | The finance system's codes for standard-rated and exempt lines. |
+
 ### Reminders
 
 For each kind of event, list how many days before the date to send reminders, separated by commas: for example

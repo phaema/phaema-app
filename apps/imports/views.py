@@ -19,8 +19,15 @@ IMPORT_DIR = "imports"
 MAX_BYTES = 10 * 1024 * 1024
 
 
+def _available():
+    from apps.core.models import ModuleSettings
+
+    ledger = ModuleSettings.load().rent_ledger_enabled
+    return [wb for wb in WORKBOOKS.values() if wb.key != "receipts" or ledger]
+
+
 def _workbook(key):
-    cls = WORKBOOKS.get(key)
+    cls = next((wb for wb in _available() if wb.key == key), None)
     if cls is None:
         raise Http404
     return cls
@@ -28,7 +35,7 @@ def _workbook(key):
 
 @administrators_only
 def hub(request):
-    return render(request, "imports/hub.html", {"workbooks": WORKBOOKS.values()})
+    return render(request, "imports/hub.html", {"workbooks": _available()})
 
 
 @administrators_only

@@ -6,7 +6,7 @@
 | 2 | Map with HM Land Registry INSPIRE polygon import; spreadsheet import; leases and licences | Done |
 | 3 | Lease event engine, reminders and dashboard; rent schedules | Done |
 | 3½ | Usability release: user manual and in-app help; colour themes including dark and high contrast; Excel/CSV export of every list; report builder; import of parties, leases and breaks | Done |
-| 4 | Rent ledger: demand runs, VAT, receipts and allocation, arrears, statements, finance export. Mid-point review | |
+| 4 | Rent ledger: demand runs, VAT, receipts and allocation, arrears, statements, finance export. Mid-point review | Done (review with Stuart) |
 | 5 | Service charge ledger: budgets, apportionment, on-account demands, year-end reconciliation | |
 | 6 | Maintenance: components, planned schedules, reactive jobs and works orders, contractors, recharges from lease repairing terms | |
 | 7 | Compliance certificates; documents; Transparency Code open data export; Golden Thread tiers; example records | |

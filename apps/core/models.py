@@ -38,8 +38,25 @@ class ModuleSettings(models.Model):
     organisation_name = models.CharField(_("organisation name"), max_length=200, blank=True)
     rent_ledger_enabled = models.BooleanField(
         _("rent ledger"), default=False,
-        help_text=_("Hold tenant rent accounts in PHAEMA. If off, demands are exported to the council's finance system."),
+        help_text=_("Raise rent charges, keep tenant accounts and arrears, and export to the finance system."),
     )
+
+    class Invoicing(models.TextChoices):
+        PHAEMA = "phaema", _("PHAEMA numbers the invoices; finance records them")
+        FINANCE = "finance", _("PHAEMA sends charges; the finance system raises the invoices")
+
+    invoicing = models.CharField(_("who raises rent invoices"), max_length=10, choices=Invoicing.choices,
+                                 default=Invoicing.PHAEMA)
+    invoice_prefix = models.CharField(_("invoice number prefix"), max_length=10, default="PH",
+                                      help_text=_("Put before invoice numbers, e.g. PH000123."))
+    next_invoice_number = models.PositiveIntegerField(_("next invoice number"), default=1)
+    vat_rate = models.DecimalField(_("standard VAT rate (%)"), max_digits=5, decimal_places=2, default=20,
+                                   help_text=_("Added to rent on leases where the council has opted to tax."))
+    rent_income_code = models.CharField(_("rent income code"), max_length=40, blank=True,
+                                        help_text=_("Ledger code (cost centre and account) for rent income, "
+                                                    "included in the finance export."))
+    vat_code_standard = models.CharField(_("VAT code: standard rated"), max_length=10, default="S")
+    vat_code_exempt = models.CharField(_("VAT code: exempt"), max_length=10, default="E")
     service_charges_enabled = models.BooleanField(_("service charge ledger"), default=False)
     maintenance_enabled = models.BooleanField(_("maintenance"), default=False)
     compliance_enabled = models.BooleanField(_("compliance"), default=True)

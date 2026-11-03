@@ -12,6 +12,13 @@ summary: Property and PHAEMA terms explained.
 Agreement for lease
 :   A contract to grant a lease in the future, often once building work is finished.
 
+Apportionment
+:   Charging part of a period's rent, by the day, when an agreement starts or ends part way through a period.
+    See [raising rent](rent-ledger.md#raising-rent).
+
+Arrears
+:   Rent that is overdue: the due date has passed and it has not been paid or credited.
+
 Break option
 :   A right in a lease for the landlord, the tenant or either to end it early on a set date, usually by giving
     notice by a deadline. See [breaks](events.md#breaks).
@@ -42,6 +49,10 @@ Licence
 NIA (net internal area)
 :   The usable floor area inside a building, excluding common parts, stairs, toilets and plant. Usually the area
     rent is based on for shops and offices.
+
+Option to tax
+:   A landlord's choice to charge VAT on rent from a commercial property, which would otherwise be exempt. In
+    PHAEMA, agreements where the council has opted to tax are marked VAT chargeable.
 
 Peppercorn rent
 :   A nominal rent, often nothing at all, used where a lease is granted for community benefit or a premium.

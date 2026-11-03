@@ -285,6 +285,9 @@ class Command(BaseCommand):
         from apps.leases import demo as lease_demo
 
         lease_count = lease_demo.load()
+        from apps.ledger import demo as ledger_demo
+
+        charge_count = ledger_demo.load()
 
         modules = ModuleSettings.load()
         if not modules.organisation_name:
@@ -293,7 +296,7 @@ class Command(BaseCommand):
 
         self.stdout.write(self.style.SUCCESS(
             f"Demo data loaded: {created} properties added, {updated} refreshed, {len(TITLES)} titles, "
-            f"{lease_count} leases and licences."
+            f"{lease_count} leases and licences, {charge_count} rent charges."
         ))
 
     def load_surveyors(self, refs):
@@ -369,7 +372,9 @@ class Command(BaseCommand):
 
     def remove_demo_data(self):
         from apps.leases import demo as lease_demo
+        from apps.ledger import demo as ledger_demo
 
+        ledger_demo.remove()
         lease_demo.remove()
         InspireParcel.objects.filter(inspire_id__startswith="DEMO-").delete()
         demo = Property.objects.filter(reference__startswith=PREFIX)

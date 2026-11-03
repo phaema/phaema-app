@@ -29,6 +29,7 @@ PHAEMA helps a council's estates team manage its land and property: the property
 - Email reminders at lead times set by the council (e.g. 180, 90 and 30 days), weekly overdue reminders, and a private calendar feed for Outlook
 - Rent schedules: rent history, review outcomes, fixed steps, concessions and indexation, with future rents taking effect automatically; next payments preview
 - Dashboard: overdue and upcoming lease events by type, rent roll by holding purpose, WAULT to expiry and to first break
+- Rent ledger (optional module): demand runs with day-based apportionment of part periods and VAT on opted leases; PHAEMA-numbered invoices or charges sent for the finance system to invoice; credit notes; receipts imported from finance and set against the oldest debt; rent accounts and printable statements; aged arrears; collection rate on the dashboard; a documented finance export in CSV or Excel
 - Three roles: Administrators (change anything), Surveyors (change the properties they manage) and Viewers (read only), applied on every screen, in data entry and in the API. See [users and roles](docs/roles.md)
 - Adjustable text size (smaller, standard, large, largest) and colour themes: standard, dark, high contrast, or match the device; plus a council brand colour for the header
 - Photos and documents are only available to signed-in users; photos are stripped of location data on upload

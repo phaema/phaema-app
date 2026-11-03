@@ -1,0 +1,17 @@
+{% load i18n humanize %}<table class="govuk-table phaema-report">
+  <thead class="govuk-table__head"><tr class="govuk-table__row">
+    <th scope="col" class="govuk-table__header">{% translate "Reference" %}</th><th scope="col" class="govuk-table__header">{% translate "Lease" %}</th>
+    <th scope="col" class="govuk-table__header">{% translate "Details" %}</th><th scope="col" class="govuk-table__header">{% translate "Due" %}</th>
+    <th scope="col" class="govuk-table__header govuk-table__header--numeric">{% translate "Net" %}</th><th scope="col" class="govuk-table__header govuk-table__header--numeric">{% translate "VAT" %}</th><th scope="col" class="govuk-table__header govuk-table__header--numeric">{% translate "Total" %}</th>
+  </tr></thead>
+  <tbody class="govuk-table__body">
+  {% for c in charges %}<tr class="govuk-table__row">
+    <td class="govuk-table__cell">{{ c.reference }}</td>
+    <td class="govuk-table__cell"><a class="govuk-link" href="{% url 'ledger:account' c.lease_id %}">{{ c.lease.reference }}</a><br><span class="govuk-body-s">{{ c.lease.counterparty.name }}</span></td>
+    <td class="govuk-table__cell">{{ c.description }}</td><td class="govuk-table__cell">{{ c.due_date|date:"j M Y" }}</td>
+    <td class="govuk-table__cell govuk-table__cell--numeric">£{{ c.net|floatformat:2|intcomma }}</td><td class="govuk-table__cell govuk-table__cell--numeric">£{{ c.vat|floatformat:2|intcomma }}</td><td class="govuk-table__cell govuk-table__cell--numeric">£{{ c.gross|floatformat:2|intcomma }}</td>
+  </tr>{% endfor %}
+  {% if totals %}<tr class="govuk-table__row phaema-total-row"><td class="govuk-table__cell" colspan="4"><strong>{% translate "Total" %}</strong></td>
+    <td class="govuk-table__cell govuk-table__cell--numeric"><strong>£{{ totals.net|floatformat:2|intcomma }}</strong></td><td class="govuk-table__cell govuk-table__cell--numeric"><strong>£{{ totals.vat|floatformat:2|intcomma }}</strong></td><td class="govuk-table__cell govuk-table__cell--numeric"><strong>£{{ totals.gross|floatformat:2|intcomma }}</strong></td></tr>{% endif %}
+  </tbody>
+</table>

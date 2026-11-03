@@ -82,3 +82,8 @@ html.phaema-text-largest { font-size: 150%; }
 .phaema-hint { margin-bottom: 15px; }
 .phaema-glossary dt { font-weight: 700; margin-top: 20px; }
 .phaema-glossary dd { margin: 5px 0 0; }
+.phaema-subnav { display: flex; flex-wrap: wrap; gap: 8px 20px; border-bottom: 1px solid var(--ph-border, #b1b4b6); padding-bottom: 10px; }
+.phaema-subnav a[aria-current="page"] { font-weight: 700; text-decoration: none; }
+@media print {
+  .phaema-header, .phaema-settings-bar, .govuk-phase-banner, .phaema-subnav, .govuk-details, .govuk-footer { display: none !important; }
+}

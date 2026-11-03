@@ -1,0 +1,25 @@
+{% extends "base.html" %}{% load i18n humanize phaema %}
+{% block title %}{% translate "Rent arrears" %}{% endblock %}
+{% block help_page %}rent-ledger{% endblock %}
+{% block content %}
+<h1 class="govuk-heading-xl">{% translate "Rent arrears" %}</h1>
+{% include "ledger/_nav.html" with section="arrears" %}
+<p class="govuk-body">{% blocktranslate count n=summary.count with total=summary.total|floatformat:2|intcomma %}£{{ total }} overdue on {{ n }} agreement.{% plural %}£{{ total }} overdue on {{ n }} agreements.{% endblocktranslate %}
+  {% translate "Download:" %} <a class="govuk-link" href="?format=xlsx">Excel</a> · <a class="govuk-link" href="?format=csv">CSV</a></p>
+<div class="phaema-table-scroll"><table class="govuk-table phaema-report">
+  <thead class="govuk-table__head"><tr class="govuk-table__row">
+    <th scope="col" class="govuk-table__header">{% translate "Agreement" %}</th>
+    <th scope="col" class="govuk-table__header govuk-table__header--numeric">{% translate "Balance" %}</th><th scope="col" class="govuk-table__header govuk-table__header--numeric">{% translate "Overdue" %}</th>
+    {% for _l, label in bands %}<th scope="col" class="govuk-table__header govuk-table__header--numeric">{{ label }}</th>{% endfor %}
+  </tr></thead>
+  <tbody class="govuk-table__body">
+  {% for a in summary.accounts %}<tr class="govuk-table__row">
+    <td class="govuk-table__cell"><a class="govuk-link" href="{% url 'ledger:account' a.lease.pk %}">{{ a.lease.reference }}</a><br><span class="govuk-body-s">{{ a.lease.counterparty.name }}</span></td>
+    <td class="govuk-table__cell govuk-table__cell--numeric">£{{ a.balance|floatformat:2|intcomma }}</td><td class="govuk-table__cell govuk-table__cell--numeric"><strong>£{{ a.overdue|floatformat:2|intcomma }}</strong></td>
+    {% for label, amount in a.aged %}<td class="govuk-table__cell govuk-table__cell--numeric">{% if amount %}£{{ amount|floatformat:2|intcomma }}{% endif %}</td>{% endfor %}
+  </tr>{% empty %}<tr class="govuk-table__row"><td class="govuk-table__cell" colspan="7">{% translate "No arrears." %}</td></tr>{% endfor %}
+  {% if summary.accounts %}<tr class="govuk-table__row phaema-total-row"><td class="govuk-table__cell"><strong>{% translate "Total" %}</strong></td><td class="govuk-table__cell"></td><td class="govuk-table__cell govuk-table__cell--numeric"><strong>£{{ summary.total|floatformat:2|intcomma }}</strong></td>
+    {% for label, amount in summary.bands %}<td class="govuk-table__cell govuk-table__cell--numeric"><strong>£{{ amount|floatformat:2|intcomma }}</strong></td>{% endfor %}</tr>{% endif %}
+  </tbody>
+</table></div>
+{% endblock %}

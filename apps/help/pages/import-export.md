@@ -16,6 +16,9 @@ Import in this order, so each record can find the records it links to:
 3. [Leases and licences](#leases-and-licences), with their break options
 4. [Land Registry boundaries](maps.md#land-registry-inspire-boundaries), if you use them
 
+Rent receipts from the finance system are imported the same way when the rent ledger is on. See
+[receipts](rent-ledger.md#receipts).
+
 ### How every import works
 
 1. Download the **Excel template**. It has a sheet for each kind of record, drop-down lists for fixed choices, an
