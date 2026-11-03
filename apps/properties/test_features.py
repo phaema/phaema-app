@@ -156,6 +156,8 @@ def test_text_size_setting(client, db):
     resp = client.get(reverse("text-size", args=["large"]), {"next": "https://evil.example/"})
     assert resp["Location"] == "/"
     assert b"phaema-text-large" in client.get(reverse("login")).content
+    client.get(reverse("text-size", args=["smaller"]))
+    assert b"phaema-text-smaller" in client.get(reverse("login")).content
 
 
 def test_unchanged_decimal_is_not_logged_as_change(db):
