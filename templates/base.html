@@ -1,12 +1,14 @@
 {% load static i18n %}<!DOCTYPE html>
 {% get_current_language as LANG %}
-<html lang="{{ LANG }}" class="govuk-template phaema-text-{{ text_size }}">
+<html lang="{{ LANG }}" class="govuk-template phaema-text-{{ text_size }}" data-theme="{{ theme }}">
 <head>
   <meta charset="utf-8">
   <title>{% block title %}PHAEMA{% endblock %} – PHAEMA</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <link rel="stylesheet" href="{% static 'vendor/govuk-frontend/govuk-frontend.min.css' %}">
   <link rel="stylesheet" href="{% static 'css/phaema.css' %}">
+  <link rel="stylesheet" href="{% static 'css/themes.css' %}">
+  {% if brand_colour %}<style>:root { --ph-brand: {{ brand_colour }}; }</style>{% endif %}
 </head>
 <body class="govuk-template__body">
   <script>document.body.className += ' js-enabled' + ('noModule' in HTMLScriptElement.prototype ? ' govuk-frontend-supported' : '');</script>
@@ -23,7 +25,10 @@
         <a href="{% url 'properties:map' %}">{% translate "Map" %}</a>
         <a href="{% url 'leases:list' %}">{% translate "Leases" %}</a>
         <a href="{% url 'leases:events' %}">{% translate "Events" %}</a>
+        <a href="{% url 'reports:list' %}">{% translate "Reports" %}</a>
         <a href="{% url 'changes' %}">{% translate "Changes" %}</a>
+        {% if is_administrator %}<a href="{% url 'imports:hub' %}">{% translate "Import" %}</a>{% endif %}
+        <a href="{% url 'help:index' %}">{% translate "Help" %}</a>
         {% if user.is_staff %}<a href="{% url 'admin:index' %}">{% translate "Manage data" %}</a>{% endif %}
         <span class="phaema-header__user">{{ user.get_full_name|default:user.get_username }} ({{ role|lower|slice:":-1" }})</span>
         <form method="post" action="{% url 'logout' %}" class="phaema-header__logout">
@@ -43,6 +48,15 @@
         <span class="govuk-phase-banner__text">{% translate "This is a development version. Do not rely on it for live estate management." %}</span>
       </p>
     </div>
+    <div class="phaema-settings-bar">
+    {% block help_link %}{% if user.is_authenticated %}<p class="govuk-body-s govuk-!-margin-0 phaema-help-link"><a class="govuk-link" href="{% url 'help:index' %}{% block help_page %}{% endblock %}">{% translate "Help with this page" %}</a></p>{% endif %}{% endblock %}
+    <nav class="phaema-text-size" aria-label="{% translate 'Colour theme' %}">
+      <span class="govuk-body-s">{% translate "Theme:" %}</span>
+      {% for key, label in themes.items %}
+        {% if key == theme %}<span class="govuk-body-s phaema-text-size__current" aria-current="true">{{ label }}</span>
+        {% else %}<a class="govuk-link govuk-body-s" href="{% url 'theme' key %}?next={{ request.get_full_path|urlencode }}">{{ label }}</a>{% endif %}
+      {% endfor %}
+    </nav>
     <nav class="phaema-text-size" aria-label="{% translate 'Text size' %}">
       <span class="govuk-body-s">{% translate "Text size:" %}</span>
       {% for key, label in text_sizes.items %}
@@ -50,6 +64,7 @@
         {% else %}<a class="govuk-link govuk-body-s phaema-text-size__{{ key }}" href="{% url 'text-size' key %}?next={{ request.get_full_path|urlencode }}">{{ label }}</a>{% endif %}
       {% endfor %}
     </nav>
+    </div>
     {% block breadcrumbs %}{% endblock %}
     <main class="govuk-main-wrapper" id="main-content" role="main">
       {% if messages %}

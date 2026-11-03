@@ -1,5 +1,6 @@
 {% extends "base.html" %}{% load i18n humanize phaema_roles %}
 {% block title %}{{ object.name }}{% endblock %}
+{% block help_page %}parties{% endblock %}
 {% block breadcrumbs %}
 <nav class="govuk-breadcrumbs" aria-label="Breadcrumb"><ol class="govuk-breadcrumbs__list">
   <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="{% url 'leases:parties' %}">{% translate "Tenants and other parties" %}</a></li>

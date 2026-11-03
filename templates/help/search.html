@@ -1,0 +1,21 @@
+{% extends "base.html" %}{% load i18n %}
+{% block title %}{% translate "Search the manual" %}{% endblock %}
+{% block help_link %}{% endblock %}
+{% block content %}
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-one-quarter">{% include "help/_contents.html" %}</div>
+  <div class="govuk-grid-column-three-quarters">
+    <h1 class="govuk-heading-l">{% translate "Search the manual" %}</h1>
+    {% if q %}
+      <p class="govuk-body">{% blocktranslate count n=results|length with q=q %}{{ n }} page mentions “{{ q }}”{% plural %}{{ n }} pages mention “{{ q }}”{% endblocktranslate %}</p>
+      <ul class="govuk-list">
+      {% for p, snippet in results %}
+        <li class="govuk-!-margin-bottom-4"><a class="govuk-link govuk-!-font-weight-bold" href="{{ p.get_absolute_url }}">{{ p.title }}</a><br><span class="govuk-body-s">{{ snippet }}</span></li>
+      {% empty %}
+        <li>{% translate "Try a different word, or browse the contents." %}</li>
+      {% endfor %}
+      </ul>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

@@ -9,6 +9,7 @@ from django.utils.translation import gettext_lazy as _
 from django.views.generic import DetailView, ListView
 
 from apps.core.tables import sortable
+from apps.reports.mixins import ExportMixin
 
 from . import events
 from .models import Lease, Party
@@ -28,8 +29,9 @@ EXPIRY_WINDOWS = [("6", _("Within 6 months")), ("12", _("Within 12 months")), ("
                   ("past", _("Already passed (holding over or ended)"))]
 
 
-class LeaseListView(LoginRequiredMixin, ListView):
+class LeaseListView(LoginRequiredMixin, ExportMixin, ListView):
     model = Lease
+    export_dataset, export_title = "leases", "Leases and licences"
     paginate_by = 50
     template_name = "leases/lease_list.html"
     FILTERS = ("direction", "agreement_type", "status", "security_of_tenure")
@@ -127,8 +129,9 @@ PARTY_COLUMNS = {
 }
 
 
-class PartyListView(LoginRequiredMixin, ListView):
+class PartyListView(LoginRequiredMixin, ExportMixin, ListView):
     model = Party
+    export_dataset, export_title = "parties", "Tenants and other parties"
     paginate_by = 50
     template_name = "leases/party_list.html"
 

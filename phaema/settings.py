@@ -32,6 +32,9 @@ INSTALLED_APPS = [
     "apps.core",
     "apps.properties",
     "apps.leases",
+    "apps.reports",
+    "apps.imports",
+    "apps.help",
 ]
 
 MIDDLEWARE = [

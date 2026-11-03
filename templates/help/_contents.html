@@ -1,0 +1,17 @@
+{% load i18n %}<nav class="phaema-help-nav" aria-label="{% translate 'Manual contents' %}">
+  {% if not user.is_authenticated %}<p class="govuk-body"><a class="govuk-link" href="{% url 'login' %}">{% translate "Sign in to PHAEMA" %}</a></p>{% endif %}
+  <form method="get" action="{% url 'help:search' %}" class="govuk-!-margin-bottom-4" role="search">
+    <label class="govuk-label govuk-label--s" for="help-q">{% translate "Search the manual" %}</label>
+    <div class="phaema-search-row">
+      <input class="govuk-input" id="help-q" name="q" type="search" value="{{ q|default:'' }}">
+      <button class="govuk-button govuk-button--secondary govuk-!-margin-bottom-0" data-module="govuk-button">{% translate "Search" %}</button>
+    </div>
+  </form>
+  <h2 class="govuk-heading-s govuk-!-margin-bottom-2"><a class="govuk-link govuk-link--no-visited-state" href="{% url 'help:index' %}">{% translate "Contents" %}</a></h2>
+  {% for section, pages in contents %}
+    <h3 class="govuk-body-s govuk-!-font-weight-bold govuk-!-margin-bottom-1 govuk-!-margin-top-3">{{ section }}</h3>
+    <ul class="govuk-list govuk-body-s">
+    {% for p in pages %}<li><a class="govuk-link govuk-link--no-visited-state" href="{{ p.get_absolute_url }}"{% if p.slug == page.slug %} aria-current="page"{% endif %}>{{ p.title }}</a></li>{% endfor %}
+    </ul>
+  {% endfor %}
+</nav>

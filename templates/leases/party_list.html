@@ -1,5 +1,6 @@
 {% extends "base.html" %}{% load i18n humanize %}
 {% block title %}{% translate "Tenants and other parties" %}{% endblock %}
+{% block help_page %}parties{% endblock %}
 {% block breadcrumbs %}
 <nav class="govuk-breadcrumbs" aria-label="Breadcrumb"><ol class="govuk-breadcrumbs__list">
   <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="{% url 'leases:list' %}">{% translate "Leases and licences" %}</a></li>
@@ -28,7 +29,9 @@
   </div>
   <div class="govuk-grid-column-three-quarters">
     <p class="govuk-body">{% blocktranslate count n=paginator.count %}{{ n }} party{% plural %}{{ n }} parties{% endblocktranslate %}
-      {% if perms.leases.add_party %}· <a class="govuk-link" href="{% url 'admin:leases_party_add' %}">{% translate "Add a party" %}</a>{% endif %}</p>
+      {% if perms.leases.add_party %}· <a class="govuk-link" href="{% url 'admin:leases_party_add' %}">{% translate "Add a party" %}</a>{% endif %}
+      {% if is_administrator %}· <a class="govuk-link" href="{% url 'imports:upload' 'parties' %}">{% translate "Import from a spreadsheet" %}</a>{% endif %}</p>
+    {% include "core/_downloads.html" %}
     <table class="govuk-table">
       {% include "core/_sortable_head.html" %}
       <tbody class="govuk-table__body">

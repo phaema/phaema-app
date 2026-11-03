@@ -1,5 +1,6 @@
 {% extends "base.html" %}{% load i18n humanize %}
 {% block title %}{% translate "Dashboard" %}{% endblock %}
+{% block help_page %}dashboard{% endblock %}
 {% block content %}
 <h1 class="govuk-heading-xl">{% translate "Dashboard" %}</h1>
 
@@ -62,6 +63,7 @@
 <div class="govuk-grid-row">
   <div class="govuk-grid-column-one-half">
     <h2 class="govuk-heading-m">{% translate "Lease events" %}</h2>
+  {% include "core/_hint.html" with summary=_("What counts as overdue?") text=_("An event is overdue when its date has passed and nobody has recorded the outcome. Break dates and notice deadlines lapse on their own once passed.") page="events" anchor="status-and-colours" %}
     <table class="govuk-table">
       <thead class="govuk-table__head"><tr class="govuk-table__row">
         <th scope="col" class="govuk-table__header">{% translate "Event" %}</th>

@@ -1,0 +1,35 @@
+{% extends "base.html" %}{% load i18n %}
+{% block title %}{% translate "Import" %}{% endblock %}
+{% block help_page %}import-export{% endblock %}
+{% block content %}
+<h1 class="govuk-heading-xl">{% translate "Import from a spreadsheet" %}</h1>
+<p class="govuk-body">{% translate "Add or update many records at once from Excel or CSV. Each import starts with a template, and you see a preview before anything is saved. If any row has a problem, nothing is imported." %}</p>
+<p class="govuk-body">{% translate "Import in this order, so each record can find the ones it links to:" %}</p>
+<table class="govuk-table">
+  <thead class="govuk-table__head"><tr class="govuk-table__row">
+    <th scope="col" class="govuk-table__header">{% translate "Records" %}</th>
+    <th scope="col" class="govuk-table__header">{% translate "What it covers" %}</th>
+    <th scope="col" class="govuk-table__header">{% translate "Template" %}</th>
+  </tr></thead>
+  <tbody class="govuk-table__body">
+    <tr class="govuk-table__row">
+      <td class="govuk-table__cell"><a class="govuk-link" href="{% url 'properties:import' %}">{% translate "Properties" %}</a></td>
+      <td class="govuk-table__cell">{% translate "Estates, sites, buildings, units and land, with addresses, UPRNs, areas and managing surveyors." %}</td>
+      <td class="govuk-table__cell"><a class="govuk-link" href="{% url 'properties:import-template' %}">{% translate "Excel template" %}</a></td>
+    </tr>
+    {% for wb in workbooks %}
+    <tr class="govuk-table__row">
+      <td class="govuk-table__cell"><a class="govuk-link" href="{% url 'imports:upload' wb.key %}">{{ wb.title }}</a></td>
+      <td class="govuk-table__cell">{{ wb.description }}</td>
+      <td class="govuk-table__cell"><a class="govuk-link" href="{% url 'imports:template' wb.key %}">{% translate "Excel template" %}</a></td>
+    </tr>
+    {% endfor %}
+    <tr class="govuk-table__row">
+      <td class="govuk-table__cell"><a class="govuk-link" href="{% url 'properties:inspire-upload' %}">{% translate "Land Registry boundaries" %}</a></td>
+      <td class="govuk-table__cell">{% translate "HM Land Registry INSPIRE Index Polygons (GML), to show title boundaries on the map." %}</td>
+      <td class="govuk-table__cell"></td>
+    </tr>
+  </tbody>
+</table>
+<p class="govuk-body">{% translate "To take data out of PHAEMA, use the Excel and CSV links on any list, or" %} <a class="govuk-link" href="{% url 'reports:list' %}">{% translate "build a report" %}</a>.</p>
+{% endblock %}

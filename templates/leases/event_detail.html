@@ -1,5 +1,6 @@
 {% extends "base.html" %}{% load i18n humanize %}
 {% block title %}{{ event.display_title }}{% endblock %}
+{% block help_page %}events{% endblock %}
 {% block breadcrumbs %}
 <nav class="govuk-breadcrumbs" aria-label="Breadcrumb"><ol class="govuk-breadcrumbs__list">
   <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="{% url 'leases:events' %}">{% translate "Lease events" %}</a></li>
@@ -22,6 +23,7 @@
 
   {% if outcome_form %}
   <h2 class="govuk-heading-m">{% translate "Record the outcome" %}</h2>
+  {% include "core/_hint.html" with summary=_("What happens when I record the outcome?") text=_("PHAEMA updates the agreement for you: a review adds the new rent to the rent schedule and sets up the next review; an exercised break or a vacated expiry ends the agreement.") page="events" anchor="recording-the-outcome" %}
   {% if event.event_type == "review" %}<p class="govuk-body">{% translate "The new rent is added to the rent schedule from its effective date, and the next review is set up automatically." %}</p>{% endif %}
   {% with form=outcome_form %}{% include "core/_form_errors.html" %}{% endwith %}
   <form method="post" novalidate>{% csrf_token %}

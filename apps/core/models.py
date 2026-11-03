@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
+from django.core.validators import RegexValidator
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
@@ -57,6 +58,13 @@ class ModuleSettings(models.Model):
     )
     os_map_style = models.CharField(_("OS map style"), max_length=20, choices=OsMapStyle.choices,
                                     default=OsMapStyle.ROAD)
+
+    brand_colour = models.CharField(
+        _("header colour"), max_length=7, blank=True,
+        validators=[RegexValidator(r"^#[0-9A-Fa-f]{6}$", _("Enter a colour like #1d3557."))],
+        help_text=_("Your council's colour for the PHAEMA header, as a hex code such as #1d3557. "
+                    "Choose a dark colour so the white header text stays readable. Leave blank for the default."),
+    )
 
     reminder_days_review = models.CharField(
         _("rent review reminders (days before)"), max_length=60, default="180,90,30",

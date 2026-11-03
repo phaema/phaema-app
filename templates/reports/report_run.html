@@ -1,0 +1,47 @@
+{% extends "base.html" %}{% load i18n humanize phaema %}
+{% block title %}{{ report.name }}{% endblock %}
+{% block help_page %}reports{% endblock %}
+{% block breadcrumbs %}
+<nav class="govuk-breadcrumbs" aria-label="Breadcrumb"><ol class="govuk-breadcrumbs__list">
+  <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="{% url 'reports:list' %}">{% translate "Reports" %}</a></li>
+  <li class="govuk-breadcrumbs__list-item">{{ report.name }}</li>
+</ol></nav>
+{% endblock %}
+{% block content %}
+<span class="govuk-caption-l">{{ dataset.label }}</span>
+<h1 class="govuk-heading-l">{{ report.name }}</h1>
+{% if report.description %}<p class="govuk-body">{{ report.description }}</p>{% endif %}
+<p class="govuk-body">{% blocktranslate count n=count %}{{ n }} record{% plural %}{{ n }} records{% endblocktranslate %}
+  {% if filter_summary %}<br><span class="govuk-body-s">{% translate "Filters:" %} {{ filter_summary|join:"; " }}</span>{% endif %}</p>
+<div class="govuk-button-group">
+  <a class="govuk-button" href="?format=xlsx" data-module="govuk-button">{% translate "Download Excel" %}</a>
+  <a class="govuk-button govuk-button--secondary" href="?format=csv" data-module="govuk-button">{% translate "Download CSV" %}</a>
+  {% if can_change %}<a class="govuk-link" href="{% url 'reports:edit' report.pk %}">{% translate "Change this report" %}</a>{% endif %}
+  <form method="post" action="{% url 'reports:copy' report.pk %}" class="govuk-!-display-inline">{% csrf_token %}<button class="phaema-link-button govuk-body">{% translate "Copy to my reports" %}</button></form>
+  {% if can_change and not report.starter %}<form method="post" action="{% url 'reports:delete' report.pk %}" class="govuk-!-display-inline">{% csrf_token %}<button class="phaema-link-button govuk-body">{% translate "Delete" %}</button></form>{% endif %}
+</div>
+<div class="phaema-table-scroll">
+<table class="govuk-table phaema-report">
+  <thead class="govuk-table__head"><tr class="govuk-table__row">
+    {% for f in fields %}<th scope="col" class="govuk-table__header{% if f.type == 'money' or f.type == 'area' or f.type == 'number' %} govuk-table__header--numeric{% endif %}">{{ f.label }}</th>{% endfor %}
+  </tr></thead>
+  <tbody class="govuk-table__body">
+  {% for row in table %}
+    <tr class="govuk-table__row">
+    {% for value in row %}
+      {% include "reports/_cell.html" with f=fields|get_item:forloop.counter0 value=value %}
+    {% endfor %}
+    </tr>
+  {% empty %}
+    <tr class="govuk-table__row"><td class="govuk-table__cell" colspan="{{ fields|length }}">{% translate "No records match this report." %}</td></tr>
+  {% endfor %}
+  {% if totals and table %}
+    <tr class="govuk-table__row phaema-total-row">
+    {% for t in totals %}<td class="govuk-table__cell govuk-table__cell--numeric">{% if forloop.first and t is None %}<strong>{% translate "Total" %}</strong>{% elif t is not None %}<strong>{% if fields|get_item:forloop.counter0|attr_type == "money" %}£{% endif %}{{ t|floatformat:2|intcomma }}</strong>{% endif %}</td>{% endfor %}
+    </tr>
+  {% endif %}
+  </tbody>
+</table>
+</div>
+{% with querystring="" %}{% include "core/_pagination.html" %}{% endwith %}
+{% endblock %}

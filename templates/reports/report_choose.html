@@ -1,0 +1,21 @@
+{% extends "base.html" %}{% load i18n %}
+{% block title %}{% translate "New report" %}{% endblock %}
+{% block help_page %}reports{% endblock %}
+{% block content %}
+<h1 class="govuk-heading-l">{% translate "What do you want to report on?" %}</h1>
+<form method="get" novalidate>
+  <div class="govuk-form-group"><fieldset class="govuk-fieldset">
+    <legend class="govuk-visually-hidden">{% translate "Records" %}</legend>
+    <div class="govuk-radios" data-module="govuk-radios">
+    {% for d in datasets %}
+      <div class="govuk-radios__item">
+        <input class="govuk-radios__input" id="ds-{{ d.key }}" name="dataset" type="radio" value="{{ d.key }}"{% if forloop.first %} checked{% endif %} aria-describedby="ds-{{ d.key }}-hint">
+        <label class="govuk-label govuk-radios__label" for="ds-{{ d.key }}">{{ d.label }}</label>
+        <div id="ds-{{ d.key }}-hint" class="govuk-hint govuk-radios__hint">{{ d.description }}</div>
+      </div>
+    {% endfor %}
+    </div>
+  </fieldset></div>
+  <button class="govuk-button" data-module="govuk-button">{% translate "Continue" %}</button>
+</form>
+{% endblock %}

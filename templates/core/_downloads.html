@@ -1,0 +1,4 @@
+{% load i18n %}<p class="govuk-body-s phaema-downloads">{% translate "Download this list:" %}
+  <a class="govuk-link" href="?{% if querystring %}{{ querystring }}&amp;{% endif %}format=xlsx">{% translate "Excel" %}</a> ·
+  <a class="govuk-link" href="?{% if querystring %}{{ querystring }}&amp;{% endif %}format=csv">CSV</a>
+  · <a class="govuk-link" href="{% url 'reports:list' %}">{% translate "More reports" %}</a></p>

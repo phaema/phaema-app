@@ -1,0 +1,33 @@
+{% extends "base.html" %}{% load i18n %}
+{% block title %}{% if is_index %}{% translate "Help" %}{% else %}{{ page.title }} – {% translate "Help" %}{% endif %}{% endblock %}
+{% block help_link %}{% endblock %}
+{% block content %}
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-one-quarter">{% include "help/_contents.html" %}</div>
+  <div class="govuk-grid-column-three-quarters phaema-manual">
+    {% if not is_index %}<span class="govuk-caption-m">{% translate "PHAEMA manual" %} · {{ page.section }}</span>{% endif %}
+    {{ page.heading|safe }}
+    {% if page.headings|length > 2 %}
+    <nav class="phaema-on-this-page" aria-label="{% translate 'On this page' %}">
+      <h2 class="govuk-body-s govuk-!-font-weight-bold govuk-!-margin-bottom-1">{% translate "On this page" %}</h2>
+      <ul class="govuk-list govuk-body-s">{% for id, text in page.headings %}<li><a class="govuk-link" href="#{{ id }}">{{ text }}</a></li>{% endfor %}</ul>
+    </nav>
+    {% endif %}
+    {{ page.html|safe }}
+    {% if is_index %}
+      {% for section, pages in contents %}
+      <h2 class="govuk-heading-m govuk-!-margin-top-6">{{ section }}</h2>
+      <dl class="govuk-summary-list">
+        {% for p in pages %}<div class="govuk-summary-list__row"><dt class="govuk-summary-list__key"><a class="govuk-link" href="{{ p.get_absolute_url }}">{{ p.title }}</a></dt><dd class="govuk-summary-list__value">{{ p.summary }}</dd></div>{% endfor %}
+      </dl>
+      {% endfor %}
+    {% endif %}
+    {% if previous_page or next_page %}
+    <nav class="govuk-pagination govuk-pagination--block govuk-!-margin-top-8" aria-label="{% translate 'Manual pages' %}">
+      {% if previous_page %}<div class="govuk-pagination__prev"><a class="govuk-link govuk-pagination__link" href="{{ previous_page.get_absolute_url }}" rel="prev"><span class="govuk-pagination__link-title">{% translate "Previous" %}</span><span class="govuk-visually-hidden">:</span> <span class="govuk-pagination__link-label">{{ previous_page.title }}</span></a></div>{% endif %}
+      {% if next_page %}<div class="govuk-pagination__next"><a class="govuk-link govuk-pagination__link" href="{{ next_page.get_absolute_url }}" rel="next"><span class="govuk-pagination__link-title">{% translate "Next" %}</span><span class="govuk-visually-hidden">:</span> <span class="govuk-pagination__link-label">{{ next_page.title }}</span></a></div>{% endif %}
+    </nav>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
