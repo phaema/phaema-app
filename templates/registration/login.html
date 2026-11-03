@@ -1,0 +1,26 @@
+{% extends "base.html" %}{% load i18n %}
+{% block title %}{% translate "Sign in" %}{% endblock %}
+{% block content %}
+<div class="govuk-grid-row"><div class="govuk-grid-column-one-half">
+  <h1 class="govuk-heading-l">{% translate "Sign in to PHAEMA" %}</h1>
+  {% if form.errors %}
+  <div class="govuk-error-summary" data-module="govuk-error-summary"><div role="alert">
+    <h2 class="govuk-error-summary__title">{% translate "There is a problem" %}</h2>
+    <div class="govuk-error-summary__body"><p class="govuk-body">{% translate "Enter a correct username and password." %}</p></div>
+  </div></div>
+  {% endif %}
+  <form method="post" novalidate>
+    {% csrf_token %}
+    <div class="govuk-form-group">
+      <label class="govuk-label" for="id_username">{% translate "Username" %}</label>
+      <input class="govuk-input" id="id_username" name="username" type="text" autocomplete="username" spellcheck="false" value="{{ form.username.value|default:'' }}">
+    </div>
+    <div class="govuk-form-group">
+      <label class="govuk-label" for="id_password">{% translate "Password" %}</label>
+      <input class="govuk-input" id="id_password" name="password" type="password" autocomplete="current-password">
+    </div>
+    <input type="hidden" name="next" value="{{ next }}">
+    <button type="submit" class="govuk-button" data-module="govuk-button">{% translate "Sign in" %}</button>
+  </form>
+</div></div>
+{% endblock %}

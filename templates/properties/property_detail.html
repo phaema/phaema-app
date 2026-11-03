@@ -1,0 +1,116 @@
+{% extends "base.html" %}{% load i18n humanize phaema %}
+{% block title %}{{ object.reference }} {{ object.name }}{% endblock %}
+{% block breadcrumbs %}
+<nav class="govuk-breadcrumbs" aria-label="Breadcrumb"><ol class="govuk-breadcrumbs__list">
+  <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="{% url 'properties:list' %}">{% translate "Properties" %}</a></li>
+  {% for a in object.ancestors %}<li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="{{ a.get_absolute_url }}">{{ a.name }}</a></li>{% endfor %}
+  <li class="govuk-breadcrumbs__list-item">{{ object.name }}</li>
+</ol></nav>
+{% endblock %}
+{% block content %}
+<span class="govuk-caption-l">{{ object.reference }} · {{ object.get_property_type_display }}</span>
+<h1 class="govuk-heading-xl">{{ object.name }}</h1>
+{% if user.is_staff %}<p class="govuk-body"><a class="govuk-link" href="{% url 'admin:properties_property_change' object.pk %}">{% translate "Edit this property, add photos or assign a surveyor" %}</a></p>{% endif %}
+
+<div class="govuk-grid-row">
+<div class="govuk-grid-column-two-thirds">
+  {% if photos %}
+  {% with first=photos.0 %}
+  <figure class="phaema-gallery" data-phaema-gallery>
+    <a href="{{ first.image.url }}" data-gallery-link target="_blank" rel="noopener">
+      <img class="phaema-gallery__main" data-gallery-main src="{{ first.image.url }}" alt="{{ first.caption|default:object.name }}">
+    </a>
+    <figcaption class="govuk-body-s govuk-!-margin-top-2" data-gallery-caption>
+      {% blocktranslate count n=photos|length %}Photo 1 of {{ n }}{% plural %}Photo 1 of {{ n }}{% endblocktranslate %}{% if first.caption %}: {{ first.caption }}{% endif %}{% if first.taken_on %} ({{ first.taken_on|date:"j M Y" }}){% endif %}
+    </figcaption>
+    {% if photos|length > 1 %}
+    <ul class="phaema-gallery__thumbs" aria-label="{% translate 'All photos' %}">
+      {% for ph in photos %}
+      <li><a href="{{ ph.image.url }}" data-gallery-thumb data-caption="{{ ph.caption }}" data-alt="{{ ph.caption|default:object.name }}"{% if forloop.first %} aria-current="true"{% endif %}>
+        <img src="{{ ph.image.url }}" alt="{% blocktranslate with n=forloop.counter %}Show photo {{ n }}{% endblocktranslate %}{% if ph.caption %}: {{ ph.caption }}{% endif %}" loading="lazy"></a></li>
+      {% endfor %}
+    </ul>
+    {% endif %}
+  </figure>
+  {% endwith %}
+  {% endif %}
+
+  <h2 class="govuk-heading-m">{% translate "Details" %}</h2>
+  <dl class="govuk-summary-list">
+    <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Managing surveyor" %}</dt><dd class="govuk-summary-list__value">{% if object.managing_surveyor %}<a class="govuk-link" href="{% url 'properties:list' %}?surveyor={{ object.managing_surveyor_id }}">{{ surveyor_name }}</a>{% if object.managing_surveyor.email %}<br><span class="govuk-body-s">{{ object.managing_surveyor.email }}</span>{% endif %}{% else %}{% translate "Not assigned" %}{% endif %}</dd></div>
+    <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Address" %}</dt><dd class="govuk-summary-list__value">{{ object.address|default:"–" }}</dd></div>
+    <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">UPRN</dt><dd class="govuk-summary-list__value">{{ object.uprn|default:"–" }}</dd></div>
+    <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Holding purpose" %}</dt><dd class="govuk-summary-list__value">{{ object.get_holding_purpose_display|default:"–" }}</dd></div>
+    <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Tenure" %}</dt><dd class="govuk-summary-list__value">{{ object.get_tenure_display|default:"–" }}</dd></div>
+    <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Occupation" %}</dt><dd class="govuk-summary-list__value">{{ object.get_occupation_display|default:"–" }}</dd></div>
+    <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Use" %}</dt><dd class="govuk-summary-list__value">{{ object.use_description|default:"–" }}{% if object.use_class %} ({{ object.use_class }}){% endif %}</dd></div>
+    <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Areas" %}</dt><dd class="govuk-summary-list__value">
+      {% if object.gia_sqm %}GIA {{ object.gia_sqm|floatformat:0|intcomma }} m²<br>{% endif %}{% if object.nia_sqm %}NIA {{ object.nia_sqm|floatformat:0|intcomma }} m²<br>{% endif %}{% if object.site_area_ha %}{% translate "Site" %} {{ object.site_area_ha|floatformat:2 }} ha{% endif %}
+      {% if not object.gia_sqm and not object.nia_sqm and not object.site_area_ha %}–{% endif %}</dd></div>
+    <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Grid reference" %}</dt><dd class="govuk-summary-list__value">{% if object.easting %}{{ object.easting }}, {{ object.northing }}{% else %}–{% endif %}</dd></div>
+    {% if object.exclude_from_publication %}<div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Open data" %}</dt><dd class="govuk-summary-list__value"><strong class="govuk-tag govuk-tag--red">{% translate "Excluded from publication" %}</strong></dd></div>{% endif %}
+  </dl>
+  {% if object.notes %}<h2 class="govuk-heading-m">{% translate "Notes" %}</h2><p class="govuk-body">{{ object.notes|linebreaksbr }}</p>{% endif %}
+
+  {% if breakdown %}
+  <h2 class="govuk-heading-m">{% translate "Floor areas" %}</h2>
+  <dl class="govuk-summary-list">
+    <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Gross internal area (GIA)" %}</dt><dd class="govuk-summary-list__value">{% if breakdown.gia %}{{ breakdown.gia|floatformat:0|intcomma }} m²{% if breakdown.gia_source == "buildings" %}<br><span class="govuk-body-s">{% translate "Total of the buildings within" %}</span>{% endif %}{% else %}–{% endif %}</dd></div>
+    <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Lettable parts" %}</dt><dd class="govuk-summary-list__value">{{ breakdown.leaf_count }}{% if breakdown.vacant_count %} ({{ breakdown.vacant_count }} {% translate "vacant" %}{% if breakdown.vacant_nia %}, {{ breakdown.vacant_nia|floatformat:0|intcomma }} m² NIA{% endif %}){% endif %}</dd></div>
+    <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Total net internal area (NIA)" %}</dt><dd class="govuk-summary-list__value">{% if breakdown.leaf_nia %}{{ breakdown.leaf_nia|floatformat:0|intcomma }} m²{% else %}–{% endif %}</dd></div>
+    {% if breakdown.non_lettable is not None %}<div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Non-lettable area" %}</dt><dd class="govuk-summary-list__value">{{ breakdown.non_lettable|floatformat:0|intcomma }} m²<br><span class="govuk-body-s">{% translate "GIA less lettable NIA: common parts, circulation, plant, walls and similar" %}</span></dd></div>{% endif %}
+    {% if breakdown.net_to_gross %}<div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Net to gross" %}</dt><dd class="govuk-summary-list__value">{{ breakdown.net_to_gross }}%</dd></div>{% endif %}
+  </dl>
+  <details class="govuk-details" data-module="govuk-details">
+    <summary class="govuk-details__summary"><span class="govuk-details__summary-text">{% translate "How the floor area is made up" %}</span></summary>
+    <div class="govuk-details__text">
+      <table class="govuk-table">
+        <caption class="govuk-table__caption govuk-table__caption--s">{% translate "All parts of this property. Lettable parts are in bold." %}</caption>
+        <thead class="govuk-table__head"><tr class="govuk-table__row">
+          <th scope="col" class="govuk-table__header">{% translate "Part" %}</th>
+          <th scope="col" class="govuk-table__header">{% translate "Occupation" %}</th>
+          <th scope="col" class="govuk-table__header govuk-table__header--numeric">NIA m²</th>
+          <th scope="col" class="govuk-table__header govuk-table__header--numeric">GIA m²</th>
+        </tr></thead>
+        <tbody class="govuk-table__body">
+        {% for part, depth in breakdown.parts %}
+          <tr class="govuk-table__row">
+            <td class="govuk-table__cell phaema-indent-{{ depth }}"><a class="govuk-link{% if part.pk in breakdown.leaf_ids %} phaema-lettable{% endif %}" href="{{ part.get_absolute_url }}">{{ part.name }}</a> <span class="govuk-body-s">{{ part.get_property_type_display }}</span></td>
+            <td class="govuk-table__cell">{{ part.get_occupation_display }}</td>
+            <td class="govuk-table__cell govuk-table__cell--numeric">{{ part.nia_sqm|default_if_none:""|floatformat:0|intcomma }}</td>
+            <td class="govuk-table__cell govuk-table__cell--numeric">{{ part.gia_sqm|default_if_none:""|floatformat:0|intcomma }}</td>
+          </tr>
+        {% endfor %}
+          <tr class="govuk-table__row">
+            <th scope="row" class="govuk-table__header" colspan="2">{% translate "Total of lettable parts" %}</th>
+            <td class="govuk-table__cell govuk-table__cell--numeric"><strong>{{ breakdown.leaf_nia|floatformat:0|intcomma }}</strong></td>
+            <td class="govuk-table__cell govuk-table__cell--numeric"><strong>{{ breakdown.leaf_gia|floatformat:0|intcomma }}</strong></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </details>
+  {% endif %}
+
+  <h2 class="govuk-heading-m">{% translate "Parts of this property" %}</h2>
+  {% if children %}
+  <ul class="govuk-list">{% for c in children %}<li><a class="govuk-link" href="{{ c.get_absolute_url }}">{{ c.reference }} {{ c.name }}</a> – {{ c.get_property_type_display }}</li>{% endfor %}</ul>
+  {% else %}<p class="govuk-body">{% translate "None recorded." %}</p>{% endif %}
+</div>
+<div class="govuk-grid-column-one-third">
+  <h2 class="govuk-heading-m">{% translate "Location" %}</h2>
+  <p class="govuk-body-s">{% translate "A map showing the location and boundaries will appear here (coming in week 2)." %}</p>
+
+  <h2 class="govuk-heading-m">{% translate "Titles" %}</h2>
+  {% if titles %}
+  <ul class="govuk-list">{% for t in titles %}<li><a class="govuk-link" href="{{ t.get_absolute_url }}"><strong>{{ t }}</strong></a> – {{ t.get_tenure_display }}{% if t.title_class %}, {{ t.get_title_class_display|lower }}{% endif %}
+    {% with docs=t.documents.all %}{% if docs %}<br><span class="govuk-body-s">{% blocktranslate count n=docs|length %}{{ n }} document{% plural %}{{ n }} documents{% endblocktranslate %}</span>{% endif %}{% endwith %}</li>{% endfor %}</ul>
+  {% else %}<p class="govuk-body">{% translate "No titles linked." %}</p>{% endif %}
+
+  <h2 class="govuk-heading-m">{% translate "History" %}</h2>
+  {% if history %}
+  <ul class="govuk-list govuk-body-s">{% for e in history %}<li><a class="govuk-link" href="{% url 'change' e.pk %}">{{ e.timestamp|date:"j M Y H:i" }}</a> – {{ e.get_action_display }}{% if e.user %} {% translate "by" %} {{ e.user.get_full_name|default:e.user.username }}{% endif %}{% if e.action == "update" %}: {{ e|field_labels }}{% endif %}</li>{% endfor %}</ul>
+  {% else %}<p class="govuk-body">{% translate "No history." %}</p>{% endif %}
+</div>
+</div>
+{% endblock %}

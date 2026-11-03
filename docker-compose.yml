@@ -1,0 +1,41 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# Runs PHAEMA locally (e.g. on a Mac) or on a single server.
+# Start with:  ./phaema.sh start      then open http://localhost:8000
+services:
+  db:
+    build: ./docker/db
+    environment:
+      POSTGRES_DB: phaema
+      POSTGRES_USER: phaema
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-phaema-local}
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U phaema -d phaema"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    restart: unless-stopped
+
+  web:
+    build: .
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgis://phaema:${DB_PASSWORD:-phaema-local}@db:5432/phaema
+      SECRET_KEY: ${SECRET_KEY:-local-development-only-change-me}
+      DEBUG: ${DEBUG:-False}
+      SECURE_COOKIES: ${SECURE_COOKIES:-False}
+      ALLOWED_HOSTS: ${ALLOWED_HOSTS:-localhost,127.0.0.1}
+      PHAEMA_ORGANISATION_NAME: ${PHAEMA_ORGANISATION_NAME:-Demonstration Council}
+      MEDIA_ROOT: /app/media
+    ports:
+      - "127.0.0.1:8000:8000"
+    volumes:
+      - media:/app/media
+    restart: unless-stopped
+
+volumes:
+  db-data:
+  media:
