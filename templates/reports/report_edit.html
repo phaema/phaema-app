@@ -59,6 +59,9 @@
     {% elif f.type == "text" %}
       <label class="govuk-label" for="f_{{ f.key }}">{% translate "Contains" %}</label>
       <input class="govuk-input govuk-input--width-20" id="f_{{ f.key }}" name="f_{{ f.key }}" value="{{ row.spec.contains|default:'' }}">
+      <div class="govuk-checkboxes govuk-checkboxes--small govuk-!-margin-top-2"><div class="govuk-checkboxes__item">
+        <input class="govuk-checkboxes__input" id="f_{{ f.key }}_blank" name="f_{{ f.key }}_blank" type="checkbox" value="1"{% if row.spec.blank %} checked{% endif %}>
+        <label class="govuk-label govuk-checkboxes__label" for="f_{{ f.key }}_blank">{% translate "Only records where this is blank" %}</label></div></div>
     {% elif f.type == "bool" %}
       <label class="govuk-label" for="f_{{ f.key }}">{{ f.label }}</label>
       <select class="govuk-select" id="f_{{ f.key }}" name="f_{{ f.key }}">

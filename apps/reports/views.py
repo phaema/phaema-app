@@ -19,14 +19,27 @@ from . import datasets, export
 from .models import Report
 
 DATE_MODES = [("", "Any date"), ("next", "In the next … days"), ("last", "In the last … days"),
+              ("upto", "Up to … days from now, including past dates"),
               ("before_today", "Before today"), ("between", "Between two dates")]
 
 
 @login_required
 def report_list(request):
+    from apps.core.models import ModuleSettings
+
+    from .starter import CATEGORIES, LEDGER_CATEGORY, STARTERS, category
+
     visible = Report.objects.filter(Q(shared=True) | ~Q(starter="") | Q(owner=request.user))
+    order = {s["starter"]: i for i, s in enumerate(STARTERS)}
+    ledger_on = ModuleSettings.load().rent_ledger_enabled
+    grouped = {}
+    for report in sorted(visible.exclude(starter=""), key=lambda r: order.get(r.starter, 999)):
+        cat = category(report.starter)
+        if cat == LEDGER_CATEGORY and not ledger_on:
+            continue
+        grouped.setdefault(cat, []).append(report)
     return render(request, "reports/report_list.html", {
-        "starters": visible.exclude(starter=""),
+        "starter_groups": [(c, grouped[c]) for c in CATEGORIES if c in grouped],
         "shared": visible.filter(starter="", shared=True).exclude(owner=request.user).select_related("owner"),
         "mine": visible.filter(starter="", owner=request.user),
         "datasets": datasets.registry().values(),
@@ -91,12 +104,16 @@ def _describe_filters(ds, filters):
                          for u in get_user_model().objects.filter(pk__in=[v for v in spec["in"] if str(v).isdigit()])}
                 names = {**users, "none": _("Nobody")}
             lines.append(f"{f.label}: {', '.join(str(names.get(str(v), v)) for v in spec['in'])}")
+        elif spec.get("blank"):
+            lines.append(f"{f.label} is blank")
         elif "contains" in spec:
             lines.append(f"{f.label} contains “{spec['contains']}”")
         elif "is" in spec:
             lines.append(f"{f.label}: {'Yes' if spec['is'] else 'No'}")
         elif "next_days" in spec:
             lines.append(f"{f.label} in the next {spec['next_days']} days")
+        elif "upto_days" in spec:
+            lines.append(f"{f.label} up to {spec['upto_days']} days from now, including past dates")
         elif "last_days" in spec:
             lines.append(f"{f.label} in the last {spec['last_days']} days")
         elif spec.get("before_today"):
@@ -135,7 +152,9 @@ def _read_form(post, ds):
             if values:
                 filters[f.key] = {"in": values}
         elif f.type == "text":
-            if post.get(k, "").strip():
+            if post.get(f"{k}_blank") == "1":
+                filters[f.key] = {"blank": True}
+            elif post.get(k, "").strip():
                 filters[f.key] = {"contains": post[k].strip()}
         elif f.type == "bool":
             if post.get(k) in ("yes", "no"):
@@ -153,7 +172,7 @@ def _read_form(post, ds):
                 filters[f.key] = spec
         elif f.type == "date":
             mode = post.get(f"{k}_mode", "")
-            if mode in ("next", "last"):
+            if mode in ("next", "last", "upto"):
                 days = post.get(f"{k}_days", "").strip()
                 if days.isdigit():
                     filters[f.key] = {f"{mode}_days": int(days)}
@@ -189,9 +208,10 @@ def _form_context(ds, report, errors=None):
         elif f.type == "choice":
             row["options"] = f.choices
         if f.type == "date":
-            mode = ("next" if "next_days" in spec else "last" if "last_days" in spec else "before_today"
+            mode = ("next" if "next_days" in spec else "last" if "last_days" in spec else "upto"
+                    if "upto_days" in spec else "before_today"
                     if spec.get("before_today") else "between" if ("from" in spec or "to" in spec) else "")
-            row["mode"], row["days"] = mode, spec.get("next_days", spec.get("last_days", ""))
+            row["mode"], row["days"] = mode, spec.get("next_days", spec.get("last_days", spec.get("upto_days", "")))
         filter_rows.append(row)
     return {
         "dataset": ds, "report": report, "errors": errors or [],

@@ -1,39 +1,138 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 """Reports PHAEMA provides out of the box. Administrators can adjust them; anyone can copy them."""
 
+CATEGORIES = ["Property and assets", "Leases and key dates", "Rents and income", "Contacts", "Data quality"]
+LEDGER_CATEGORY = "Rents and income"  # shown only when the rent ledger is switched on
+
+LIVE = {"in": ["current", "holding_over"]}
+OPEN = {"in": ["open", "in_progress"]}
+
 STARTERS = [
-    {"starter": "rent_roll", "name": "Rent roll", "dataset": "leases",
+    {"starter": "rent_roll", "category": "Leases and key dates", "name": "Rent roll", "dataset": "leases",
      "description": "Live agreements let out by the council, with rent and key dates.",
      "columns": ["reference", "counterparty", "premises", "agreement_type", "term_start", "term_end",
                  "next_review_date", "annual_rent", "rent_frequency", "surveyor"],
      "filters": {"status": {"in": ["current", "holding_over"]}, "direction": {"in": ["out"]}},
      "sort_by": "annual_rent", "sort_descending": True},
-    {"starter": "expiries_12m", "name": "Lease expiries in the next 12 months", "dataset": "leases",
+    {"starter": "expiries_12m", "category": "Leases and key dates", "name": "Lease expiries in the next 12 months", "dataset": "leases",
      "description": "Live agreements whose contractual term ends within a year.",
      "columns": ["reference", "counterparty", "premises", "term_end", "security_of_tenure", "annual_rent", "surveyor"],
      "filters": {"status": {"in": ["current", "holding_over"]}, "term_end": {"next_days": 365}},
      "sort_by": "term_end"},
-    {"starter": "vacant", "name": "Vacant properties", "dataset": "properties",
+    {"starter": "vacant", "category": "Property and assets", "name": "Vacant properties", "dataset": "properties",
      "description": "Everything recorded as vacant, with floor areas.",
      "columns": ["reference", "name", "property_type", "address_line_1", "postcode", "use_description",
                  "nia_sqm", "gia_sqm", "managing_surveyor"],
      "filters": {"occupation": {"in": ["vacant"]}}, "sort_by": "reference"},
-    {"starter": "overdue_events", "name": "Overdue lease events", "dataset": "events",
+    {"starter": "overdue_events", "category": "Leases and key dates", "name": "Overdue lease events", "dataset": "events",
      "description": "Events past their due date with no outcome recorded.",
      "columns": ["due_date", "event_type", "title", "lease", "tenant", "premises", "assigned_to"],
      "filters": {"status": {"in": ["open", "in_progress"]}, "due_date": {"before_today": True}},
      "sort_by": "due_date"},
-    {"starter": "terrier", "name": "Property terrier", "dataset": "properties",
+    {"starter": "terrier", "category": "Property and assets", "name": "Property terrier", "dataset": "properties",
      "description": "The full property register with identifiers and classification.",
      "columns": ["reference", "name", "property_type", "parent", "uprn", "address_line_1", "town", "postcode",
                  "holding_purpose", "tenure", "occupation", "gia_sqm", "nia_sqm", "site_area_ha", "titles",
                  "managing_surveyor"],
      "filters": {}, "sort_by": "reference"},
-    {"starter": "tenant_contacts", "name": "Tenant contacts", "dataset": "parties",
+    {"starter": "tenant_contacts", "category": "Contacts", "name": "Tenant contacts", "dataset": "parties",
      "description": "Contact details for everyone with a current agreement.",
      "columns": ["name", "party_type", "contact_name", "email", "phone", "address", "finance_customer_ref",
                  "n_current", "current_rent"],
      "filters": {"n_current": {"min": 1}}, "sort_by": "name"},
+    # ---- property and assets
+    {"starter": "transparency_assets", "category": "Property and assets",
+     "name": "Land and building assets (Transparency Code)", "dataset": "properties",
+     "description": "The land and buildings list councils publish under the Local Government Transparency Code. "
+                    "Properties marked 'exclude from open data' are left out.",
+     "columns": ["uprn", "name", "address_line_1", "address_line_2", "town", "postcode", "easting", "northing",
+                 "tenure", "property_type", "holding_purpose"],
+     "filters": {"exclude_from_publication": {"is": False}}, "sort_by": "reference"},
+    {"starter": "surplus_disposal", "category": "Property and assets",
+     "name": "Surplus and held for disposal", "dataset": "properties",
+     "description": "Property the council has declared surplus or is holding for disposal, for asset reviews.",
+     "columns": ["reference", "name", "property_type", "address_line_1", "postcode", "holding_purpose", "occupation",
+                 "gia_sqm", "site_area_ha", "current_rent", "managing_surveyor"],
+     "filters": {"holding_purpose": {"in": ["surplus", "held_for_sale"]}}, "sort_by": "holding_purpose"},
+    # ---- leases and key dates
+    {"starter": "reviews_12m", "category": "Leases and key dates",
+     "name": "Rent reviews in the next 12 months", "dataset": "events",
+     "description": "Open rent reviews due within a year, with the current rent, to plan negotiations.",
+     "columns": ["due_date", "lease", "tenant", "premises", "current_rent", "assigned_to", "status"],
+     "filters": {"event_type": {"in": ["review"]}, "status": OPEN, "due_date": {"next_days": 365}},
+     "sort_by": "due_date"},
+    {"starter": "breaks_18m", "category": "Leases and key dates",
+     "name": "Breaks and notice deadlines in the next 18 months", "dataset": "events",
+     "description": "Break dates and last dates to serve break notice coming up, so no break is missed.",
+     "columns": ["due_date", "event_type", "title", "lease", "tenant", "premises", "current_rent", "assigned_to"],
+     "filters": {"event_type": {"in": ["notice", "break"]}, "status": OPEN, "due_date": {"next_days": 548}},
+     "sort_by": "due_date"},
+    {"starter": "holding_over", "category": "Leases and key dates",
+     "name": "Agreements holding over", "dataset": "leases",
+     "description": "Tenants still in occupation after their term ended: renew, or recover possession.",
+     "columns": ["reference", "counterparty", "premises", "term_end", "security_of_tenure", "annual_rent", "surveyor"],
+     "filters": {"status": {"in": ["holding_over"]}}, "sort_by": "term_end"},
+    {"starter": "act_renewals_24m", "category": "Leases and key dates",
+     "name": "1954 Act protected leases: ended or ending within 2 years", "dataset": "leases",
+     "description": "Live leases with security of tenure that end within two years or are already continuing "
+                    "past their term. Section 25 notices and renewal terms need planning well ahead.",
+     "columns": ["reference", "counterparty", "premises", "term_end", "annual_rent", "permitted_use", "surveyor"],
+     "filters": {"status": LIVE, "security_of_tenure": {"in": ["inside"]}, "term_end": {"upto_days": 730}},
+     "sort_by": "term_end"},
+    {"starter": "nil_rent", "category": "Leases and key dates",
+     "name": "Nil and peppercorn rent lettings", "dataset": "leases",
+     "description": "Agreements let at no rent, for reporting on community lettings and subsidy.",
+     "columns": ["reference", "counterparty", "premises", "agreement_type", "term_start", "term_end",
+                 "permitted_use", "surveyor"],
+     "filters": {"status": LIVE, "direction": {"in": ["out"]}, "annual_rent": {"max": 0}}, "sort_by": "reference"},
+    {"starter": "leased_in", "category": "Leases and key dates",
+     "name": "Property leased in by the council", "dataset": "leases",
+     "description": "Agreements where the council is the tenant, with the rent it pays and when they end.",
+     "columns": ["reference", "counterparty", "premises", "term_end", "next_review_date", "annual_rent",
+                 "rent_frequency", "surveyor"],
+     "filters": {"status": LIVE, "direction": {"in": ["in"]}}, "sort_by": "annual_rent", "sort_descending": True},
+    # ---- rents and income
+    {"starter": "rent_arrears", "category": "Rents and income",
+     "name": "Rent arrears (overdue payments)", "dataset": "rent_accounts",
+     "description": "Every agreement with overdue rent, aged, largest first, with tenant contact details.",
+     "columns": ["reference", "tenant", "phone", "email", "overdue", "aged_0", "aged_1", "aged_2", "aged_3",
+                 "last_paid", "surveyor"],
+     "filters": {"overdue": {"min": 0.01}}, "sort_by": "overdue", "sort_descending": True, "show_totals": True},
+    {"starter": "overdue_invoices", "category": "Rents and income",
+     "name": "Overdue rent invoices", "dataset": "charges",
+     "description": "Each unpaid or part-paid invoice past its due date, oldest first.",
+     "columns": ["reference", "lease", "tenant", "description", "due_date", "days_overdue", "gross", "outstanding"],
+     "filters": {"outstanding": {"min": 0.01}, "due_date": {"before_today": True}},
+     "sort_by": "days_overdue", "sort_descending": True, "show_totals": True},
+    {"starter": "arrears_90", "category": "Rents and income",
+     "name": "Arrears over 90 days", "dataset": "rent_accounts",
+     "description": "Agreements with rent overdue more than 90 days, to consider for debt recovery.",
+     "columns": ["reference", "tenant", "contact_name", "phone", "email", "aged_3", "overdue", "last_paid",
+                 "surveyor"],
+     "filters": {"aged_3": {"min": 0.01}}, "sort_by": "aged_3", "sort_descending": True, "show_totals": True},
+    {"starter": "awaiting_finance", "category": "Rents and income",
+     "name": "Charges waiting to go to finance", "dataset": "charges",
+     "description": "Invoices and credit notes raised in PHAEMA but not yet in a finance export.",
+     "columns": ["reference", "kind", "lease", "tenant", "description", "issue_date", "due_date", "net", "vat",
+                 "gross"],
+     "filters": {"waiting": {"is": True}}, "sort_by": "issue_date", "show_totals": True},
+    {"starter": "receipts_30d", "category": "Rents and income",
+     "name": "Rent received in the last 30 days", "dataset": "receipts",
+     "description": "Payments received in the past month.",
+     "columns": ["received_on", "payment_reference", "lease", "tenant", "quoted_reference", "amount"],
+     "filters": {"received_on": {"last_days": 30}}, "sort_by": "received_on", "sort_descending": True,
+     "show_totals": True},
+    # ---- data quality
+    {"starter": "no_surveyor", "category": "Data quality",
+     "name": "Properties with no managing surveyor", "dataset": "properties",
+     "description": "Nobody is responsible for these, so their lease events are not assigned to anyone.",
+     "columns": ["reference", "name", "property_type", "parent", "postcode", "occupation", "holding_purpose"],
+     "filters": {"managing_surveyor": {"in": ["none"]}}, "sort_by": "reference"},
+    {"starter": "missing_uprn", "category": "Data quality",
+     "name": "Properties without a UPRN", "dataset": "properties",
+     "description": "The UPRN links PHAEMA to GIS, council tax, business rates and the Transparency Code list.",
+     "columns": ["reference", "name", "property_type", "address_line_1", "town", "postcode", "managing_surveyor"],
+     "filters": {"uprn": {"blank": True}}, "sort_by": "reference"},
 ]
 
 
@@ -41,4 +140,9 @@ def ensure_starter_reports():
     from .models import Report
 
     for spec in STARTERS:
-        Report.objects.get_or_create(starter=spec["starter"], defaults={**spec, "shared": True})
+        fields = {k: v for k, v in spec.items() if k != "category"}
+        Report.objects.get_or_create(starter=spec["starter"], defaults={**fields, "shared": True})
+
+
+def category(starter_key):
+    return next((s["category"] for s in STARTERS if s["starter"] == starter_key), CATEGORIES[-1])

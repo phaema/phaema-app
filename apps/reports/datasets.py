@@ -244,10 +244,87 @@ def _rent_fields():
     ]
 
 
+# ------------------------------------------------------------------ rent ledger
+
+def _figures(mapping, name, output):
+    """Annotate a queryset with a value worked out in Python, per row, so it can be filtered and sorted."""
+    from django.db.models import Case, When
+
+    whens = [When(pk=pk, then=Value(v)) for pk, v in mapping.items() if v is not None]
+    return {name: Case(*whens, default=Value(None), output_field=output) if whens else
+            Value(None, output_field=output)}
+
+
+def _ledger_state(today=None):
+    """Every rent account, worked out once: what is owed on each charge and each agreement's totals."""
+    from apps.ledger import billing
+
+    today = today or date.today()
+    owed, days, leases = {}, {}, {}
+    for acc in billing.accounts(today):
+        for line in acc.lines:
+            if line.kind == "charge" and line.outstanding > 0:
+                owed[line.obj.pk] = line.outstanding
+                if line.obj.due_date < today:
+                    days[line.obj.pk] = (today - line.obj.due_date).days
+        leases[acc.lease.pk] = acc
+    return owed, days, leases
+
+
 def _charges():
     from apps.ledger.models import Charge
 
-    return Charge.objects.select_related("lease", "lease__counterparty", "export")
+    owed, days, _accounts = _ledger_state()
+    money, whole = DecimalField(max_digits=12, decimal_places=2), IntegerField()
+    return Charge.objects.select_related("lease", "lease__counterparty", "export").annotate(
+        **_figures(owed, "outstanding", money), **_figures(days, "days_overdue", whole))
+
+
+def _rent_accounts():
+    from django.db.models import Max
+
+    from apps.leases.models import Lease
+    from apps.ledger.billing import AGE_BANDS
+
+    _owed, _days, accounts = _ledger_state()
+    money = DecimalField(max_digits=12, decimal_places=2)
+    figures = {}
+    figures.update(_figures({pk: a.balance for pk, a in accounts.items()}, "balance", money))
+    figures.update(_figures({pk: a.overdue for pk, a in accounts.items()}, "overdue", money))
+    for i, (_limit, label) in enumerate(AGE_BANDS):
+        figures.update(_figures({pk: dict(a.aged)[label] for pk, a in accounts.items()}, f"aged_{i}", money))
+    return (Lease.objects.filter(pk__in=list(accounts)).select_related("counterparty")
+            .prefetch_related("properties", "properties__managing_surveyor")
+            .annotate(last_paid=Max("receipts__received_on"), **figures))
+
+
+def _rent_account_fields():
+    from apps.ledger.billing import AGE_BANDS
+
+    return [
+        Field("reference", "Agreement", path="reference", default=True),
+        Field("tenant", "Tenant", path="counterparty__name", default=True),
+        Field("customer_ref", "Customer reference", path="counterparty__finance_customer_ref"),
+        Field("contact_name", "Contact", path="counterparty__contact_name"),
+        Field("phone", "Phone", path="counterparty__phone"),
+        Field("email", "Email", path="counterparty__email"),
+        Field("premises", "Premises", getter=lambda lease: "; ".join(p.name for p in lease.properties.all())),
+        Field("surveyor", "Managing surveyor", getter=lambda lease: next(
+            (_user_name(p.managing_surveyor) for p in lease.properties.all() if p.managing_surveyor), "")),
+        Field("status", "Agreement status", "choice", "status", choices=_lease_status_choices()),
+        Field("annual_rent", "Rent £ a year", "money", "annual_rent"),
+        Field("balance", "Balance", "money", "balance", default=True),
+        Field("overdue", "Overdue", "money", "overdue", default=True),
+    ] + [Field(f"aged_{i}", f"Overdue {label}", "money", f"aged_{i}", default=True)
+         for i, (_l, label) in enumerate(AGE_BANDS)] + [
+        Field("last_paid", "Last payment", "date", "last_paid", default=True),
+    ]
+
+
+def _lease_status_choices():
+    from apps.leases.models import Lease
+
+    return _choices(Lease, "status")
 
 
 def _charge_fields():
@@ -270,6 +347,8 @@ def _charge_fields():
         Field("gross", "Total", "money", "gross", default=True),
         Field("waiting", "Waiting to go to finance", "bool", "export__isnull",
               getter=lambda c: c.export_id is None),
+        Field("outstanding", "Still owed", "money", "outstanding", default=True),
+        Field("days_overdue", "Days overdue", "number", "days_overdue"),
     ]
 
 
@@ -350,6 +429,8 @@ def registry():
                     _charges, _charge_fields()),
             Dataset("receipts", "Rent receipts", "Payments received, from the finance system.",
                     _receipts, _receipt_fields()),
+            Dataset("rent_accounts", "Rent accounts", "Each agreement's rent balance, overdue rent by age and "
+                    "last payment.", _rent_accounts, _rent_account_fields()),
             Dataset("titles", "Titles", "Registered and unregistered titles.", _titles, _title_fields()),
             Dataset("changes", "Change log", "Every change made in PHAEMA.", _audit, _audit_fields()),
         ]}
@@ -364,9 +445,10 @@ def get(key):
 
 def apply_filters(dataset, qs, filters, today=None):
     """filters: {field_key: spec}. Specs by type:
-    choice/user: {"in": [values]}; text: {"contains": "..."}; bool: {"is": true|false};
+    choice/user: {"in": [values]}; text: {"contains": "..."} or {"blank": true}; bool: {"is": true|false};
     number/money/area: {"min": x, "max": y}; date: {"from": "YYYY-MM-DD", "to": "...",
-    "next_days": n, "last_days": n, "before_today": true}.
+    "next_days": n, "last_days": n, "upto_days": n (on or before n days ahead, past included),
+    "before_today": true}.
     """
     from datetime import timedelta
 
@@ -384,6 +466,8 @@ def apply_filters(dataset, qs, filters, today=None):
             if "none" in spec["in"]:
                 cond |= Q(**{f"{path}__isnull": True})
             qs = qs.filter(cond)
+        elif f.type == "text" and spec.get("blank"):
+            qs = qs.filter(Q(**{path: ""}) | Q(**{f"{path}__isnull": True}))
         elif f.type == "text" and spec.get("contains"):
             qs = qs.filter(**{f"{path}__icontains": spec["contains"]})
         elif f.type == "bool" and spec.get("is") in (True, False):
@@ -402,6 +486,8 @@ def apply_filters(dataset, qs, filters, today=None):
             if spec.get("next_days") not in (None, ""):
                 qs = qs.filter(**{f"{lookup}__gte": today,
                                   f"{lookup}__lte": today + timedelta(days=int(spec["next_days"]))})
+            if spec.get("upto_days") not in (None, ""):
+                qs = qs.filter(**{f"{lookup}__lte": today + timedelta(days=int(spec["upto_days"]))})
             if spec.get("last_days") not in (None, ""):
                 qs = qs.filter(**{f"{lookup}__lte": today,
                                   f"{lookup}__gte": today - timedelta(days=int(spec["last_days"]))})
