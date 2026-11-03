@@ -8,6 +8,7 @@ from rest_framework.routers import DefaultRouter
 from apps.core import views as core_views
 from apps.leases import event_views
 from apps.leases.api import LeaseViewSet, PartyViewSet
+from apps.properties import opendata
 from apps.properties.api import PropertyViewSet, TitleViewSet
 
 router = DefaultRouter()
@@ -37,6 +38,9 @@ urlpatterns = [
     path("rents/", include("apps.ledger.urls")),
     path("service-charges/", include("apps.servicecharges.urls")),
     path("maintenance/", include("apps.maintenance.urls")),
+    path("compliance/", include("apps.compliance.urls")),
+    path("open-data/", opendata.index, name="open-data"),
+    path("open-data/<slug:slug>.<str:fmt>", opendata.dataset, name="open-data-file"),
     path("cases/", include("apps.cases.urls")),
     path("calendar/<str:token>.ics", event_views.calendar_feed, name="calendar-feed"),
     path("admin/", admin.site.urls),

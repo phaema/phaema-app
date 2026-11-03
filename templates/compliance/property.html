@@ -1,0 +1,99 @@
+{% extends "base.html" %}{% load i18n phaema %}
+{% block title %}{% translate "Compliance" %}: {{ property.reference }}{% endblock %}
+{% block help_page %}compliance{% endblock %}
+{% block breadcrumbs %}<nav class="govuk-breadcrumbs" aria-label="Breadcrumb"><ol class="govuk-breadcrumbs__list"><li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="{% url 'compliance:home' %}">{% translate "Compliance" %}</a></li><li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="{{ property.get_absolute_url }}">{{ property.reference }}</a></li></ol></nav>{% endblock %}
+{% block content %}
+<span class="govuk-caption-l">{% translate "Compliance and building information" %}</span>
+<h1 class="govuk-heading-l">{{ property.reference }} {{ property.name }}</h1>
+<p class="govuk-body"><a class="govuk-link" href="{{ property.get_absolute_url }}">{% translate "Property record" %}</a>{% if maintenance_on %} · <a class="govuk-link" href="{% url 'maintenance:property' property.pk %}">{% translate "Maintenance" %}</a>{% endif %}</p>
+
+<h2 class="govuk-heading-m">{% translate "Certificates" %}</h2>
+{% include "compliance/_status_table.html" with rows=reqs empty=_("No certificates set up for this property yet.") hide_property=True %}
+
+{% if editable %}
+{% if reqs %}<details class="govuk-details" data-module="govuk-details"><summary class="govuk-details__summary"><span class="govuk-details__summary-text">{% translate "Record a certificate" %}</span></summary><div class="govuk-details__text">
+<form method="post" enctype="multipart/form-data">{% csrf_token %}<input type="hidden" name="action" value="certificate">
+  <div class="govuk-form-group"><label class="govuk-label govuk-label--s" for="c-req">{% translate "Certificate" %}</label><select class="govuk-select" id="c-req" name="requirement">{% for r, s in reqs %}<option value="{{ r.pk }}">{{ r.kind.name }}</option>{% endfor %}</select></div>
+  <div class="govuk-form-group"><label class="govuk-label govuk-label--s" for="c-issued">{% translate "Date of inspection or certificate" %}</label><input class="govuk-input govuk-input--width-10" type="date" id="c-issued" name="issued_on" value="{{ today|date:'Y-m-d' }}"></div>
+  <div class="govuk-form-group"><label class="govuk-label govuk-label--s" for="c-expires">{% translate "Valid until" %}</label><div class="govuk-hint">{% translate "Leave blank to use the usual period for this certificate." %}</div><input class="govuk-input govuk-input--width-10" type="date" id="c-expires" name="expires_on"></div>
+  <div class="govuk-form-group"><fieldset class="govuk-fieldset"><legend class="govuk-fieldset__legend govuk-fieldset__legend--s">{% translate "Result" %}</legend><div class="govuk-radios govuk-radios--small">{% for v, l in results %}<div class="govuk-radios__item"><input class="govuk-radios__input" id="res-{{ v }}" name="result" type="radio" value="{{ v }}"{% if forloop.first %} checked{% endif %}><label class="govuk-label govuk-radios__label" for="res-{{ v }}">{{ l }}</label></div>{% endfor %}</div></fieldset></div>
+  <div class="govuk-form-group"><label class="govuk-label govuk-label--s" for="c-actions">{% translate "Remedial actions" %}</label><div class="govuk-hint">{% translate "One per line. Each becomes an action to track, and can be raised as a repair job." %}</div><textarea class="govuk-textarea" id="c-actions" name="actions" rows="3"></textarea>
+    <label class="govuk-label govuk-!-margin-top-2" for="c-priority">{% translate "Priority of these actions" %}</label><select class="govuk-select" id="c-priority" name="priority">{% for v, l in priorities %}<option value="{{ v }}"{% if v == "medium" %} selected{% endif %}>{{ l }}</option>{% endfor %}</select></div>
+  <div class="govuk-form-group"><label class="govuk-label govuk-label--s" for="c-rating">{% translate "Rating" %}</label><div class="govuk-hint">{% translate "For an EPC or DEC, the band, for example C." %}</div><input class="govuk-input govuk-input--width-4" id="c-rating" name="rating" maxlength="10"></div>
+  <div class="govuk-form-group"><label class="govuk-label govuk-label--s" for="c-by">{% translate "Carried out by" %}</label><input class="govuk-input" id="c-by" name="carried_out_by" maxlength="200">
+    <label class="govuk-label govuk-!-margin-top-2" for="c-contractor">{% translate "or contractor" %}</label><select class="govuk-select" id="c-contractor" name="contractor"><option value="">–</option>{% for c in contractors %}<option value="{{ c.pk }}">{{ c.name }}</option>{% endfor %}</select></div>
+  <div class="govuk-form-group"><label class="govuk-label govuk-label--s" for="c-ref">{% translate "Certificate number" %}</label><input class="govuk-input govuk-input--width-20" id="c-ref" name="reference" maxlength="60"></div>
+  {% if jobs %}<div class="govuk-form-group"><label class="govuk-label govuk-label--s" for="c-job">{% translate "From job" %}</label><select class="govuk-select" id="c-job" name="job"><option value="">–</option>{% for j in jobs %}<option value="{{ j.pk }}">{{ j.reference }} {{ j.title|truncatechars:50 }}</option>{% endfor %}</select></div>{% endif %}
+  <div class="govuk-form-group"><label class="govuk-label govuk-label--s" for="c-file">{% translate "The certificate" %}</label><div class="govuk-hint">{% translate "PDF or photo, up to 25 MB" %}</div><input class="govuk-file-upload" id="c-file" name="file" type="file"></div>
+  <button class="govuk-button" data-module="govuk-button">{% translate "Save the certificate" %}</button>
+</form></div></details>{% endif %}
+{% if kinds %}<details class="govuk-details" data-module="govuk-details"{% if not reqs %} open{% endif %}><summary class="govuk-details__summary"><span class="govuk-details__summary-text">{% translate "Choose the certificates this property needs" %}</span></summary><div class="govuk-details__text">
+<form method="post">{% csrf_token %}<input type="hidden" name="action" value="add_requirements">
+  <p class="govuk-body-s">{% blocktranslate with who=who.0|title why=who.1 %}Held by: {{ who }} ({{ why }}). You can change it for each certificate afterwards.{% endblocktranslate %}</p>
+  <div class="govuk-form-group"><fieldset class="govuk-fieldset"><legend class="govuk-visually-hidden">{% translate "Certificates" %}</legend><div class="govuk-checkboxes govuk-checkboxes--small">
+  {% for k in kinds %}<div class="govuk-checkboxes__item"><input class="govuk-checkboxes__input" id="k-{{ k.pk }}" name="kind" type="checkbox" value="{{ k.pk }}"><label class="govuk-label govuk-checkboxes__label" for="k-{{ k.pk }}">{{ k.name }}, {% blocktranslate count n=k.valid_months %}valid {{ n }} month{% plural %}valid {{ n }} months{% endblocktranslate %}<br><span class="govuk-body-s">{{ k.regulation }}</span></label></div>{% endfor %}
+  </div></fieldset></div>
+  <button class="govuk-button govuk-button--secondary" data-module="govuk-button">{% translate "Add to the register" %}</button>
+</form></div></details>{% endif %}
+{% endif %}
+
+<h2 class="govuk-heading-m">{% translate "Remedial actions" %}</h2>
+{% if actions %}<table class="govuk-table"><tbody class="govuk-table__body">
+{% for a in actions %}{% with c=a.certificate r=a.certificate.requirement %}<tr class="govuk-table__row">
+  <td class="govuk-table__cell">{{ a.description }}<br><span class="govuk-body-s">{{ r.kind.name }}, {{ c.issued_on|date:"j M Y" }} · {{ a.get_priority_display }}</span></td>
+  <td class="govuk-table__cell">{% if a.done_on %}{% translate "Done" %} {{ a.done_on|date:"j M Y" }}{% else %}{% translate "Due" %} {{ a.due_on|date:"j M Y" }}{% if a.due_on < today %} <strong class="govuk-tag govuk-tag--red">{% translate "Overdue" %}</strong>{% endif %}{% endif %}
+    {% if a.job %}<br><a class="govuk-link govuk-body-s" href="{{ a.job.get_absolute_url }}">{{ a.job.reference }}</a>{% endif %}
+    {% if editable and not a.done_on %}<form method="post" class="govuk-!-margin-top-2">{% csrf_token %}<input type="hidden" name="item" value="{{ a.pk }}">
+      <button class="govuk-button govuk-button--secondary govuk-!-margin-bottom-0" name="action" value="action_done" data-module="govuk-button">{% translate "Done" %}</button>
+      {% if maintenance_on and not a.job %}<button class="govuk-button govuk-button--secondary govuk-!-margin-bottom-0" name="action" value="action_job" data-module="govuk-button">{% translate "Raise a repair job" %}</button>{% endif %}</form>{% endif %}</td>
+</tr>{% endwith %}{% endfor %}
+</tbody></table>{% else %}<p class="govuk-body">{% translate "None." %}</p>{% endif %}
+
+{% if golden_thread %}
+<h2 class="govuk-heading-m" id="golden-thread">{% translate "Golden Thread and higher-risk screening" %}</h2>
+{% include "core/_hint.html" with summary=_("What are the tiers?") text=_("Tier A: higher-risk buildings in England (at least 18 metres or 7 storeys, with at least two homes) and buildings in scope in Wales, which need the statutory Golden Thread. Tier B: other buildings under the Fire Safety Order, kept to the same principles as best practice. Tier C: land and simple assets. PHAEMA suggests a tier; an officer confirms it.") page="compliance" anchor="golden-thread-tiers" %}
+<dl class="govuk-summary-list">
+  <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Tier" %}</dt><dd class="govuk-summary-list__value">{% if screening.tier %}<strong>{{ screening.get_tier_display }}</strong><br><span class="govuk-body-s">{% if screening.confirmed_by %}{% blocktranslate with who=screening.confirmed_by|person:"" d=screening.confirmed_on|date:"j M Y" %}Confirmed by {{ who }} on {{ d }}{% endblocktranslate %}{% else %}{% blocktranslate with d=screening.confirmed_on|date:"j M Y" %}Confirmed on {{ d }}{% endblocktranslate %}{% endif %}</span>{% else %}{% translate "Not confirmed" %}{% endif %}
+    {% if suggested.0 != screening.tier %}<br><strong class="govuk-tag govuk-tag--blue">{% blocktranslate with t=suggested.0 %}Suggested: {{ t }}{% endblocktranslate %}</strong> <span class="govuk-body-s">{{ suggested.1 }}</span>{% endif %}</dd></div>
+  {% if screening %}<div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Screening" %}</dt><dd class="govuk-summary-list__value">{{ screening.get_country_display }}; {% if screening.height_m %}{{ screening.height_m }} m; {% endif %}{% if screening.storeys %}{{ screening.storeys }} {% translate "storeys" %}; {% endif %}{{ screening.residential_units }} {% translate "residential units" %}</dd></div>
+  <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Responsible person" %}</dt><dd class="govuk-summary-list__value">{{ screening.responsible_person|default:"–" }}</dd></div>
+  {% if screening.tier == "A" %}<div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Accountable person" %}</dt><dd class="govuk-summary-list__value">{{ screening.accountable_person|default:"–" }}</dd></div>{% endif %}{% endif %}
+</dl>
+{% if editable %}<details class="govuk-details" data-module="govuk-details"><summary class="govuk-details__summary"><span class="govuk-details__summary-text">{% translate "Screen this building" %}</span></summary><div class="govuk-details__text">
+<form method="post">{% csrf_token %}<input type="hidden" name="action" value="screening"><input type="hidden" name="anchor" value="#golden-thread">
+  <div class="govuk-form-group"><label class="govuk-label govuk-label--s" for="s-country">{% translate "Country" %}</label><select class="govuk-select" id="s-country" name="country">{% for v, l in countries %}<option value="{{ v }}"{% if v == screening.country %} selected{% endif %}>{{ l }}</option>{% endfor %}</select></div>
+  <div class="govuk-form-group"><label class="govuk-label govuk-label--s" for="s-height">{% translate "Height (metres)" %}</label><div class="govuk-hint">{% translate "From ground level to the top of the highest occupied floor." %}</div><input class="govuk-input govuk-input--width-5" id="s-height" name="height_m" inputmode="decimal" value="{{ screening.height_m|default_if_none:'' }}"></div>
+  <div class="govuk-form-group"><label class="govuk-label govuk-label--s" for="s-storeys">{% translate "Storeys above ground" %}</label><input class="govuk-input govuk-input--width-3" id="s-storeys" name="storeys" inputmode="numeric" value="{{ screening.storeys|default_if_none:'' }}"></div>
+  <div class="govuk-form-group"><label class="govuk-label govuk-label--s" for="s-units">{% translate "Residential units" %}</label><input class="govuk-input govuk-input--width-3" id="s-units" name="residential_units" inputmode="numeric" value="{{ screening.residential_units|default:0 }}"></div>
+  <div class="govuk-form-group"><label class="govuk-label govuk-label--s" for="s-rp">{% translate "Responsible person under the Fire Safety Order" %}</label><input class="govuk-input" id="s-rp" name="responsible_person" maxlength="200" value="{{ screening.responsible_person }}"></div>
+  <div class="govuk-form-group"><label class="govuk-label govuk-label--s" for="s-ap">{% translate "Accountable person (tier A buildings)" %}</label><input class="govuk-input" id="s-ap" name="accountable_person" maxlength="200" value="{{ screening.accountable_person }}"></div>
+  <div class="govuk-form-group"><fieldset class="govuk-fieldset"><legend class="govuk-fieldset__legend govuk-fieldset__legend--s">{% translate "Confirm the tier" %}</legend><div class="govuk-hint">{% blocktranslate with t=suggested.0 why=suggested.1 %}Suggested: {{ t }}, {{ why }}.{% endblocktranslate %}</div><div class="govuk-radios govuk-radios--small">
+    {% for v, l in tiers %}<div class="govuk-radios__item"><input class="govuk-radios__input" id="tier-{{ v }}" name="tier" type="radio" value="{{ v }}"{% if v == screening.tier %} checked{% endif %}><label class="govuk-label govuk-radios__label" for="tier-{{ v }}">{{ l }}</label></div>{% endfor %}
+  </div></fieldset></div>
+  <div class="govuk-form-group"><label class="govuk-label govuk-label--s" for="s-notes">{% translate "Notes" %}</label><textarea class="govuk-textarea" id="s-notes" name="notes" rows="2">{{ screening.notes }}</textarea></div>
+  <button class="govuk-button" data-module="govuk-button">{% translate "Save the screening" %}</button>
+</form></div></details>{% endif %}
+{% endif %}
+
+<h2 class="govuk-heading-m" id="documents">{% translate "Building information" %}</h2>
+<p class="govuk-body-s">{% translate "Kept for the life of the building. A new version supersedes the old one, which stays in the history." %}</p>
+{% if documents %}<table class="govuk-table">
+  <thead class="govuk-table__head"><tr class="govuk-table__row"><th scope="col" class="govuk-table__header">{% translate "Document" %}</th><th scope="col" class="govuk-table__header">{% translate "Category" %}</th><th scope="col" class="govuk-table__header">{% translate "Dated" %}</th></tr></thead>
+  <tbody class="govuk-table__body">{% for d in documents %}<tr class="govuk-table__row" id="doc-{{ d.pk }}">
+    <td class="govuk-table__cell"><a class="govuk-link" href="{{ d.file.url }}">{{ d.title }}</a> <span class="govuk-body-s">({{ d.file|file_size }}{% if d.supersedes %}, {% blocktranslate with v=d.version %}version {{ v }}{% endblocktranslate %}{% endif %})</span></td>
+    <td class="govuk-table__cell govuk-body-s">{{ d.get_category_display }}</td>
+    <td class="govuk-table__cell govuk-body-s">{{ d.document_date|date:"j M Y"|default:"–" }}</td>
+  </tr>{% endfor %}</tbody></table>
+{% else %}<p class="govuk-body">{% translate "None yet." %}</p>{% endif %}
+{% if superseded %}<details class="govuk-details" data-module="govuk-details"><summary class="govuk-details__summary"><span class="govuk-details__summary-text">{% blocktranslate count n=superseded|length %}{{ n }} earlier version{% plural %}{{ n }} earlier versions{% endblocktranslate %}</span></summary><div class="govuk-details__text">
+  <ul class="govuk-list govuk-body-s">{% for d in superseded %}<li><a class="govuk-link" href="{{ d.file.url }}">{{ d.title }}</a>, {% blocktranslate with v=d.version %}version {{ v }}{% endblocktranslate %}, {{ d.created_at|date:"j M Y" }}</li>{% endfor %}</ul></div></details>{% endif %}
+{% if editable %}<details class="govuk-details" data-module="govuk-details"><summary class="govuk-details__summary"><span class="govuk-details__summary-text">{% translate "Add a document or a new version" %}</span></summary><div class="govuk-details__text">
+<form method="post" enctype="multipart/form-data">{% csrf_token %}<input type="hidden" name="action" value="document"><input type="hidden" name="anchor" value="#documents">
+  {% if documents %}<div class="govuk-form-group"><label class="govuk-label govuk-label--s" for="d-old">{% translate "A new version of" %}</label><select class="govuk-select" id="d-old" name="supersedes"><option value="">{% translate "Nothing: a new document" %}</option>{% for d in documents %}<option value="{{ d.pk }}">{{ d.title }}</option>{% endfor %}</select></div>{% endif %}
+  <div class="govuk-form-group"><label class="govuk-label govuk-label--s" for="d-title">{% translate "Title" %}</label><input class="govuk-input" id="d-title" name="title" maxlength="200"></div>
+  <div class="govuk-form-group"><label class="govuk-label govuk-label--s" for="d-cat">{% translate "Category" %}</label><select class="govuk-select" id="d-cat" name="category">{% for v, l in categories %}<option value="{{ v }}">{{ l }}</option>{% endfor %}</select></div>
+  <div class="govuk-form-group"><label class="govuk-label govuk-label--s" for="d-date">{% translate "Date of the document" %}</label><input class="govuk-input govuk-input--width-10" type="date" id="d-date" name="document_date"></div>
+  <div class="govuk-form-group"><label class="govuk-label govuk-label--s" for="d-file">{% translate "File" %}</label><div class="govuk-hint">{% translate "PDF, photo, Word or Excel, up to 25 MB" %}</div><input class="govuk-file-upload" id="d-file" name="file" type="file"></div>
+  <button class="govuk-button govuk-button--secondary" data-module="govuk-button">{% translate "Save" %}</button>
+</form></div></details>{% endif %}
+{% endblock %}

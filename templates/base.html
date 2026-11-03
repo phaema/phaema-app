@@ -32,12 +32,13 @@
           <a href="{% url 'servicecharges:list' %}">{% translate "Service charges" %}</a></div></details>
         {% elif modules.rent_ledger_enabled %}<a href="{% url 'ledger:home' %}">{% translate "Rents" %}</a>
         {% elif modules.service_charges_enabled %}<a href="{% url 'servicecharges:list' %}">{% translate "Service charges" %}</a>{% endif %}
-        {% if modules.maintenance_enabled %}<details class="phaema-menu"><summary>{% translate "Maintenance" %}</summary><div class="phaema-menu__panel">
-          <a href="{% url 'maintenance:home' %}">{% translate "Overview" %}</a>
-          <a href="{% url 'maintenance:jobs' %}">{% translate "Jobs" %}</a>
+        {% if modules.maintenance_enabled or modules.compliance_enabled %}<details class="phaema-menu"><summary>{% translate "Buildings" %}</summary><div class="phaema-menu__panel">
+          {% if modules.maintenance_enabled %}<a href="{% url 'maintenance:home' %}">{% translate "Maintenance" %}</a>
+          <a href="{% url 'maintenance:jobs' %}">{% translate "Repair jobs" %}</a>
           <a href="{% url 'maintenance:planned' %}">{% translate "Planned maintenance" %}</a>
           <a href="{% url 'maintenance:components' %}">{% translate "Components" %}</a>
-          <a href="{% url 'maintenance:contractors' %}">{% translate "Contractors" %}</a></div></details>{% endif %}
+          <a href="{% url 'maintenance:contractors' %}">{% translate "Contractors" %}</a>{% endif %}
+          {% if modules.compliance_enabled %}<a href="{% url 'compliance:home' %}">{% translate "Compliance" %}</a>{% endif %}</div></details>{% endif %}
         <a href="{% url 'reports:list' %}">{% translate "Reports" %}</a>
         <a href="{% url 'changes' %}">{% translate "Changes" %}</a>
         {% if is_administrator %}<a href="{% url 'imports:hub' %}">{% translate "Import" %}</a>{% endif %}

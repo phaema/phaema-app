@@ -20,7 +20,7 @@ CONTRIBUTORS = "Contributors"
 VIEWERS = "Viewers"
 ROLES = (ADMINISTRATORS, SURVEYORS, CONTRIBUTORS, VIEWERS)
 
-PHAEMA_APPS = ("core", "properties", "leases", "ledger", "servicecharges", "cases", "maintenance")
+PHAEMA_APPS = ("core", "properties", "leases", "ledger", "servicecharges", "cases", "maintenance", "compliance")
 
 # Permissions held by each role, as "app_label.codename". Object-level rules (only your
 # own properties) are applied on top of these by can_edit().
@@ -37,6 +37,9 @@ SURVEYOR_PERMISSIONS = {
     "maintenance.add_job", "maintenance.change_job", "maintenance.add_jobdocument",
     "maintenance.add_component", "maintenance.change_component",
     "maintenance.add_plannedtask", "maintenance.change_plannedtask",
+    "compliance.add_requirement", "compliance.change_requirement", "compliance.add_certificate",
+    "compliance.add_action", "compliance.change_action", "compliance.add_buildingdocument",
+    "compliance.add_buildingsafety", "compliance.change_buildingsafety",
 }
 ADMIN_EXTRA = {
     "auth.view_user", "auth.add_user", "auth.change_user",
@@ -130,6 +133,14 @@ def can_edit(user, obj):
         return obj.pk is None or manages(user, obj.property) or obj.owner_id == user.pk
     if isinstance(obj, JobDocument):
         return can_edit(user, obj.job)
+    from apps.compliance.models import Action, BuildingDocument, BuildingSafety, Certificate, Requirement
+
+    if isinstance(obj, (Requirement, BuildingDocument, BuildingSafety)):
+        return obj.pk is None or manages(user, obj.property)
+    if isinstance(obj, Certificate):
+        return can_edit(user, obj.requirement)
+    if isinstance(obj, Action):
+        return can_edit(user, obj.certificate)
     return False  # titles, documents, INSPIRE parcels and settings are for administrators
 
 

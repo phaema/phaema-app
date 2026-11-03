@@ -6,7 +6,7 @@ summary: Repairs and works orders, planned and statutory maintenance, components
 # Maintenance
 
 Maintenance is an optional module. An administrator switches it on under **Manage data**, **Module settings**,
-by ticking **Maintenance**. It then appears in the menu, with an **Overview** of emergencies, jobs past target,
+by ticking **Maintenance**. It then appears under **Buildings** in the menu, with an **Overview** of emergencies, jobs past target,
 overdue statutory tasks, contracts to re-tender and contractors whose insurance is running out.
 
 What sets PHAEMA apart is that maintenance is linked to the lease: who pays for a repair is worked out from the
