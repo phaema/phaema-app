@@ -13,25 +13,36 @@
 
 <div class="govuk-grid-row">
 <div class="govuk-grid-column-two-thirds">
-  <h2 class="govuk-heading-m">{% translate "Key dates" %}</h2>
-  {% if key_dates %}
+  <h2 class="govuk-heading-m">{% translate "Events" %}</h2>
+  {% if open_events %}
   <table class="govuk-table">
     <thead class="govuk-table__head"><tr class="govuk-table__row">
-      <th scope="col" class="govuk-table__header">{% translate "Date" %}</th>
+      <th scope="col" class="govuk-table__header">{% translate "Due" %}</th>
       <th scope="col" class="govuk-table__header">{% translate "Event" %}</th>
+      <th scope="col" class="govuk-table__header">{% translate "Assigned to" %}</th>
       <th scope="col" class="govuk-table__header">{% translate "Status" %}</th>
     </tr></thead>
     <tbody class="govuk-table__body">
-    {% for d in key_dates %}
+    {% for e in open_events %}{% with rag=e.rag %}
       <tr class="govuk-table__row">
-        <td class="govuk-table__cell">{{ d.date|date:"j M Y" }}</td>
-        <td class="govuk-table__cell">{{ d.label }}</td>
-        <td class="govuk-table__cell"><strong class="govuk-tag govuk-tag--{{ d.rag.0 }}">{{ d.rag.1 }}</strong>{% if d.days >= 0 %}<br><span class="govuk-body-s">{% blocktranslate count n=d.days %}in {{ n }} day{% plural %}in {{ n }} days{% endblocktranslate %}</span>{% endif %}</td>
+        <td class="govuk-table__cell">{{ e.due_date|date:"j M Y" }}</td>
+        <td class="govuk-table__cell"><a class="govuk-link" href="{{ e.get_absolute_url }}">{{ e.display_title }}</a>{% if e.status == "in_progress" %}<br><span class="govuk-body-s">{% translate "In progress" %}</span>{% endif %}</td>
+        <td class="govuk-table__cell">{{ e.assigned_to.get_full_name|default:e.assigned_to.username|default:"–" }}</td>
+        <td class="govuk-table__cell"><strong class="govuk-tag govuk-tag--{{ rag.0 }}">{{ rag.1 }}</strong>{% if e.days_to_go >= 0 %}<br><span class="govuk-body-s">{% blocktranslate count n=e.days_to_go %}in {{ n }} day{% plural %}in {{ n }} days{% endblocktranslate %}</span>{% endif %}</td>
       </tr>
-    {% endfor %}
+    {% endwith %}{% endfor %}
     </tbody>
   </table>
-  {% else %}<p class="govuk-body">{% translate "No key dates recorded." %}</p>{% endif %}
+  {% else %}<p class="govuk-body">{% translate "Nothing to do." %}</p>{% endif %}
+  {% if user|can_edit:object %}<p class="govuk-body-s"><a class="govuk-link" href="{% url 'leases:event-add' object.pk %}">{% translate "Add an event" %}</a></p>{% endif %}
+  {% if closed_events %}
+  <details class="govuk-details" data-module="govuk-details">
+    <summary class="govuk-details__summary"><span class="govuk-details__summary-text">{% translate "Completed events" %}</span></summary>
+    <div class="govuk-details__text"><ul class="govuk-list govuk-body-s">
+      {% for e in closed_events %}<li><a class="govuk-link" href="{{ e.get_absolute_url }}">{{ e.display_title }}, {{ e.due_date|date:"j M Y" }}</a> – {{ e.get_status_display }}{% if e.outcome %}: {{ e.outcome|truncatechars:120 }}{% endif %}</li>{% endfor %}
+    </ul></div>
+  </details>
+  {% endif %}
 
   <h2 class="govuk-heading-m">{% translate "Term" %}</h2>
   <dl class="govuk-summary-list">
@@ -57,6 +68,32 @@
     <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Permitted use" %}</dt><dd class="govuk-summary-list__value">{{ object.permitted_use|default:"–" }}</dd></div>
     <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Assignment and subletting" %}</dt><dd class="govuk-summary-list__value">{{ object.alienation|linebreaksbr|default:"–" }}</dd></div>
   </dl>
+  <h2 class="govuk-heading-m">{% translate "Rent schedule" %}</h2>
+  <table class="govuk-table">
+    <thead class="govuk-table__head"><tr class="govuk-table__row">
+      <th scope="col" class="govuk-table__header">{% translate "From" %}</th>
+      <th scope="col" class="govuk-table__header govuk-table__header--numeric">{% translate "Rent £ a year" %}</th>
+      <th scope="col" class="govuk-table__header">{% translate "Reason" %}</th>
+      {% if user|can_edit:object %}<th scope="col" class="govuk-table__header"><span class="govuk-visually-hidden">{% translate "Actions" %}</span></th>{% endif %}
+    </tr></thead>
+    <tbody class="govuk-table__body">
+    {% for entry, is_current, is_future in schedule %}
+      <tr class="govuk-table__row">
+        <td class="govuk-table__cell">{{ entry.effective_from|date:"j M Y" }}{% if is_current %} <strong class="govuk-tag govuk-tag--green">{% translate "Current" %}</strong>{% elif is_future %} <strong class="govuk-tag govuk-tag--blue">{% translate "Future" %}</strong>{% endif %}</td>
+        <td class="govuk-table__cell govuk-table__cell--numeric">{{ entry.annual_rent|floatformat:2|intcomma }}</td>
+        <td class="govuk-table__cell">{{ entry.get_reason_display }}{% if entry.notes %}<br><span class="govuk-body-s">{{ entry.notes }}</span>{% endif %}</td>
+        {% if user|can_edit:object %}<td class="govuk-table__cell">{% if schedule|length > 1 %}<form method="post" action="{% url 'leases:rent-delete' entry.pk %}">{% csrf_token %}<button class="phaema-link-button govuk-body-s" type="submit">{% translate "Remove" %}<span class="govuk-visually-hidden"> {{ entry }}</span></button></form>{% endif %}</td>{% endif %}
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  {% if user|can_edit:object %}<p class="govuk-body-s"><a class="govuk-link" href="{% url 'leases:rent-add' object.pk %}">{% translate "Add a rent step, concession or variation" %}</a></p>{% endif %}
+  {% if payments %}
+  <h3 class="govuk-heading-s">{% translate "Next payments due" %}</h3>
+  <ul class="govuk-list govuk-body-s">{% for d, amount in payments %}<li>{{ d|date:"j M Y" }}: £{{ amount|floatformat:2|intcomma }}{% if object.vat_chargeable %} {% translate "plus VAT" %}{% endif %}</li>{% endfor %}</ul>
+  <p class="govuk-body-s">{% translate "A guide only: part periods are not apportioned. Demands will be raised by the rent ledger." %}</p>
+  {% endif %}
+
   {% with breaks=object.breaks.all %}{% if breaks %}
   <h2 class="govuk-heading-m">{% translate "Break options" %}</h2>
   <ul class="govuk-list">{% for b in breaks %}<li><strong>{{ b.break_date|date:"j F Y" }}</strong> – {{ b.get_exercisable_by_display }}{% if b.notice_months %}, {% blocktranslate count n=b.notice_months %}{{ n }} month's notice{% plural %}{{ n }} months' notice{% endblocktranslate %} ({% translate "by" %} {{ b.notice_deadline|date:"j F Y" }}){% endif %}{% if b.conditions %}<br><span class="govuk-body-s">{{ b.conditions }}</span>{% endif %}</li>{% endfor %}</ul>

@@ -4,6 +4,9 @@ from datetime import date, timedelta
 
 import uuid
 
+import secrets
+
+from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator
 from django.db import models
@@ -320,3 +323,135 @@ class LeaseDocument(TimeStampedModel):
         if self.file and not getattr(self.file, "_committed", True):
             self.original_filename = self.file.name.rsplit("/", 1)[-1][:255]
         super().save(*args, **kwargs)
+
+
+class RentScheduleEntry(TimeStampedModel):
+    """The rent payable from a date: the initial rent, review outcomes, fixed steps and variations.
+
+    The lease's current annual rent is always the entry in force today; future entries
+    (stepped rents) take effect automatically on their date.
+    """
+
+    class Reason(models.TextChoices):
+        INITIAL = "initial", _("Initial rent")
+        REVIEW = "review", _("Rent review")
+        STEP = "step", _("Fixed step")
+        INDEXATION = "index", _("Index-linked increase")
+        VARIATION = "variation", _("Variation or concession")
+        RENEWAL = "renewal", _("Lease renewal")
+
+    lease = models.ForeignKey(Lease, on_delete=models.CASCADE, related_name="rent_schedule")
+    effective_from = models.DateField(_("effective from"))
+    annual_rent = models.DecimalField(_("annual rent (£)"), max_digits=12, decimal_places=2,
+                                      validators=[MinValueValidator(0)])
+    reason = models.CharField(_("reason"), max_length=20, choices=Reason.choices)
+    notes = models.CharField(_("notes"), max_length=255, blank=True)
+
+    class Meta:
+        ordering = ["lease", "effective_from"]
+        constraints = [models.UniqueConstraint(fields=["lease", "effective_from"], name="one_rent_per_date")]
+        verbose_name = _("rent schedule entry")
+        verbose_name_plural = _("rent schedule")
+
+    def __str__(self):
+        return f"£{self.annual_rent:,.2f} from {self.effective_from:%d %b %Y}"
+
+    def get_absolute_url(self):
+        return self.lease.get_absolute_url()
+
+
+class LeaseEvent(TimeStampedModel):
+    """Something that must be done by a date: generated from the lease, or added by hand."""
+
+    class EventType(models.TextChoices):
+        REVIEW = "review", _("Rent review")
+        BREAK_NOTICE = "notice", _("Break notice deadline")
+        BREAK = "break", _("Break date")
+        EXPIRY = "expiry", _("Lease expiry")
+        OTHER = "other", _("Other (added by hand)")
+
+    class Status(models.TextChoices):
+        OPEN = "open", _("To do")
+        IN_PROGRESS = "in_progress", _("In progress")
+        DONE = "done", _("Completed")
+        LAPSED = "lapsed", _("Lapsed / not used")
+
+    lease = models.ForeignKey(Lease, on_delete=models.CASCADE, related_name="events")
+    event_type = models.CharField(_("event"), max_length=20, choices=EventType.choices)
+    title = models.CharField(_("title"), max_length=200, blank=True)
+    due_date = models.DateField(_("due date"), db_index=True)
+    status = models.CharField(_("status"), max_length=20, choices=Status.choices, default=Status.OPEN)
+    assigned_to = models.ForeignKey(settings.AUTH_USER_MODEL, verbose_name=_("assigned to"), null=True, blank=True,
+                                    on_delete=models.SET_NULL, related_name="lease_events")
+    source = models.CharField(
+        max_length=60, blank=True, editable=False,
+        help_text=_("What generated this event, e.g. 'review' or 'break:12'. Blank for events added by hand."),
+    )
+    completed_on = models.DateField(_("completed on"), null=True, blank=True)
+    completed_by = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True, editable=False,
+                                     on_delete=models.SET_NULL, related_name="+")
+    outcome = models.TextField(_("outcome and notes"), blank=True)
+
+    class Meta:
+        ordering = ["due_date", "pk"]
+        verbose_name = _("lease event")
+        verbose_name_plural = _("lease events")
+
+    def __str__(self):
+        return f"{self.display_title} – {self.lease.reference} ({self.due_date:%d %b %Y})"
+
+    def get_absolute_url(self):
+        return reverse("leases:event", args=[self.pk])
+
+    @property
+    def display_title(self):
+        return self.title or self.get_event_type_display()
+
+    @property
+    def is_open(self):
+        return self.status in (self.Status.OPEN, self.Status.IN_PROGRESS)
+
+    def days_to_go(self, today=None):
+        return (self.due_date - (today or date.today())).days
+
+    def rag(self, today=None):
+        """(colour, label) for the status tag."""
+        if not self.is_open:
+            return ("grey", self.get_status_display())
+        days = self.days_to_go(today)
+        if days < 0:
+            return ("red", _("Overdue"))
+        if days <= 90:
+            return ("orange", _("Due within 3 months"))
+        if days <= 183:
+            return ("yellow", _("Due within 6 months"))
+        return ("green", _("Later"))
+
+
+class ReminderLog(models.Model):
+    """Which reminders have been sent, so nobody is emailed twice for the same thing."""
+
+    event = models.ForeignKey(LeaseEvent, on_delete=models.CASCADE, related_name="reminders")
+    stage = models.CharField(max_length=20)  # e.g. "90" days before, or "overdue-2026-W45"
+    sent_to = models.EmailField()
+    sent_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        constraints = [models.UniqueConstraint(fields=["event", "stage", "sent_to"], name="one_reminder_per_stage")]
+
+
+def _new_token():
+    return secrets.token_urlsafe(24)
+
+
+class CalendarFeed(models.Model):
+    """A private web address for a user's lease events, for Outlook or any calendar app."""
+
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="calendar_feed")
+    token = models.CharField(max_length=64, unique=True, default=_new_token)
+    include_all = models.BooleanField(default=False, help_text=_("Include everyone's events, not just mine."))
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def regenerate(self):
+        self.token = _new_token()
+        self.save(update_fields=["token"])

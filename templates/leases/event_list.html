@@ -1,0 +1,51 @@
+{% extends "base.html" %}{% load i18n %}
+{% block title %}{% translate "Lease events" %}{% endblock %}
+{% block content %}
+<h1 class="govuk-heading-xl">{% translate "Lease events" %}</h1>
+<p class="govuk-body"><a class="govuk-link" href="{% url 'leases:events' %}?assigned=me">{% translate "My events" %}</a> ·
+  <a class="govuk-link" href="{% url 'leases:events' %}?window=overdue">{% translate "Overdue" %}</a> ·
+  <a class="govuk-link" href="{% url 'leases:calendar' %}">{% translate "Add to Outlook or another calendar" %}</a></p>
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-one-quarter">
+    <form method="get" class="phaema-filters">
+      <div class="govuk-form-group">
+        <label class="govuk-label govuk-label--s" for="q">{% translate "Search" %}</label>
+        <div class="govuk-hint" id="q-hint">{% translate "Agreement, tenant, property or title" %}</div>
+        <input class="govuk-input" id="q" name="q" type="search" value="{{ q }}" aria-describedby="q-hint">
+      </div>
+      {% for name, label, choices, current, any in filters %}
+      <div class="govuk-form-group">
+        <label class="govuk-label govuk-label--s" for="f-{{ name }}">{{ label }}</label>
+        <select class="govuk-select" id="f-{{ name }}" name="{{ name }}">
+          {% if any %}<option value="">{% translate "Any" %}</option>{% endif %}
+          {% for value, text in choices %}<option value="{{ value }}"{% if value == current %} selected{% endif %}>{{ text }}</option>{% endfor %}
+        </select>
+      </div>
+      {% endfor %}
+      {% if request.GET.sort %}<input type="hidden" name="sort" value="{{ request.GET.sort }}">{% endif %}
+      <button class="govuk-button govuk-!-margin-bottom-2" data-module="govuk-button">{% translate "Apply" %}</button>
+      <p class="govuk-body-s govuk-!-margin-bottom-0"><a class="govuk-link" href="{% url 'leases:events' %}">{% translate "Clear filters" %}</a></p>
+    </form>
+  </div>
+  <div class="govuk-grid-column-three-quarters">
+    <p class="govuk-body">{% blocktranslate count n=paginator.count %}{{ n }} event{% plural %}{{ n }} events{% endblocktranslate %}</p>
+    <table class="govuk-table">
+      {% include "core/_sortable_head.html" %}
+      <tbody class="govuk-table__body">
+      {% for e in page_obj %}{% with rag=e.rag %}
+        <tr class="govuk-table__row">
+          <td class="govuk-table__cell">{{ e.due_date|date:"j M Y" }}<br><strong class="govuk-tag govuk-tag--{{ rag.0 }}">{{ rag.1 }}</strong></td>
+          <td class="govuk-table__cell"><a class="govuk-link" href="{{ e.get_absolute_url }}">{{ e.display_title }}</a></td>
+          <td class="govuk-table__cell"><a class="govuk-link" href="{{ e.lease.get_absolute_url }}">{{ e.lease.reference }}</a><br><span class="govuk-body-s">{{ e.lease.counterparty.name }}</span></td>
+          <td class="govuk-table__cell">{% if e.assigned_to %}{{ e.assigned_to.get_full_name|default:e.assigned_to.username }}{% else %}<span class="govuk-body-s">{% translate "Nobody" %}</span>{% endif %}</td>
+          <td class="govuk-table__cell">{{ e.get_status_display }}</td>
+        </tr>
+      {% endwith %}{% empty %}
+        <tr class="govuk-table__row"><td class="govuk-table__cell" colspan="5">{% translate "No events match." %}</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+    {% include "core/_pagination.html" %}
+  </div>
+</div>
+{% endblock %}

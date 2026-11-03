@@ -162,7 +162,7 @@ def load(today=None):
     # Enterprise Centre suites and the head lease held by the council
     suites = [("DL-0031", "DM-S07-U01", "Exampleton Design Studio Ltd", 8100, -10),
               ("DL-0032", "DM-S07-U02", "Exampleton Accountancy Services", 8100, -22),
-              ("DL-0034", "DM-S07-U04", "Exampleton Code Works Ltd", 19200, -5)]
+              ("DL-0034", "DM-S07-U04", "Exampleton Code Works Ltd", 9600, -5)]  # 50% first-year concession
     for ref, unit, party, rent, offset in suites:
         start = add_months(q, offset)
         lease(ref, [unit], party, agreement_type="lease", lease_date=start, term_start=start,
@@ -180,7 +180,42 @@ def load(today=None):
           premises_description="Underground cable route beneath the estate roads",
           notes="Terminable wayleave, 12 months' notice.")
     _documents()
+    _rent_histories(q)
     return Lease.objects.filter(reference__startswith="DL-").count()
+
+
+def _schedule(lease, entries):
+    from . import workflow
+    from .models import RentScheduleEntry
+
+    lease.rent_schedule.all().delete()
+    for when, rent, reason, notes in entries:
+        RentScheduleEntry.objects.create(lease=lease, effective_from=when, annual_rent=Decimal(rent),
+                                         reason=reason, notes=notes)
+    workflow.refresh_current_rent(lease)
+
+
+def _rent_histories(q):
+    from .models import LeaseEvent
+
+    # DL-0003: initial rent, then a review at year 5 settled by agreement.
+    l3 = Lease.objects.get(reference="DL-0003")
+    review5 = add_months(l3.term_start, 60)
+    _schedule(l3, [(l3.term_start, 46000, "initial", ""),
+                   (review5, 52000, "review", "Settled by agreement")])
+    LeaseEvent.objects.get_or_create(
+        lease=l3, source="review", due_date=review5,
+        defaults={"event_type": "review", "status": "done", "completed_on": add_months(review5, 2),
+                  "assigned_to": l3.properties.first().managing_surveyor,
+                  "outcome": f"Review settled at £52,000.00 a year from {review5:%d %B %Y}. Settled by agreement."})
+    # DL-0034: half rent for the first year as a letting incentive, then the full rent.
+    l34 = Lease.objects.get(reference="DL-0034")
+    _schedule(l34, [(l34.term_start, 9600, "variation", "50% rent concession for the first year"),
+                    (add_months(l34.term_start, 12), 19200, "step", "Full rent")])
+    # DL-0005: CPI review at year 1 applied.
+    l5 = Lease.objects.get(reference="DL-0005")
+    _schedule(l5, [(l5.term_start, 18000, "initial", ""),
+                   (add_months(l5.term_start, 12), 18720, "index", "CPI 4.0% applied")])
 
 
 def _documents():

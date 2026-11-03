@@ -10,12 +10,14 @@ PHAEMA has three roles. Give each person one role in **Manage data > Users** (ti
 | Add and remove photos | All properties | Their own properties | – |
 | Set boundaries from Land Registry INSPIRE parcels | All properties | Their own properties | – |
 | Add and change leases, licences and break options | All | Leases on properties they manage | – |
+| Record outcomes of lease events, assign them and add events | All | Events on leases of properties they manage | – |
+| Change rent schedules (steps, concessions, indexation) | All | Leases of properties they manage | – |
 | Add and change tenants and other parties | ✓ | ✓ | – |
 | Delete properties and leases | ✓ | – | – |
 | Titles and title documents | Change | View | View |
 | Assign managing surveyors | ✓ | – | – |
 | Spreadsheet import and INSPIRE import | ✓ | – | – |
-| Module settings (including the OS Maps key) | ✓ | – | – |
+| Module settings (OS Maps key, reminder lead times) | ✓ | – | – |
 | Add users and give them roles | ✓ (not superusers) | – | – |
 | Use the API | Read and write | Read; change what they can change on screen | Read only |
 

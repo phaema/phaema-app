@@ -1,0 +1,12 @@
+{% autoescape off %}Hello {{ user.get_full_name|default:user.username }},
+
+These lease events need your attention:
+{% for e, days in items %}
+- {{ e.display_title }}: {{ e.lease.counterparty.name }} ({{ e.lease.reference }})
+  Due {{ e.due_date|date:"l j F Y" }}{% if days < 0 %} – OVERDUE by {{ days|stringformat:"d"|slice:"1:" }} day{{ days|stringformat:"d"|slice:"1:"|pluralize }}{% elif days == 0 %} – TODAY{% else %} – in {{ days }} day{{ days|pluralize }}{% endif %}
+{% if base_url %}  {{ base_url }}{{ e.get_absolute_url }}
+{% endif %}{% endfor %}
+To record an outcome, open the event in PHAEMA. To change when reminders are sent, ask an administrator to update the module settings.
+
+PHAEMA – Property Holding and Estate Management Application
+{% endautoescape %}

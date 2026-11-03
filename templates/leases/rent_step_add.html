@@ -1,0 +1,17 @@
+{% extends "base.html" %}{% load i18n %}
+{% block title %}{% translate "Add to the rent schedule" %}{% endblock %}
+{% block content %}
+<span class="govuk-caption-l">{{ lease.reference }} · {{ lease.counterparty.name }}</span>
+<h1 class="govuk-heading-l">{% translate "Add to the rent schedule" %}</h1>
+<div class="govuk-grid-row"><div class="govuk-grid-column-two-thirds">
+<p class="govuk-body">{% translate "Use this for fixed rent steps, rent-free or reduced periods, index-linked increases or variations. Rent reviews are recorded from the review event. Future rents take effect automatically on their date." %}</p>
+{% include "core/_form_errors.html" %}
+<form method="post" novalidate>{% csrf_token %}
+  {% for field in form %}{% include "core/_field.html" %}{% endfor %}
+  <div class="govuk-button-group">
+    <button class="govuk-button" data-module="govuk-button">{% translate "Add rent" %}</button>
+    <a class="govuk-link" href="{{ lease.get_absolute_url }}">{% translate "Cancel" %}</a>
+  </div>
+</form>
+</div></div>
+{% endblock %}

@@ -78,25 +78,26 @@ def filter_leases(qs, key, today=None):
 
 
 def event_summary(today=None):
-    """Rows for the dashboard: label, overdue count and filter, due-soon count and filter."""
+    """Rows for the dashboard from the event records: overdue and due in the next 6 months, by type."""
+    from .models import LeaseEvent
+
     today = today or date.today()
-    base = Lease.objects.all()
-
-    def n(key):
-        return filter_leases(base, key, today).count()
-
-    return [
-        {"label": EVENTS["review"], "overdue": n("review_overdue"), "overdue_key": "review_overdue",
-         "due": n("review_due"), "due_key": "review_due"},
-        {"label": EVENTS["expiry"], "overdue": n("expiry_overdue"), "overdue_key": "expiry_overdue",
-         "due": n("expiry_due"), "due_key": "expiry_due"},
-        {"label": EVENTS["holding_over"], "overdue": n("holding_over"), "overdue_key": "holding_over",
-         "due": None, "due_key": None},
-        {"label": EVENTS["notice"], "overdue": None, "overdue_key": None,
-         "due": n("notice_due"), "due_key": "notice_due"},
-        {"label": EVENTS["break"], "overdue": None, "overdue_key": None,
-         "due": n("break_due"), "due_key": "break_due"},
-    ]
+    end = add_months(today, WINDOW_MONTHS)
+    open_events = LeaseEvent.objects.filter(status__in=("open", "in_progress"), lease__status__in=LIVE)
+    rows = []
+    for etype, label in LeaseEvent.EventType.choices:
+        mine = open_events.filter(event_type=etype)
+        if etype == LeaseEvent.EventType.EXPIRY:
+            mine = mine.exclude(lease__status=Lease.Status.HOLDING_OVER)  # counted under holding over
+        lapses = etype in (LeaseEvent.EventType.BREAK, LeaseEvent.EventType.BREAK_NOTICE)
+        rows.append({
+            "label": label, "type": etype,
+            "overdue": None if lapses else mine.filter(due_date__lt=today).count(),
+            "due": mine.filter(due_date__gte=today, due_date__lte=end).count(),
+        })
+    rows.append({"label": EVENTS["holding_over"], "type": "holding_over",
+                 "overdue": Lease.objects.filter(status=Lease.Status.HOLDING_OVER).count(), "due": None})
+    return rows
 
 
 def _years(start, end):

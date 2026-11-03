@@ -1,0 +1,17 @@
+{% extends "base.html" %}{% load i18n %}
+{% block title %}{% translate "Add an event" %}{% endblock %}
+{% block content %}
+<span class="govuk-caption-l">{{ lease.reference }} · {{ lease.counterparty.name }}</span>
+<h1 class="govuk-heading-l">{% translate "Add an event" %}</h1>
+<div class="govuk-grid-row"><div class="govuk-grid-column-two-thirds">
+<p class="govuk-body">{% translate "Rent reviews, breaks and expiry are added automatically from the lease. Add anything else that needs doing by a date." %}</p>
+{% include "core/_form_errors.html" %}
+<form method="post" novalidate>{% csrf_token %}
+  {% for field in form %}{% include "core/_field.html" %}{% endfor %}
+  <div class="govuk-button-group">
+    <button class="govuk-button" data-module="govuk-button">{% translate "Add event" %}</button>
+    <a class="govuk-link" href="{{ lease.get_absolute_url }}">{% translate "Cancel" %}</a>
+  </div>
+</form>
+</div></div>
+{% endblock %}

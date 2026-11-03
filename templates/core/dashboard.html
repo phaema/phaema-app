@@ -72,13 +72,15 @@
       {% for ev in lease_events %}
         <tr class="govuk-table__row">
           <th scope="row" class="govuk-table__header">{{ ev.label }}</th>
-          <td class="govuk-table__cell govuk-table__cell--numeric">{% if ev.overdue is None %}<span class="govuk-body-s">–</span>{% elif ev.overdue %}<a class="govuk-link phaema-overdue" href="{% url 'leases:list' %}?event={{ ev.overdue_key }}">{{ ev.overdue }}</a>{% else %}0{% endif %}</td>
-          <td class="govuk-table__cell govuk-table__cell--numeric">{% if ev.due is None %}<span class="govuk-body-s">–</span>{% elif ev.due %}<a class="govuk-link" href="{% url 'leases:list' %}?event={{ ev.due_key }}">{{ ev.due }}</a>{% else %}0{% endif %}</td>
+          <td class="govuk-table__cell govuk-table__cell--numeric">{% if ev.overdue is None %}<span class="govuk-body-s">–</span>{% elif ev.overdue %}{% if ev.type == "holding_over" %}<a class="govuk-link phaema-overdue" href="{% url 'leases:list' %}?status=holding_over">{{ ev.overdue }}</a>{% else %}<a class="govuk-link phaema-overdue" href="{% url 'leases:events' %}?type={{ ev.type }}&amp;window=overdue">{{ ev.overdue }}</a>{% endif %}{% else %}0{% endif %}</td>
+          <td class="govuk-table__cell govuk-table__cell--numeric">{% if ev.due is None %}<span class="govuk-body-s">–</span>{% elif ev.due %}<a class="govuk-link" href="{% url 'leases:events' %}?type={{ ev.type }}&amp;window=183">{{ ev.due }}</a>{% else %}0{% endif %}</td>
         </tr>
       {% endfor %}
       </tbody>
     </table>
-    <p class="govuk-body-s">{% translate "Overdue: a review date has passed without the new rent being recorded, an agreement has expired but is still marked current, or a tenant is holding over. Breaks and notice deadlines simply lapse once passed, so only upcoming ones are shown." %}</p>
+    <p class="govuk-body-s">{% translate "Overdue: the date has passed and no outcome has been recorded. Breaks and notice deadlines simply lapse once passed, so only upcoming ones are shown." %}
+      <a class="govuk-link" href="{% url 'leases:events' %}">{% translate "All events" %}</a></p>
+    {% if my_events %}<p class="govuk-body"><a class="govuk-link" href="{% url 'leases:events' %}?assigned=me">{% blocktranslate count n=my_events %}You have {{ n }} open event{% plural %}You have {{ n }} open events{% endblocktranslate %}</a>{% if my_overdue %}, <a class="govuk-link phaema-overdue" href="{% url 'leases:events' %}?assigned=me&amp;window=overdue">{{ my_overdue }} {% translate "overdue" %}</a>{% endif %}</p>{% endif %}
   </div>
   <div class="govuk-grid-column-one-half">
     <h2 class="govuk-heading-m">{% translate "Rent roll" %}</h2>

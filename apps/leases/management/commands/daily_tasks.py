@@ -1,0 +1,16 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+from django.conf import settings
+from django.core.management.base import BaseCommand
+
+from apps.leases.reminders import send_reminders
+from apps.leases.workflow import sync_all
+
+
+class Command(BaseCommand):
+    help = ("Daily housekeeping: apply stepped rents that take effect today, bring lease events up to date, "
+            "and send reminders. Safe to run as often as you like.")
+
+    def handle(self, *args, **options):
+        rents = sync_all()
+        emails = send_reminders(base_url=settings.PHAEMA_BASE_URL)
+        self.stdout.write(f"Rents updated: {rents}. Reminder emails sent: {emails}.")

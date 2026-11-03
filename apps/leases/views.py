@@ -84,24 +84,23 @@ class LeaseDetailView(LoginRequiredMixin, DetailView):
     template_name = "leases/lease_detail.html"
 
     def get_queryset(self):
-        return Lease.objects.select_related("counterparty", "guarantor").prefetch_related("properties", "breaks", "documents")
+        return Lease.objects.select_related("counterparty", "guarantor").prefetch_related(
+            "properties", "breaks", "documents")
 
     def get_context_data(self, **kwargs):
+        from . import workflow
+
         ctx = super().get_context_data(**kwargs)
+        lease = self.object
+        events = list(lease.events.select_related("assigned_to"))
+        ctx["open_events"] = [e for e in events if e.is_open]
+        ctx["closed_events"] = sorted((e for e in events if not e.is_open),
+                                      key=lambda e: e.completed_on or e.due_date, reverse=True)[:10]
         today = date.today()
-        rows = []
-        for when, label, kind in self.object.key_dates():
-            days = (when - today).days
-            if days < 0:
-                rag = ("grey", _("Passed"))
-            elif days <= 183:
-                rag = ("red", _("Within 6 months"))
-            elif days <= 365:
-                rag = ("orange", _("Within 12 months"))
-            else:
-                rag = ("green", _("More than 12 months"))
-            rows.append({"date": when, "label": label, "kind": kind, "days": days, "rag": rag})
-        ctx["key_dates"] = rows
+        schedule = list(lease.rent_schedule.all())
+        current = max((e for e in schedule if e.effective_from <= today), key=lambda e: e.effective_from, default=None)
+        ctx["schedule"] = [(e, e == current, e.effective_from > today) for e in schedule]
+        ctx["payments"] = workflow.payments_preview(lease, today, 4)
         return ctx
 
 

@@ -1,0 +1,45 @@
+{% extends "base.html" %}{% load i18n humanize %}
+{% block title %}{{ event.display_title }}{% endblock %}
+{% block breadcrumbs %}
+<nav class="govuk-breadcrumbs" aria-label="Breadcrumb"><ol class="govuk-breadcrumbs__list">
+  <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="{% url 'leases:events' %}">{% translate "Lease events" %}</a></li>
+  <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="{{ event.lease.get_absolute_url }}">{{ event.lease.reference }}</a></li>
+  <li class="govuk-breadcrumbs__list-item">{{ event.display_title }}</li>
+</ol></nav>
+{% endblock %}
+{% block content %}
+<span class="govuk-caption-l">{{ event.lease.reference }} · {{ event.lease.counterparty.name }}</span>
+<h1 class="govuk-heading-xl">{{ event.display_title }}</h1>
+<div class="govuk-grid-row">
+<div class="govuk-grid-column-two-thirds">
+  <dl class="govuk-summary-list">
+    <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Due" %}</dt><dd class="govuk-summary-list__value">{{ event.due_date|date:"l j F Y" }} <strong class="govuk-tag govuk-tag--{{ rag.0 }}">{{ rag.1 }}</strong></dd></div>
+    <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Assigned to" %}</dt><dd class="govuk-summary-list__value">{{ event.assigned_to.get_full_name|default:event.assigned_to.username|default:"Nobody" }}</dd></div>
+    <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Status" %}</dt><dd class="govuk-summary-list__value">{{ event.get_status_display }}{% if event.completed_on %} – {{ event.completed_on|date:"j M Y" }}{% if event.completed_by %} {% translate "by" %} {{ event.completed_by.get_full_name|default:event.completed_by.username }}{% endif %}{% endif %}</dd></div>
+    <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Agreement" %}</dt><dd class="govuk-summary-list__value"><a class="govuk-link" href="{{ event.lease.get_absolute_url }}">{{ event.lease.reference }} {{ event.lease.get_agreement_type_display }}</a><br><span class="govuk-body-s">{% translate "Current rent" %} £{{ event.lease.annual_rent|floatformat:2|intcomma }} {% translate "a year" %} · {{ event.lease.get_review_basis_display }}</span></dd></div>
+    {% if event.outcome %}<div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Notes and outcome" %}</dt><dd class="govuk-summary-list__value">{{ event.outcome|linebreaksbr }}</dd></div>{% endif %}
+  </dl>
+
+  {% if outcome_form %}
+  <h2 class="govuk-heading-m">{% translate "Record the outcome" %}</h2>
+  {% if event.event_type == "review" %}<p class="govuk-body">{% translate "The new rent is added to the rent schedule from its effective date, and the next review is set up automatically." %}</p>{% endif %}
+  {% with form=outcome_form %}{% include "core/_form_errors.html" %}{% endwith %}
+  <form method="post" novalidate>{% csrf_token %}
+    {% for field in outcome_form %}{% include "core/_field.html" %}{% endfor %}
+    <button class="govuk-button" name="record_outcome" value="1" data-module="govuk-button">{% translate "Record outcome" %}</button>
+  </form>
+  {% endif %}
+</div>
+<div class="govuk-grid-column-one-third">
+  {% if edit_form %}
+  <h2 class="govuk-heading-m">{% translate "Assign or update" %}</h2>
+  {% if event.source %}<p class="govuk-body-s">{% translate "The date comes from the lease. To change it, edit the agreement." %}</p>{% endif %}
+  {% with form=edit_form %}{% include "core/_form_errors.html" %}{% endwith %}
+  <form method="post" novalidate>{% csrf_token %}
+    {% for field in edit_form %}{% include "core/_field.html" %}{% endfor %}
+    <button class="govuk-button govuk-button--secondary" name="save_details" value="1" data-module="govuk-button">{% translate "Save" %}</button>
+  </form>
+  {% endif %}
+</div>
+</div>
+{% endblock %}
