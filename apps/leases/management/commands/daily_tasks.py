@@ -13,4 +13,10 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         rents = sync_all()
         emails = send_reminders(base_url=settings.PHAEMA_BASE_URL)
+        from apps.core.models import ModuleSettings
+
+        if ModuleSettings.load().service_charges_enabled:
+            from apps.servicecharges.deadlines import send_weekly
+
+            emails += send_weekly(base_url=settings.PHAEMA_BASE_URL)
         self.stdout.write(f"Rents updated: {rents}. Reminder emails sent: {emails}.")

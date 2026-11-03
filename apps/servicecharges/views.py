@@ -17,7 +17,7 @@ from apps.core.roles import administrators_only, is_administrator
 from apps.ledger.models import Charge
 from apps.reports.export import csv_response, xlsx_response
 
-from . import apportion
+from . import apportion, deadlines
 from .models import Schedule, ScheduleMember, ScheduleYear
 
 Col = namedtuple("Col", "label type")
@@ -46,7 +46,7 @@ def schedule_list(request):
         current = schedule.years.filter(start__lte=date.today()).first() or schedule.years.first()
         rows.append({"schedule": schedule, "current": _year_summary(current) if current else None})
     return render(request, "servicecharges/schedule_list.html", {
-        "rows": rows, "ledger_on": ModuleSettings.load().rent_ledger_enabled})
+        "rows": rows, "ledger_on": ModuleSettings.load().rent_ledger_enabled, "deadlines": deadlines.upcoming()})
 
 
 @service_view
@@ -84,7 +84,69 @@ def year_detail(request, pk):
         "year": year, "rows": rows, "summary": _year_summary(year), "members": members, "void": void,
         "expenditure": year.expenditure.select_related("heading").order_by("-spent_on", "-pk")[:100],
         "expenditure_count": year.expenditure.count(), "can_manage": is_administrator(request.user),
-        "today": date.today(),
+        "today": date.today(), "income": apportion.income_total(year),
+        "non_recoverable": apportion.non_recoverable_total(year), "net": apportion.actual_total(year),
+    })
+
+
+@administrators_only
+@service_view
+@require_POST
+def record_issue(request, pk):
+    """Record when the budget or the year-end statements went to tenants."""
+    year = get_object_or_404(ScheduleYear, pk=pk)
+    what = request.POST.get("what")
+    try:
+        when = date.fromisoformat(request.POST.get("date", ""))
+    except ValueError:
+        messages.error(request, _("Enter the date it was issued."))
+        return redirect(year)
+    if what == "budget":
+        year.budget_issued_on = when
+        year.save(update_fields=["budget_issued_on", "updated_at"])
+        messages.success(request, _("Budget issue date recorded."))
+    elif what == "statements":
+        year.statements_issued_on = when
+        year.certified_by = request.POST.get("certified_by", "").strip()[:150]
+        year.certification_notes = request.POST.get("certification_notes", "").strip()
+        year.save(update_fields=["statements_issued_on", "certified_by", "certification_notes", "updated_at"])
+        messages.success(request, _("Year-end statement issue recorded."))
+    return redirect(year)
+
+
+@service_view
+def year_matrix(request, pk):
+    year = get_object_or_404(ScheduleYear.objects.select_related("schedule"), pk=pk)
+    m = apportion.matrix(year)
+    fmt = request.GET.get("format")
+    if fmt in ("xlsx", "csv"):
+        cols = [Col("Lease", "text"), Col("Share", "number"), Col("Days", "number")] + \
+               [Col(h, "money") for h in m.headings] + [Col("Total", "money")]
+        data = ([label, Decimal(share) if share else None, days or None] + [Decimal(a) for a in amounts]
+                + [Decimal(total)] for label, share, days, amounts, total in m.rows)
+        title = f"Apportionment {year.schedule.name} {year.label}"
+        return xlsx_response(title, cols, data, totals=True) if fmt == "xlsx" else csv_response(title, cols, data)
+    rows = [(label, Decimal(share) if share else None, days, [Decimal(a) for a in amounts], Decimal(total))
+            for label, share, days, amounts, total in m.rows]
+    return render(request, "servicecharges/matrix.html", {
+        "year": year, "matrix": m, "rows": rows, "totals": [Decimal(t) for t in m.totals]})
+
+
+@service_view
+def budget_statement(request, pk, member_pk):
+    from apps.leases.workflow import PERIODS
+
+    year = get_object_or_404(ScheduleYear.objects.select_related("schedule"), pk=pk)
+    member = get_object_or_404(ScheduleMember.objects.select_related("lease", "lease__counterparty"),
+                               pk=member_pk, schedule=year.schedule)
+    share = next(s for s in apportion.shares(year.schedule)[0] if s.member.pk == member.pk)
+    annual = apportion.on_account_annual(year, share)
+    periods = PERIODS.get(member.lease.rent_frequency)
+    return render(request, "servicecharges/budget_statement.html", {
+        "year": year, "member": member, "share": share, "annual": annual, "today": date.today(),
+        "per_payment": (annual / periods).quantize(Decimal("0.01")) if periods else None,
+        "rows": [(h, b) for h, b, _a in apportion.by_heading(year) if b],
+        "budget": apportion.budget_total(year),
     })
 
 

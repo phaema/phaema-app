@@ -7,9 +7,11 @@
 <p class="govuk-body">{% translate "Each lease's share of the actual spending, for the days it was in force in the year and within any cap, compared with what it was charged on account. The difference becomes a balancing charge or a credit on the tenant's rent account." %}</p>
 <dl class="govuk-summary-list">
   <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Budget" %}</dt><dd class="govuk-summary-list__value">£{{ recon.budget|floatformat:2|intcomma }}</dd></div>
-  <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Actual spending" %}</dt><dd class="govuk-summary-list__value">£{{ recon.actual|floatformat:2|intcomma }}</dd></div>
+  <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Recoverable costs" %}</dt><dd class="govuk-summary-list__value">£{{ recon.costs|floatformat:2|intcomma }}</dd></div>
+  {% if recon.income %}<div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Less income and credits" %}</dt><dd class="govuk-summary-list__value">−£{{ recon.income|floatformat:2|intcomma }}</dd></div>{% endif %}
+  <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Total to share" %}</dt><dd class="govuk-summary-list__value">£{{ recon.actual|floatformat:2|intcomma }}</dd></div>
   <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Recovered from tenants" %}</dt><dd class="govuk-summary-list__value">£{{ recon.recovered|floatformat:2|intcomma }}</dd></div>
-  <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Borne by the council" %}</dt><dd class="govuk-summary-list__value">£{{ recon.council|floatformat:2|intcomma }} <span class="govuk-body-s">({% translate "empty units, part years and caps" %})</span></dd></div>
+  <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Borne by the council" %}</dt><dd class="govuk-summary-list__value">£{{ recon.council|floatformat:2|intcomma }} <span class="govuk-body-s">({% translate "empty units, part years and caps" %})</span>{% if recon.non_recoverable %}<br>{% translate "plus not recoverable costs" %} £{{ recon.non_recoverable|floatformat:2|intcomma }}{% endif %}</dd></div>
 </dl>
 <table class="govuk-table phaema-report">
   <thead class="govuk-table__head"><tr class="govuk-table__row">

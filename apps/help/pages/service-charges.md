@@ -10,8 +10,10 @@ common parts, from the tenants who benefit. It is an optional module: an adminis
 [settings](settings.md#rent-ledger-settings), and it needs the [rent ledger](rent-ledger.md), because service
 charges are demanded and collected through it. When it is on, **Service charges** appears in the menu.
 
-The module follows the usual approach set out in the RICS professional statement on service charges in
-commercial property: a budget, payments on account, and a year-end reconciliation against actual costs.
+The module follows the RICS professional standard *Service charges in commercial property* (2nd edition, in force
+for service charge years starting on or after 31 December 2025): a budget issued to tenants before the year
+starts, payments on account, and a year-end statement reconciling actual costs, with all income credited and
+nothing recovered beyond actual cost.
 
 ## Schedules
 
@@ -35,7 +37,12 @@ each lease's floor area, share and on-account payment, and the council's share.
 ## Budgets and payments on account
 
 For each year, add the **budget** by cost heading (cleaning, security, repairs and so on) in **Manage data**,
-then **Service charge years**. When it is agreed, open the year and select **Approve the budget**.
+then **Service charge years**. Add a **budget commentary** explaining the main changes and planned works; it appears on each tenant's budget
+statement. When the budget is agreed, open the year and select **Approve the budget**.
+
+Each lease has a printable **budget statement** (the **Budget** link on the year page) showing the schedule's
+budget by heading, the commentary, the tenant's share and what they will pay on account each year and each
+payment. When the statements have gone to tenants, record the date under **Timetable**.
 
 From then on, every [demand run](rent-ledger.md#raising-rent) also charges each lease its share of the budget,
 on its rent payment dates, as **service charge on account**. You can choose to charge rent only, service charges
@@ -51,7 +58,32 @@ Record what the council actually spends on each heading during the year:
   schedule, date, heading, supplier, description, invoice reference and amount. The date decides which year the
   cost falls in. A row with an invoice reference already recorded for that year is not added twice.
 
+Two kinds of entry need care:
+
+- **Income and credits**, such as interest on the service charge account, rebates and insurance commissions,
+  must be credited to the service charge. Record them with the type **Income** (positive amounts); they reduce the
+  total shared between tenants.
+- **Costs not recoverable from tenants**, such as improvements or costs the leases do not allow, are recorded
+  with **Recoverable** unticked. The council bears them, and they are shown separately on statements.
+
 The year page compares **budget and actual** by heading, and can be downloaded to Excel.
+
+## Timetable
+
+RICS expects the budget to reach tenants **at least one month before the year starts**, and the year-end
+statements **within four months of the year end**. Each year's page shows both due dates and the dates you
+record against them, marking anything late or overdue. Deadlines in the next 60 days, and any overdue, appear on
+the dashboard and the Service charges page, and administrators get a list by email every Monday. PHAEMA also
+reminds you to set up next year's budget as the current year draws to a close.
+
+When the year-end statements are issued, record the date, who certified them and any accountant's review.
+
+## Apportionment matrix
+
+The **Apportionment matrix** link on each year shows how every heading's cost is split between the leases and the
+council (empty units, part years and caps), using the budget until spending is recorded and actual costs after.
+Download it to Excel to send with the budget or statements. At reconciliation the matrix is saved with the year, so
+it always shows exactly what was charged.
 
 ## Year-end reconciliation
 

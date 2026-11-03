@@ -42,9 +42,15 @@ COLUMNS = [
     ("Managing surveyor", "managing_surveyor", False, "The surveyor's PHAEMA username or email address."),
     ("Exclude from open data", "exclude_from_publication", False, "Yes for sensitive properties; otherwise leave blank."),
     ("Notes", "notes", False, ""),
+    # Added November 2026; at the end so earlier spreadsheets still line up.
+    ("GEA m2", "gea_sqm", False, "Gross external area in square metres."),
+    ("Measured to", "area_standard", False, "RICS Code of Measuring Practice, 6th edition; IPMS: All Buildings; or Other."),
+    ("Source of areas", "area_source", False, "Measured survey, Taken from drawings, Lease or title plan, or Estimate."),
+    ("Areas measured on", "areas_measured_on", False, "Date the areas were measured, dd/mm/yyyy."),
 ]
-CHOICE_FIELDS = {"property_type", "holding_purpose", "tenure", "occupation"}
-DECIMAL_FIELDS = {"gia_sqm", "nia_sqm", "site_area_ha"}
+CHOICE_FIELDS = {"property_type", "holding_purpose", "tenure", "occupation", "area_standard", "area_source"}
+DECIMAL_FIELDS = {"gia_sqm", "nia_sqm", "site_area_ha", "gea_sqm"}
+DATE_FIELDS = {"areas_measured_on"}
 INTEGER_FIELDS = {"easting", "northing"}
 
 
@@ -164,6 +170,10 @@ def validate(rows, user_model=None):
                         value = Decimal(text.replace(",", ""))
                     except InvalidOperation:
                         raise ValueError(f"{text} is not a number.")
+                elif f in DATE_FIELDS:
+                    from apps.imports.engine import to_date
+
+                    value = to_date(None, text)
                 elif f in INTEGER_FIELDS:
                     if not text.replace(",", "").isdigit():
                         raise ValueError(f"{text} is not a whole number.")
@@ -257,14 +267,19 @@ def template_workbook():
     for cell in ws[1]:
         cell.font = Font(bold=True, color="FFFFFF")
         cell.fill = PatternFill("solid", fgColor="1D3557")
-    ws.append(["EX-001", "Example Business Park", "Site", "", "", "", "Example Road", "", "Exampletown", "",
-               "Investment", "Freehold", "Partly let", "Business park", "", "", "", "2.5", "", "", "", "", "Delete this example row"])
+    example = {"reference": "EX-001", "name": "Example Business Park", "property_type": "Site",
+               "address_line_1": "Example Road", "town": "Exampletown", "holding_purpose": "Investment",
+               "tenure": "Freehold", "occupation": "Partly let", "use_description": "Business park",
+               "site_area_ha": "2.5", "area_standard": "RICS Code of Measuring Practice, 6th edition",
+               "area_source": "Lease or title plan", "notes": "Delete this example row"}
+    ws.append([example.get(f, "") for _h, f, _r, _g in COLUMNS])
     ws.freeze_panes = "A2"
     for i, (h, _f, _r, _g) in enumerate(COLUMNS, start=1):
         ws.column_dimensions[ws.cell(1, i).column_letter].width = max(12, len(h) + 4)
 
     lists = wb.create_sheet("Lists")
-    for col, f in enumerate(["property_type", "holding_purpose", "tenure", "occupation"], start=1):
+    for col, f in enumerate(["property_type", "holding_purpose", "tenure", "occupation", "area_standard", "area_source"],
+                            start=1):
         labels = [str(label) for _v, label in Property._meta.get_field(f).choices]
         for row, label in enumerate(labels, start=1):
             lists.cell(row, col, label)

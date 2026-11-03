@@ -41,6 +41,18 @@ hectares. The property page shows how the floor area is made up:
 - **non-lettable area**: GIA less lettable NIA, which covers common parts, circulation, plant and walls;
 - **net to gross**: lettable NIA as a percentage of GIA.
 
+### How areas were measured
+
+RICS asks for the measurement basis to be recorded. For each property, record in **Edit this property**:
+
+- **measured to**: the RICS Code of Measuring Practice (6th edition) or IPMS: All Buildings;
+- the **source**: a measured survey, drawings, a lease or title plan, or an estimate;
+- the **date** the areas were measured.
+
+Estimated areas are marked as estimates wherever they are shown. You can also record the **gross external area
+(GEA)**, used for planning, insurance and some valuations. The ready-made report **Floor areas with no measurement basis** lists
+properties still to be checked.
+
 ## Photos
 
 Add photos in **Edit this property or add photos**. They are resized and their location data removed when

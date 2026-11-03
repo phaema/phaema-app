@@ -5,6 +5,9 @@
 <h1 class="govuk-heading-xl">{% translate "Service charges" %}</h1>
 {% if not ledger_on %}<div class="govuk-warning-text"><span class="govuk-warning-text__icon" aria-hidden="true">!</span><strong class="govuk-warning-text__text"><span class="govuk-visually-hidden">{% translate "Warning" %}</span>{% translate "The rent ledger is switched off, so service charges cannot be demanded. Switch it on in Module settings." %}</strong></div>{% endif %}
 <p class="govuk-body">{% translate "Each schedule is a pool of shared costs recovered from the tenants who benefit." %}{% if is_administrator %} <a class="govuk-link" href="{% url 'admin:servicecharges_schedule_add' %}">{% translate "Add a schedule" %}</a> · <a class="govuk-link" href="{% url 'admin:servicecharges_scheduleyear_add' %}">{% translate "Add a year and budget" %}</a>{% endif %}</p>
+{% if deadlines %}<h2 class="govuk-heading-m">{% translate "Deadlines" %}</h2>
+<ul class="govuk-list">{% for d in deadlines %}<li><strong class="govuk-tag govuk-tag--{{ d.colour }}">{% if d.days < 0 %}{% translate "Overdue" %}{% else %}{{ d.due|date:"j M Y" }}{% endif %}</strong> <a class="govuk-link" href="{% if d.year %}{{ d.year.get_absolute_url }}{% else %}{{ d.schedule.get_absolute_url }}{% endif %}">{{ d.schedule.name }}</a>: {{ d.what }}{% if d.days < 0 %} ({% translate "was due" %} {{ d.due|date:"j M Y" }}){% endif %}</li>{% endfor %}</ul>
+<h2 class="govuk-heading-m">{% translate "Schedules" %}</h2>{% endif %}
 <table class="govuk-table">
   <thead class="govuk-table__head"><tr class="govuk-table__row">
     <th scope="col" class="govuk-table__header">{% translate "Schedule" %}</th><th scope="col" class="govuk-table__header">{% translate "Current year" %}</th>

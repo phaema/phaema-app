@@ -69,16 +69,36 @@ def budget_total(year):
     return year.budget_lines.aggregate(t=Sum("amount"))["t"] or ZERO
 
 
+def _sum(qs):
+    return qs.aggregate(t=Sum("amount"))["t"] or ZERO
+
+
+def recoverable_costs(year):
+    return _sum(year.expenditure.filter(kind="cost", recoverable=True))
+
+
+def income_total(year):
+    """Interest, rebates and commissions credited to the service charge."""
+    return _sum(year.expenditure.filter(kind="income"))
+
+
+def non_recoverable_total(year):
+    """Costs the council bears itself, such as improvements."""
+    return _sum(year.expenditure.filter(kind="cost", recoverable=False))
+
+
 def actual_total(year):
-    return year.expenditure.aggregate(t=Sum("amount"))["t"] or ZERO
+    """The net cost to share: recoverable costs less income and credits."""
+    return recoverable_costs(year) - income_total(year)
 
 
 def by_heading(year):
-    """[(heading, budget, actual)] for every heading with a budget or spending."""
+    """[(heading, budget, actual)]: budget and recoverable costs for every heading with either."""
     from .models import CostHeading
 
     budget = dict(year.budget_lines.values_list("heading", "amount"))
-    actual = {h: t for h, t in year.expenditure.values("heading").annotate(t=Sum("amount")).values_list("heading", "t")}
+    actual = dict(year.expenditure.filter(kind="cost", recoverable=True).values("heading").annotate(t=Sum("amount"))
+                  .values_list("heading", "t"))
     rows = []
     for h in CostHeading.objects.filter(pk__in=set(budget) | set(actual)):
         rows.append((h, budget.get(h.pk, ZERO), actual.get(h.pk, ZERO)))
@@ -160,6 +180,9 @@ class Reconciliation:
     recovered: Decimal  # charged to tenants in total
     council: Decimal  # borne by the council: voids, part-year gaps and caps
     rows: list = field(default_factory=list)  # [(heading, budget, actual)]
+    costs: Decimal = ZERO  # recoverable costs before income
+    income: Decimal = ZERO  # interest, rebates and commissions credited
+    non_recoverable: Decimal = ZERO  # costs the council bears itself
 
 
 def _days_in_force(lease, year):
@@ -184,7 +207,62 @@ def reconcile(year):
         paid = demanded.get(s.member.lease_id, ZERO)
         lines.append(ReconLine(s, days, fraction, due, paid, due - paid, capped=due < uncapped))
     recovered = sum((line.due for line in lines), ZERO)
-    return Reconciliation(year, lines, actual, budget_total(year), recovered, actual - recovered, by_heading(year))
+    return Reconciliation(year, lines, actual, budget_total(year), recovered, actual - recovered, by_heading(year),
+                          costs=recoverable_costs(year), income=income_total(year),
+                          non_recoverable=non_recoverable_total(year))
+
+
+# ------------------------------------------------------------------ apportionment matrix
+
+@dataclass
+class Matrix:
+    basis: str  # "actual" or "budget"
+    headings: list  # column names
+    rows: list  # [(label, share, days, [amounts], total)]
+    totals: list  # column totals, then the grand total
+
+
+def matrix(year, basis=None):
+    """How each heading's cost is shared between the leases and the council, for the year.
+
+    Uses actual costs once the year has spending, otherwise the budget. Income and credits are a
+    final, negative column. A capped lease's amounts are scaled down in proportion to its cap.
+    """
+    from .models import CostHeading
+
+    if year.apportionment and basis is None:
+        return Matrix(**year.apportionment)  # fixed at reconciliation
+    basis = basis or ("actual" if year.expenditure.exists() else "budget")
+    if basis == "actual":
+        values = dict(year.expenditure.filter(kind="cost", recoverable=True).values("heading")
+                      .annotate(t=Sum("amount")).values_list("heading", "t"))
+    else:
+        values = dict(year.budget_lines.values_list("heading", "amount"))
+    headings = list(CostHeading.objects.filter(pk__in=values).exclude(code="INC"))
+    columns = [(h.name, values[h.pk]) for h in headings]
+    income = income_total(year) if basis == "actual" else ZERO
+    if income:
+        columns.append(("Income and credits", -income))
+    total = sum((v for _n, v in columns), ZERO)
+    share_list, _area, _void = shares(year.schedule)
+    rows, used = [], [ZERO] * len(columns)
+    for s in share_list:
+        days = _days_in_force(s.member.lease, year)
+        fraction = Decimal(days) / Decimal(year.days)
+        uncapped = total * s.share * fraction
+        due = capped(uncapped.quantize(PENNY), s.member.annual_cap, fraction)
+        scale = (due / uncapped) if uncapped else ZERO
+        amounts = [(v * s.share * fraction * scale).quantize(PENNY) for _n, v in columns]
+        if amounts:  # put any rounding difference on the largest heading, so the row matches the reconciliation
+            biggest = max(range(len(amounts)), key=lambda i: abs(amounts[i]))
+            amounts[biggest] += due - sum(amounts, ZERO)
+        used = [u + a for u, a in zip(used, amounts)]
+        rows.append([f"{s.member.lease.reference} {s.member.lease.counterparty.name}", str(s.share), days,
+                     [str(a) for a in amounts], str(sum(amounts, ZERO))])
+    council = [(v - u).quantize(PENNY) for (_n, v), u in zip(columns, used)]
+    rows.append(["Council (empty units, part years, caps)", "", "", [str(a) for a in council],
+                 str(sum(council, ZERO))])
+    return Matrix(basis, [n for n, _v in columns], rows, [str(v) for _n, v in columns] + [str(total)])
 
 
 @transaction.atomic
@@ -209,6 +287,9 @@ def finalise(year, issue_date=None):
     _number(made)
     for charge in made:
         charge.save()
+    snapshot = matrix(year, basis="actual")
+    year.apportionment = {"basis": snapshot.basis, "headings": snapshot.headings, "rows": snapshot.rows,
+                          "totals": snapshot.totals}
     year.status, year.reconciled_on = ScheduleYear.Status.RECONCILED, issue_date
-    year.save(update_fields=["status", "reconciled_on", "updated_at"])
+    year.save(update_fields=["status", "reconciled_on", "apportionment", "updated_at"])
     return made

@@ -1,0 +1,10 @@
+{% autoescape off %}Hello {{ user.get_full_name|default:user.username }},
+
+These service charge deadlines are coming up or have passed. RICS expects budgets to reach tenants at least one month before the year starts, and year-end statements within four months of the year end.
+{% for d in items %}
+- {{ d.schedule.name }}: {{ d.what }}
+  Due {{ d.due|date:"l j F Y" }}{% if d.days < 0 %} – OVERDUE{% endif %}
+{% if base_url %}  {{ base_url }}{% if d.year %}{{ d.year.get_absolute_url }}{% else %}{{ d.schedule.get_absolute_url }}{% endif %}
+{% endif %}{% endfor %}
+PHAEMA – Property Holding and Estate Management Application
+{% endautoescape %}

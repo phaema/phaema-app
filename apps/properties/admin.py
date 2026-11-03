@@ -34,7 +34,8 @@ class PropertyAdmin(AdministratorOnlyEditingMixin, RoleAdminMixin, admin.GISMode
         (None, {"fields": ("reference", "name", "property_type", "parent", "managing_surveyor")}),
         ("Identifiers and address", {"fields": ("uprn", "usrn", "address_line_1", "address_line_2", "town", "postcode")}),
         ("Classification", {"fields": ("holding_purpose", "tenure", "occupation", "use_description", "use_class")}),
-        ("Areas", {"fields": ("gia_sqm", "nia_sqm", "site_area_ha")}),
+        ("Areas", {"fields": ("gia_sqm", "nia_sqm", "gea_sqm", "site_area_ha", "area_standard", "area_source",
+                              "areas_measured_on")}),
         ("Location", {"fields": ("easting", "northing", "boundary", "boundary_source")}),
         ("Other", {"fields": ("exclude_from_publication", "notes")}),
     )

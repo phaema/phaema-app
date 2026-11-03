@@ -1,0 +1,30 @@
+{% extends "base.html" %}{% load i18n humanize phaema %}
+{% block title %}{% translate "Service charge budget" %} {{ member.lease.reference }}{% endblock %}
+{% block help_page %}service-charges{% endblock %}
+{% block content %}
+<span class="govuk-caption-l">{{ year.schedule.name }}</span>
+<h1 class="govuk-heading-l">{% translate "Service charge budget" %} {{ year.label }}</h1>
+<dl class="govuk-summary-list govuk-summary-list--no-border">
+  <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Tenant" %}</dt><dd class="govuk-summary-list__value">{{ member.lease.counterparty.name }}{% if member.lease.counterparty.address %}<br>{{ member.lease.counterparty.address|linebreaksbr }}{% endif %}</dd></div>
+  <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Lease" %}</dt><dd class="govuk-summary-list__value">{{ member.lease.reference }}: {% for p in member.lease.properties.all %}{{ p.name }}{% if not forloop.last %}; {% endif %}{% endfor %}</dd></div>
+  <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Service charge year" %}</dt><dd class="govuk-summary-list__value">{{ year.start|date:"j F Y" }} {% translate "to" %} {{ year.end|date:"j F Y" }}</dd></div>
+  <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Your share" %}</dt><dd class="govuk-summary-list__value">{{ share.share|percent }} ({% translate "shared by" %} {{ year.schedule.get_basis_display }}){% if member.annual_cap %}, {% translate "capped at" %} £{{ member.annual_cap|floatformat:2|intcomma }} {% translate "a year" %}{% endif %}</dd></div>
+  <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Date" %}</dt><dd class="govuk-summary-list__value">{{ year.budget_issued_on|default:today|date:"j F Y" }}</dd></div>
+</dl>
+{% if year.budget_commentary %}<h2 class="govuk-heading-m">{% translate "About this budget" %}</h2><p class="govuk-body">{{ year.budget_commentary|linebreaksbr }}</p>{% endif %}
+<h2 class="govuk-heading-m">{% translate "Budget for the whole schedule" %}</h2>
+<table class="govuk-table">
+  <thead class="govuk-table__head"><tr class="govuk-table__row"><th scope="col" class="govuk-table__header">{% translate "Heading" %}</th><th scope="col" class="govuk-table__header govuk-table__header--numeric">{% translate "Budget" %}</th></tr></thead>
+  <tbody class="govuk-table__body">
+  {% for h, b in rows %}<tr class="govuk-table__row"><td class="govuk-table__cell">{{ h.name }}</td><td class="govuk-table__cell govuk-table__cell--numeric">£{{ b|floatformat:2|intcomma }}</td></tr>{% endfor %}
+  <tr class="govuk-table__row phaema-total-row"><td class="govuk-table__cell"><strong>{% translate "Total" %}</strong></td><td class="govuk-table__cell govuk-table__cell--numeric"><strong>£{{ budget|floatformat:2|intcomma }}</strong></td></tr>
+  </tbody>
+</table>
+<h2 class="govuk-heading-m">{% translate "What you will pay on account" %}</h2>
+<dl class="govuk-summary-list">
+  <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "For the year" %}</dt><dd class="govuk-summary-list__value"><strong>£{{ annual|floatformat:2|intcomma }}</strong> {% translate "plus VAT where charged" %}</dd></div>
+  {% if per_payment %}<div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Each payment" %}</dt><dd class="govuk-summary-list__value">£{{ per_payment|floatformat:2|intcomma }}, {{ member.lease.get_rent_frequency_display|lower }}, {% translate "with your rent" %}</dd></div>{% endif %}
+</dl>
+<p class="govuk-body">{% translate "After the year ends, you will receive a statement of the actual costs. Any difference between your share of the actual costs and what you paid on account will be charged or credited to you." %}</p>
+<p class="govuk-body-s govuk-!-display-none-print"><a class="govuk-link" href="{{ year.get_absolute_url }}">{% translate "Back to the year" %}</a></p>
+{% endblock %}

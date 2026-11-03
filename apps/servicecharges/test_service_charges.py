@@ -179,3 +179,95 @@ def test_demo(db):
     assert apportion.reconcile(year).actual > 0
     call_command("load_demo_data", "--reset", verbosity=0)
     assert Schedule.objects.count() == 1
+
+
+# ------------------------------------------------------------------ RICS 2nd edition additions
+
+def test_income_and_non_recoverable_costs(estate):
+    year = estate["year"]
+    h = {c.code: c for c in CostHeading.objects.all()}
+    Expenditure.objects.create(year=year, heading=h["CLN"], spent_on=date(2025, 6, 1), description="Cleaning",
+                               amount=D("10000"))
+    Expenditure.objects.create(year=year, heading=h["INC"], spent_on=date(2026, 3, 1), description="Interest",
+                               amount=D("500"), kind="income")
+    Expenditure.objects.create(year=year, heading=h["ROAD"], spent_on=date(2026, 3, 1), description="Upgrade",
+                               amount=D("4000"), recoverable=False)
+    recon = apportion.reconcile(year)
+    assert (recon.costs, recon.income, recon.actual, recon.non_recoverable) == (D("10000"), D("500"), D("9500"),
+                                                                                 D("4000"))
+    assert recon.lines[0].due == D("1900.00")  # 20% of £9,500
+    assert [h.code for h, _b, _a in apportion.by_heading(year)] == ["CLN"]
+
+
+def test_matrix_rows_match_reconciliation_and_are_kept(estate):
+    year = estate["year"]
+    h = {c.code: c for c in CostHeading.objects.all()}
+    for code, amount in (("CLN", "7000.01"), ("SEC", "3333.33")):
+        Expenditure.objects.create(year=year, heading=h[code], spent_on=date(2025, 6, 1), description=code,
+                                   amount=D(amount))
+    Expenditure.objects.create(year=year, heading=h["INC"], spent_on=date(2025, 6, 1), description="Rebate",
+                               amount=D("100"), kind="income")
+    estate["members"][1].annual_cap = D("500")
+    estate["members"][1].save()
+    m = apportion.matrix(year)
+    assert m.basis == "actual" and m.headings == ["Cleaning", "Security", "Income and credits"]
+    recon = apportion.reconcile(year)
+    assert [D(r[4]) for r in m.rows[:-1]] == [line.due for line in recon.lines]
+    assert sum(D(r[4]) for r in m.rows) == recon.actual  # leases + council = everything
+    apportion.finalise(year, date(2026, 5, 1))
+    year.refresh_from_db()
+    Expenditure.objects.create(year=year, heading=h["CLN"], spent_on=date(2025, 7, 1), description="Late",
+                               amount=D("999"))
+    assert apportion.matrix(year).rows == m.rows  # fixed at reconciliation
+
+
+def test_deadlines(estate):
+    from apps.servicecharges import deadlines
+
+    year = estate["year"]  # 1 April 2025 to 31 March 2026
+    assert (year.budget_due, year.statements_due) == (date(2025, 3, 1), date(2026, 7, 31))
+    found = {d.what: d for d in deadlines.upcoming(today=date(2026, 5, 1))}
+    assert "Issue the 2025/26 year-end statements" in found
+    assert any("budget for the year from 01/04/2026" in w for w in found)
+    year.statements_issued_on = date(2026, 6, 30)
+    year.save()
+    assert not any("year-end statements" in d.what for d in deadlines.upcoming(today=date(2026, 5, 1)))
+
+
+def test_weekly_deadline_email(estate, make_user, mailoutbox):
+    from apps.servicecharges import deadlines
+
+    make_user("admin", "Administrators", email="admin@example.org")
+    assert deadlines.send_weekly(today=date(2026, 5, 5)) == 0  # a Tuesday
+    assert deadlines.send_weekly(today=date(2026, 5, 4)) == 1  # a Monday
+    assert "year-end statements" in mailoutbox[0].body
+
+
+def test_issue_dates_matrix_and_budget_statement_pages(client, make_user, estate):
+    year, member = estate["year"], estate["members"][0]
+    client.force_login(make_user("admin", "Administrators"))
+    client.post(f"/service-charges/years/{year.pk}/issued/", {"what": "budget", "date": "2025-02-20"})
+    client.post(f"/service-charges/years/{year.pk}/issued/", {"what": "statements", "date": "2026-07-01",
+                                                              "certified_by": "A Accountant"})
+    year.refresh_from_db()
+    assert year.budget_issued_on == date(2025, 2, 20) and year.certified_by == "A Accountant"
+    page = client.get(f"/service-charges/years/{year.pk}/budget/{member.pk}/")
+    assert page.status_code == 200 and page.context["annual"] == D("2000.00") and page.context["per_payment"] == D("500.00")
+    assert client.get(f"/service-charges/years/{year.pk}/apportionment/").status_code == 200
+    assert client.get(f"/service-charges/years/{year.pk}/apportionment/?format=xlsx").status_code == 200
+    assert client.get("/").status_code == 200
+
+
+def test_expenditure_import_income_and_recoverable(estate):
+    rows = ("Schedule,Date,Heading,Description,Amount,Type,Recoverable\n"
+            "Estate services,15/05/2025,INC,Interest,50,Income,\n"
+            "Estate services,15/05/2025,ROAD,Upgrade,900,Cost,No\n"
+            "Estate services,15/05/2025,CLN,Negative,-5,,\n")
+    workbook = ExpenditureWorkbook()
+    result, prepared = workbook.validate(SimpleUploadedFile("spend.csv", rows.encode()))
+    assert "positive amount" in " ".join(result.rows[2].errors)
+    good = "\n".join(rows.splitlines()[:3]) + "\n"
+    workbook = ExpenditureWorkbook()
+    result, prepared = workbook.validate(SimpleUploadedFile("spend.csv", good.encode()))
+    workbook.apply(prepared)
+    assert apportion.income_total(estate["year"]) == D("50") and apportion.non_recoverable_total(estate["year"]) == D("900")

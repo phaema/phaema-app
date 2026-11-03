@@ -12,4 +12,7 @@ urlpatterns = [
     path("years/<int:pk>/approve/", views.year_approve, name="approve"),
     path("years/<int:pk>/reconcile/", views.reconcile, name="reconcile"),
     path("years/<int:pk>/statement/<int:member_pk>/", views.statement, name="statement"),
+    path("years/<int:pk>/budget/<int:member_pk>/", views.budget_statement, name="budget-statement"),
+    path("years/<int:pk>/issued/", views.record_issue, name="issued"),
+    path("years/<int:pk>/apportionment/", views.year_matrix, name="matrix"),
 ]

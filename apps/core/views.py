@@ -59,6 +59,10 @@ def dashboard(request):
         "rent_roll": lease_events.rent_roll(),
         "recent_changes": _with_targets(AuditEntry.objects.select_related("user", "content_type")[:10]),
     }
+    if ModuleSettings.load().service_charges_enabled:
+        from apps.servicecharges.deadlines import upcoming
+
+        context["service_deadlines"] = upcoming()
     if ModuleSettings.load().rent_ledger_enabled:
         from apps.ledger import billing
 

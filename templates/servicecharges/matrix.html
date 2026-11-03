@@ -1,0 +1,27 @@
+{% extends "base.html" %}{% load i18n humanize phaema %}
+{% block title %}{% translate "Apportionment" %} {{ year }}{% endblock %}
+{% block help_page %}service-charges{% endblock %}
+{% block content %}
+<span class="govuk-caption-l">{{ year.schedule.name }} {{ year.label }}</span>
+<h1 class="govuk-heading-l">{% translate "Apportionment matrix" %}</h1>
+<p class="govuk-body">{% if matrix.basis == "actual" %}{% translate "How each heading's actual cost is shared between the leases and the council." %}{% else %}{% translate "How each heading's budget is shared between the leases and the council. Actual costs replace the budget once spending is recorded." %}{% endif %}
+  {% if year.apportionment %}<strong>{% translate "Fixed at reconciliation" %} {{ year.reconciled_on|date:"j M Y" }}.</strong>{% endif %}
+  {% translate "Download:" %} <a class="govuk-link" href="?format=xlsx">Excel</a> · <a class="govuk-link" href="?format=csv">CSV</a></p>
+<div class="phaema-table-scroll"><table class="govuk-table phaema-report">
+  <thead class="govuk-table__head"><tr class="govuk-table__row">
+    <th scope="col" class="govuk-table__header">{% translate "Lease" %}</th><th scope="col" class="govuk-table__header govuk-table__header--numeric">{% translate "Share" %}</th><th scope="col" class="govuk-table__header govuk-table__header--numeric">{% translate "Days" %}</th>
+    {% for h in matrix.headings %}<th scope="col" class="govuk-table__header govuk-table__header--numeric">{{ h }}</th>{% endfor %}
+    <th scope="col" class="govuk-table__header govuk-table__header--numeric">{% translate "Total" %}</th>
+  </tr></thead>
+  <tbody class="govuk-table__body">
+  {% for label, share, days, amounts, total in rows %}<tr class="govuk-table__row">
+    <td class="govuk-table__cell">{{ label }}</td><td class="govuk-table__cell govuk-table__cell--numeric">{% if share is not None %}{{ share|percent }}{% endif %}</td><td class="govuk-table__cell govuk-table__cell--numeric">{{ days }}</td>
+    {% for a in amounts %}<td class="govuk-table__cell govuk-table__cell--numeric">£{{ a|floatformat:2|intcomma }}</td>{% endfor %}
+    <td class="govuk-table__cell govuk-table__cell--numeric"><strong>£{{ total|floatformat:2|intcomma }}</strong></td>
+  </tr>{% endfor %}
+  <tr class="govuk-table__row phaema-total-row"><td class="govuk-table__cell" colspan="3"><strong>{% translate "Total" %}</strong></td>
+    {% for t in totals %}<td class="govuk-table__cell govuk-table__cell--numeric"><strong>£{{ t|floatformat:2|intcomma }}</strong></td>{% endfor %}</tr>
+  </tbody>
+</table></div>
+<p class="govuk-body-s"><a class="govuk-link" href="{{ year.get_absolute_url }}">{% translate "Back to the year" %}</a></p>
+{% endblock %}
