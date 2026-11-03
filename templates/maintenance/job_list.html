@@ -1,0 +1,43 @@
+{% extends "base.html" %}{% load i18n phaema %}
+{% block title %}{% translate "Maintenance jobs" %}{% endblock %}
+{% block help_page %}maintenance{% endblock %}
+{% block content %}
+<h1 class="govuk-heading-xl govuk-!-margin-bottom-4">{% translate "Jobs" %}</h1>
+{% include "maintenance/_nav.html" %}
+{% if can_raise %}<a class="govuk-button" href="{% url 'maintenance:job-new' %}" data-module="govuk-button">{% translate "Report a repair" %}</a>{% endif %}
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-one-quarter">
+    <form method="get" class="phaema-filters">
+      <div class="govuk-form-group"><label class="govuk-label govuk-label--s" for="q">{% translate "Search" %}</label><div class="govuk-hint" id="q-hint">{% translate "Job number, description, property, contractor or order number" %}</div><input class="govuk-input" id="q" name="q" type="search" value="{{ q }}" aria-describedby="q-hint"></div>
+      {% for name, label, choices, current, any in filters %}
+      <div class="govuk-form-group"><label class="govuk-label govuk-label--s" for="f-{{ name }}">{{ label }}</label>
+        <select class="govuk-select" id="f-{{ name }}" name="{{ name }}">{% if any %}<option value="">{% translate "Any" %}</option>{% endif %}{% for value, text in choices %}<option value="{{ value }}"{% if value == current %} selected{% endif %}>{{ text }}</option>{% endfor %}</select></div>
+      {% endfor %}
+      {% if request.GET.sort %}<input type="hidden" name="sort" value="{{ request.GET.sort }}">{% endif %}
+      <button class="govuk-button govuk-!-margin-bottom-2" data-module="govuk-button">{% translate "Apply" %}</button>
+      <p class="govuk-body-s govuk-!-margin-bottom-0"><a class="govuk-link" href="{% url 'maintenance:jobs' %}">{% translate "Clear filters" %}</a></p>
+    </form>
+  </div>
+  <div class="govuk-grid-column-three-quarters">
+    <p class="govuk-body">{% blocktranslate count n=paginator.count %}{{ n }} job{% plural %}{{ n }} jobs{% endblocktranslate %}</p>
+    {% include "core/_downloads.html" %}
+    <table class="govuk-table">
+      {% include "core/_sortable_head.html" %}
+      <tbody class="govuk-table__body">
+      {% for j in page_obj %}{% with rag=j.rag %}
+        <tr class="govuk-table__row">
+          <td class="govuk-table__cell"><a class="govuk-link" href="{{ j.get_absolute_url }}">{{ j.reference }}</a><br><span class="govuk-body-s">{{ j.title }}</span></td>
+          <td class="govuk-table__cell"><span class="govuk-body-s">{{ j.property.reference }}<br>{{ j.property.name }}</span></td>
+          <td class="govuk-table__cell govuk-body-s">{{ j.get_priority_display|truncatewords:1 }}</td>
+          <td class="govuk-table__cell govuk-body-s">{{ j.get_status_display }}{% if j.contractor %}<br>{{ j.contractor }}{% endif %}{% if j.approval_status == "pending" %}<br><strong class="govuk-tag govuk-tag--blue">{% translate "Approval" %}</strong>{% endif %}</td>
+          <td class="govuk-table__cell">{% if j.target_date %}{{ j.target_date|date:"j M Y" }}<br>{% endif %}<strong class="govuk-tag govuk-tag--{{ rag.0 }}">{{ rag.1 }}</strong></td>
+        </tr>
+      {% endwith %}{% empty %}
+        <tr class="govuk-table__row"><td class="govuk-table__cell" colspan="5">{% translate "No jobs match." %}</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+    {% include "core/_pagination.html" %}
+  </div>
+</div>
+{% endblock %}

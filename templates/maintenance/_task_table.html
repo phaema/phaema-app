@@ -1,0 +1,20 @@
+{% load i18n phaema %}{% if tasks %}
+<table class="govuk-table">
+  <thead class="govuk-table__head"><tr class="govuk-table__row"><th scope="col" class="govuk-table__header">{% translate "Task" %}</th>{% if not hide_property %}<th scope="col" class="govuk-table__header">{% translate "Property" %}</th>{% endif %}<th scope="col" class="govuk-table__header">{% translate "Every" %}</th><th scope="col" class="govuk-table__header">{% translate "Due" %}</th></tr></thead>
+  <tbody class="govuk-table__body">
+  {% for t in tasks %}{% with rag=t.rag %}<tr class="govuk-table__row" id="task-{{ t.pk }}">
+    <td class="govuk-table__cell">{{ t.title }}{% if t.statutory %} <strong class="govuk-tag govuk-tag--purple">{% translate "Statutory" %}</strong>{% endif %}
+      {% if t.regulation %}<br><span class="govuk-body-s">{{ t.regulation }}</span>{% endif %}
+      {% if t.contractor %}<br><span class="govuk-body-s">{{ t.contractor }}</span>{% endif %}</td>
+    {% if not hide_property %}<td class="govuk-table__cell"><a class="govuk-link govuk-body-s" href="{% url 'maintenance:property' t.property_id %}">{{ t.property.reference }}</a><br><span class="govuk-body-s">{{ t.property.name }}</span></td>{% endif %}
+    <td class="govuk-table__cell govuk-body-s">{% blocktranslate count n=t.frequency_months %}{{ n }} month{% plural %}{{ n }} months{% endblocktranslate %}</td>
+    <td class="govuk-table__cell">{{ t.next_due|date:"j M Y" }}<br><strong class="govuk-tag govuk-tag--{% if rag.0 == 'red' and t.statutory %}red{% else %}{{ rag.0 }}{% endif %}">{{ rag.1 }}</strong>
+      {% if t.last_done %}<br><span class="govuk-body-s">{% translate "Last" %} {{ t.last_done|date:"j M Y" }}</span>{% endif %}
+      {% if actions %}<form method="post" action="{% url 'maintenance:planned-action' t.pk %}" class="govuk-!-margin-top-2">{% csrf_token %}<input type="hidden" name="next" value="{{ request.get_full_path }}">
+        <label class="govuk-visually-hidden" for="done-{{ t.pk }}">{% translate "Date done" %}</label><input class="govuk-input govuk-input--width-10" type="date" id="done-{{ t.pk }}" name="date" value="{{ today|date:'Y-m-d' }}">
+        <button class="govuk-button govuk-button--secondary govuk-!-margin-bottom-0" name="action" value="done" data-module="govuk-button">{% translate "Done" %}</button>
+        <button class="govuk-button govuk-button--secondary govuk-!-margin-bottom-0" name="action" value="raise" data-module="govuk-button">{% translate "Raise a job" %}</button></form>{% endif %}</td>
+  </tr>{% endwith %}{% endfor %}
+  </tbody>
+</table>
+{% else %}<p class="govuk-body">{{ empty }}</p>{% endif %}

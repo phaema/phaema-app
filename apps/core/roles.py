@@ -20,7 +20,7 @@ CONTRIBUTORS = "Contributors"
 VIEWERS = "Viewers"
 ROLES = (ADMINISTRATORS, SURVEYORS, CONTRIBUTORS, VIEWERS)
 
-PHAEMA_APPS = ("core", "properties", "leases", "ledger", "servicecharges", "cases")
+PHAEMA_APPS = ("core", "properties", "leases", "ledger", "servicecharges", "cases", "maintenance")
 
 # Permissions held by each role, as "app_label.codename". Object-level rules (only your
 # own properties) are applied on top of these by can_edit().
@@ -34,6 +34,9 @@ SURVEYOR_PERMISSIONS = {
     "leases.add_leaseevent", "leases.change_leaseevent",
     "leases.add_rentscheduleentry", "leases.change_rentscheduleentry", "leases.delete_rentscheduleentry",
     "cases.add_case", "cases.change_case",
+    "maintenance.add_job", "maintenance.change_job", "maintenance.add_jobdocument",
+    "maintenance.add_component", "maintenance.change_component",
+    "maintenance.add_plannedtask", "maintenance.change_plannedtask",
 }
 ADMIN_EXTRA = {
     "auth.view_user", "auth.add_user", "auth.change_user",
@@ -119,6 +122,14 @@ def can_edit(user, obj):
         return can_edit(user, obj.lease)
     if isinstance(obj, Party):
         return True  # contact details are shared; changes are in the audit trail
+    from apps.maintenance.models import Component, Job, JobDocument, PlannedTask
+
+    if isinstance(obj, (Component, PlannedTask)):
+        return obj.pk is None or manages(user, obj.property)
+    if isinstance(obj, Job):
+        return obj.pk is None or manages(user, obj.property) or obj.owner_id == user.pk
+    if isinstance(obj, JobDocument):
+        return can_edit(user, obj.job)
     return False  # titles, documents, INSPIRE parcels and settings are for administrators
 
 

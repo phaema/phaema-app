@@ -14,6 +14,7 @@ class ModuleSettingsAdmin(admin.ModelAdmin):
         ("Rent ledger", {"fields": ["invoicing", "invoice_prefix", "next_invoice_number", "vat_rate",
                                     "rent_income_code", "service_charge_income_code", "vat_code_standard",
                                     "vat_code_exempt"]}),
+        ("Maintenance", {"fields": ["order_approval_limit"]}),
         ("Maps", {"fields": ["os_maps_api_key", "os_map_style"]}),
         ("Reminders", {"fields": ["reminder_days_review", "reminder_days_notice", "reminder_days_break",
                                   "reminder_days_expiry", "reminder_days_other", "overdue_reminders"]}),

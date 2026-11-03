@@ -1,8 +1,10 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 """Reports PHAEMA provides out of the box. Administrators can adjust them; anyone can copy them."""
 
-CATEGORIES = ["Property and assets", "Leases and key dates", "Cases", "Rents and income", "Contacts", "Data quality"]
+CATEGORIES = ["Property and assets", "Leases and key dates", "Cases", "Rents and income", "Maintenance", "Contacts",
+              "Data quality"]
 LEDGER_CATEGORY = "Rents and income"  # shown only when the rent ledger is switched on
+MAINTENANCE_CATEGORY = "Maintenance"  # shown only when maintenance is switched on
 
 LIVE = {"in": ["current", "holding_over"]}
 OPEN = {"in": ["open", "in_progress"]}
@@ -157,6 +159,39 @@ STARTERS = [
                     "RICS asks to be recorded.",
      "columns": ["reference", "name", "property_type", "nia_sqm", "gia_sqm", "area_source", "managing_surveyor"],
      "filters": {"area_standard": {"in": [""]}, "nia_sqm": {"min": 0.01}}, "sort_by": "reference"},
+    {"starter": "jobs_past_target", "category": "Maintenance", "name": "Repairs past their target",
+     "dataset": "jobs", "description": "Open jobs whose target completion date has passed.",
+     "columns": ["reference", "title", "property", "priority", "contractor", "reported_on", "target_date"],
+     "filters": {"status": {"in": ["reported", "ordered"]}, "target_date": {"before_today": True}},
+     "sort_by": "target_date"},
+    {"starter": "statutory_overdue", "category": "Maintenance", "name": "Statutory maintenance overdue",
+     "dataset": "planned", "description": "Statutory inspections and tests past their due date: a legal and safety risk.",
+     "columns": ["title", "property", "property_name", "regulation", "last_done", "next_due", "contractor"],
+     "filters": {"statutory": {"is": True}, "next_due": {"before_today": True}}, "sort_by": "next_due"},
+    {"starter": "planned_90", "category": "Maintenance", "name": "Planned maintenance due in the next 90 days",
+     "dataset": "planned", "description": "Planned and statutory tasks coming up, including any overdue.",
+     "columns": ["title", "property", "statutory", "frequency_months", "next_due", "contractor", "estimated_cost"],
+     "filters": {"next_due": {"upto_days": 90}}, "sort_by": "next_due"},
+    {"starter": "repair_spend_12m", "category": "Maintenance", "name": "Repair spending in the last 12 months",
+     "dataset": "jobs", "description": "Completed jobs with their final cost and who paid.",
+     "columns": ["reference", "title", "property", "contractor", "completed_on", "actual_cost", "responsibility",
+                 "recharged"],
+     "filters": {"completed_on": {"last_days": 365}}, "sort_by": "completed_on", "sort_descending": True},
+    {"starter": "replacements_5y", "category": "Maintenance", "name": "Components in poor or bad condition",
+     "dataset": "components", "description": "Components in condition C or D, for the capital programme.",
+     "columns": ["property", "name", "category", "condition", "replace_year", "replacement_cost"],
+     "filters": {"condition": {"in": ["C", "D"]}}, "sort_by": "replacement_cost", "sort_descending": True},
+    {"starter": "contracts_retender", "category": "Maintenance", "name": "Contracts due for re-tender or benchmarking",
+     "dataset": "contracts", "description": "Contracts to re-tender or benchmark within six months: the RICS service "
+                                          "charge standard expects it at least every three years.",
+     "columns": ["title", "contractor", "starts", "ends", "annual_value", "last_tested", "retender_due"],
+     "filters": {"retender_due": {"upto_days": 183}}, "sort_by": "retender_due"},
+    {"starter": "contractor_insurance", "category": "Maintenance", "name": "Contractor insurance expiring",
+     "dataset": "contractors", "description": "Approved contractors whose insurance has expired or expires within "
+                                            "30 days.",
+     "columns": ["name", "trades", "insurer", "public_liability", "insurance_expires", "email"],
+     "filters": {"approved": {"is": True}, "active": {"is": True}, "insurance_expires": {"upto_days": 30}},
+     "sort_by": "insurance_expires"},
     {"starter": "missing_uprn", "category": "Data quality",
      "name": "Properties without a UPRN", "dataset": "properties",
      "description": "The UPRN links PHAEMA to GIS, council tax, business rates and the Transparency Code list.",

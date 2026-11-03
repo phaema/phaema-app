@@ -1,0 +1,19 @@
+{% extends "base.html" %}{% load i18n humanize %}
+{% block title %}{% translate "Lifecycle forecast" %}{% endblock %}
+{% block help_page %}maintenance{% endblock %}
+{% block content %}
+<h1 class="govuk-heading-xl govuk-!-margin-bottom-4">{% translate "Lifecycle forecast" %}</h1>
+{% include "maintenance/_nav.html" %}
+<p class="govuk-body">{% translate "When components reach the end of their expected life, and what replacing them costs, from the component register. Replacements already overdue are counted in this year." %}</p>
+<p class="govuk-body">{% translate "Show" %} <a class="govuk-link" href="?years=5">5</a> · <a class="govuk-link" href="?years=10">10</a> · <a class="govuk-link" href="?years=20">20</a> · <a class="govuk-link" href="?years=30">30</a> {% translate "years" %} · <a class="govuk-link" href="?years={{ span }}&amp;format=xlsx">{% translate "Download to Excel" %}</a></p>
+<p class="govuk-body-l">{% blocktranslate with t=total|floatformat:0|intcomma n=span %}£{{ t }} over {{ n }} years{% endblocktranslate %}</p>
+<table class="govuk-table">
+  <thead class="govuk-table__head"><tr class="govuk-table__row"><th scope="col" class="govuk-table__header">{% translate "Year" %}</th><th scope="col" class="govuk-table__header govuk-table__header--numeric">{% translate "Capital" %}</th><th scope="col" class="govuk-table__header govuk-table__header--numeric">{% translate "Revenue" %}</th><th scope="col" class="govuk-table__header">{% translate "Components" %}</th></tr></thead>
+  <tbody class="govuk-table__body">{% for year, capital, revenue, items in rows %}<tr class="govuk-table__row">
+    <th scope="row" class="govuk-table__header">{{ year }}</th>
+    <td class="govuk-table__cell govuk-table__cell--numeric">{% if capital %}£{{ capital|floatformat:0|intcomma }}{% else %}–{% endif %}</td>
+    <td class="govuk-table__cell govuk-table__cell--numeric">{% if revenue %}£{{ revenue|floatformat:0|intcomma }}{% else %}–{% endif %}</td>
+    <td class="govuk-table__cell govuk-body-s">{% for c in items %}<a class="govuk-link" href="{% url 'maintenance:property' c.property_id %}">{{ c.property.reference }}</a> {{ c.name }}{% if not forloop.last %}; {% endif %}{% endfor %}</td>
+  </tr>{% endfor %}</tbody>
+</table>
+{% endblock %}

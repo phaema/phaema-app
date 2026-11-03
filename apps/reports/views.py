@@ -27,15 +27,16 @@ DATE_MODES = [("", "Any date"), ("next", "In the next … days"), ("last", "In t
 def report_list(request):
     from apps.core.models import ModuleSettings
 
-    from .starter import CATEGORIES, LEDGER_CATEGORY, STARTERS, category
+    from .starter import CATEGORIES, LEDGER_CATEGORY, MAINTENANCE_CATEGORY, STARTERS, category
 
     visible = Report.objects.filter(Q(shared=True) | ~Q(starter="") | Q(owner=request.user))
     order = {s["starter"]: i for i, s in enumerate(STARTERS)}
-    ledger_on = ModuleSettings.load().rent_ledger_enabled
+    modules = ModuleSettings.load()
+    ledger_on, maintenance_on = modules.rent_ledger_enabled, modules.maintenance_enabled
     grouped = {}
     for report in sorted(visible.exclude(starter=""), key=lambda r: order.get(r.starter, 999)):
         cat = category(report.starter)
-        if cat == LEDGER_CATEGORY and not ledger_on:
+        if (cat == LEDGER_CATEGORY and not ledger_on) or (cat == MAINTENANCE_CATEGORY and not maintenance_on):
             continue
         grouped.setdefault(cat, []).append(report)
     return render(request, "reports/report_list.html", {

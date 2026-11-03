@@ -1,0 +1,122 @@
+{% extends "base.html" %}{% load i18n humanize phaema %}
+{% block title %}{{ job.reference }}{% endblock %}
+{% block help_page %}maintenance{% endblock %}
+{% block breadcrumbs %}<nav class="govuk-breadcrumbs" aria-label="Breadcrumb"><ol class="govuk-breadcrumbs__list"><li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="{% url 'maintenance:jobs' %}">{% translate "Jobs" %}</a></li><li class="govuk-breadcrumbs__list-item">{{ job.reference }}</li></ol></nav>{% endblock %}
+{% block content %}
+<span class="govuk-caption-l">{{ job.get_category_display }}</span>
+<h1 class="govuk-heading-l govuk-!-margin-bottom-2">{{ job.reference }}</h1>
+<p class="govuk-body-l govuk-!-margin-bottom-2">{{ job.title }}</p>
+<p class="govuk-body"><strong class="govuk-tag govuk-tag--{{ rag.0 }}">{{ rag.1 }}</strong> · {{ job.get_status_display }}{% if job.target_date and job.is_open %} · {% translate "Target" %} {{ job.target_date|date:"j M Y" }}{% endif %}</p>
+
+<div class="govuk-grid-row"><div class="govuk-grid-column-two-thirds">
+{% if job.description %}<p class="govuk-body">{{ job.description|linebreaksbr }}</p>{% endif %}
+
+{% if job.approval_status == "pending" %}
+<div class="govuk-notification-banner" role="region" aria-labelledby="ap-title" data-module="govuk-notification-banner">
+  <div class="govuk-notification-banner__header"><h2 class="govuk-notification-banner__title" id="ap-title">{% translate "Order waiting for approval" %}</h2></div>
+  <div class="govuk-notification-banner__content">
+    <p class="govuk-body">{% blocktranslate with name=job.approver|person:"–" est=job.estimate|floatformat:2|intcomma lim=limit|floatformat:0|intcomma %}{{ name }} is asked to approve an order of £{{ est }}, over the £{{ lim }} limit.{% endblocktranslate %}</p>
+    {% if can_approve %}<form method="post">{% csrf_token %}
+      <div class="govuk-form-group"><label class="govuk-label govuk-label--s" for="comments">{% translate "Comments" %}</label><div class="govuk-hint">{% translate "Needed if you return it." %}</div><textarea class="govuk-textarea" id="comments" name="comments" rows="2"></textarea></div>
+      <div class="govuk-button-group"><button class="govuk-button" name="action" value="approve" data-module="govuk-button">{% translate "Approve the order" %}</button><button class="govuk-button govuk-button--warning" name="action" value="return" data-module="govuk-button">{% translate "Return with comments" %}</button></div>
+    </form>{% endif %}
+  </div>
+</div>
+{% elif job.approval_status == "returned" %}<div class="govuk-inset-text"><strong>{% translate "Order returned" %}</strong> {% translate "by" %} {{ job.approved_by|person:"–" }}: {{ job.approval_comments }}</div>{% endif %}
+
+<h2 class="govuk-heading-m">{% translate "Details" %}</h2>
+<dl class="govuk-summary-list">
+  <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Property" %}</dt><dd class="govuk-summary-list__value"><a class="govuk-link" href="{{ job.property.get_absolute_url }}">{{ job.property.reference }} {{ job.property.name }}</a> · <a class="govuk-link govuk-body-s" href="{% url 'maintenance:property' job.property_id %}">{% translate "its maintenance" %}</a>{% if job.component %}<br><span class="govuk-body-s">{% translate "Component:" %} {{ job.component.name }}</span>{% endif %}</dd></div>
+  <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Reported" %}</dt><dd class="govuk-summary-list__value">{{ job.reported_on|date:"j M Y" }} ({{ job.get_how_reported_display|lower }}){% if job.reported_by %}, {{ job.reported_by }}{% endif %}</dd></div>
+  <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Priority" %}</dt><dd class="govuk-summary-list__value">{{ job.get_priority_display }}</dd></div>
+  <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Who pays" %}</dt><dd class="govuk-summary-list__value"><strong>{{ job.get_responsibility_display }}</strong>{% if job.responsibility_reason %}<br><span class="govuk-body-s">{{ job.responsibility_reason }}</span>{% endif %}{% if job.lease %}<br><span class="govuk-body-s">{% translate "Agreement:" %} <a class="govuk-link" href="{{ job.lease.get_absolute_url }}">{{ job.lease.reference }}</a> ({{ job.lease.get_repairing_display|default:_("repairing terms not recorded") }})</span>{% endif %}
+    {% if can_work %}<details class="govuk-details govuk-!-margin-top-2 govuk-!-margin-bottom-0" data-module="govuk-details"><summary class="govuk-details__summary"><span class="govuk-details__summary-text">{% translate "Change" %}</span></summary><div class="govuk-details__text">
+      <form method="post">{% csrf_token %}<input type="hidden" name="action" value="responsibility">
+        <div class="govuk-form-group"><label class="govuk-label govuk-label--s" for="resp">{% translate "Who pays" %}</label><select class="govuk-select" id="resp" name="responsibility">{% for v, l in responsibilities %}<option value="{{ v }}"{% if v == job.responsibility %} selected{% endif %}>{{ l }}</option>{% endfor %}</select></div>
+        <div class="govuk-form-group"><label class="govuk-label govuk-label--s" for="reason">{% translate "Why" %}</label><div class="govuk-hint">{% blocktranslate with s=suggested.0 r=suggested.1 %}From the lease: {{ r }}.{% endblocktranslate %} {% translate "For example, choose recharge for damage the tenant caused." %}</div><input class="govuk-input" id="reason" name="reason" maxlength="200"></div>
+        <button class="govuk-button govuk-button--secondary" data-module="govuk-button">{% translate "Save" %}</button></form></div></details>{% endif %}</dd></div>
+  <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Owner" %}</dt><dd class="govuk-summary-list__value">{{ job.owner|person:"–" }}</dd></div>
+  {% if job.planned_task %}<div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Planned task" %}</dt><dd class="govuk-summary-list__value">{{ job.planned_task.title }}{% if job.planned_task.statutory %} <strong class="govuk-tag govuk-tag--purple">{% translate "Statutory" %}</strong>{% endif %}<br><span class="govuk-body-s">{% translate "Completing this job records the task as done." %}</span></dd></div>{% endif %}
+  {% if job.case %}<div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Case" %}</dt><dd class="govuk-summary-list__value"><a class="govuk-link" href="{{ job.case.get_absolute_url }}">{{ job.case.display_reference }}</a></dd></div>{% endif %}
+</dl>
+
+<h2 class="govuk-heading-m">{% translate "Works order" %}</h2>
+<dl class="govuk-summary-list">
+  <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Contractor" %}</dt><dd class="govuk-summary-list__value">{% if job.contractor %}<a class="govuk-link" href="{{ job.contractor.get_absolute_url }}">{{ job.contractor }}</a>{% if not job.contractor.insurance_ok %} <strong class="govuk-tag govuk-tag--red">{% translate "Insurance not current" %}</strong>{% endif %}{% else %}–{% endif %}</dd></div>
+  <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Estimate" %}</dt><dd class="govuk-summary-list__value">{% if job.estimate %}£{{ job.estimate|floatformat:2|intcomma }}{% if job.approval_status == "approved" %} <strong class="govuk-tag govuk-tag--green">{% translate "Approved" %}</strong> <span class="govuk-body-s">{{ job.approved_by|person:"" }}</span>{% endif %}{% else %}–{% endif %}</dd></div>
+  {% if job.po_number %}<div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Purchase order" %}</dt><dd class="govuk-summary-list__value">{{ job.po_number }}</dd></div>{% endif %}
+  <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Order issued" %}</dt><dd class="govuk-summary-list__value">{% if job.ordered_on %}{{ job.ordered_on|date:"j M Y" }} · <a class="govuk-link" href="{% url 'maintenance:order' job.pk %}">{% translate "Print the works order" %}</a>{% else %}{% translate "Not yet" %}{% endif %}</dd></div>
+</dl>
+{% if can_work and job.is_open %}
+  <details class="govuk-details" data-module="govuk-details"{% if not job.contractor %} open{% endif %}><summary class="govuk-details__summary"><span class="govuk-details__summary-text">{% translate "Contractor, estimate and order number" %}</span></summary><div class="govuk-details__text">
+  <form method="post">{% csrf_token %}<input type="hidden" name="action" value="order_details">
+    <div class="govuk-form-group"><label class="govuk-label govuk-label--s" for="contractor">{% translate "Contractor" %}</label><select class="govuk-select" id="contractor" name="contractor"><option value="">{% translate "Choose" %}</option>{% for c in contractors %}<option value="{{ c.pk }}"{% if c.pk == job.contractor_id %} selected{% endif %}>{{ c.name }}{% if c.trades %} ({{ c.trades }}){% endif %}</option>{% endfor %}</select></div>
+    <div class="govuk-form-group"><label class="govuk-label govuk-label--s" for="estimate">{% translate "Estimate (£, net)" %}</label><div class="govuk-hint">{% blocktranslate with lim=limit|floatformat:0|intcomma %}Over £{{ lim }} needs your supervisor's approval.{% endblocktranslate %}</div><div class="govuk-input__wrapper"><div class="govuk-input__prefix" aria-hidden="true">£</div><input class="govuk-input govuk-input--width-10" id="estimate" name="estimate" inputmode="decimal" value="{{ job.estimate|default_if_none:'' }}"></div></div>
+    <div class="govuk-form-group"><label class="govuk-label govuk-label--s" for="po">{% translate "Purchase order number" %}</label><div class="govuk-hint">{% translate "From the finance system, to match the invoice." %}</div><input class="govuk-input govuk-input--width-20" id="po" name="po_number" value="{{ job.po_number }}"></div>
+    <button class="govuk-button govuk-button--secondary" data-module="govuk-button">{% translate "Save" %}</button>
+  </form></div></details>
+  {% if job.status == "reported" and job.contractor %}
+    {% if needs_approval and job.approval_status != "pending" %}
+      {% if approver %}<form method="post">{% csrf_token %}<input type="hidden" name="action" value="request_approval"><button class="govuk-button" data-module="govuk-button">{% blocktranslate with name=approver.get_full_name|default:approver.username %}Ask {{ name }} to approve the order{% endblocktranslate %}</button></form>
+      {% else %}<p class="govuk-body"><strong class="govuk-tag govuk-tag--red">{% translate "No supervisor" %}</strong> {% translate "This order needs approval but you have no supervisor in PHAEMA. Ask an administrator to set one." %}</p>{% endif %}
+    {% elif not needs_approval %}
+      <form method="post">{% csrf_token %}<input type="hidden" name="action" value="issue_order">
+        {% if job.contractor.email %}<div class="govuk-checkboxes govuk-checkboxes--small govuk-!-margin-bottom-3"><div class="govuk-checkboxes__item"><input class="govuk-checkboxes__input" id="email" name="email" type="checkbox" value="1" checked><label class="govuk-label govuk-checkboxes__label" for="email">{% blocktranslate with e=job.contractor.email %}Email the works order to {{ e }}{% endblocktranslate %}</label></div></div>{% endif %}
+        <button class="govuk-button" data-module="govuk-button">{% translate "Issue the works order" %}</button></form>
+    {% endif %}
+  {% endif %}
+{% endif %}
+
+<h2 class="govuk-heading-m">{% translate "Completion" %}</h2>
+{% if job.completed_on %}
+<dl class="govuk-summary-list">
+  <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Completed" %}</dt><dd class="govuk-summary-list__value">{{ job.completed_on|date:"j M Y" }}{% if job.completion_notes %}<br><span class="govuk-body-s">{{ job.completion_notes|linebreaksbr }}</span>{% endif %}</dd></div>
+  <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Final cost" %}</dt><dd class="govuk-summary-list__value">{% if job.actual_cost is not None %}£{{ job.actual_cost|floatformat:2|intcomma }}{% else %}–{% endif %}{% if job.invoice_reference %} <span class="govuk-body-s">({% translate "invoice" %} {{ job.invoice_reference }})</span>{% endif %}</dd></div>
+  {% if job.recharge %}<div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Recharged" %}</dt><dd class="govuk-summary-list__value">{{ job.recharge.reference }}, £{{ job.recharge.gross|floatformat:2|intcomma }} {% translate "on the rent account" %}</dd></div>{% endif %}
+  {% if job.expenditure %}<div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Service charge" %}</dt><dd class="govuk-summary-list__value"><a class="govuk-link" href="{{ job.expenditure.year.get_absolute_url }}">{{ job.expenditure.year }}</a>, {{ job.expenditure.heading.name }}</dd></div>{% endif %}
+</dl>
+{% elif can_work and job.is_open %}
+<details class="govuk-details" data-module="govuk-details"{% if job.status == "ordered" %} open{% endif %}><summary class="govuk-details__summary"><span class="govuk-details__summary-text">{% translate "Record completion" %}</span></summary><div class="govuk-details__text">
+<form method="post">{% csrf_token %}<input type="hidden" name="action" value="complete">
+  <div class="govuk-form-group"><label class="govuk-label govuk-label--s" for="c-date">{% translate "Date completed" %}</label><input class="govuk-input govuk-input--width-10" type="date" id="c-date" name="date" value="{{ today|date:'Y-m-d' }}"></div>
+  <div class="govuk-form-group"><label class="govuk-label govuk-label--s" for="c-notes">{% translate "Work done" %}</label><textarea class="govuk-textarea" id="c-notes" name="notes" rows="3"></textarea></div>
+  <div class="govuk-form-group"><label class="govuk-label govuk-label--s" for="c-cost">{% translate "Final cost (£, net)" %}</label><div class="govuk-input__wrapper"><div class="govuk-input__prefix" aria-hidden="true">£</div><input class="govuk-input govuk-input--width-10" id="c-cost" name="cost" inputmode="decimal" value="{{ job.estimate|default_if_none:'' }}"></div></div>
+  <div class="govuk-form-group"><label class="govuk-label govuk-label--s" for="c-inv">{% translate "Contractor's invoice number" %}</label><input class="govuk-input govuk-input--width-20" id="c-inv" name="invoice"></div>
+  <button class="govuk-button" data-module="govuk-button">{% translate "Record completion" %}</button>
+</form></div></details>
+{% else %}<p class="govuk-body">{% translate "Not completed." %}</p>{% endif %}
+
+{% if can_work and job.status == "completed" %}
+  {% if job.responsibility == "recharge" or job.responsibility == "tenant" %}{% if ledger_on and job.lease and not job.recharge %}
+    <form method="post">{% csrf_token %}<input type="hidden" name="action" value="recharge"><button class="govuk-button govuk-button--secondary" data-module="govuk-button">{% blocktranslate with ref=job.lease.reference %}Recharge the cost to {{ ref }}'s rent account{% endblocktranslate %}</button></form>
+  {% endif %}{% endif %}
+  {% if job.responsibility == "service" and sc_on and not job.expenditure %}
+    {% if sc_years %}<form method="post" class="phaema-inline-fields">{% csrf_token %}<input type="hidden" name="action" value="service_charge">
+      <label class="govuk-label govuk-!-margin-right-2" for="sc-year">{% translate "Add to the service charge" %}</label>
+      <select class="govuk-select" id="sc-year" name="year">{% for y in sc_years %}<option value="{{ y.pk }}">{{ y }}</option>{% endfor %}</select>
+      <label class="govuk-visually-hidden" for="sc-heading">{% translate "Heading" %}</label><select class="govuk-select" id="sc-heading" name="heading">{% for h in headings %}<option value="{{ h.pk }}">{{ h.name }}</option>{% endfor %}</select>
+      <button class="govuk-button govuk-button--secondary govuk-!-margin-bottom-0" data-module="govuk-button">{% translate "Add" %}</button></form>
+    {% else %}<p class="govuk-body-s">{% translate "No service charge year covers this property and date." %}</p>{% endif %}
+  {% endif %}
+  <form method="post">{% csrf_token %}<input type="hidden" name="action" value="close"><button class="govuk-button govuk-button--secondary" data-module="govuk-button">{% translate "Close the job" %}</button></form>
+{% endif %}
+
+<h2 class="govuk-heading-m govuk-!-margin-top-6">{% translate "Photos and documents" %}</h2>
+<ul class="govuk-list">{% for d in job.documents.all %}<li><a class="govuk-link" href="{{ d.file.url }}">{{ d.description }}</a> <span class="govuk-body-s">({{ d.file|file_size }}, {{ d.created_at|date:"j M Y" }})</span></li>{% empty %}<li class="govuk-body">{% translate "None yet." %}</li>{% endfor %}</ul>
+{% if can_work %}<details class="govuk-details" data-module="govuk-details"><summary class="govuk-details__summary"><span class="govuk-details__summary-text">{% translate "Add a photo or document" %}</span></summary><div class="govuk-details__text">
+<form method="post" enctype="multipart/form-data">{% csrf_token %}<input type="hidden" name="action" value="add_document">
+  <div class="govuk-form-group"><label class="govuk-label govuk-label--s" for="doc-desc">{% translate "Description" %}</label><input class="govuk-input" id="doc-desc" name="description" maxlength="200"></div>
+  <div class="govuk-form-group"><label class="govuk-label govuk-label--s" for="doc-file">{% translate "File" %}</label><div class="govuk-hint">{% translate "Photo (JPEG or PNG), PDF, Word or Excel, up to 25 MB" %}</div><input class="govuk-file-upload" id="doc-file" name="file" type="file"></div>
+  <button class="govuk-button govuk-button--secondary" data-module="govuk-button">{% translate "Add" %}</button></form></div></details>{% endif %}
+
+{% if can_work %}<div class="govuk-button-group govuk-!-margin-top-6">
+  {% if job.is_open %}<form method="post">{% csrf_token %}<input type="hidden" name="action" value="cancel"><button class="govuk-button govuk-button--warning" data-module="govuk-button">{% translate "Cancel the job" %}</button></form>
+  {% elif job.status != "completed" %}<form method="post">{% csrf_token %}<input type="hidden" name="action" value="reopen"><button class="govuk-button govuk-button--secondary" data-module="govuk-button">{% translate "Reopen" %}</button></form>{% endif %}
+</div>{% endif %}
+</div>
+<div class="govuk-grid-column-one-third">
+  {% if job.lease %}<h2 class="govuk-heading-s">{% translate "Tenant" %}</h2><p class="govuk-body-s">{{ job.lease.counterparty }}{% if job.lease.counterparty.phone %}<br>{{ job.lease.counterparty.phone }}{% endif %}</p>{% endif %}
+  {% if job.contractor %}<h2 class="govuk-heading-s">{% translate "Contractor" %}</h2><p class="govuk-body-s">{{ job.contractor }}{% if job.contractor.phone %}<br>{{ job.contractor.phone }}{% endif %}{% if job.contractor.emergency_phone %}<br>{% translate "Out of hours:" %} {{ job.contractor.emergency_phone }}{% endif %}</p>{% endif %}
+</div>
+</div>
+{% endblock %}

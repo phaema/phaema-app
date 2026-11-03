@@ -1,0 +1,17 @@
+{% extends "base.html" %}{% load i18n humanize %}
+{% block title %}{% translate "Contractors" %}{% endblock %}
+{% block help_page %}maintenance{% endblock %}
+{% block content %}
+<h1 class="govuk-heading-xl govuk-!-margin-bottom-4">{% translate "Contractors" %}</h1>
+{% include "maintenance/_nav.html" %}
+{% if is_administrator %}<p class="govuk-body"><a class="govuk-link" href="{% url 'admin:maintenance_contractor_add' %}">{% translate "Add a contractor" %}</a></p>{% endif %}
+<table class="govuk-table">
+  <thead class="govuk-table__head"><tr class="govuk-table__row"><th scope="col" class="govuk-table__header">{% translate "Contractor" %}</th><th scope="col" class="govuk-table__header">{% translate "Approved" %}</th><th scope="col" class="govuk-table__header">{% translate "Insurance" %}</th><th scope="col" class="govuk-table__header govuk-table__header--numeric">{% translate "Open orders" %}</th></tr></thead>
+  <tbody class="govuk-table__body">{% for c in contractors %}<tr class="govuk-table__row">
+    <td class="govuk-table__cell"><a class="govuk-link" href="{{ c.get_absolute_url }}">{{ c.name }}</a>{% if c.trades %}<br><span class="govuk-body-s">{{ c.trades }}</span>{% endif %}</td>
+    <td class="govuk-table__cell">{% if c.approved %}{% translate "Yes" %}{% else %}<strong class="govuk-tag govuk-tag--grey">{% translate "No" %}</strong>{% endif %}</td>
+    <td class="govuk-table__cell">{% if not c.insurance_expires %}<strong class="govuk-tag govuk-tag--red">{% translate "Not recorded" %}</strong>{% elif c.insurance_expires < today %}<strong class="govuk-tag govuk-tag--red">{% translate "Expired" %}</strong>{% elif c.insurance_expires <= soon %}<strong class="govuk-tag govuk-tag--orange">{{ c.insurance_expires|date:"j M Y" }}</strong>{% else %}{{ c.insurance_expires|date:"j M Y" }}{% endif %}</td>
+    <td class="govuk-table__cell govuk-table__cell--numeric">{% if c.open_jobs %}£{{ c.open_jobs|floatformat:0|intcomma }}{% else %}–{% endif %}</td>
+  </tr>{% empty %}<tr class="govuk-table__row"><td class="govuk-table__cell" colspan="4">{% translate "No contractors yet." %}</td></tr>{% endfor %}</tbody>
+</table>
+{% endblock %}

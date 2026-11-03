@@ -28,6 +28,11 @@ PHAEMA has three roles. Give each person one role in **Manage data > Users** (ti
 | Raise rent, issue credit notes, import receipts, create finance exports | ✓ | – | – |
 | See service charge schedules, years and tenant statements | ✓ | ✓ | ✓ |
 | Set up schedules, budgets and spending; approve budgets; reconcile years | ✓ | – | – |
+| See maintenance jobs, planned tasks, components, contractors and contracts | ✓ | ✓ | ✓ |
+| Report repairs | ✓ | ✓ | – |
+| Work on jobs (order, complete, recharge); add components and planned tasks | All | Properties they manage, and jobs they own | – |
+| Approve works orders over the limit | Any (not their own) | Orders from the people they supervise | – |
+| Add contractors and contracts | ✓ | – | – |
 | Module settings (OS Maps key, reminder lead times, brand colour, rent ledger) | ✓ | – | – |
 | Add users and give them roles | ✓ (not superusers) | – | – |
 | Use the API | Read and write | Read; change what they can change on screen | Read only |

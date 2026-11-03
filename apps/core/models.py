@@ -63,6 +63,9 @@ class ModuleSettings(models.Model):
     vat_code_exempt = models.CharField(_("VAT code: exempt"), max_length=10, default="E")
     service_charges_enabled = models.BooleanField(_("service charge ledger"), default=False)
     maintenance_enabled = models.BooleanField(_("maintenance"), default=False)
+    order_approval_limit = models.DecimalField(
+        _("works orders needing approval (£, over)"), max_digits=10, decimal_places=2, default=5000,
+        help_text=_("Works orders estimated above this need the job owner's supervisor to approve them."))
     compliance_enabled = models.BooleanField(_("compliance"), default=True)
     golden_thread_enabled = models.BooleanField(_("Golden Thread"), default=True)
 

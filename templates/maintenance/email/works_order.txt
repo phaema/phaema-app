@@ -1,0 +1,22 @@
+{% autoescape off %}WORKS ORDER {{ job.reference }}{% if job.po_number %}  (purchase order {{ job.po_number }}){% endif %}
+{{ settings.organisation_name }}
+
+To: {{ job.contractor }}
+Issued: {{ job.ordered_on|date:"j F Y" }}
+Priority: {{ job.get_priority_display }}{% if job.target_date %}
+Complete by: {{ job.target_date|date:"j F Y" }}{% endif %}
+
+Property: {{ job.property.reference }} {{ job.property.name }}{% if job.property.address %}
+{{ job.property.address }}{% endif %}{% if job.component %}
+Component: {{ job.component.name }}{% if job.component.location %}, {{ job.component.location }}{% endif %}{% endif %}
+
+Work required:
+{{ job.title }}
+{{ job.description }}
+{% if job.estimate %}
+Agreed estimate: £{{ job.estimate|floatformat:2 }} plus VAT. Do not exceed it without written approval.
+{% endif %}
+Quote the works order number on your invoice, and send photographs and any certificates with it.
+{% if job.owner %}
+Contact: {{ job.owner.get_full_name|default:job.owner.username }}{% if job.owner.email %}, {{ job.owner.email }}{% endif %}
+{% endif %}{% endautoescape %}

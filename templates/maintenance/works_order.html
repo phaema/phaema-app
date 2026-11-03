@@ -1,0 +1,19 @@
+{% extends "base.html" %}{% load i18n humanize %}
+{% block title %}{% translate "Works order" %} {{ job.reference }}{% endblock %}
+{% block help_page %}maintenance{% endblock %}
+{% block content %}
+<p class="govuk-body govuk-!-display-none-print"><a class="govuk-link" href="{{ job.get_absolute_url }}">{% translate "Back to the job" %}</a> · <a class="govuk-link" href="javascript:window.print()">{% translate "Print" %}</a></p>
+<p class="govuk-body govuk-!-margin-bottom-1">{{ settings.organisation_name }}</p>
+<h1 class="govuk-heading-l">{% translate "Works order" %} {{ job.reference }}</h1>
+<dl class="govuk-summary-list">
+  <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "To" %}</dt><dd class="govuk-summary-list__value">{{ job.contractor }}{% if job.contractor.address %}<br>{{ job.contractor.address|linebreaksbr }}{% endif %}</dd></div>
+  <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Issued" %}</dt><dd class="govuk-summary-list__value">{{ job.ordered_on|date:"j F Y"|default:"–" }}</dd></div>
+  {% if job.po_number %}<div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Purchase order" %}</dt><dd class="govuk-summary-list__value">{{ job.po_number }}</dd></div>{% endif %}
+  <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Priority" %}</dt><dd class="govuk-summary-list__value">{{ job.get_priority_display }}{% if job.target_date %}<br>{% translate "Complete by" %} <strong>{{ job.target_date|date:"j F Y" }}</strong>{% endif %}</dd></div>
+  <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Property" %}</dt><dd class="govuk-summary-list__value">{{ job.property.reference }} {{ job.property.name }}{% if job.property.address %}<br>{{ job.property.address }}{% endif %}{% if job.component %}<br>{% translate "Component:" %} {{ job.component.name }}{% if job.component.location %}, {{ job.component.location }}{% endif %}{% endif %}</dd></div>
+  <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Work required" %}</dt><dd class="govuk-summary-list__value"><strong>{{ job.title }}</strong>{% if job.description %}<br>{{ job.description|linebreaksbr }}{% endif %}</dd></div>
+  {% if job.estimate %}<div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Agreed estimate" %}</dt><dd class="govuk-summary-list__value">£{{ job.estimate|floatformat:2|intcomma }} {% translate "plus VAT. Do not exceed it without written approval." %}</dd></div>{% endif %}
+  {% if job.owner %}<div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Contact" %}</dt><dd class="govuk-summary-list__value">{{ job.owner.get_full_name|default:job.owner.username }}{% if job.owner.email %}, {{ job.owner.email }}{% endif %}</dd></div>{% endif %}
+</dl>
+<p class="govuk-body">{% translate "Quote the works order number on your invoice, and send photographs and any certificates with it." %}</p>
+{% endblock %}

@@ -418,6 +418,134 @@ def _case_fields():
     ]
 
 
+def _jobs():
+    from apps.maintenance.models import Job
+
+    return Job.objects.select_related("property", "contractor", "owner", "lease", "recharge")
+
+
+def _job_fields():
+    from apps.maintenance.models import Job as J
+
+    return [
+        Field("reference", "Job", getter=lambda j: j.reference, default=True),
+        Field("title", "What needs doing", path="title", default=True),
+        Field("property", "Property", path="property__reference", default=True),
+        Field("property_name", "Property name", path="property__name"),
+        Field("category", "Category", "choice", "category", choices=_choices(J, "category")),
+        Field("priority", "Priority", "choice", "priority", choices=_choices(J, "priority"), default=True),
+        Field("status", "Status", "choice", "status", choices=_choices(J, "status"), default=True),
+        Field("reported_on", "Reported", "date", "reported_on", default=True),
+        Field("target_date", "Target", "date", "target_date", default=True),
+        Field("contractor", "Contractor", path="contractor__name", default=True),
+        Field("responsibility", "Who pays", "choice", "responsibility", choices=_choices(J, "responsibility")),
+        Field("estimate", "Estimate £", "money", "estimate"),
+        Field("ordered_on", "Order issued", "date", "ordered_on"),
+        Field("po_number", "Purchase order", path="po_number"),
+        Field("completed_on", "Completed", "date", "completed_on"),
+        Field("actual_cost", "Final cost £", "money", "actual_cost"),
+        Field("invoice_reference", "Contractor's invoice", path="invoice_reference"),
+        Field("lease", "Agreement", path="lease__reference"),
+        Field("recharged", "Recharge invoice", getter=lambda j: j.recharge.reference if j.recharge else ""),
+        Field("owner", "Owner", "user", "owner"),
+    ]
+
+
+def _components():
+    from apps.maintenance.models import Component
+
+    return Component.objects.select_related("property")
+
+
+def _component_fields():
+    from apps.maintenance.models import Component as C
+
+    return [
+        Field("property", "Property", path="property__reference", default=True),
+        Field("property_name", "Property name", path="property__name"),
+        Field("name", "Component", path="name", default=True),
+        Field("category", "Category", "choice", "category", choices=_choices(C, "category"), default=True),
+        Field("location", "Location", path="location"),
+        Field("uniclass", "Uniclass 2015", path="uniclass"),
+        Field("nrm3", "NRM3 element", path="nrm3"),
+        Field("quantity", "Quantity", "number", "quantity"),
+        Field("unit", "Unit", path="unit"),
+        Field("installed_year", "Installed", "number", "installed_year"),
+        Field("life_years", "Expected life (years)", "number", "life_years"),
+        Field("replace_year", "Replace in", "number", getter=lambda c: c.replace_year, default=True),
+        Field("condition", "Condition", "choice", "condition", choices=_choices(C, "condition"), default=True),
+        Field("condition_on", "Condition assessed", "date", "condition_on"),
+        Field("replacement_cost", "Replacement cost £", "money", "replacement_cost", default=True),
+        Field("capital", "Capital", "bool", "capital"),
+    ]
+
+
+def _planned():
+    from apps.maintenance.models import PlannedTask
+
+    return PlannedTask.objects.filter(active=True).select_related("property", "contractor")
+
+
+def _planned_fields():
+    from apps.maintenance.models import PlannedTask as P
+
+    return [
+        Field("title", "Task", path="title", default=True),
+        Field("property", "Property", path="property__reference", default=True),
+        Field("property_name", "Property name", path="property__name"),
+        Field("category", "Category", "choice", "category", choices=_choices(P, "category")),
+        Field("statutory", "Statutory", "bool", "statutory", default=True),
+        Field("regulation", "Law or standard", path="regulation"),
+        Field("frequency_months", "Every (months)", "number", "frequency_months", default=True),
+        Field("last_done", "Last done", "date", "last_done", default=True),
+        Field("next_due", "Next due", "date", "next_due", default=True),
+        Field("contractor", "Contractor", path="contractor__name", default=True),
+        Field("estimated_cost", "Estimated cost £", "money", "estimated_cost"),
+    ]
+
+
+def _contracts():
+    from apps.maintenance.models import Contract
+
+    return Contract.objects.select_related("contractor").prefetch_related("properties")
+
+
+def _contract_fields():
+    return [
+        Field("title", "Contract", path="title", default=True),
+        Field("contractor", "Contractor", path="contractor__name", default=True),
+        Field("reference", "Reference", path="reference"),
+        Field("starts", "Starts", "date", "starts", default=True),
+        Field("ends", "Ends", "date", "ends", default=True),
+        Field("annual_value", "A year £", "money", "annual_value", default=True),
+        Field("last_tested", "Last tendered or benchmarked", "date", "last_tested"),
+        Field("retender_due", "Re-tender or benchmark by", "date", "retender_due", default=True),
+        Field("service_charge", "Service charge", "bool", "service_charge"),
+        Field("properties", "Properties", getter=lambda c: ", ".join(p.reference for p in c.properties.all())),
+    ]
+
+
+def _contractors():
+    from apps.maintenance.models import Contractor
+
+    return Contractor.objects.all()
+
+
+def _contractor_fields():
+    return [
+        Field("name", "Contractor", path="name", default=True),
+        Field("trades", "Trades", path="trades", default=True),
+        Field("approved", "Approved list", "bool", "approved", default=True),
+        Field("email", "Email", path="email"),
+        Field("phone", "Phone", path="phone"),
+        Field("insurer", "Insurer", path="insurer"),
+        Field("public_liability", "Public liability £", "money", "public_liability"),
+        Field("insurance_expires", "Insurance expires", "date", "insurance_expires", default=True),
+        Field("accreditations", "Accreditations", path="accreditations"),
+        Field("active", "Active", "bool", "active"),
+    ]
+
+
 def _titles():
     from apps.properties.models import Title
 
@@ -480,6 +608,16 @@ def registry():
             Dataset("rent_accounts", "Rent accounts", "Each agreement's rent balance, overdue rent by age and "
                     "last payment.", _rent_accounts, _rent_account_fields()),
             Dataset("cases", "Cases", "Consents, lease events, enquiries and other estate work.", _cases, _case_fields()),
+            Dataset("jobs", "Maintenance jobs", "Reactive and planned repairs, works orders and their costs.",
+                    _jobs, _job_fields()),
+            Dataset("components", "Components", "The component register: building elements, plant and systems.",
+                    _components, _component_fields()),
+            Dataset("planned", "Planned maintenance", "Planned and statutory maintenance tasks and when they are due.",
+                    _planned, _planned_fields()),
+            Dataset("contracts", "Maintenance contracts", "Service contracts and their re-tender dates.",
+                    _contracts, _contract_fields()),
+            Dataset("contractors", "Contractors", "Contractors, their insurance and accreditations.",
+                    _contractors, _contractor_fields()),
             Dataset("titles", "Titles", "Registered and unregistered titles.", _titles, _title_fields()),
             Dataset("changes", "Change log", "Every change made in PHAEMA.", _audit, _audit_fields()),
         ]}
