@@ -26,8 +26,18 @@
         <a href="{% url 'leases:list' %}">{% translate "Leases" %}</a>
         <a href="{% url 'leases:events' %}">{% translate "Events" %}</a>
         <a href="{% url 'cases:list' %}">{% translate "Cases" %}</a>
-        {% if modules.rent_ledger_enabled %}<a href="{% url 'ledger:home' %}">{% translate "Rents" %}</a>{% endif %}
-        {% if modules.service_charges_enabled %}<a href="{% url 'servicecharges:list' %}">{% translate "Service charges" %}</a>{% endif %}
+        {% if modules.rent_ledger_enabled and modules.service_charges_enabled %}<details class="phaema-menu"><summary>{% translate "Income" %}</summary><div class="phaema-menu__panel">
+          <a href="{% url 'ledger:home' %}">{% translate "Rents" %}</a>
+          <a href="{% url 'ledger:arrears' %}">{% translate "Arrears" %}</a>
+          <a href="{% url 'servicecharges:list' %}">{% translate "Service charges" %}</a></div></details>
+        {% elif modules.rent_ledger_enabled %}<a href="{% url 'ledger:home' %}">{% translate "Rents" %}</a>
+        {% elif modules.service_charges_enabled %}<a href="{% url 'servicecharges:list' %}">{% translate "Service charges" %}</a>{% endif %}
+        {% if modules.maintenance_enabled %}<details class="phaema-menu"><summary>{% translate "Maintenance" %}</summary><div class="phaema-menu__panel">
+          <a href="{% url 'maintenance:home' %}">{% translate "Overview" %}</a>
+          <a href="{% url 'maintenance:jobs' %}">{% translate "Jobs" %}</a>
+          <a href="{% url 'maintenance:planned' %}">{% translate "Planned maintenance" %}</a>
+          <a href="{% url 'maintenance:components' %}">{% translate "Components" %}</a>
+          <a href="{% url 'maintenance:contractors' %}">{% translate "Contractors" %}</a></div></details>{% endif %}
         <a href="{% url 'reports:list' %}">{% translate "Reports" %}</a>
         <a href="{% url 'changes' %}">{% translate "Changes" %}</a>
         {% if is_administrator %}<a href="{% url 'imports:hub' %}">{% translate "Import" %}</a>{% endif %}

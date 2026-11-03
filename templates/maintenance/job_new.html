@@ -1,0 +1,14 @@
+{% extends "base.html" %}{% load i18n %}
+{% block title %}{% translate "Report a repair" %}{% endblock %}
+{% block help_page %}maintenance{% endblock %}
+{% block content %}
+<h1 class="govuk-heading-l">{% translate "Report a repair" %}</h1>
+<div class="govuk-grid-row"><div class="govuk-grid-column-two-thirds">
+<p class="govuk-body">{% translate "PHAEMA works out who pays from the lease repairing terms, and sets the target from the priority. You can change both on the job." %}</p>
+<form method="post" novalidate>{% csrf_token %}
+  {% include "core/_form_errors.html" %}
+  {% for field in form %}{% include "core/_field.html" %}{% endfor %}
+  <button class="govuk-button" data-module="govuk-button">{% translate "Raise the job" %}</button>
+</form>
+</div></div>
+{% endblock %}

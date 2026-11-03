@@ -1,0 +1,36 @@
+{% extends "base.html" %}{% load i18n humanize phaema %}
+{% block title %}{% translate "Maintenance" %}{% endblock %}
+{% block help_page %}maintenance{% endblock %}
+{% block content %}
+<h1 class="govuk-heading-xl govuk-!-margin-bottom-4">{% translate "Maintenance" %}</h1>
+{% include "maintenance/_nav.html" %}
+{% if can_raise %}<a class="govuk-button" href="{% url 'maintenance:job-new' %}" data-module="govuk-button">{% translate "Report a repair" %}</a>{% endif %}
+{% if to_approve %}<div class="govuk-inset-text govuk-!-margin-top-0"><strong>{% translate "Works orders waiting for your approval" %}</strong>
+  <ul class="govuk-list">{% for j in to_approve %}<li><a class="govuk-link" href="{{ j.get_absolute_url }}">{{ j.reference }}</a>: {{ j.title }}, £{{ j.estimate|floatformat:2|intcomma }}</li>{% endfor %}</ul></div>{% endif %}
+<div class="govuk-grid-row">
+  {% for n, label, url, alert in stats %}<div class="govuk-grid-column-one-quarter"><div class="phaema-stat"{% if alert and n %} style="border-color:#d4351c"{% endif %}>
+    <span class="phaema-stat__value">{{ n }}</span><a class="govuk-link govuk-body" href="{{ url }}">{{ label }}</a></div></div>{% endfor %}
+</div>
+
+<h2 class="govuk-heading-m">{% translate "Emergencies and jobs past target" %}</h2>
+{% include "maintenance/_job_table.html" with jobs=urgent empty=_("None. Every open job is within its target.") %}
+
+<h2 class="govuk-heading-m">{% translate "Planned maintenance overdue" %}</h2>
+{% include "maintenance/_task_table.html" with tasks=overdue empty=_("Nothing overdue.") %}
+<h2 class="govuk-heading-m">{% translate "Due in the next 30 days" %}</h2>
+{% include "maintenance/_task_table.html" with tasks=soon empty=_("Nothing due.") %}
+
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-one-half">
+    <h2 class="govuk-heading-m">{% translate "Contracts to re-tender or benchmark" %}</h2>
+    {% include "core/_hint.html" with summary=_("Why every three years?") text=_("The RICS professional standard on service charges in commercial property expects service contracts to be re-tendered or benchmarked at least every three years. PHAEMA uses three years for every contract unless you change it.") page="maintenance" anchor="contracts" %}
+    {% if contracts %}<ul class="govuk-list">{% for c in contracts %}<li><strong class="govuk-tag govuk-tag--{% if c.retender_due < today %}red{% else %}orange{% endif %}">{{ c.retender_due|date:"M Y" }}</strong> {{ c.title }} <span class="govuk-body-s">({{ c.contractor }})</span></li>{% endfor %}</ul>
+    {% else %}<p class="govuk-body">{% translate "None in the next six months." %}</p>{% endif %}
+  </div>
+  <div class="govuk-grid-column-one-half">
+    <h2 class="govuk-heading-m">{% translate "Contractor insurance" %}</h2>
+    {% if insurance %}<ul class="govuk-list">{% for c in insurance %}<li><a class="govuk-link" href="{{ c.get_absolute_url }}">{{ c.name }}</a>: {% if c.insurance_expires %}{% if c.insurance_expires < today %}<strong class="govuk-tag govuk-tag--red">{% translate "Expired" %}</strong>{% else %}<strong class="govuk-tag govuk-tag--orange">{% translate "Expires" %} {{ c.insurance_expires|date:"j M" }}</strong>{% endif %}{% else %}<strong class="govuk-tag govuk-tag--red">{% translate "Not recorded" %}</strong>{% endif %}</li>{% endfor %}</ul>
+    {% else %}<p class="govuk-body">{% translate "All approved contractors are insured for the next 30 days." %}</p>{% endif %}
+  </div>
+</div>
+{% endblock %}

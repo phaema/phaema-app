@@ -1,0 +1,23 @@
+{% extends "base.html" %}{% load i18n humanize %}
+{% block title %}{{ contractor.name }}{% endblock %}
+{% block help_page %}maintenance{% endblock %}
+{% block content %}
+<span class="govuk-caption-l">{% translate "Contractor" %}</span>
+<h1 class="govuk-heading-l">{{ contractor.name }}</h1>
+{% include "maintenance/_nav.html" %}
+<div class="govuk-grid-row"><div class="govuk-grid-column-two-thirds">
+<dl class="govuk-summary-list">
+  <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Trades" %}</dt><dd class="govuk-summary-list__value">{{ contractor.trades|default:"–" }}</dd></div>
+  <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Contact" %}</dt><dd class="govuk-summary-list__value">{{ contractor.contact_name }}{% if contractor.email %}<br>{{ contractor.email }}{% endif %}{% if contractor.phone %}<br>{{ contractor.phone }}{% endif %}{% if contractor.emergency_phone %}<br>{% translate "Out of hours:" %} {{ contractor.emergency_phone }}{% endif %}</dd></div>
+  <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Approved list" %}</dt><dd class="govuk-summary-list__value">{% if contractor.approved %}{% translate "Yes" %}{% else %}{% translate "No" %}{% endif %}</dd></div>
+  <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Insurance" %}</dt><dd class="govuk-summary-list__value">{{ contractor.insurer|default:"–" }}{% if contractor.public_liability %}, £{{ contractor.public_liability|floatformat:0|intcomma }} {% translate "public liability" %}{% endif %}<br>{% if contractor.insurance_expires %}{% translate "Expires" %} {{ contractor.insurance_expires|date:"j M Y" }}{% if contractor.insurance_expires < today %} <strong class="govuk-tag govuk-tag--red">{% translate "Expired" %}</strong>{% endif %}{% else %}<strong class="govuk-tag govuk-tag--red">{% translate "Expiry not recorded" %}</strong>{% endif %}</dd></div>
+  <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Accreditations" %}</dt><dd class="govuk-summary-list__value">{{ contractor.accreditations|linebreaksbr|default:"–" }}</dd></div>
+  <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Spend, last 12 months" %}</dt><dd class="govuk-summary-list__value">{% if spend %}£{{ spend|floatformat:2|intcomma }}{% else %}–{% endif %}</dd></div>
+</dl>
+{% if is_administrator %}<p class="govuk-body"><a class="govuk-link" href="{% url 'admin:maintenance_contractor_change' contractor.pk %}">{% translate "Change these details" %}</a></p>{% endif %}
+<h2 class="govuk-heading-m">{% translate "Contracts" %}</h2>
+<ul class="govuk-list">{% for c in contracts %}<li>{{ c.title }} · {% translate "re-tender or benchmark by" %} {{ c.retender_due|date:"M Y" }}</li>{% empty %}<li>{% translate "None." %}</li>{% endfor %}</ul>
+<h2 class="govuk-heading-m">{% translate "Jobs" %}</h2>
+{% include "maintenance/_job_table.html" with jobs=jobs empty=_("No jobs yet.") %}
+</div></div>
+{% endblock %}

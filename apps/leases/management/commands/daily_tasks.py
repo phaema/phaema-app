@@ -22,4 +22,10 @@ class Command(BaseCommand):
             from apps.servicecharges.deadlines import send_weekly
 
             emails += send_weekly(base_url=settings.PHAEMA_BASE_URL)
-        self.stdout.write(f"Rents updated: {rents}. Cases opened: {cases}. Reminder emails sent: {emails}.")
+        jobs = 0
+        if ModuleSettings.load().maintenance_enabled:
+            from apps.maintenance.workflow import auto_raise
+
+            jobs = auto_raise()
+        self.stdout.write(f"Rents updated: {rents}. Cases opened: {cases}. Planned jobs raised: {jobs}. "
+                          f"Reminder emails sent: {emails}.")

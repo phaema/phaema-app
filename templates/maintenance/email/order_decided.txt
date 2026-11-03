@@ -1,0 +1,10 @@
+{% autoescape off %}Hello {{ user.get_full_name|default:user.username }},
+
+The works order for {{ job.reference }} ({{ job.title }}) has been {% if job.approval_status == "approved" %}approved{% else %}returned{% endif %} by {{ job.approved_by.get_full_name|default:job.approved_by.username }}.
+{% if job.approval_comments %}
+Comments: {{ job.approval_comments }}
+{% endif %}{% if base_url %}
+{{ base_url }}{{ job.get_absolute_url }}
+{% endif %}
+PHAEMA – Property Holding and Estate Management Application
+{% endautoescape %}

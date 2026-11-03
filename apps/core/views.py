@@ -62,6 +62,10 @@ def dashboard(request):
     from apps.cases.views import cases_summary
 
     context["cases"] = cases_summary(request.user)
+    if ModuleSettings.load().maintenance_enabled:
+        from apps.maintenance.workflow import summary
+
+        context["maintenance"] = summary(request.user)
     if ModuleSettings.load().service_charges_enabled:
         from apps.servicecharges.deadlines import upcoming
 

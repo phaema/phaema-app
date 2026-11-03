@@ -1,0 +1,9 @@
+{% load i18n %}<nav class="phaema-subnav govuk-!-margin-bottom-6" aria-label="{% translate 'Maintenance' %}">
+  <a class="govuk-link" href="{% url 'maintenance:home' %}"{% if section == "home" %} aria-current="page"{% endif %}>{% translate "Overview" %}</a>
+  <a class="govuk-link" href="{% url 'maintenance:jobs' %}"{% if section == "jobs" %} aria-current="page"{% endif %}>{% translate "Jobs" %}</a>
+  <a class="govuk-link" href="{% url 'maintenance:planned' %}"{% if section == "planned" %} aria-current="page"{% endif %}>{% translate "Planned maintenance" %}</a>
+  <a class="govuk-link" href="{% url 'maintenance:components' %}"{% if section == "components" %} aria-current="page"{% endif %}>{% translate "Components" %}</a>
+  <a class="govuk-link" href="{% url 'maintenance:forecast' %}"{% if section == "forecast" %} aria-current="page"{% endif %}>{% translate "Lifecycle forecast" %}</a>
+  <a class="govuk-link" href="{% url 'maintenance:contractors' %}"{% if section == "contractors" %} aria-current="page"{% endif %}>{% translate "Contractors" %}</a>
+  <a class="govuk-link" href="{% url 'maintenance:contracts' %}"{% if section == "contracts" %} aria-current="page"{% endif %}>{% translate "Contracts" %}</a>
+</nav>

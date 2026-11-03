@@ -1,0 +1,47 @@
+{% extends "base.html" %}{% load i18n humanize phaema %}
+{% block title %}{% translate "Maintenance" %}: {{ property.reference }}{% endblock %}
+{% block help_page %}maintenance{% endblock %}
+{% block breadcrumbs %}<nav class="govuk-breadcrumbs" aria-label="Breadcrumb"><ol class="govuk-breadcrumbs__list"><li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="{% url 'maintenance:home' %}">{% translate "Maintenance" %}</a></li><li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="{{ property.get_absolute_url }}">{{ property.reference }}</a></li></ol></nav>{% endblock %}
+{% block content %}
+<span class="govuk-caption-l">{% translate "Maintenance" %}</span>
+<h1 class="govuk-heading-l">{{ property.reference }} {{ property.name }}</h1>
+<p class="govuk-body"><a class="govuk-link" href="{{ property.get_absolute_url }}">{% translate "Property record" %}</a>{% if can_raise %} · <a class="govuk-link" href="{% url 'maintenance:job-new' %}?property={{ property.pk }}">{% translate "Report a repair" %}</a>{% endif %}{% if editable %} · <a class="govuk-link" href="{% url 'admin:maintenance_component_add' %}?property={{ property.pk }}">{% translate "Add a component" %}</a>{% endif %}</p>
+
+<h2 class="govuk-heading-m">{% translate "Who pays for repairs" %}</h2>
+{% include "core/_hint.html" with summary=_("How is this worked out?") text=_("From the repairing terms of the current lease of this property: full repairing leases leave repairs to the tenant; on internal repairing terms the tenant looks after the inside and the council the structure and exterior, recovered through the service charge where the lease has one. Common parts of a let building go to the service charge. Check the lease itself for anything unusual.") page="maintenance" anchor="who-pays" %}
+{% if leases %}<p class="govuk-body-s">{% translate "Current agreements:" %} {% for l in leases %}<a class="govuk-link" href="{{ l.get_absolute_url }}">{{ l.reference }}</a> ({{ l.get_repairing_display|default:_("repairing terms not recorded") }}){% if not forloop.last %}, {% endif %}{% endfor %}</p>{% endif %}
+<table class="govuk-table">
+  <thead class="govuk-table__head"><tr class="govuk-table__row"><th scope="col" class="govuk-table__header">{% translate "Repairs to" %}</th><th scope="col" class="govuk-table__header">{% translate "Who pays" %}</th></tr></thead>
+  <tbody class="govuk-table__body">{% for label, who, why in matrix %}<tr class="govuk-table__row"><td class="govuk-table__cell">{{ label }}</td><td class="govuk-table__cell"><strong>{{ who.label }}</strong><br><span class="govuk-body-s">{{ why }}</span></td></tr>{% endfor %}</tbody>
+</table>
+
+<h2 class="govuk-heading-m">{% translate "Components" %}</h2>
+{% if components %}
+<table class="govuk-table">
+  <thead class="govuk-table__head"><tr class="govuk-table__row"><th scope="col" class="govuk-table__header">{% translate "Component" %}</th><th scope="col" class="govuk-table__header">{% translate "Condition" %}</th><th scope="col" class="govuk-table__header">{% translate "Replace" %}</th><th scope="col" class="govuk-table__header govuk-table__header--numeric">{% translate "Cost" %}</th></tr></thead>
+  <tbody class="govuk-table__body">{% for c in components %}<tr class="govuk-table__row" id="component-{{ c.pk }}">
+    <td class="govuk-table__cell">{% if editable %}<a class="govuk-link" href="{% url 'admin:maintenance_component_change' c.pk %}">{{ c.name }}</a>{% else %}{{ c.name }}{% endif %}<br><span class="govuk-body-s">{{ c.get_category_display }}{% if c.location %}, {{ c.location }}{% endif %}{% if c.uniclass %} · {{ c.uniclass }}{% endif %}</span></td>
+    <td class="govuk-table__cell">{% if c.condition %}<strong class="govuk-tag govuk-tag--{% if c.condition == 'A' %}green{% elif c.condition == 'B' %}blue{% elif c.condition == 'C' %}orange{% else %}red{% endif %}">{{ c.condition }}</strong>{% if c.condition_on %} <span class="govuk-body-s">{{ c.condition_on|date:"M Y" }}</span>{% endif %}{% else %}–{% endif %}</td>
+    <td class="govuk-table__cell">{{ c.replace_year|default:"–" }}{% if c.replace_year and c.replace_year <= today.year %} <strong class="govuk-tag govuk-tag--red">{% translate "Due" %}</strong>{% endif %}</td>
+    <td class="govuk-table__cell govuk-table__cell--numeric">{% if c.replacement_cost %}£{{ c.replacement_cost|floatformat:0|intcomma }}{% else %}–{% endif %}</td>
+  </tr>{% endfor %}</tbody>
+</table>
+{% else %}<p class="govuk-body">{% translate "No components recorded yet." %}</p>{% endif %}
+
+<h2 class="govuk-heading-m" id="planned-tasks">{% translate "Planned maintenance" %}</h2>
+{% include "maintenance/_task_table.html" with tasks=tasks empty=_("No planned tasks yet.") actions=editable hide_property=True %}
+{% if editable and library %}
+<details class="govuk-details" data-module="govuk-details"{% if not tasks %} open{% endif %}><summary class="govuk-details__summary"><span class="govuk-details__summary-text">{% translate "Add tasks from the library" %}</span></summary><div class="govuk-details__text">
+<form method="post">{% csrf_token %}
+  <p class="govuk-body-s">{% translate "PHAEMA's open library of common planned and statutory tasks. Check the frequencies against your own risk assessments and the manufacturers' instructions; change them afterwards under Manage data." %}</p>
+  <div class="govuk-form-group"><fieldset class="govuk-fieldset"><legend class="govuk-visually-hidden">{% translate "Tasks" %}</legend><div class="govuk-checkboxes govuk-checkboxes--small">
+  {% for code, title, cat, months, statutory, reg in library %}<div class="govuk-checkboxes__item"><input class="govuk-checkboxes__input" id="lib-{{ code }}" name="task" type="checkbox" value="{{ code }}"><label class="govuk-label govuk-checkboxes__label" for="lib-{{ code }}">{{ title }}, {% blocktranslate count n=months %}every month{% plural %}every {{ n }} months{% endblocktranslate %}{% if statutory %} <strong class="govuk-tag govuk-tag--purple">{% translate "Statutory" %}</strong>{% endif %}{% if reg %}<br><span class="govuk-body-s">{{ reg }}</span>{% endif %}</label></div>{% endfor %}
+  </div></fieldset></div>
+  <div class="govuk-form-group"><label class="govuk-label govuk-label--s" for="first-due">{% translate "First due" %}</label><div class="govuk-hint">{% translate "Change each task's date afterwards if they differ." %}</div><input class="govuk-input govuk-input--width-10" type="date" id="first-due" name="first_due"></div>
+  <div class="govuk-form-group"><label class="govuk-label govuk-label--s" for="lib-contractor">{% translate "Contractor" %}</label><select class="govuk-select" id="lib-contractor" name="contractor"><option value="">{% translate "None yet" %}</option>{% for c in contractors %}<option value="{{ c.pk }}">{{ c.name }}</option>{% endfor %}</select></div>
+  <button class="govuk-button" data-module="govuk-button">{% translate "Add the tasks" %}</button>
+</form></div></details>{% endif %}
+
+<h2 class="govuk-heading-m">{% translate "Jobs" %}</h2>
+{% include "maintenance/_job_table.html" with jobs=jobs empty=_("No jobs yet.") %}
+{% endblock %}

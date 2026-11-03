@@ -13,6 +13,13 @@ body, .phaema-header, .phaema-stat { font-family: arial, sans-serif; }
 .phaema-header__nav a, .phaema-header__logout button { color: #fff; font: inherit; font-weight: 700; font-size: 1rem; }
 .phaema-header__nav a:focus { color: #0b0c0c; background: #fd0; outline: none; }
 .phaema-header__logout { margin: 0; }
+.phaema-menu { position: relative; }
+.phaema-menu > summary { color: #fff; font-weight: 700; font-size: 1rem; cursor: pointer; text-decoration: underline; list-style: none; }
+.phaema-menu > summary::-webkit-details-marker { display: none; }
+.phaema-menu > summary::after { content: " \25BE"; text-decoration: none; display: inline-block; margin-left: 2px; }
+.phaema-menu > summary:focus { color: #0b0c0c; background: #fd0; outline: none; }
+.phaema-menu__panel { position: absolute; z-index: 20; top: calc(100% + 6px); left: -12px; min-width: 210px; background: #1d3557; border: 1px solid #457b9d; padding: 8px 12px; display: flex; flex-direction: column; gap: 8px; box-shadow: 0 4px 10px rgba(0,0,0,.25); }
+@media (max-width: 640px) { .phaema-menu__panel { position: static; box-shadow: none; border: 0; padding: 6px 0 0 12px; } }
 .phaema-header__logout button { background: none; border: 0; padding: 0; text-decoration: underline; cursor: pointer; }
 .phaema-stat { border-left: 5px solid #1d3557; padding-left: 15px; margin-bottom: 20px; }
 .phaema-stat__value { font-size: 2.5rem; font-weight: 700; line-height: 1.1; display: block; }

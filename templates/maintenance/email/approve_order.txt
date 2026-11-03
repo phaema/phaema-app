@@ -1,0 +1,14 @@
+{% autoescape off %}Hello {{ user.get_full_name|default:user.username }},
+
+{{ job.owner.get_full_name|default:job.owner.username|default:"A colleague" }} asks you to approve a works order:
+
+{{ job.reference }}: {{ job.title }}
+{{ job.property.reference }} {{ job.property.name }}
+Contractor: {{ job.contractor|default:"not chosen yet" }}
+Estimate: £{{ job.estimate|floatformat:2 }} (net)
+Who pays: {{ job.get_responsibility_display }}
+{% if base_url %}
+Approve or return it here: {{ base_url }}{{ job.get_absolute_url }}
+{% endif %}
+PHAEMA – Property Holding and Estate Management Application
+{% endautoescape %}

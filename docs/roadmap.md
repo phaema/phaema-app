@@ -9,7 +9,7 @@
 | 4 | Rent ledger: demand runs, VAT, receipts and allocation, arrears, statements, finance export. Mid-point review | Done (review with Stuart) |
 | 5 | Service charge ledger: budgets, apportionment, on-account demands, year-end reconciliation | Done |
 | 6a | Case management engine (phase 1): case types, stages, tasks, targets, automatic lease event cases, emails, documents, fees, Contributor role | Done |
-| 6 | Maintenance: components, planned schedules, reactive jobs and works orders, contractors, recharges from lease repairing terms | |
+| 6 | Maintenance: components, planned schedules, reactive jobs and works orders, contractors, recharges from lease repairing terms | Done |
 | 7 | Compliance certificates; documents; Transparency Code open data export; Golden Thread tiers; example records | |
 | 8 | Testing, fixes, IONOS deployment scripts, installation guide, manual pages for the new modules, demo script | |
 

@@ -1,0 +1,13 @@
+{% load i18n phaema %}{% if jobs %}
+<table class="govuk-table">
+  <thead class="govuk-table__head"><tr class="govuk-table__row"><th scope="col" class="govuk-table__header">{% translate "Job" %}</th><th scope="col" class="govuk-table__header">{% translate "Property" %}</th><th scope="col" class="govuk-table__header">{% translate "Contractor" %}</th><th scope="col" class="govuk-table__header">{% translate "Target" %}</th></tr></thead>
+  <tbody class="govuk-table__body">
+  {% for j in jobs %}{% with rag=j.rag %}<tr class="govuk-table__row">
+    <td class="govuk-table__cell"><a class="govuk-link" href="{{ j.get_absolute_url }}">{{ j.reference }}</a><br><span class="govuk-body-s">{{ j.title }}</span></td>
+    <td class="govuk-table__cell"><span class="govuk-body-s">{{ j.property.reference }}<br>{{ j.property.name }}</span></td>
+    <td class="govuk-table__cell"><span class="govuk-body-s">{{ j.contractor|default:"–" }}</span></td>
+    <td class="govuk-table__cell">{% if j.target_date %}{{ j.target_date|date:"j M Y" }}<br>{% endif %}<strong class="govuk-tag govuk-tag--{{ rag.0 }}">{{ rag.1 }}</strong></td>
+  </tr>{% endwith %}{% endfor %}
+  </tbody>
+</table>
+{% else %}<p class="govuk-body">{{ empty }}</p>{% endif %}

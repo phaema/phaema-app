@@ -1,0 +1,18 @@
+{% extends "base.html" %}{% load i18n humanize %}
+{% block title %}{% translate "Contracts" %}{% endblock %}
+{% block help_page %}maintenance{% endblock %}
+{% block content %}
+<h1 class="govuk-heading-xl govuk-!-margin-bottom-4">{% translate "Contracts" %}</h1>
+{% include "maintenance/_nav.html" %}
+{% include "core/_hint.html" with summary=_("Why the re-tender dates?") text=_("The RICS professional standard on service charges in commercial property expects service contracts to be re-tendered or benchmarked at least every three years, so tenants pay a fair price.") page="maintenance" anchor="contracts" %}
+{% if is_administrator %}<p class="govuk-body"><a class="govuk-link" href="{% url 'admin:maintenance_contract_add' %}">{% translate "Add a contract" %}</a></p>{% endif %}
+<table class="govuk-table">
+  <thead class="govuk-table__head"><tr class="govuk-table__row"><th scope="col" class="govuk-table__header">{% translate "Contract" %}</th><th scope="col" class="govuk-table__header">{% translate "Term" %}</th><th scope="col" class="govuk-table__header govuk-table__header--numeric">{% translate "A year" %}</th><th scope="col" class="govuk-table__header">{% translate "Re-tender or benchmark by" %}</th></tr></thead>
+  <tbody class="govuk-table__body">{% for c in contracts %}<tr class="govuk-table__row" id="contract-{{ c.pk }}">
+    <td class="govuk-table__cell">{% if is_administrator %}<a class="govuk-link" href="{% url 'admin:maintenance_contract_change' c.pk %}">{{ c.title }}</a>{% else %}{{ c.title }}{% endif %}<br><span class="govuk-body-s"><a class="govuk-link" href="{{ c.contractor.get_absolute_url }}">{{ c.contractor }}</a>{% if c.service_charge %} · {% translate "service charge" %}{% endif %}{% with n=c.properties.count %}{% if n %} · {% blocktranslate count n=n %}{{ n }} property{% plural %}{{ n }} properties{% endblocktranslate %}{% endif %}{% endwith %}</span></td>
+    <td class="govuk-table__cell govuk-body-s">{{ c.starts|date:"j M Y" }}{% if c.ends %} – {{ c.ends|date:"j M Y" }}{% endif %}</td>
+    <td class="govuk-table__cell govuk-table__cell--numeric">{% if c.annual_value %}£{{ c.annual_value|floatformat:0|intcomma }}{% else %}–{% endif %}</td>
+    <td class="govuk-table__cell">{{ c.retender_due|date:"M Y" }}{% if c.retender_due < today %} <strong class="govuk-tag govuk-tag--red">{% translate "Overdue" %}</strong>{% elif c.retender_due <= soon %} <strong class="govuk-tag govuk-tag--orange">{% translate "Soon" %}</strong>{% endif %}</td>
+  </tr>{% empty %}<tr class="govuk-table__row"><td class="govuk-table__cell" colspan="4">{% translate "No contracts yet." %}</td></tr>{% endfor %}</tbody>
+</table>
+{% endblock %}
