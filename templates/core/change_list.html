@@ -1,0 +1,37 @@
+{% extends "base.html" %}{% load i18n %}
+{% block title %}{% translate "Changes" %}{% endblock %}
+{% block content %}
+<h1 class="govuk-heading-xl">{% translate "Change log" %}</h1>
+<p class="govuk-body">{% translate "Every change to PHAEMA records is logged here and cannot be edited or deleted." %}</p>
+<form method="get" class="phaema-filters">
+  <div class="govuk-form-group">
+    <label class="govuk-label govuk-label--s" for="user">{% translate "Changed by" %}</label>
+    <select class="govuk-select" id="user" name="user">
+      <option value="">{% translate "Anyone" %}</option>
+      {% for u in users %}<option value="{{ u.pk }}"{% if selected_user == u.pk|stringformat:"s" %} selected{% endif %}>{{ u.get_full_name|default:u.username }}</option>{% endfor %}
+      <option value="system"{% if selected_user == "system" %} selected{% endif %}>{% translate "System (import or script)" %}</option>
+    </select>
+  </div>
+  <button class="govuk-button govuk-!-margin-bottom-0" data-module="govuk-button">{% translate "Apply" %}</button>
+</form>
+<table class="govuk-table">
+  <thead class="govuk-table__head"><tr class="govuk-table__row">
+    <th scope="col" class="govuk-table__header">{% translate "When" %}</th>
+    <th scope="col" class="govuk-table__header">{% translate "Who" %}</th>
+    <th scope="col" class="govuk-table__header">{% translate "What" %}</th>
+    <th scope="col" class="govuk-table__header">{% translate "Record" %}</th>
+    <th scope="col" class="govuk-table__header"><span class="govuk-visually-hidden">{% translate "Details" %}</span></th>
+  </tr></thead>
+  <tbody class="govuk-table__body">
+  {% for e in page_obj.object_list %}{% include "core/_change_row.html" %}{% empty %}
+  <tr class="govuk-table__row"><td class="govuk-table__cell" colspan="5">{% translate "No changes found." %}</td></tr>{% endfor %}
+  </tbody>
+</table>
+{% if page_obj.has_other_pages %}
+<nav class="govuk-pagination" aria-label="{% translate 'Pagination' %}">
+  {% if page_obj.has_previous %}<div class="govuk-pagination__prev"><a class="govuk-link govuk-pagination__link" href="?user={{ selected_user }}&amp;page={{ page_obj.previous_page_number }}" rel="prev"><span class="govuk-pagination__link-title">{% translate "Previous" %}</span></a></div>{% endif %}
+  <p class="govuk-body govuk-!-margin-0">{% blocktranslate with n=page_obj.number total=page_obj.paginator.num_pages %}Page {{ n }} of {{ total }}{% endblocktranslate %}</p>
+  {% if page_obj.has_next %}<div class="govuk-pagination__next"><a class="govuk-link govuk-pagination__link" href="?user={{ selected_user }}&amp;page={{ page_obj.next_page_number }}" rel="next"><span class="govuk-pagination__link-title">{% translate "Next" %}</span></a></div>{% endif %}
+</nav>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,7 @@
+{% load i18n phaema %}<tr class="govuk-table__row">
+  <td class="govuk-table__cell">{{ e.timestamp|date:"j M Y" }}<br><span class="govuk-body-s">{{ e.timestamp|date:"H:i" }}</span></td>
+  <td class="govuk-table__cell">{% if e.user %}{{ e.user.get_full_name|default:e.user.username }}{% else %}<span class="govuk-body-s">{% translate "System (import or script)" %}</span>{% endif %}</td>
+  <td class="govuk-table__cell">{{ e.get_action_display }} {{ e.content_type.name }}{% if e.action == "update" %}<br><span class="govuk-body-s">{{ e|field_labels }}</span>{% endif %}</td>
+  <td class="govuk-table__cell">{% if e.target_url %}<a class="govuk-link" href="{{ e.target_url }}">{{ e.object_repr }}</a>{% else %}{{ e.object_repr }}{% endif %}</td>
+  <td class="govuk-table__cell"><a class="govuk-link" href="{% url 'change' e.pk %}">{% translate "View change" %}<span class="govuk-visually-hidden"> {{ e.object_repr }}</span></a></td>
+</tr>

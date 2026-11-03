@@ -11,12 +11,17 @@ so the map has somewhere to show it.
 """
 from decimal import Decimal
 
+from datetime import date
+
+from django.contrib.auth import get_user_model
 from django.contrib.gis.geos import MultiPolygon, Polygon
+from django.core.files.base import ContentFile
 from django.core.management.base import BaseCommand
 from django.db import transaction
 
 from apps.core.models import ModuleSettings
-from apps.properties.models import Property, Title
+from apps.properties.demo_media import placeholder_pdf, placeholder_photo
+from apps.properties.models import Property, PropertyPhoto, Title, TitleDocument
 
 PREFIX = "DM-"
 TITLE_PREFIX = "ZZ"
@@ -68,7 +73,7 @@ def build_records():
         add(bref, f"Unit block {block}", "building", "DM-E01", holding_purpose="investment", tenure="freehold",
             occupation="part_let", use_description="Light industrial", use_class="E(g)(iii)",
             address_line_1=f"Block {block}, Riverside Way", postcode="ZZ99 1RE",
-            gia_sqm=Decimal(sum(u[2] for u in units)) * Decimal("1.05"), boundary=rect(bx, by, width, 60))
+            gia_sqm=Decimal(sum(u[2] for u in units)) * Decimal("1.12"), boundary=rect(bx, by, width, 60))
         for i, (num, occ, nia) in enumerate(units):
             add(f"DM-E01-U0{num}", f"Unit {num}", "unit", bref, uprn=uprn(), holding_purpose="investment",
                 tenure="freehold", occupation=occ, use_description="Light industrial / storage",
@@ -95,6 +100,7 @@ def build_records():
             holding_purpose="investment", tenure="freehold", occupation=occ, use_description=use,
             use_class="Sui generis" if use == "Takeaway" else "E(a)" if use == "Shop" else "E(b)" if use == "Café" else "E(c)",
             address_line_1=f"{num} Market Square", postcode="ZZ99 1MS", nia_sqm=Decimal(nia),
+            gia_sqm=Decimal(nia) * Decimal("1.10"),
             boundary=rect(600 + 20 * i, 400, 20, 25))
     add("DM-S01-U07", "First floor offices, 1–6 Market Square", "unit", "DM-S01-B01", uprn=uprn(),
         holding_purpose="investment", tenure="freehold", occupation="let", use_description="Office",
@@ -155,7 +161,7 @@ def build_records():
         add(f"DM-S07-U0{i}", f"Suite {i}, Enterprise Centre", "unit", "DM-S07", uprn=uprn(),
             holding_purpose="investment", tenure="leasehold", occupation=occ, use_description="Office suite",
             use_class="E(g)(i)", address_line_1=f"Suite {i}, Enterprise Way", postcode="ZZ99 6EW",
-            nia_sqm=Decimal(nia))
+            nia_sqm=Decimal(nia), gia_sqm=Decimal(nia) * Decimal("1.08"))
     return records
 
 
@@ -188,6 +194,48 @@ TITLES = [
      "restrictions_and_covenants": "125-year ground lease from 2004; landlord's consent needed to assign the head lease.",
      "refs": ["DM-S07"]},
 ]
+
+
+# Fictional managing surveyors. They cannot sign in (no password is set).
+SURVEYORS = {
+    "demo.amorgan": ("Alex", "Morgan"),
+    "demo.pshah": ("Priya", "Shah"),
+    "demo.ojones": ("Owen", "Jones"),
+}
+# Which surveyor manages which demo property (children inherit unless listed).
+ASSIGNMENTS = {
+    "DM-E01": "demo.amorgan", "DM-S11": "demo.amorgan", "DM-S07": "demo.amorgan",
+    "DM-S01": "demo.pshah", "DM-S05": "demo.pshah", "DM-S08": "demo.pshah",
+    "DM-S02": "demo.ojones", "DM-S03": "demo.ojones", "DM-S04": "demo.ojones", "DM-S09": "demo.ojones",
+    # DM-S06 and DM-S10 are left unassigned to show the "Unassigned" filter.
+}
+
+PHOTOS = {
+    "DM-E01": [("Riverside Industrial Estate from the entrance", "industrial")],
+    "DM-E01-U03": [("Unit 3 front elevation", "industrial"), ("Unit 3 loading door", "industrial"),
+                   ("Unit 3 yard", "industrial")],
+    "DM-S01-B01": [("1–6 Market Square from the square", "retail"), ("Shop fronts, east end", "retail"),
+                   ("Shop fronts, west end", "retail")],
+    "DM-S02": [("Town Hall front elevation", "civic"), ("Town Hall from High Street", "civic")],
+    "DM-S06": [("Former Oak Street school site from Oak Street", "land")],
+}
+
+DOCUMENTS = {
+    "ZZ100001": [
+        ("register", "Official copy of the register", date(2026, 3, 14), [
+            "Title number ZZ100001", "Property: Riverside Industrial Estate, Riverside Way, Exampleton ZZ99 1RE",
+            "Proprietor: Demonstration District Council", "Class of title: Title absolute",
+            "Charges register: Restrictive covenant against use as a scrap metal yard (conveyance 1968)."]),
+        ("plan", "Title plan", date(2026, 3, 14), [
+            "Title number ZZ100001", "Title plan placeholder: boundaries shown in the PHAEMA map."]),
+    ],
+    "ZZ200001": [
+        ("lease", "Ground lease of the Enterprise Centre", date(2004, 6, 24), [
+            "Lease dated 24 June 2004", "Landlord: Exampleton Estates (fictional)",
+            "Tenant: Demonstration District Council", "Term: 125 years from 24 June 2004",
+            "Rent: peppercorn", "Alienation: landlord's consent needed to assign the whole."]),
+    ],
+}
 
 
 class Command(BaseCommand):
@@ -229,6 +277,10 @@ class Command(BaseCommand):
                     title = Title.objects.create(**spec)
             title.properties.set(linked)
 
+        self.load_surveyors(refs)
+        self.load_photos(refs)
+        self.load_documents()
+
         modules = ModuleSettings.load()
         if not modules.organisation_name:
             modules.organisation_name = ORG_NAME
@@ -237,6 +289,51 @@ class Command(BaseCommand):
         self.stdout.write(self.style.SUCCESS(
             f"Demo data loaded: {created} properties added, {updated} refreshed, {len(TITLES)} titles."
         ))
+
+    def load_surveyors(self, refs):
+        User = get_user_model()
+        users = {}
+        for username, (first, last) in SURVEYORS.items():
+            user, created = User.objects.get_or_create(
+                username=username,
+                defaults={"first_name": first, "last_name": last, "email": f"{username}@example.org"},
+            )
+            if created:
+                user.set_unusable_password()
+                user.save()
+            users[username] = user
+        for ref, prop in refs.items():
+            # Use the nearest listed ancestor's surveyor, so units follow their estate.
+            node, username = prop, None
+            while node is not None and username is None:
+                username = ASSIGNMENTS.get(node.reference)
+                node = refs.get(node.parent.reference) if node.parent_id else None
+            surveyor = users.get(username)
+            if prop.managing_surveyor_id != (surveyor.pk if surveyor else None):
+                prop.managing_surveyor = surveyor
+                prop.save(update_fields=["managing_surveyor", "updated_at"])
+
+    def load_photos(self, refs):
+        for ref, photos in PHOTOS.items():
+            prop = refs[ref]
+            if prop.photos.exists():
+                continue  # keep any photos already there
+            for i, (caption, style) in enumerate(photos):
+                PropertyPhoto.objects.create(
+                    property=prop, caption=caption, is_main=(i == 0), order=i, taken_on=date(2026, 9, 1 + i),
+                    image=ContentFile(placeholder_photo(caption, style, i), name="demo.png"),
+                )
+
+    def load_documents(self):
+        for number, docs in DOCUMENTS.items():
+            title = Title.objects.get(title_number=number)
+            if title.documents.exists():
+                continue
+            for doc_type, description, doc_date, lines in docs:
+                TitleDocument.objects.create(
+                    title=title, document_type=doc_type, description=description, document_date=doc_date,
+                    file=ContentFile(placeholder_pdf(f"{description} - {number}", lines), name=f"{number}-{doc_type}.pdf"),
+                )
 
     def remove_demo_data(self):
         demo = Property.objects.filter(reference__startswith=PREFIX)
@@ -252,4 +349,5 @@ class Command(BaseCommand):
             for p in Property.objects.filter(pk__in=ids):
                 p.delete()
                 removed += 1
+        get_user_model().objects.filter(username__in=SURVEYORS, auditentry__isnull=True).delete()
         return removed

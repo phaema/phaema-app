@@ -1,0 +1,50 @@
+{% extends "base.html" %}{% load i18n %}
+{% block title %}{% translate "Title" %} {{ object }}{% endblock %}
+{% block breadcrumbs %}
+<nav class="govuk-breadcrumbs" aria-label="Breadcrumb"><ol class="govuk-breadcrumbs__list">
+  <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="{% url 'properties:list' %}">{% translate "Properties" %}</a></li>
+  <li class="govuk-breadcrumbs__list-item">{% translate "Title" %} {{ object }}</li>
+</ol></nav>
+{% endblock %}
+{% block content %}
+<span class="govuk-caption-l">{% translate "Title" %}</span>
+<h1 class="govuk-heading-xl">{{ object }}</h1>
+{% if user.is_staff %}<p class="govuk-body"><a class="govuk-link" href="{% url 'admin:properties_title_change' object.pk %}">{% translate "Edit this title or add documents" %}</a></p>{% endif %}
+<div class="govuk-grid-row">
+<div class="govuk-grid-column-two-thirds">
+  <dl class="govuk-summary-list">
+    <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Tenure" %}</dt><dd class="govuk-summary-list__value">{{ object.get_tenure_display }}</dd></div>
+    <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Class of title" %}</dt><dd class="govuk-summary-list__value">{{ object.get_title_class_display|default:"–" }}</dd></div>
+    <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Deeds location" %}</dt><dd class="govuk-summary-list__value">{{ object.deeds_location|default:"–" }}</dd></div>
+    <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Restrictions, covenants and rights" %}</dt><dd class="govuk-summary-list__value">{{ object.restrictions_and_covenants|linebreaksbr|default:"–" }}</dd></div>
+    {% if object.notes %}<div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Notes" %}</dt><dd class="govuk-summary-list__value">{{ object.notes|linebreaksbr }}</dd></div>{% endif %}
+  </dl>
+
+  <h2 class="govuk-heading-m">{% translate "Documents" %}</h2>
+  {% with docs=object.documents.all %}
+  {% if docs %}
+  <table class="govuk-table">
+    <thead class="govuk-table__head"><tr class="govuk-table__row">
+      <th scope="col" class="govuk-table__header">{% translate "Document" %}</th>
+      <th scope="col" class="govuk-table__header">{% translate "Type" %}</th>
+      <th scope="col" class="govuk-table__header">{% translate "Date" %}</th>
+    </tr></thead>
+    <tbody class="govuk-table__body">
+    {% for d in docs %}
+      <tr class="govuk-table__row">
+        <td class="govuk-table__cell"><a class="govuk-link" href="{{ d.file.url }}" target="_blank" rel="noopener">{{ d.description|default:d.get_document_type_display }} (PDF, {{ d.file.size|filesizeformat }})</a></td>
+        <td class="govuk-table__cell">{{ d.get_document_type_display }}</td>
+        <td class="govuk-table__cell">{{ d.document_date|date:"j M Y"|default:"–" }}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  {% else %}<p class="govuk-body">{% translate "No documents stored." %}</p>{% endif %}
+  {% endwith %}
+</div>
+<div class="govuk-grid-column-one-third">
+  <h2 class="govuk-heading-m">{% translate "Properties" %}</h2>
+  <ul class="govuk-list">{% for p in object.properties.all %}<li><a class="govuk-link" href="{{ p.get_absolute_url }}">{{ p.reference }} {{ p.name }}</a></li>{% empty %}<li>{% translate "None linked." %}</li>{% endfor %}</ul>
+</div>
+</div>
+{% endblock %}

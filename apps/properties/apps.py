@@ -10,7 +10,17 @@ class PropertiesConfig(AppConfig):
     def ready(self):
         from apps.core import audit
 
-        from .models import Property, Title
+        from django.db.models.signals import post_delete
 
-        audit.register(Property)
-        audit.register(Title)
+        from .models import Property, PropertyPhoto, Title, TitleDocument
+
+        for model in (Property, Title, PropertyPhoto, TitleDocument):
+            audit.register(model)
+
+        def remove_file(sender, instance, **kwargs):
+            field = instance.image if sender is PropertyPhoto else instance.file
+            if field:
+                field.storage.delete(field.name)
+
+        post_delete.connect(remove_file, sender=PropertyPhoto, dispatch_uid="phaema_photo_file", weak=False)
+        post_delete.connect(remove_file, sender=TitleDocument, dispatch_uid="phaema_titledoc_file", weak=False)

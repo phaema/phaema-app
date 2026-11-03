@@ -1,39 +1,78 @@
-{% extends "base.html" %}{% load i18n %}
+{% extends "base.html" %}{% load i18n humanize %}
 {% block title %}{% translate "Dashboard" %}{% endblock %}
 {% block content %}
 <h1 class="govuk-heading-xl">{% translate "Dashboard" %}</h1>
+
 <div class="govuk-grid-row">
   <div class="govuk-grid-column-one-quarter">
-    <div class="phaema-stat"><span class="phaema-stat__value">{{ property_count }}</span><span class="govuk-body">{% translate "properties in the register" %}</span></div>
+    <div class="phaema-stat">
+      <span class="phaema-stat__value">{{ property_count }}</span>
+      <a class="govuk-link govuk-body" href="{% url 'properties:list' %}">{% translate "properties in the register" %}</a>
+    </div>
   </div>
   <div class="govuk-grid-column-one-quarter">
-    <div class="phaema-stat"><span class="phaema-stat__value">{{ vacant_count }}</span><a class="govuk-link" href="{% url 'properties:list' %}?occupation=vacant">{% translate "vacant" %}</a></div>
+    <div class="phaema-stat">
+      <span class="phaema-stat__value">{{ unit_count }}</span>
+      <a class="govuk-link govuk-body" href="{% url 'properties:list' %}?property_type=unit">{% translate "lettable units" %}</a>
+      <p class="govuk-body-s govuk-!-margin-bottom-0"><a class="govuk-link" href="{% url 'properties:list' %}?property_type=unit&amp;occupation=vacant">{% blocktranslate count n=vacant_unit_count %}{{ n }} vacant{% plural %}{{ n }} vacant{% endblocktranslate %}</a></p>
+    </div>
+  </div>
+  <div class="govuk-grid-column-one-quarter">
+    <div class="phaema-stat">
+      <span class="phaema-stat__value">{{ vacant_count }}</span>
+      <a class="govuk-link govuk-body" href="{% url 'properties:list' %}?occupation=vacant">{% translate "vacant properties" %}</a>
+      {% if vacant_buildings %}<p class="govuk-body-s govuk-!-margin-bottom-0"><a class="govuk-link" href="{% url 'properties:list' %}?property_type=building&amp;occupation=vacant">{% blocktranslate count n=vacant_buildings %}including {{ n }} whole building{% plural %}including {{ n }} whole buildings{% endblocktranslate %}</a></p>{% endif %}
+    </div>
+  </div>
+  <div class="govuk-grid-column-one-quarter">
+    <div class="phaema-stat">
+      <span class="phaema-stat__value">{% if vacancy_rate is not None %}{{ vacancy_rate }}%{% else %}–{% endif %}</span>
+      <span class="govuk-body">{% translate "vacancy by floor area (NIA)" %}</span>
+    </div>
   </div>
 </div>
 
 <div class="govuk-grid-row">
-  <div class="govuk-grid-column-one-third">
+  <div class="govuk-grid-column-one-half">
+    <h2 class="govuk-heading-m">{% translate "Vacant floor space" %}</h2>
+    <dl class="govuk-summary-list">
+      <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Vacant lettable spaces" %}</dt><dd class="govuk-summary-list__value">{{ vacant_space.n }}</dd></div>
+      <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Net internal area (NIA)" %}</dt><dd class="govuk-summary-list__value">{% if vacant_space.nia %}{{ vacant_space.nia|floatformat:0|intcomma }} m²{% else %}–{% endif %}</dd></div>
+      <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Gross internal area (GIA)" %}</dt><dd class="govuk-summary-list__value">{% if vacant_space.gia %}{{ vacant_space.gia|floatformat:0|intcomma }} m²{% else %}–{% endif %}</dd></div>
+      <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Total lettable NIA" %}</dt><dd class="govuk-summary-list__value">{% if lettable_nia %}{{ lettable_nia|floatformat:0|intcomma }} m²{% else %}–{% endif %}</dd></div>
+    </dl>
+    <p class="govuk-body-s">{% translate "Floor space is counted on the lowest-level records (units, or buildings with no units), so nothing is counted twice." %}</p>
+    {% if my_count %}<p class="govuk-body"><a class="govuk-link" href="{% url 'properties:list' %}?surveyor=me">{% blocktranslate count n=my_count %}You manage {{ n }} property{% plural %}You manage {{ n }} properties{% endblocktranslate %}</a></p>{% endif %}
+  </div>
+  <div class="govuk-grid-column-one-half">
     <h2 class="govuk-heading-m">{% translate "Register by type" %}</h2>
     {% if by_type %}
     <table class="govuk-table">
       <thead class="govuk-table__head"><tr class="govuk-table__row"><th scope="col" class="govuk-table__header">{% translate "Type" %}</th><th scope="col" class="govuk-table__header govuk-table__header--numeric">{% translate "Number" %}</th></tr></thead>
       <tbody class="govuk-table__body">
-      {% for label, n in by_type %}<tr class="govuk-table__row"><td class="govuk-table__cell">{{ label }}</td><td class="govuk-table__cell govuk-table__cell--numeric">{{ n }}</td></tr>{% endfor %}
+      {% for key, label, n in by_type %}<tr class="govuk-table__row"><td class="govuk-table__cell">{{ label }}</td><td class="govuk-table__cell govuk-table__cell--numeric"><a class="govuk-link" href="{% url 'properties:list' %}?property_type={{ key }}" aria-label="{% blocktranslate %}Show {{ n }} {{ label }} records{% endblocktranslate %}">{{ n }}</a></td></tr>{% endfor %}
       </tbody>
     </table>
     {% else %}
     <p class="govuk-body">{% translate "No properties yet." %}{% if user.is_staff %} <a class="govuk-link" href="{% url 'admin:properties_property_add' %}">{% translate "Add the first property" %}</a>.{% endif %}</p>
     {% endif %}
   </div>
-  <div class="govuk-grid-column-two-thirds">
-    <h2 class="govuk-heading-m">{% translate "Recent changes" %}</h2>
-    {% if recent_changes %}
-    <ul class="govuk-list">
-      {% for e in recent_changes %}
-      <li>{{ e.timestamp|date:"j M Y H:i" }} – {{ e.get_action_display }} {{ e.content_type.name }} <strong>{{ e.object_repr }}</strong>{% if e.user %} {% translate "by" %} {{ e.user }}{% endif %}</li>
-      {% endfor %}
-    </ul>
-    {% else %}<p class="govuk-body">{% translate "Nothing changed yet." %}</p>{% endif %}
-  </div>
 </div>
+
+<h2 class="govuk-heading-m">{% translate "Recent changes" %}</h2>
+{% if recent_changes %}
+<table class="govuk-table">
+  <thead class="govuk-table__head"><tr class="govuk-table__row">
+    <th scope="col" class="govuk-table__header">{% translate "When" %}</th>
+    <th scope="col" class="govuk-table__header">{% translate "Who" %}</th>
+    <th scope="col" class="govuk-table__header">{% translate "What" %}</th>
+    <th scope="col" class="govuk-table__header">{% translate "Record" %}</th>
+    <th scope="col" class="govuk-table__header"><span class="govuk-visually-hidden">{% translate "Details" %}</span></th>
+  </tr></thead>
+  <tbody class="govuk-table__body">
+  {% for e in recent_changes %}{% include "core/_change_row.html" %}{% endfor %}
+  </tbody>
+</table>
+<p class="govuk-body"><a class="govuk-link" href="{% url 'changes' %}">{% translate "See all changes" %}</a></p>
+{% else %}<p class="govuk-body">{% translate "Nothing changed yet." %}</p>{% endif %}
 {% endblock %}

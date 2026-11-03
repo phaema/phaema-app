@@ -9,9 +9,14 @@ PHAEMA helps a council's estates team manage its land and property: the property
 ## What works so far
 
 - Property register: estates, sites, buildings, lettable units and land parcels in a hierarchy, with UPRN, address, classification, areas, grid reference and boundary
-- Title records linked to properties
-- Search and filters, property detail pages and a dashboard
-- A full, tamper-proof audit trail of every change
+- Managing surveyor for each property, with a "My properties" and per-surveyor filter
+- Search, filters and sortable columns
+- Property pages with a photo gallery, and a breakdown of how the floor area (GIA and NIA) is made up from the parts
+- Title records with stored PDF documents (official copies, plans, deeds, leases)
+- Dashboard: lettable units, vacant floor space (NIA and GIA), vacancy rate, and links into filtered lists
+- A full, tamper-proof audit trail, with a change log showing who changed what and when, field by field
+- Adjustable text size (standard, large, largest)
+- Photos and documents are only available to signed-in users; photos are stripped of location data on upload
 - Optional modules that each council switches on or off (rent ledger, service charges, maintenance, compliance, Golden Thread)
 - An open REST API with OpenAPI documentation at `/api/docs/`
 

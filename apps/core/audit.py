@@ -1,5 +1,7 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 """Audit trail: call register(Model) to record every create, change and delete."""
+from decimal import Decimal
+
 from django.contrib.contenttypes.models import ContentType
 from django.db.models.signals import post_delete, post_save, pre_save
 
@@ -14,6 +16,9 @@ def _snapshot(instance):
         if field.name in _EXCLUDED:
             continue
         value = field.value_from_object(instance)
+        if value is not None and field.get_internal_type() == "DecimalField":
+            # Store 480 and 480.00 the same way so unchanged values are not logged as changes.
+            value = f"{Decimal(str(value)):.{field.decimal_places}f}"
         data[field.name] = None if value is None else str(value)
     return data
 
@@ -45,12 +50,14 @@ def _pre_save(sender, instance, **kwargs):
         instance._audit_before = _snapshot(old) if old else None
 
 
-def _post_save(sender, instance, created, **kwargs):
+def _post_save(sender, instance, created, update_fields=None, **kwargs):
     after = _snapshot(instance)
     if created:
         _record(instance, "create", {k: [None, v] for k, v in after.items() if v is not None})
         return
     before = getattr(instance, "_audit_before", None) or {}
+    if update_fields:
+        after = {k: v for k, v in after.items() if k in update_fields or k.removesuffix("_id") in update_fields}
     diff = {k: [before.get(k), v] for k, v in after.items() if before.get(k) != v}
     if diff:
         _record(instance, "update", diff)

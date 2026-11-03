@@ -19,21 +19,24 @@
         </select>
       </div>
       {% endfor %}
+      <div class="govuk-form-group">
+        <label class="govuk-label govuk-label--s" for="f-surveyor">{% translate "Managed by" %}</label>
+        <select class="govuk-select" id="f-surveyor" name="surveyor">
+          <option value="">{% translate "Anyone" %}</option>
+          {% for value, text in surveyor_options %}<option value="{{ value }}"{% if value == surveyor_selected %} selected{% endif %}>{{ text }}</option>{% endfor %}
+        </select>
+      </div>
+      {% if request.GET.sort %}<input type="hidden" name="sort" value="{{ request.GET.sort }}">{% endif %}
       <button class="govuk-button govuk-!-margin-bottom-2" data-module="govuk-button">{% translate "Apply" %}</button>
       <p class="govuk-body-s govuk-!-margin-bottom-0"><a class="govuk-link" href="{% url 'properties:list' %}">{% translate "Clear filters" %}</a></p>
     </form>
   </div>
   <div class="govuk-grid-column-three-quarters">
     <p class="govuk-body">{% blocktranslate count n=paginator.count %}{{ n }} property{% plural %}{{ n }} properties{% endblocktranslate %}
-      {% if user.is_staff %}· <a class="govuk-link" href="{% url 'admin:properties_property_add' %}">{% translate "Add a property" %}</a>{% endif %}</p>
+      {% if user.is_staff %}· <a class="govuk-link" href="{% url 'admin:properties_property_add' %}">{% translate "Add a property" %}</a> · <a class="govuk-link" href="{% url 'admin:properties_property_changelist' %}">{% translate "Assign surveyors" %}</a>{% endif %}</p>
     <table class="govuk-table">
       <thead class="govuk-table__head"><tr class="govuk-table__row">
-        <th scope="col" class="govuk-table__header">{% translate "Reference" %}</th>
-        <th scope="col" class="govuk-table__header">{% translate "Name" %}</th>
-        <th scope="col" class="govuk-table__header">{% translate "Type" %}</th>
-        <th scope="col" class="govuk-table__header">{% translate "Purpose" %}</th>
-        <th scope="col" class="govuk-table__header">{% translate "Occupation" %}</th>
-        <th scope="col" class="govuk-table__header">{% translate "Postcode" %}</th>
+        {% for h in headings %}<th scope="col" class="govuk-table__header{% if h.numeric %} govuk-table__header--numeric{% endif %}" aria-sort="{{ h.aria_sort }}"><a class="phaema-sort" href="{{ h.url }}" data-sort="{{ h.aria_sort }}">{{ h.label }}</a></th>{% endfor %}
       </tr></thead>
       <tbody class="govuk-table__body">
       {% for p in page_obj %}
@@ -44,9 +47,11 @@
           <td class="govuk-table__cell">{{ p.get_holding_purpose_display }}</td>
           <td class="govuk-table__cell">{{ p.get_occupation_display }}</td>
           <td class="govuk-table__cell">{{ p.postcode }}</td>
+          <td class="govuk-table__cell govuk-table__cell--numeric">{{ p.nia_sqm|default_if_none:""|floatformat:0 }}</td>
+          <td class="govuk-table__cell">{% if p.managing_surveyor %}{{ p.managing_surveyor.get_full_name|default:p.managing_surveyor.username }}{% endif %}</td>
         </tr>
       {% empty %}
-        <tr class="govuk-table__row"><td class="govuk-table__cell" colspan="6">{% translate "No properties match." %}</td></tr>
+        <tr class="govuk-table__row"><td class="govuk-table__cell" colspan="8">{% translate "No properties match." %}</td></tr>
       {% endfor %}
       </tbody>
     </table>

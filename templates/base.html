@@ -1,6 +1,6 @@
 {% load static i18n %}<!DOCTYPE html>
 {% get_current_language as LANG %}
-<html lang="{{ LANG }}" class="govuk-template">
+<html lang="{{ LANG }}" class="govuk-template phaema-text-{{ text_size }}">
 <head>
   <meta charset="utf-8">
   <title>{% block title %}PHAEMA{% endblock %} – PHAEMA</title>
@@ -20,6 +20,7 @@
       <nav class="phaema-header__nav" aria-label="{% translate 'Main menu' %}">
         <a href="{% url 'dashboard' %}">{% translate "Dashboard" %}</a>
         <a href="{% url 'properties:list' %}">{% translate "Properties" %}</a>
+        <a href="{% url 'changes' %}">{% translate "Changes" %}</a>
         {% if user.is_staff %}<a href="{% url 'admin:index' %}">{% translate "Manage data" %}</a>{% endif %}
         <form method="post" action="{% url 'logout' %}" class="phaema-header__logout">
           {% csrf_token %}<button type="submit">{% translate "Sign out" %}</button>
@@ -36,6 +37,13 @@
         <span class="govuk-phase-banner__text">{% translate "This is a development version. Do not rely on it for live estate management." %}</span>
       </p>
     </div>
+    <nav class="phaema-text-size" aria-label="{% translate 'Text size' %}">
+      <span class="govuk-body-s">{% translate "Text size:" %}</span>
+      {% for key, label in text_sizes.items %}
+        {% if key == text_size %}<span class="govuk-body-s phaema-text-size__current phaema-text-size__{{ key }}" aria-current="true">{{ label }}</span>
+        {% else %}<a class="govuk-link govuk-body-s phaema-text-size__{{ key }}" href="{% url 'text-size' key %}?next={{ request.get_full_path|urlencode }}">{{ label }}</a>{% endif %}
+      {% endfor %}
+    </nav>
     {% block breadcrumbs %}{% endblock %}
     <main class="govuk-main-wrapper" id="main-content" role="main">
       {% if messages %}
@@ -59,6 +67,7 @@
       </p>
     </div>
   </footer>
+  <script type="module" src="{% static 'js/phaema.js' %}"></script>
   <script type="module">import { initAll } from "{% static 'vendor/govuk-frontend/govuk-frontend.min.js' %}"; initAll();</script>
 </body>
 </html>
