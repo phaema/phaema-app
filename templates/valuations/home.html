@@ -5,6 +5,10 @@
 <h1 class="govuk-heading-xl govuk-!-margin-bottom-4">{% translate "Asset valuation" %}</h1>
 <p class="govuk-body">{% translate "Valuations for the council's accounts at" %}
   {% for y in years %}{% if y == year_end %}<strong>{{ y|date:"j F Y" }}</strong>{% else %}<a class="govuk-link" href="?year={{ y|date:'Y-m-d' }}">{{ y|date:"j M Y" }}</a>{% endif %}{% if not forloop.last %} · {% endif %}{% endfor %}</p>
+{% if mine or my_audits %}<div class="govuk-inset-text"><strong>{% translate "Assigned to you" %}</strong>
+  <ul class="govuk-list govuk-body-s govuk-!-margin-bottom-0">{% for m in mine %}<li><a class="govuk-link" href="{{ m.get_absolute_url }}">{{ m.property.reference }} {{ m.property.name }}</a>: {{ m.get_status_display|lower }}</li>{% endfor %}
+  {% for a in my_audits %}<li><a class="govuk-link" href="{{ a.get_absolute_url }}">{% translate "Audit query" %}: {{ a.valuation.property.name }}</a>{% if a.due_on %}, {% translate "due" %} {{ a.due_on|date:"j M Y" }}{% endif %}</li>{% endfor %}</ul></div>{% endif %}
+<p class="govuk-body"><a class="govuk-link" href="{% url 'valuations:audit' %}">{% translate "Audit" %}</a>: {% blocktranslate with o=audit_open r=audit_reported %}{{ o }} queries being answered, {{ r }} reported to the auditor awaiting close-off{% endblocktranslate %}</p>
 <p class="govuk-body-s"><a class="govuk-link" href="{% url 'valuations:schedule' %}?year={{ year_end|date:'Y-m-d' }}">{% translate "Year-end schedule for finance (Excel)" %}</a> · <a class="govuk-link" href="{% url 'valuations:data-pack' %}?year={{ year_end|date:'Y-m-d' }}">{% translate "Valuer's data pack (Excel)" %}</a>{% if is_admin %} · <a class="govuk-link" href="{% url 'admin:valuations_valuer_changelist' %}">{% translate "Valuers" %}</a> · <a class="govuk-link" href="{% url 'admin:valuations_assetclass_changelist' %}">{% translate "Asset classes" %}</a> · <a class="govuk-link" href="{% url 'admin:valuations_valuationsettings_changelist' %}">{% translate "Finance's criteria" %}</a>{% endif %}</p>
 
 {% if unclassified %}<div class="govuk-inset-text">{% blocktranslate count n=unclassified %}{{ n }} top-level property has no asset class yet.{% plural %}{{ n }} top-level properties have no asset class yet.{% endblocktranslate %}
@@ -26,7 +30,9 @@
   </tr>{% endfor %}</tbody>
 </table>
 {% if is_admin and not started %}<form method="post" class="phaema-inline-fields">{% csrf_token %}<input type="hidden" name="action" value="start"><input type="hidden" name="year" value="{{ year_end|date:'Y-m-d' }}">
-  <label class="govuk-label govuk-!-margin-right-2" for="valuer">{% translate "Valuer" %}</label><select class="govuk-select" id="valuer" name="valuer"><option value="">{% translate "Choose later" %}</option>{% for v in valuers %}<option value="{{ v.pk }}">{{ v }}</option>{% endfor %}</select>
+  <label class="govuk-label govuk-!-margin-right-2" for="assignee">{% translate "Assign every valuation to" %}</label><select class="govuk-select" id="assignee" name="assignee"><option value="">{% translate "Assign each one later" %}</option>
+    <optgroup label="{% translate 'Council staff' %}">{% for u in staff %}<option value="staff:{{ u.pk }}">{{ u.get_full_name|default:u.username }}</option>{% endfor %}</optgroup>
+    <optgroup label="{% translate 'External valuers' %}">{% for x in externals %}<option value="valuer:{{ x.pk }}">{{ x }}</option>{% endfor %}</optgroup></select>
   <button class="govuk-button govuk-!-margin-bottom-0" data-module="govuk-button">{% translate "Start the programme" %}</button></form>
   <p class="govuk-body-s govuk-!-margin-top-2">{% translate "Opens a programme case, and an asset valuation case with an instruction for each asset listed." %}</p>{% endif %}
 {% else %}<p class="govuk-body">{% translate "Nothing is due. Classify properties and record their valuations to build the programme." %}</p>{% endif %}

@@ -17,8 +17,9 @@ from apps.core.roles import is_administrator, manages
 from apps.properties.models import Property
 from apps.reports.export import csv_response, xlsx_response
 
-from . import programme
-from .models import AssetClass, Classification, Valuation, ValuationComponent, ValuationSettings, Valuer
+from . import programme, workflow
+from .models import (AssetClass, AuditReview, Classification, Valuation, ValuationComponent, ValuationSettings,
+                     Valuer)
 from .seed import FROM_PURPOSE
 
 Col = namedtuple("Col", "label type")
@@ -45,6 +46,30 @@ def _date(text, default=None):
         return default
 
 
+def _staff():
+    from django.contrib.auth import get_user_model
+
+    from apps.core.roles import ADMINISTRATORS, SURVEYORS
+
+    return (get_user_model().objects.filter(is_active=True, groups__name__in=(ADMINISTRATORS, SURVEYORS))
+            .distinct().order_by("first_name", "username"))
+
+
+def _assignee(choice):
+    """'staff:12' or 'valuer:3' -> a Valuer (made for staff if needed), or None."""
+    kind, _sep, pk = (choice or "").partition(":")
+    if kind == "staff" and pk.isdigit():
+        user = _staff().filter(pk=int(pk)).first()
+        return workflow.staff_valuer(user) if user else None
+    if kind == "valuer" and pk.isdigit():
+        return Valuer.objects.filter(pk=int(pk), active=True).first()
+    return None
+
+
+def _assignees():
+    return {"staff": _staff(), "externals": Valuer.objects.filter(active=True, status=Valuer.Status.EXTERNAL)}
+
+
 def _year_end(request, settings):
     chosen = _date(request.GET.get("year") or request.POST.get("year"))
     return chosen or settings.year_end()
@@ -60,8 +85,11 @@ def home(request):
             raise PermissionDenied
         action = request.POST.get("action")
         if action == "start":
-            valuer = Valuer.objects.filter(pk=request.POST.get("valuer") or 0).first()
+            valuer = _assignee(request.POST.get("assignee"))
             _case, made = programme.start(year_end, request.user, valuer)
+            if valuer is not None:
+                for item in Valuation.objects.filter(valuation_date=year_end, valuer=valuer, case__isnull=False):
+                    workflow.assign(item, valuer, request.user)
             messages.success(request, _("Programme started: %(n)s assets instructed, each with its own case.")
                              % {"n": made})
         elif action == "classify":
@@ -82,6 +110,7 @@ def home(request):
     classified = set(programme.current_classes().keys())
     unclassified = Property.objects.exclude(pk__in=classified).filter(parent__isnull=True).count()
     rotation = [(v, v.rotation_due(settings.rotation_years)) for v in Valuer.objects.filter(active=True)]
+    audits = AuditReview.objects.exclude(status=AuditReview.Status.CLOSED)
     return render(request, "valuations/home.html", {
         "settings": settings, "year_end": year_end, "rows": rows, "started": started,
         "counts": [(n, dict(Valuation.Status.choices)[s]) for s, n in counts.items() if n],
@@ -89,7 +118,11 @@ def home(request):
         "classes": AssetClass.objects.filter(active=True), "valuers": Valuer.objects.filter(active=True),
         "rotation": [(v, d) for v, d in rotation if d and d <= year_end],
         "years": [settings.year_end(date(date.today().year + n, 1, 1)) for n in (-2, -1, 0, 1)],
-        "status_labels": dict(Valuation.Status.choices),
+        "status_labels": dict(Valuation.Status.choices), **_assignees(),
+        "mine": Valuation.objects.filter(valuer__user=request.user).exclude(status="accepted")
+        .select_related("property"),
+        "audit_open": audits.filter(status="open").count(), "audit_reported": audits.filter(status="reported").count(),
+        "my_audits": audits.filter(assigned_to=request.user, status="open").select_related("valuation__property"),
     })
 
 
@@ -150,7 +183,7 @@ def property_valuations(request, pk):
 class ValuationForm(forms.ModelForm):
     class Meta:
         model = Valuation
-        fields = ["valuer", "basis", "purpose", "terms_agreed_on", "valuation_date", "report_date", "inspection_date",
+        fields = ["basis", "purpose", "terms_agreed_on", "valuation_date", "report_date", "inspection_date",
                   "inspection", "method", "value", "land_value", "building_value", "remaining_life",
                   "special_assumptions", "key_assumptions", "material_uncertainty", "uncertainty_statement",
                   "conflicts", "report", "notes"]
@@ -159,10 +192,6 @@ class ValuationForm(forms.ModelForm):
         widgets.update({f: forms.Textarea(attrs={"rows": 3})
                         for f in ("special_assumptions", "key_assumptions", "uncertainty_statement", "conflicts",
                                   "notes")})
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.fields["valuer"].queryset = Valuer.objects.filter(active=True)
 
     def clean(self):
         data = super().clean()
@@ -177,7 +206,7 @@ class ValuationForm(forms.ModelForm):
 @valuation_view
 def valuation_detail(request, pk):
     v = get_object_or_404(Valuation.objects.select_related("property", "asset_class", "valuer", "case"), pk=pk)
-    work = _can_work(request.user, v.property)
+    work = workflow.can_work(request.user, v)
     editable = work and v.status != Valuation.Status.ACCEPTED
     form = ValuationForm(instance=v) if editable else None
     if request.method == "POST":
@@ -193,6 +222,9 @@ def valuation_detail(request, pk):
                 v.status, v.accepted_by, v.accepted_on = Valuation.Status.ACCEPTED, request.user, date.today()
                 v.save(update_fields=["status", "accepted_by", "accepted_on", "updated_at"])
                 messages.success(request, _("Accepted for the accounts."))
+            return redirect(v)
+        if action in ("assign", "flag", "audit_report", "audit_close"):
+            _audit_or_assign(request, v, action)
             return redirect(v)
         if action == "reopen" and is_administrator(request.user):
             v.status, v.accepted_by, v.accepted_on = Valuation.Status.RECEIVED, None, None
@@ -245,8 +277,59 @@ def valuation_detail(request, pk):
         "previous": previous, "change": (v.value - previous.value) if previous and v.value is not None
         and previous.value is not None else None, "settings": settings, "needs_components": needs_components,
         "problems": _acceptance_problems(v) if v.status != Valuation.Status.ACCEPTED else [],
-        "register_components": components,
+        "register_components": components, **_assignees(),
+        "can_assign": is_administrator(request.user) or _can_work(request.user, v.property),
+        "audits": [(a, workflow.can_respond(request.user, a)) for a in v.audit_reviews.select_related(
+            "assigned_to", "reported_by", "closed_by")],
+        "audit_reasons": AuditReview._meta.get_field("reason").choices, "outcomes": AuditReview.Outcome.choices,
+        "accounts_year": workflow.accounts_year(v.valuation_date), "today": date.today(),
     })
+
+
+def _audit_or_assign(request, v, action):
+    post = request.POST
+    if action == "assign":
+        if not (is_administrator(request.user) or _can_work(request.user, v.property)):
+            raise PermissionDenied
+        valuer = _assignee(post.get("assignee"))
+        if valuer is None:
+            messages.error(request, _("Choose a member of staff or an external valuer."))
+            return
+        workflow.assign(v, valuer, request.user)
+        messages.success(request, _("Assigned to %(who)s.") % {"who": valuer})
+    elif action == "flag":
+        if not is_administrator(request.user):
+            raise PermissionDenied
+        if not post.get("query", "").strip():
+            messages.error(request, _("Enter the auditor's query, or why it is flagged."))
+            return
+        from django.contrib.auth import get_user_model
+
+        assigned = get_user_model().objects.filter(pk=post.get("assigned_to") or 0).first()
+        workflow.flag(v, request.user, post["query"], post.get("reason", "sample"), post.get("auditor", "").strip(),
+                      _date(post.get("due_on")), assigned)
+        messages.success(request, _("Flagged for audit."))
+    else:
+        review = get_object_or_404(AuditReview, pk=post.get("review"), valuation=v)
+        if action == "audit_report":
+            if not workflow.can_respond(request.user, review):
+                raise PermissionDenied
+            if not post.get("response", "").strip():
+                messages.error(request, _("Write the response to the auditor."))
+                return
+            workflow.report(review, request.user, post["response"], request.FILES.get("evidence"),
+                            _date(post.get("reported_on"), date.today()))
+            messages.success(request, _("Response recorded as reported to the auditor."))
+        else:
+            if not is_administrator(request.user):
+                raise PermissionDenied
+            outcome = post.get("outcome")
+            if outcome not in AuditReview.Outcome.values:
+                messages.error(request, _("Choose the outcome."))
+                return
+            workflow.close(review, request.user, outcome, post.get("notes", ""))
+            messages.success(request, _("Audit closed.") if outcome != "amended" else
+                             _("Audit closed. The valuation is reopened for amendment."))
 
 
 def _acceptance_problems(v):
@@ -268,6 +351,36 @@ def _acceptance_problems(v):
         out.append(_("The buildings are worth more than the componentisation threshold: add the significant "
                      "components."))
     return out
+
+
+# ------------------------------------------------------------------ audit
+
+AUDIT_COLUMNS = [Col("Asset reference", "text"), Col("Asset", "text"), Col("Valuation date", "date"),
+                 Col("Value", "money"), Col("Basis", "text"), Col("Valuer", "text"), Col("Why flagged", "text"),
+                 Col("Auditor", "text"), Col("Query", "text"), Col("Response due", "date"),
+                 Col("Prepared by", "text"), Col("Status", "text"), Col("Response", "text"),
+                 Col("Reported", "date"), Col("Outcome", "text"), Col("Closed", "date")]
+
+
+@valuation_view
+def audit(request):
+    years = sorted(set(AuditReview.objects.values_list("accounts_year", flat=True)), reverse=True)
+    year = request.GET.get("year") or (years[0] if years else "")
+    qs = AuditReview.objects.filter(accounts_year=year).select_related(
+        "valuation__property", "valuation__valuer", "assigned_to")
+    if request.GET.get("format") in ("xlsx", "csv"):
+        data = [[a.valuation.property.reference, a.valuation.property.name, a.valuation.valuation_date,
+                 a.valuation.value, a.valuation.get_basis_display(), str(a.valuation.valuer or ""),
+                 a.get_reason_display(), a.auditor, a.query, a.due_on,
+                 (a.assigned_to.get_full_name() or a.assigned_to.username) if a.assigned_to else "",
+                 a.get_status_display(), a.response, a.reported_on, a.get_outcome_display() if a.outcome else "",
+                 a.closed_on] for a in qs]
+        title = f"Valuation audit log {year}"
+        return csv_response(title, AUDIT_COLUMNS, data) if request.GET["format"] == "csv" else \
+            xlsx_response(title, AUDIT_COLUMNS, data)
+    groups = [(label, [a for a in qs if a.status == value]) for value, label in AuditReview.Status.choices]
+    return render(request, "valuations/audit.html", {"year": year, "years": years, "groups": groups,
+                                                     "today": date.today()})
 
 
 # ------------------------------------------------------------------ downloads

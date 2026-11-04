@@ -118,6 +118,10 @@ class Valuer(TimeStampedModel):
         EXTERNAL = "external", _("External")
 
     name = models.CharField(_("lead valuer"), max_length=150)
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True,
+                                related_name="valuer", verbose_name=_("PHAEMA user (internal valuers)"),
+                                help_text=_("For a council employee: their valuations appear on their dashboard and "
+                                            "they can record them."))
     firm = models.CharField(_("firm"), max_length=150, blank=True)
     status = models.CharField(_("status"), max_length=8, choices=Status.choices, default=Status.EXTERNAL)
     rics_number = models.CharField(_("RICS membership number"), max_length=20, blank=True)
@@ -249,3 +253,60 @@ class ValuationComponent(models.Model):
 
     def __str__(self):
         return self.name
+
+
+def _audit_path(instance, filename):
+    ext = filename.rsplit(".", 1)[-1].lower() if "." in filename else "bin"
+    return f"valuations/audit/{instance.valuation_id}/{uuid.uuid4().hex}.{ext}"
+
+
+class AuditReview(TimeStampedModel):
+    """A valuation selected by the external auditor (or flagged by finance), the council's response, and close-off."""
+
+    class Status(models.TextChoices):
+        OPEN = "open", _("Flagged: response being prepared")
+        REPORTED = "reported", _("Reported to the auditor")
+        CLOSED = "closed", _("Closed")
+
+    class Outcome(models.TextChoices):
+        NO_CHANGE = "no_change", _("Auditor satisfied: no change")
+        AMENDED = "amended", _("Valuation amended")
+        ADJUSTED = "adjusted", _("Accounts adjusted, valuation unchanged")
+        OTHER = "other", _("Other (see notes)")
+
+    valuation = models.ForeignKey(Valuation, on_delete=models.CASCADE, related_name="audit_reviews")
+    accounts_year = models.CharField(_("accounts"), max_length=20, help_text=_("For example 2026/27."))
+    auditor = models.CharField(_("auditor"), max_length=150, blank=True)
+    reason = models.CharField(_("why flagged"), max_length=20, default="sample", choices=[
+        ("sample", _("Selected in the auditor's sample")), ("query", _("Auditor's query")),
+        ("finance", _("Flagged by finance")), ("internal", _("Internal review"))])
+    query = models.TextField(_("auditor's query"))
+    due_on = models.DateField(_("response due"), null=True, blank=True)
+    assigned_to = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True,
+                                    related_name="audit_reviews", verbose_name=_("preparing the response"))
+    status = models.CharField(_("status"), max_length=10, choices=Status.choices, default=Status.OPEN)
+    response = models.TextField(_("the council's response"), blank=True)
+    evidence = models.FileField(_("evidence sent"), upload_to=_audit_path, blank=True,
+                                validators=[validate_case_file])
+    reported_on = models.DateField(_("reported to the auditor"), null=True, blank=True)
+    reported_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True,
+                                    related_name="+")
+    outcome = models.CharField(_("outcome"), max_length=10, choices=Outcome.choices, blank=True)
+    closed_on = models.DateField(_("closed"), null=True, blank=True)
+    closed_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True,
+                                  related_name="+")
+    close_notes = models.TextField(_("close-off notes"), blank=True)
+
+    class Meta:
+        ordering = ["status", "due_on", "-pk"]
+        verbose_name = _("audit review")
+
+    def __str__(self):
+        return f"Audit {self.accounts_year}: {self.valuation}"
+
+    def get_absolute_url(self):
+        return reverse("valuations:valuation", args=[self.valuation_id]) + f"#audit-{self.pk}"
+
+    @builtins.property
+    def overdue(self):
+        return bool(self.status == self.Status.OPEN and self.due_on and self.due_on < date.today())

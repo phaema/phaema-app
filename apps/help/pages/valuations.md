@@ -50,6 +50,19 @@ UPRN, class, basis, tenure, floor areas, leases and rents, and last value, to se
 owned by its managing surveyor, with an instruction recorded against it. The cases carry the task lists and the
 supervisor approval described in [cases](cases.md).
 
+## Assigning valuations
+
+Every valuation is assigned to either a **member of council staff** or an **external valuer**:
+
+- When starting the programme, choose who to assign every valuation to, or assign each one later.
+- On a valuation's page, **Assign** or **Reassign** it: the list shows council staff (administrators and
+  surveyors) and the external valuers set up under **Valuers**.
+
+A member of staff is emailed, sees the valuation under **Assigned to you** on the asset valuation page and their
+dashboard, can record it, and takes over its case. For an external valuer, the case stays with the managing
+surveyor, who manages the instruction. The valuer's status (internal or external) is recorded with the valuation
+and shown in the year-end schedule, as the accounts must disclose it.
+
 ## Recording a valuation
 
 Values come back on each valuation's page, or all at once with the **Valuer's returned figures** import (see
@@ -72,6 +85,23 @@ PHAEMA checks that land and buildings add up to the value, and shows the change 
 An administrator (normally finance) selects **Accept** once the valuation is complete. PHAEMA will not accept a
 valuation without a value, valuer, report date and terms of engagement, or a building over the componentisation
 threshold without its components. Accepted valuations are locked; an administrator can reopen one.
+
+## Audit
+
+Valuations can be flagged for the external auditor, answered and closed off:
+
+1. **Flag for audit** (administrators), on the valuation's page: why (selected in the auditor's sample, an
+   auditor's query, flagged by finance, or an internal review), the auditor, their query, and when the response is
+   due. By default the response is prepared by the valuer (if council staff) or the managing surveyor, who is
+   emailed and sees it on their dashboard.
+2. **Record the response sent to the auditor**, with any evidence, and the date it was reported. The status
+   becomes *Reported to the auditor*.
+3. **Close** (administrators) when the auditor is satisfied, with the outcome: no change, valuation amended,
+   accounts adjusted, or other. If the valuation is to be amended, closing reopens it so it can be changed and
+   accepted again.
+
+Each step is also noted on the valuation's case. The **Audit** page lists every flagged valuation for each year's
+accounts by status, and downloads the audit log for the auditor as Excel.
 
 ## Impairment and material change
 

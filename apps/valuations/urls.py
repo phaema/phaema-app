@@ -10,5 +10,6 @@ urlpatterns = [
     path("property/<int:pk>/", views.property_valuations, name="property"),
     path("<int:pk>/", views.valuation_detail, name="valuation"),
     path("schedule/", views.schedule, name="schedule"),
+    path("audit/", views.audit, name="audit"),
     path("data-pack/", views.data_pack, name="data-pack"),
 ]

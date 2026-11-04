@@ -63,8 +63,9 @@ def test_recording_and_accepting(client, setup):
     client.post(f"/valuations/property/{setup['hall'].pk}/", {"action": "new", "valuation_date": "2027-03-31"})
     v = Valuation.objects.get()
     url = v.get_absolute_url()
+    client.post(url, {"action": "assign", "assignee": f"valuer:{setup['valuer'].pk}"})
     base = {"action": "save", "basis": "drc", "purpose": "Financial statements (CIPFA Code)",
-            "valuation_date": "2027-03-31", "valuer": setup["valuer"].pk, "value": "4000000",
+            "valuation_date": "2027-03-31", "value": "4000000",
             "land_value": "500000", "building_value": "3000000"}
     response = client.post(url, base)
     assert "must add up" in response.content.decode()
@@ -145,4 +146,61 @@ def test_demo(db):
     assert Valuation.objects.filter(status="received").count() == 2
     assert programme.prompts()
     call_command("load_demo_data", "--reset", verbosity=0)
-    assert Valuer.objects.count() == 2
+    assert Valuer.objects.filter(rics_number__startswith="DEMO").count() == 2
+    assert Valuer.objects.filter(user__username="demo.pshah").count() == 1
+
+
+def test_assigning_to_staff_or_an_external_valuer(client, make_user, mailoutbox, setup):
+    from apps.valuations.models import Valuer
+
+    staff = make_user("val", "Surveyors", email="val@example.org", first_name="Val", last_name="Uer")
+    Classification.objects.create(property=setup["shops"], asset_class=AssetClass.objects.get(code="investment"),
+                                  effective_from=date(2021, 4, 1))
+    _accepted(setup["shops"], "investment", date(2026, 3, 31), 900000)
+    client.force_login(setup["admin"])
+    client.post("/valuations/", {"action": "start", "year": "2027-03-31", "assignee": f"staff:{staff.pk}"})
+    v = Valuation.objects.get(valuation_date=YEAR_END)
+    assert v.valuer.user == staff and v.valuer.status == "internal" and v.case.owner == staff
+    assert mailoutbox[-1].to == ["val@example.org"]
+    client.force_login(staff)
+    assert "Assigned to you" in client.get("/valuations/").content.decode()
+    assert "1 valuation assigned to you" in client.get("/").content.decode()
+    client.post(v.get_absolute_url(), {"action": "save", "basis": "fv", "purpose": "Financial statements",
+                                       "valuation_date": "2027-03-31", "value": "950000"})
+    v.refresh_from_db()
+    assert v.value == Decimal("950000")  # the assigned valuer can record it
+    client.force_login(setup["admin"])
+    client.post(v.get_absolute_url(), {"action": "assign", "assignee": f"valuer:{setup['valuer'].pk}"})
+    v.refresh_from_db()
+    assert v.valuer == setup["valuer"] and Valuer.objects.filter(user=staff).count() == 1
+    assert v.case.notes.filter(text__contains="external").exists()
+
+
+def test_audit_flag_report_and_close(client, make_user, mailoutbox, setup):
+    from apps.valuations.models import AuditReview
+
+    v = _accepted(setup["shops"], "investment", date(2026, 3, 31), 900000)
+    client.force_login(setup["surveyor"])
+    assert client.post(v.get_absolute_url(), {"action": "flag", "query": "Why?"}).status_code == 403
+    client.force_login(setup["admin"])
+    client.post(v.get_absolute_url(), {"action": "flag", "query": "Provide the yield evidence.", "reason": "sample",
+                                       "auditor": "Audit LLP", "due_on": "2026-07-31"})
+    review = AuditReview.objects.get()
+    assert review.accounts_year == "2025/26" and review.assigned_to == setup["surveyor"]
+    client.force_login(setup["surveyor"])
+    assert "1 audit query to answer" in client.get("/").content.decode()
+    client.post(v.get_absolute_url(), {"action": "audit_report", "review": review.pk,
+                                       "response": "Yield of 7% from three lettings.",
+                                       "evidence": SimpleUploadedFile("e.pdf", b"%PDF-1.4 e")})
+    review.refresh_from_db()
+    assert review.status == "reported" and review.evidence and review.reported_by == setup["surveyor"]
+    assert client.post(v.get_absolute_url(), {"action": "audit_close", "review": review.pk,
+                                              "outcome": "no_change"}).status_code == 403
+    client.force_login(setup["admin"])
+    assert client.get("/valuations/audit/").status_code == 200
+    assert client.get("/valuations/audit/?year=2025/26&format=xlsx").status_code == 200
+    client.post(v.get_absolute_url(), {"action": "audit_close", "review": review.pk, "outcome": "amended",
+                                       "notes": "Yield corrected"})
+    review.refresh_from_db()
+    v.refresh_from_db()
+    assert review.status == "closed" and v.status == "received"  # reopened for amendment
