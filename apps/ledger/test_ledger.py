@@ -177,7 +177,7 @@ def test_pages_and_permissions(client, make_user, ledger_on, tenant):
     for url in ("/rents/", "/rents/arrears/", "/rents/receipts/", "/rents/exports/", f"/rents/accounts/{lease.pk}/"):
         assert client.get(url).status_code == 200, url
     assert client.get("/rents/runs/new/").status_code == 403
-    assert client.post("/rents/exports/").status_code == 404
+    assert client.post("/rents/exports/").status_code == 403
     client.force_login(admin)
     preview = client.get("/rents/runs/new/", {"due_from": "2026-01-01", "due_to": "2026-03-31"})
     assert len(preview.context["charges"]) == 1
