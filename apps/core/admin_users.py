@@ -33,7 +33,10 @@ class PhaemaUserAdmin(UserAdmin):
         ("Personal details", {"fields": ("first_name", "last_name", "email")}),
         ("Role", {"fields": ("groups", "is_active", "is_superuser"),
                   "description": "Administrators can change everything. Surveyors can change the properties "
-                                 "they manage. Viewers can only look. Give each person one role."}),
+                                 "they manage. Viewers can only look. Give each person one role. "
+                                 "When someone leaves or changes job, use "
+                                 "<a href=\"/people/hand-over/\">Hand over work</a> to move their properties, "
+                                 "cases and tasks to colleagues."}),
         ("Dates", {"fields": ("last_login", "date_joined")}),
     )
     add_fieldsets = (

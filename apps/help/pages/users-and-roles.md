@@ -49,3 +49,23 @@ list shows each person's supervisor, and the dashboard tells administrators abou
 
 To stop someone using PHAEMA, untick **Active** on their user record rather than deleting it, so their name stays
 on the records they changed.
+
+## Handing over work
+
+When someone leaves, changes job or a new starter takes over part of a patch, administrators can move their work
+in one step at **Hand over work** (`/people/hand-over/`, also linked from each user record).
+
+1. Choose who the work comes **from**, who it goes **to**, and optionally **Only work on** one estate, site or
+   building to hand over just that part of their patch.
+2. Select **Show their work**. PHAEMA counts what they hold: properties they manage, open cases they own, case
+   tasks not yet done, case approvals waiting for them, open cases they contribute to, lease events assigned to
+   them, maintenance jobs they own, works orders waiting for their approval, valuation audit queries and the staff
+   they supervise.
+3. For each kind of work, keep the person you chose, pick someone else, or choose **Leave with** to keep it where
+   it is. Properties, cases and approvals can only go to surveyors and administrators; contributors can also take
+   over case contributions.
+4. For a leaver, tick **Also stop them signing in**. Then select **Hand over work**.
+
+Closed cases, completed tasks and past approvals keep the original names, so the history stays true. Every record
+moved is listed in the [change log](change-log.md) under your name. To undo a hand-over, hand the same work back.
+If the person is also an internal valuer, change the valuer record under **Manage data**, **Valuers**.

@@ -1,0 +1,95 @@
+{% extends "base.html" %}{% load i18n %}
+{% block title %}{% translate "Hand over work" %}{% endblock %}
+{% block help_page %}users-and-roles{% endblock %}
+{% block content %}
+<h1 class="govuk-heading-xl">{% translate "Hand over work" %}</h1>
+<p class="govuk-body">{% blocktranslate %}Move one person's properties, cases, tasks and approvals to colleagues in one step, when someone leaves, changes job or a new starter takes over part of a patch. Every change goes in the change log.{% endblocktranslate %}</p>
+
+<form method="get" class="phaema-filters">
+  <div class="govuk-form-group">
+    <label class="govuk-label govuk-label--s" for="from">{% translate "Hand over work from" %}</label>
+    <select class="govuk-select" id="from" name="from">
+      <option value="">{% translate "Choose a person" %}</option>
+      {% for p in people %}<option value="{{ p.pk }}"{% if old and p.pk == old.pk %} selected{% endif %}>{{ p.get_full_name|default:p.username }}{% if not p.is_active %} ({% translate "cannot sign in" %}){% endif %}</option>{% endfor %}
+    </select>
+  </div>
+  <div class="govuk-form-group">
+    <label class="govuk-label govuk-label--s" for="to">{% translate "Give it to" %}</label>
+    <select class="govuk-select" id="to" name="to">
+      <option value="">{% translate "Choose for each kind below" %}</option>
+      {% for p in everyone %}<option value="{{ p.pk }}"{% if p.pk == default %} selected{% endif %}>{{ p.get_full_name|default:p.username }}</option>{% endfor %}
+      {% if not old %}{% for p in people %}{% if p.is_active %}<option value="{{ p.pk }}">{{ p.get_full_name|default:p.username }}</option>{% endif %}{% endfor %}{% endif %}
+    </select>
+  </div>
+  <div class="govuk-form-group">
+    <label class="govuk-label govuk-label--s" for="building">{% translate "Only work on" %}</label>
+    <select class="govuk-select" id="building" name="building">
+      <option value="">{% translate "All their work" %}</option>
+      {% for b in buildings %}<option value="{{ b.pk }}"{% if building and b.pk == building.pk %} selected{% endif %}>{{ b.reference }} {{ b.name }}</option>{% endfor %}
+    </select>
+  </div>
+  <button class="govuk-button govuk-!-margin-bottom-0" data-module="govuk-button">{% translate "Show their work" %}</button>
+</form>
+
+{% if old %}
+<h2 class="govuk-heading-l">{% blocktranslate with name=old.get_full_name|default:old.username %}Work held by {{ name }}{% endblocktranslate %}</h2>
+{% if building %}<p class="govuk-body">{% blocktranslate with ref=building.reference name=building.name %}Only work on {{ ref }} {{ name }} and its parts.{% endblocktranslate %}</p>{% endif %}
+{% if not total %}
+<p class="govuk-body">{% translate "They hold no open work here." %}</p>
+{% endif %}
+<form method="post" novalidate>
+  {% csrf_token %}
+  <input type="hidden" name="from" value="{{ old.pk }}">
+  {% if building %}<input type="hidden" name="building" value="{{ building.pk }}">{% endif %}
+  <table class="govuk-table">
+    <caption class="govuk-table__caption govuk-table__caption--m govuk-visually-hidden">{% translate "Work to hand over" %}</caption>
+    <thead class="govuk-table__head"><tr class="govuk-table__row">
+      <th scope="col" class="govuk-table__header">{% translate "Work" %}</th>
+      <th scope="col" class="govuk-table__header govuk-table__header--numeric">{% translate "Number" %}</th>
+      <th scope="col" class="govuk-table__header">{% translate "Give to" %}</th>
+    </tr></thead>
+    <tbody class="govuk-table__body">
+    {% for row in rows %}
+      <tr class="govuk-table__row">
+        <th scope="row" class="govuk-table__header">
+          <label for="to_{{ row.item.key }}">{{ row.item.label }}</label>
+          {% if row.item.hint %}<div class="govuk-hint govuk-!-font-size-16 govuk-!-margin-bottom-0">{{ row.item.hint }}</div>{% endif %}
+        </th>
+        <td class="govuk-table__cell govuk-table__cell--numeric">{{ row.count }}</td>
+        <td class="govuk-table__cell">
+          {% if row.limited_out %}<span class="govuk-hint govuk-!-margin-bottom-0">{% translate "Not moved when limited to one building" %}</span>
+          {% elif row.count %}
+          <select class="govuk-select" id="to_{{ row.item.key }}" name="to_{{ row.item.key }}">
+            <option value="">{% blocktranslate with name=old.get_full_name|default:old.username %}Leave with {{ name }}{% endblocktranslate %}</option>
+            {% for p in row.receivers %}<option value="{{ p.pk }}"{% if p.pk == row.chosen %} selected{% endif %}>{{ p.get_full_name|default:p.username }}</option>{% endfor %}
+          </select>
+          {% else %}<span class="govuk-hint govuk-!-margin-bottom-0">{% translate "None" %}</span>{% endif %}
+        </td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+
+  {% if valuer %}
+  <div class="govuk-inset-text">{% blocktranslate with name=valuer.name %}They are also the PHAEMA user for the internal valuer “{{ name }}”. Change that valuer under Manage data, Valuers.{% endblocktranslate %}</div>
+  {% endif %}
+
+  {% if can_deactivate %}
+  <div class="govuk-form-group">
+    <div class="govuk-checkboxes govuk-checkboxes--small" data-module="govuk-checkboxes">
+      <div class="govuk-checkboxes__item">
+        <input class="govuk-checkboxes__input" id="deactivate" name="deactivate" type="checkbox" value="1">
+        <label class="govuk-label govuk-checkboxes__label" for="deactivate">{% blocktranslate with name=old.get_full_name|default:old.username %}Also stop {{ name }} signing in (for a leaver){% endblocktranslate %}</label>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  <div class="govuk-warning-text">
+    <span class="govuk-warning-text__icon" aria-hidden="true">!</span>
+    <strong class="govuk-warning-text__text"><span class="govuk-visually-hidden">{% translate "Warning" %}</span>{% translate "Everything with a name chosen moves straight away. To undo it, hand the same work back." %}</strong>
+  </div>
+  <button class="govuk-button" data-module="govuk-button">{% translate "Hand over work" %}</button>
+</form>
+{% endif %}
+{% endblock %}
