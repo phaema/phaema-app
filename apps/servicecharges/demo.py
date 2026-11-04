@@ -36,18 +36,27 @@ def setup(today=None):
         modules.service_charges_enabled = True
         modules.service_charge_income_code = modules.service_charge_income_code or "EST-1000-9200"
         modules.save()
-    estate = Property.objects.filter(reference="DM-E01").first()
-    if estate is None or Schedule.objects.filter(name=NAME).exists():
-        return Schedule.objects.filter(name=NAME).first()
-    schedule = Schedule.objects.create(
-        name=NAME, basis=Schedule.Basis.AREA,
-        description="Estate roads, lighting, landscaping, security patrols and waste for the units on the estate. "
-                    "Fictional demonstration data.")
+    from apps.properties import demo_north
+
+    north = demo_north.SERVICE
+    build(north["name"], north["estate"], north["members"], north["caps"], north["budget"], north["factor"],
+          north["description"], today)
+    return build(NAME, "DM-E01", MEMBERS, CAPS, BUDGET, SPEND_FACTOR,
+                 "Estate roads, lighting, landscaping, security patrols and waste for the units on the estate. "
+                 "Fictional demonstration data.", today)
+
+
+def build(name, estate_ref, members, caps, budget, spend_factor, description, today):
+    """A schedule with last year (ended, ready to reconcile) and this year part way through."""
+    estate = Property.objects.filter(reference=estate_ref).first()
+    if estate is None or Schedule.objects.filter(name=name).exists():
+        return Schedule.objects.filter(name=name).first()
+    schedule = Schedule.objects.create(name=name, basis=Schedule.Basis.AREA, description=description)
     schedule.properties.add(estate)
-    for ref in MEMBERS:
+    for ref in members:
         lease = Lease.objects.filter(reference=ref).first()
         if lease:
-            ScheduleMember.objects.create(schedule=schedule, lease=lease, annual_cap=CAPS.get(ref))
+            ScheduleMember.objects.create(schedule=schedule, lease=lease, annual_cap=caps.get(ref))
     headings = {h.code: h for h in CostHeading.objects.all()}
     current = _year_start(today)
     for start, growth in ((date(current.year - 1, 4, 1), Decimal("1")), (current, Decimal("1.04"))):
@@ -57,17 +66,17 @@ def setup(today=None):
             budget_approved_on=start - timedelta(days=50), budget_issued_on=start - timedelta(days=40),
             budget_commentary="Security patrols re-tendered last year; landscaping and waste contracts rise with "
                               "inflation. Repairs allow for pothole repairs to the estate road.")
-        for code, amount in BUDGET.items():
+        for code, amount in budget.items():
             BudgetLine.objects.create(year=year, heading=headings[code], amount=(Decimal(amount) * growth).quantize(
                 Decimal("1")))
         last = min(end, today - timedelta(days=1))
         month = start
         n = 0
         while month <= last:
-            for code, amount in BUDGET.items():
+            for code, amount in budget.items():
                 if code in ("INS", "MAN") and month != start:
                     continue  # paid once a year
-                yearly = Decimal(amount) * growth * Decimal(str(SPEND_FACTOR[code]))
+                yearly = Decimal(amount) * growth * Decimal(str(spend_factor[code]))
                 value = yearly if code in ("INS", "MAN") else yearly / 12
                 n += 1
                 Expenditure.objects.create(
@@ -88,4 +97,6 @@ def setup(today=None):
 
 
 def remove():
-    Schedule.objects.filter(name=NAME).delete()
+    from apps.properties import demo_north
+
+    Schedule.objects.filter(name__in=[NAME, demo_north.SERVICE["name"]]).delete()
