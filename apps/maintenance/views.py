@@ -18,6 +18,7 @@ from django.utils.translation import gettext as _
 from django.views.decorators.http import require_POST
 from django.views.generic import ListView
 
+from apps.core import places
 from apps.core.models import ModuleSettings, supervisor_of
 from apps.core.roles import SURVEYORS, can_edit, is_administrator
 from apps.core.tables import sortable
@@ -127,6 +128,7 @@ class JobListView(LoginRequiredMixin, ExportMixin, ListView):
             qs = qs.filter(status__in=Job.OPEN, target_date__lt=today)
         if get.get("approval") == "mine":
             qs = qs.filter(approval_status="pending", approver=self.request.user)
+        qs = places.apply(qs, get, self.request.user, "property")
         if get.get("recharge") == "due":
             qs = qs.filter(status="completed", responsibility=Responsibility.RECHARGE, recharge__isnull=True)
         q = get.get("q", "").strip()
@@ -158,6 +160,7 @@ class JobListView(LoginRequiredMixin, ExportMixin, ListView):
                 ("owner", "Owner", [("me", "Mine")], get.get("owner", ""), True),
                 ("approval", "Approval", [("mine", "Waiting for my approval")], get.get("approval", ""), True),
                 ("recharge", "Recharge", [("due", "Completed, not yet recharged")], get.get("recharge", ""), True),
+                *places.filters(get),
             ],
         })
         params = get.copy()
@@ -340,6 +343,7 @@ def planned(request):
         qs = qs.filter(statutory=True)
     if get.get("category"):
         qs = qs.filter(category=get["category"])
+    qs = places.apply(qs, get, request.user, "property")
     fmt = get.get("format")
     if fmt in ("xlsx", "csv"):
         from apps.reports import datasets, export
@@ -348,6 +352,7 @@ def planned(request):
     return render(request, "maintenance/planned.html", {
         "section": "planned", "tasks": qs[:500], "today": today, "when": when, "statutory": get.get("statutory"),
         "category": get.get("category", ""), "categories": Category.choices, "can_act": _can_raise(request.user),
+        "place_filters": places.filters(get), "count": qs.count(),
         "whens": [("overdue", _("Overdue")), ("30", _("Within 30 days")), ("90", _("Within 90 days")),
                   ("365", _("Within a year"))],
     })
@@ -416,6 +421,7 @@ def components(request):
         qs = qs.filter(category=get["category"])
     if get.get("condition"):
         qs = qs.filter(condition=get["condition"])
+    qs = places.apply(qs, get, request.user, "property")
     if get.get("format") in ("xlsx", "csv"):
         from apps.reports import datasets, export
 
@@ -423,7 +429,7 @@ def components(request):
     return render(request, "maintenance/components.html", {
         "section": "components", "components": qs[:1000], "count": qs.count(), "categories": Category.choices,
         "conditions": Component.Condition.choices, "category": get.get("category", ""),
-        "condition": get.get("condition", ""), "year": date.today().year,
+        "condition": get.get("condition", ""), "year": date.today().year, "place_filters": places.filters(get),
     })
 
 
@@ -436,7 +442,8 @@ def forecast(request):
     years = list(range(this_year, this_year + span))
     by_year = defaultdict(lambda: {"capital": Decimal("0"), "revenue": Decimal("0"), "items": []})
     by_category = defaultdict(lambda: defaultdict(Decimal))
-    for c in Component.objects.select_related("property").exclude(replacement_cost__isnull=True):
+    for c in places.apply(Component.objects.select_related("property").exclude(replacement_cost__isnull=True),
+                          request.GET, request.user, "property"):
         due = c.replace_year
         if due is None:
             continue
@@ -459,7 +466,8 @@ def forecast(request):
         title = f"Lifecycle forecast {years[0]} to {years[-1]}"
         return xlsx_response(title, cols, data, totals=True) if fmt == "xlsx" else csv_response(title, cols, data)
     return render(request, "maintenance/forecast.html", {
-        "section": "forecast", "rows": rows, "span": span, "years": years,
+        "section": "forecast", "rows": rows, "span": span, "years": years, "place_filters": places.filters(request.GET),
+        "query": request.GET.urlencode(),
         "total": sum((r[1] + r[2] for r in rows), Decimal("0")),
         "categories": [(cat, [vals[y] for y in years], sum(vals.values(), Decimal("0")))
                        for cat, vals in sorted(by_category.items())],
@@ -492,7 +500,8 @@ def contractor_detail(request, pk):
 @maintenance_view
 def contracts(request):
     today = date.today()
-    rows = sorted(Contract.objects.select_related("contractor").prefetch_related("properties"),
-                  key=lambda c: c.retender_due)
+    rows = sorted(places.apply(Contract.objects.select_related("contractor").prefetch_related("properties"),
+                               request.GET, request.user, "properties"), key=lambda c: c.retender_due)
     return render(request, "maintenance/contracts.html", {
-        "section": "contracts", "contracts": rows, "today": today, "soon": today + timedelta(days=183)})
+        "section": "contracts", "contracts": rows, "today": today, "soon": today + timedelta(days=183),
+        "place_filters": places.filters(request.GET)})

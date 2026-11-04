@@ -5,6 +5,7 @@
 <h1 class="govuk-heading-xl govuk-!-margin-bottom-4">{% translate "Contracts" %}</h1>
 {% include "maintenance/_nav.html" %}
 {% include "core/_hint.html" with summary=_("Why the re-tender dates?") text=_("The RICS professional standard on service charges in commercial property expects service contracts to be re-tendered or benchmarked at least every three years, so tenants pay a fair price.") page="maintenance" anchor="contracts" %}
+<form method="get" class="phaema-inline-fields govuk-!-margin-bottom-4">{% include "core/_place_filters.html" %}<button class="govuk-button govuk-button--secondary govuk-!-margin-bottom-0" data-module="govuk-button">{% translate "Show" %}</button></form>
 {% if is_administrator %}<p class="govuk-body"><a class="govuk-link" href="{% url 'admin:maintenance_contract_add' %}">{% translate "Add a contract" %}</a></p>{% endif %}
 <table class="govuk-table">
   <thead class="govuk-table__head"><tr class="govuk-table__row"><th scope="col" class="govuk-table__header">{% translate "Contract" %}</th><th scope="col" class="govuk-table__header">{% translate "Term" %}</th><th scope="col" class="govuk-table__header govuk-table__header--numeric">{% translate "A year" %}</th><th scope="col" class="govuk-table__header">{% translate "Re-tender or benchmark by" %}</th></tr></thead>

@@ -11,6 +11,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.utils.translation import gettext as _
 
 from apps.cases.models import validate_case_file
+from apps.core import places
 from apps.core.models import ModuleSettings
 from apps.core.roles import can_edit
 from apps.properties.models import Property
@@ -44,6 +45,7 @@ def home(request):
         qs = qs.filter(kind__code=get["kind"])
     if get.get("responsible"):
         qs = qs.filter(responsible=get["responsible"])
+    qs = places.apply(qs, get, request.user, "property")
     rows = workflow.statuses(qs, today)
     show = get.get("show", "problems")
     if show == "problems":
@@ -55,10 +57,12 @@ def home(request):
         export_qs = ds.queryset().filter(pk__in=qs.values("pk")).order_by("property__reference", "kind__order")
         return export.download(request, "Compliance register", ds, export_qs)
     return render(request, "compliance/home.html", {
-        "summary": workflow.summary(today), "rows": rows[:500], "show": show, "today": today,
+        "summary": workflow.summary(today, places.apply(workflow.requirements(), get, request.user, "property")), "rows": rows[:500], "show": show, "today": today,
         "kinds": ComplianceType.objects.filter(active=True), "kind": get.get("kind", ""),
         "responsible": get.get("responsible", ""), "responsibles": Requirement.Responsible.choices,
-        "actions": Action.objects.filter(done_on__isnull=True).select_related(
+        "place_filters": places.filters(get), "filtered": bool(get.get("building") or get.get("surveyor")),
+        "actions": places.apply(Action.objects.filter(done_on__isnull=True), get, request.user,
+                                "certificate__requirement__property").select_related(
             "certificate__requirement__property", "certificate__requirement__kind", "job").order_by("due_on")[:30],
         "tier_a": BuildingSafety.objects.filter(tier="A").select_related("property"),
         "golden_thread": ModuleSettings.load().golden_thread_enabled,

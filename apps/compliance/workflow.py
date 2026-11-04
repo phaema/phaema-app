@@ -54,16 +54,18 @@ def _status(req, today):
     return ("green", "Valid", 5)
 
 
-def summary(today=None):
+def summary(today=None, qs=None):
     today = today or date.today()
-    rows = statuses(requirements(), today)
+    rows = statuses(requirements() if qs is None else qs, today)
     count = lambda *labels: sum(1 for _r, s in rows if s[1] in labels)  # noqa: E731
     return {
         "total": len(rows), "valid": count("Valid"), "missing": count("Missing"), "expired": count("Expired"),
         "failed": count("Unsatisfactory"), "soon": count("Expires soon"),
         "compliant_pct": round(100 * count("Valid", "Expires soon", "Actions open") / len(rows)) if rows else None,
-        "actions_overdue": Action.objects.filter(done_on__isnull=True, due_on__lt=today).count(),
-        "actions_open": Action.objects.filter(done_on__isnull=True).count(),
+        "actions_overdue": Action.objects.filter(certificate__requirement__in=[r for r, _s in rows],
+                                                 done_on__isnull=True, due_on__lt=today).count(),
+        "actions_open": Action.objects.filter(certificate__requirement__in=[r for r, _s in rows],
+                                              done_on__isnull=True).count(),
     }
 
 

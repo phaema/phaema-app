@@ -415,6 +415,172 @@ def _case_fields():
         Field("applicant", "Applicant", path="party__name"),
         Field("how_received", "Received by", "choice", "how_received", choices=_choices(K, "how_received")),
         Field("iken_matter", "Iken matter", path="iken_matter"),
+        Field("case_type_code", "Case type (code)", "choice", "case_type__code", choices=_case_type_codes()),
+        Field("notice_kind", "1954 Act notice", "choice", "notice_kind", choices=_choices(K, "notice_kind")),
+        Field("notice_served_on", "Notice given", "date", "notice_served_on"),
+        Field("notice_date", "Date in the notice", "date", "notice_date"),
+        Field("court_deadline", "Last day to apply to court", "date", getter=_court_deadline),
+        Field("heads_covered", "Heads of terms covered", "number",
+              getter=lambda c: len([v for v in (c.heads_of_terms or {}).values() if str(v).strip()])),
+    ]
+
+
+def _case_type_codes():
+    from apps.cases.seed import TYPES
+
+    return [(t[0], t[1]) for t in TYPES]
+
+
+def _court_deadline(case):
+    from apps.cases.leasing import notice_dates
+
+    return notice_dates(case).court_deadline
+
+
+def _approvals():
+    from apps.cases.models import Approval
+
+    return Approval.objects.select_related("case", "case__case_type", "requested_by", "approver", "decided_by")
+
+
+def _approval_fields():
+    from apps.cases.models import Approval
+
+    return [
+        Field("case", "Case", getter=lambda a: a.case.display_reference, default=True),
+        Field("case_title", "Title", path="case__title", default=True),
+        Field("case_type", "Type", path="case__case_type__name", default=True),
+        Field("stage", "To move to", "choice", "stage", choices=_choices(Approval, "stage")),
+        Field("requested_by", "Asked by", "user", "requested_by", default=True),
+        Field("approver", "Approver", "user", "approver", default=True),
+        Field("created_at", "Asked", "date", getter=lambda a: a.created_at.date(), default=True),
+        Field("status", "Status", "choice", "status", choices=_choices(Approval, "status"), default=True),
+        Field("decided_by", "Decided by", "user", "decided_by", default=True),
+        Field("decided_at", "Decided", "date", getter=lambda a: a.decided_at.date() if a.decided_at else None,
+              default=True),
+        Field("recommendation", "Recommendation", path="recommendation"),
+        Field("comments", "Approver's comments", path="comments"),
+    ]
+
+
+def _valuations():
+    from apps.valuations.models import Valuation
+
+    return Valuation.objects.select_related("property", "asset_class", "valuer", "case", "accepted_by")
+
+
+def _valuation_change(v):
+    previous = v.previous()
+    if previous is None or previous.value is None or v.value is None:
+        return None
+    return v.value - previous.value
+
+
+def _valuation_fields():
+    from apps.valuations.models import Valuation, Valuer
+
+    return [
+        Field("property", "Asset reference", path="property__reference", default=True),
+        Field("property_name", "Asset", path="property__name", default=True),
+        Field("asset_class", "Asset class", path="asset_class__name", default=True),
+        Field("basis", "Basis", "choice", "basis", choices=_choices(Valuation, "basis")),
+        Field("purpose", "Purpose", path="purpose"),
+        Field("valuation_date", "Valuation date", "date", "valuation_date", default=True),
+        Field("valuer", "Valuer", path="valuer__name", default=True),
+        Field("valuer_firm", "Firm", path="valuer__firm"),
+        Field("valuer_status", "Internal or external", "choice", "valuer__status",
+              choices=_choices(Valuer, "status"), default=True),
+        Field("status", "Status", "choice", "status", choices=_choices(Valuation, "status"), default=True),
+        Field("value", "Value £", "money", "value", default=True),
+        Field("land_value", "Land £", "money", "land_value"),
+        Field("building_value", "Buildings £", "money", "building_value"),
+        Field("change", "Change since last £", "money", getter=_valuation_change),
+        Field("remaining_life", "Remaining life (years)", "number", "remaining_life"),
+        Field("material_uncertainty", "Material uncertainty", "bool", "material_uncertainty"),
+        Field("inspection", "Inspection", "choice", "inspection", choices=_choices(Valuation, "inspection")),
+        Field("terms_agreed_on", "Terms agreed", "date", "terms_agreed_on"),
+        Field("report_date", "Report date", "date", "report_date"),
+        Field("accepted_on", "Accepted", "date", "accepted_on"),
+        Field("case", "Case", getter=lambda v: v.case.display_reference if v.case else ""),
+    ]
+
+
+def _audit_reviews():
+    from apps.valuations.models import AuditReview
+
+    return AuditReview.objects.select_related("valuation__property", "valuation__valuer", "assigned_to")
+
+
+def _valuation_audit_fields():
+    from apps.valuations.models import AuditReview
+
+    return [
+        Field("accounts_year", "Accounts", path="accounts_year", default=True),
+        Field("property", "Asset reference", path="valuation__property__reference", default=True),
+        Field("property_name", "Asset", path="valuation__property__name", default=True),
+        Field("value", "Value £", "money", "valuation__value"),
+        Field("reason", "Why flagged", "choice", "reason", choices=_choices(AuditReview, "reason"), default=True),
+        Field("auditor", "Auditor", path="auditor"),
+        Field("query", "Query", path="query", default=True),
+        Field("due_on", "Response due", "date", "due_on", default=True),
+        Field("assigned_to", "Preparing the response", "user", "assigned_to", default=True),
+        Field("status", "Status", "choice", "status", choices=_choices(AuditReview, "status"), default=True),
+        Field("reported_on", "Reported", "date", "reported_on"),
+        Field("outcome", "Outcome", "choice", "outcome", choices=_choices(AuditReview, "outcome")),
+        Field("closed_on", "Closed", "date", "closed_on"),
+    ]
+
+
+def _service_years():
+    from django.db.models import BooleanField, ExpressionWrapper, Q as DQ
+
+    from apps.servicecharges.models import ScheduleYear
+
+    return ScheduleYear.objects.select_related("schedule").annotate(
+        budget_outstanding=ExpressionWrapper(DQ(budget_issued_on__isnull=True), output_field=BooleanField()),
+        statements_outstanding=ExpressionWrapper(DQ(statements_issued_on__isnull=True), output_field=BooleanField()))
+
+
+def _service_year_fields():
+    from apps.core.dates import add_months
+    from apps.servicecharges.models import ScheduleYear
+
+    return [
+        Field("schedule", "Schedule", path="schedule__name", default=True),
+        Field("label", "Year", getter=lambda y: y.label, default=True),
+        Field("start", "Year start", "date", "start", default=True),
+        Field("end", "Year end", "date", "end", default=True),
+        Field("status", "Status", "choice", "status", choices=_choices(ScheduleYear, "status"), default=True),
+        Field("budget_due", "Budget due to tenants", "date", getter=lambda y: add_months(y.start, -1), default=True),
+        Field("budget_issued_on", "Budget issued", "date", "budget_issued_on", default=True),
+        Field("budget_outstanding", "Budget not yet issued", "bool", "budget_outstanding"),
+        Field("statements_due", "Statements due", "date", getter=lambda y: add_months(y.end, 4), default=True),
+        Field("statements_issued_on", "Statements issued", "date", "statements_issued_on", default=True),
+        Field("statements_outstanding", "Statements not yet issued", "bool", "statements_outstanding"),
+        Field("certified_by", "Certified by", path="certified_by"),
+    ]
+
+
+def _expenditure():
+    from apps.servicecharges.models import Expenditure
+
+    return Expenditure.objects.select_related("year__schedule", "heading")
+
+
+def _expenditure_fields():
+    from apps.servicecharges.models import Expenditure
+
+    return [
+        Field("schedule", "Schedule", path="year__schedule__name", default=True),
+        Field("year", "Year", getter=lambda e: e.year.label, default=True),
+        Field("spent_on", "Date", "date", "spent_on", default=True),
+        Field("heading", "Heading", path="heading__name", default=True),
+        Field("supplier", "Supplier", path="supplier", default=True),
+        Field("description", "Description", path="description", default=True),
+        Field("invoice_reference", "Invoice", path="invoice_reference"),
+        Field("kind", "Type", "choice", "kind", choices=_choices(Expenditure, "kind")),
+        Field("recoverable", "Recoverable", "bool", "recoverable", default=True),
+        Field("amount", "Amount £", "money", "amount", default=True),
     ]
 
 
@@ -722,6 +888,16 @@ def registry():
                     _certificates, _certificate_fields()),
             Dataset("compliance_actions", "Remedial actions", "Actions from compliance certificates and assessments.",
                     _actions, _action_fields()),
+            Dataset("approvals", "Approvals", "Requests for a supervisor's approval on cases, and the decisions.",
+                    _approvals, _approval_fields()),
+            Dataset("valuations", "Valuations", "Asset valuations for the accounts and other purposes.",
+                    _valuations, _valuation_fields()),
+            Dataset("valuation_audit", "Valuation audit", "Valuations flagged for audit, the responses and outcomes.",
+                    _audit_reviews, _valuation_audit_fields()),
+            Dataset("service_years", "Service charge years", "Each schedule's years, with the RICS deadlines.",
+                    _service_years, _service_year_fields()),
+            Dataset("expenditure", "Service charge spending", "Costs and income charged to service charges.",
+                    _expenditure, _expenditure_fields()),
             Dataset("titles", "Titles", "Registered and unregistered titles.", _titles, _title_fields()),
             Dataset("changes", "Change log", "Every change made in PHAEMA.", _audit, _audit_fields()),
         ]}

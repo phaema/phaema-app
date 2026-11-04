@@ -34,6 +34,9 @@ types**. Check them against the council's own policies and risk assessments.
 PHAEMA suggests who holds each certificate. A tenant on full repairing terms of the whole property holds its own
 certificates and the council keeps a copy; otherwise the council holds them. Change it for any certificate.
 
+The register can be filtered by certificate, who holds it, **building or estate** (including its units and parts)
+and **managing surveyor**; the figures at the top follow the filters.
+
 ## Recording a certificate
 
 Select **Record a certificate**, choose which, and enter the date, the result and the PDF. PHAEMA works out the

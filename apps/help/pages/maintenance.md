@@ -104,6 +104,13 @@ commercial property expects contracts to be re-tendered or benchmarked at least 
 shows when each is due and lists those due within six months on the overview. Record the date a contract was
 last tendered or benchmarked to move the date on.
 
+## Filtering by building or surveyor
+
+The repair jobs, planned maintenance, components, lifecycle forecast and contracts pages can be filtered by
+**building or estate** (including every unit and part within it) and by **managing surveyor** (or "Mine"). The
+same filters are on the cases, lease events, leases, compliance and asset valuation pages. Downloads to Excel
+follow the filters.
+
 ## Reports
 
 The **Maintenance** ready-made reports include repairs past target, statutory maintenance overdue, planned
