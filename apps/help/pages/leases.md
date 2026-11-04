@@ -38,6 +38,10 @@ To add many agreements at once, see [importing leases](import-export.md#leases-a
 | Alterations and reinstatement | What the tenant may alter, and whether they must reinstate at the end. |
 | Special rights | Parking, rights of way, telecoms access and so on. |
 
+![The agreement page for DL-0502](/static/help/lease.jpg)
+*An agreement with its events, premises and tenant.*
+
+
 These match the items the RICS Code for leasing business premises asks heads of terms to cover, so a renewal case
 can start from what the current agreement says.
 
@@ -59,3 +63,14 @@ Documents. Only signed-in users can open them.
 
 Record the outcome of the [expiry event](events.md#expiries), or set the status to Ended and fill in the
 **actual end** date. Open events for an ended agreement lapse automatically.
+
+## Worked example
+
+**DL-0502** is Northfield Packaging Ltd's lease of Unit 2, Northfield Business Park: ten years, inside the 1954
+Act, £39,000 a year plus VAT, reviewed upwards only every five years, on full repairing terms with a service charge.
+It records a £9,750 rent deposit held in the council's deposit account, with interest to the tenant. The tenant can
+break at year five on six months' notice, so PHAEMA has created a **break notice deadline** event six months before
+the **break date** event, as well as the rent review and expiry.
+
+**DL-0530** is the other way round: the council holds the Northfield Innovation Hub on a ten-year lease at £38,000
+a year. It counts as rent the council pays, and the council's own break is recorded the same way.

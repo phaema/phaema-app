@@ -14,6 +14,10 @@ do not have access, you have not been given a [role](users-and-roles.md) yet. As
 
 The menu at the top of every page takes you to:
 
+![The PHAEMA dashboard with the menu across the top](/static/help/estate.jpg)
+*The menu runs across the top of every page.*
+
+
 | Menu item | What it is for |
 |---|---|
 | Dashboard | A summary of the estate: what needs doing, rent roll, vacancies. See [the dashboard](dashboard.md). |
@@ -22,8 +26,9 @@ The menu at the top of every page takes you to:
 | Leases | [Leases and licences](leases.md), with links to [parties](parties.md). |
 | Events | [Key dates](events.md) such as rent reviews, breaks and expiries. |
 | Cases | [Cases](cases.md): consents, requests and other work from start to outcome. |
-| Rents | The [rent ledger](rent-ledger.md): raising rent, accounts, arrears and receipts. Shown when the council uses it. |
-| Service charges | [Service charge](service-charges.md) schedules, budgets, spending and reconciliation. Shown when the council uses it. |
+| Documents | The [document library](documents.md): letters and notices filled in from PHAEMA and downloaded to Word. |
+| Income | The [rent ledger](rent-ledger.md) (rents, arrears, receipts) and [service charges](service-charges.md). Shown when the council uses them. |
+| Buildings | [Maintenance](maintenance.md), [compliance](compliance.md) and [asset valuation](valuations.md). Shown when the council uses them. |
 | Reports | Ready-made and your own [reports](reports.md), to view or download. |
 | Changes | The [change log](change-log.md): who changed what, and when. |
 | Import | Administrators only: [import from spreadsheets](import-export.md). |
@@ -46,6 +51,10 @@ a record depends on your [role](users-and-roles.md). Every change is recorded in
 ## Making PHAEMA easier to read
 
 Under the menu there are three settings that PHAEMA remembers on your computer:
+
+![The style, theme and text size settings under the menu](/static/help/settings-bar.jpg)
+*Style, theme and text size are under the menu.*
+
 
 - **Theme**: Standard, Dark, High contrast (yellow on black), or Match my device, which follows your computer's
   light or dark setting.

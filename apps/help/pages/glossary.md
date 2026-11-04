@@ -35,7 +35,7 @@ GIA (gross internal area)
 
 Golden Thread
 :   The accurate, up-to-date information about a building that the Building Safety Act 2022 requires for
-    higher-risk buildings, and good practice for all. PHAEMA will support it in a later module.
+    higher-risk buildings, and good practice for all. See [compliance and building information](compliance.md).
 
 Holding over
 :   A tenant staying in occupation after the lease's term end, often while a renewal is agreed.

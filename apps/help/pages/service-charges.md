@@ -34,6 +34,10 @@ Shares are worked out over all the lettable units in the schedule, **including e
 the share of any unit that is not let (the void share), as a landlord normally must. The schedule page shows
 each lease's floor area, share and on-account payment, and the council's share.
 
+![A service charge schedule showing each lease's share](/static/help/service-charges.jpg)
+*Each lease's share, and the council's for empty units.*
+
+
 ## Budgets and payments on account
 
 For each year, add the **budget** by cost heading (cleaning, security, repairs and so on) in **Manage data**,
@@ -86,6 +90,10 @@ record against them, marking anything late or overdue. Deadlines in the next 60 
 the dashboard and the Service charges page, and administrators get a list by email every Monday. PHAEMA also
 reminds you to set up next year's budget as the current year draws to a close.
 
+![A service charge year with its timetable](/static/help/sc-year.jpg)
+*The year page: budget, actual and the RICS timetable.*
+
+
 When the year-end statements are issued, record the date, who certified them and any accountant's review.
 
 If you record a budget or statements as issued **after the due date**, PHAEMA asks for the reason. The standard
@@ -97,6 +105,10 @@ The **Apportionment matrix** link on each year shows how every heading's cost is
 council (empty units, part years and caps), using the budget until spending is recorded and actual costs after.
 Download it to Excel to send with the budget or statements. At reconciliation the matrix is saved with the year, so
 it always shows exactly what was charged.
+
+![The apportionment matrix](/static/help/sc-matrix.jpg)
+*Every heading split across every lease.*
+
 
 ## Year-end reconciliation
 
@@ -121,3 +133,11 @@ the year end.
 Each lease has a printable **service charge statement** for the year, linked from the year page. It shows the
 schedule's budget and actual costs by heading, the tenant's share, the days and any cap applied, what was paid on
 account, and the balance. Before the year is reconciled it is marked as a draft.
+
+## Worked example
+
+**Northfield Business Park services** shares the cost of the gatehouse security, roads, landscaping, CCTV and waste
+between the eight leases on the business park, by floor area. Units 4 and 10 are empty, so the council pays their
+shares. DL-0509 Northfield Training Services' lease caps its service charge at £1,800 a year, so anything above that
+falls on the council too. The year page shows the budget, the actual spending to date and the timetable, and the
+**Apportionment matrix** shows every heading split across the leases.

@@ -42,6 +42,10 @@ and **managing surveyor**; the figures at the top follow the filters.
 Select **Record a certificate**, choose which, and enter the date, the result and the PDF. PHAEMA works out the
 expiry from the usual period, or enter the date on the certificate. For an EPC or DEC, enter the rating.
 
+![The compliance register](/static/help/compliance.jpg)
+*The register, worst first.*
+
+
 | Status | Means |
 |---|---|
 | Valid | In date, nothing outstanding |
@@ -58,6 +62,10 @@ days) or low (90 days). Each is tracked until marked **Done**. With [maintenance
 ## Golden Thread tiers
 
 PHAEMA keeps building information to three tiers:
+
+![A building's compliance page](/static/help/compliance-property.jpg)
+*A building's certificates, actions and Golden Thread information.*
+
 
 | Tier | For |
 |---|---|
@@ -92,3 +100,11 @@ website.
 
 The **Compliance** ready-made reports cover certificates expired, certificates expiring in 60 days, remedial
 actions overdue, and EPCs rated F or G, which are below the minimum standard for letting.
+
+## Worked example
+
+**DM-N04 Northfield Leisure Centre** needs ten certificates. The register shows its air conditioning inspection
+(TM44) as **missing** and its emergency lighting test as **expired**. The fire risk assessment is in date but has
+an action open (clear the escape route behind the sports hall), and one done (the plant room door closer). Its
+Golden Thread screening is tier B, with the leisure trust as responsible person day to day. **DM-N01-U04**, a vacant
+unit, has an EPC rated G, so a new letting case for it shows a minimum energy efficiency warning.

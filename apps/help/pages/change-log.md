@@ -19,4 +19,8 @@ Golden Thread of information for buildings.
 - Each property page has a **History** section with the changes to that property.
 - Select a change to see every field that changed, with old and new values.
 
+![The change log](/static/help/changes.jpg)
+*Every change, with who and when.*
+
+
 Download the change log to Excel or CSV from the Changes page, or build a [report](reports.md) on it.

@@ -36,6 +36,10 @@ Administrators: select **Manage data**, then **Users**, then **Add user**. Set a
 then on the next page add their name and email address and choose one group: **Administrators**, **Surveyors**,
 **Contributors** or **Viewers**. Their email address is used for [reminders](reminders.md).
 
+![Manage data](/static/help/admin.jpg)
+*Manage data, where administrators add users and change settings.*
+
+
 ## Supervisors
 
 Each surveyor needs a **supervisor and approver**, who approves their recommendations on [cases](cases.md#approvals).

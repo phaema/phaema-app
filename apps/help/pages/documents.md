@@ -15,6 +15,10 @@ Most documents are created from a case: open the case and select **Create a lett
 the templates for that type of case. Letters about an agreement, such as an arrears reminder, are on the
 agreement's page, and the valuer's instruction is on the valuation's page.
 
+![Creating a consent letter with a preview](/static/help/document-fill.jpg)
+*Answer the questions, check the details and preview.*
+
+
 On the next page:
 
 1. Answer any questions the template asks, such as the conditions of a consent or the reasons for a refusal.
@@ -40,6 +44,10 @@ email.
 | Lease management | Tenant's break notice acknowledgement; breach of covenant letter; schedule of dilapidations covering letter; rent deposit return |
 | Asset valuation | Instruction and terms of engagement to the valuer; response to the auditor's query (from a valuation flagged for audit) |
 | General | Enquiry acknowledgement; general letter |
+
+![The document library](/static/help/documents.jpg)
+*The library, grouped by subject.*
+
 
 Consent letters for assignment, underletting, charging and sharing include the written notice of the decision the
 Landlord and Tenant Act 1988 requires.
@@ -80,3 +88,10 @@ In the text:
 
 The council's name, department, address for service, phone and email in the letterhead come from **Module
 settings**, under **Letters and notices**.
+
+## Worked example
+
+On the case for consent to assign Exampleton Fine Foods' lease to Exampleton Deli Co Ltd, select **Create a letter
+or notice** and choose **Consent granted (approval)**. PHAEMA fills in the tenant, the premises (Unit 6, Riverside
+Way), the lease date and the case reference. Check the preview, download it as Word, add the final wording on any
+conditions, sign it, and file the signed copy back on the case.

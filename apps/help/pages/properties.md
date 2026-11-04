@@ -11,6 +11,10 @@ The property register holds every property the council owns, leases or manages, 
 
 Properties form a hierarchy. Each property can be **part of** another:
 
+![The record for Northfield Business Park](/static/help/property.jpg)
+*An estate's record, with its location and photo.*
+
+
 - **Estate**: a group of sites managed together, such as an industrial estate.
 - **Site**: one piece of land, which can hold buildings.
 - **Building**: a building on a site.
@@ -31,6 +35,10 @@ A property's page lists its parts. Lettable parts are shown in bold.
 | Managing surveyor | The surveyor responsible. Surveyors can change the properties they manage (see [roles](users-and-roles.md)). Events on the property's leases are assigned to them. |
 | Exclude from open data | Tick for sensitive properties so they are left out of any published asset list. |
 | Site hazards | What anyone visiting should know first, such as fragile roofs, confined spaces, lone working or dogs. Shown on cases, jobs and valuations for the property and everything within it. |
+
+![The property register filtered to Northfield](/static/help/property-list.jpg)
+*The register, searched for Northfield.*
+
 
 ## Floor areas
 
@@ -67,3 +75,14 @@ manage titles. See also [Land Registry boundaries](maps.md#land-registry-inspire
 ## Leases on a property
 
 The property page lists the leases and licences that include it. See [leases and licences](leases.md).
+
+## Worked example
+
+In the demonstration data, **DM-N01 Northfield Business Park** is an estate. Its parts are the **Hangar block**
+(DM-N01-B01, units 1 to 5), the **Workshop block** (DM-N01-B02, units 6 to 10) and the estate roads (DM-N01-L01).
+Units 4 and 10 are vacant, so the estate shows as partly let.
+
+Lena Chen is the managing surveyor of DM-N01, so she also manages every block and unit within it: their events
+are assigned to her and she can change them. **DM-N06 Former Northfield bus depot** has no managing surveyor (filter
+the register by **Managing surveyor: Nobody** to find it) and records site hazards, which appear on every case,
+job and valuation for it.

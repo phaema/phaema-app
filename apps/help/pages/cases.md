@@ -23,6 +23,10 @@ Every case moves through the same five stages: **Received**, **Gathering informa
 **Decision** and **Completing**. Select **Move to next stage** as the work progresses. A case can be **put on
 hold** with a reason, and closed cases can be reopened.
 
+![A licence for alterations case at the Assessing stage](/static/help/case.jpg)
+*A case shows its stage, key dates and links.*
+
+
 Each case type comes with a task list for each stage, for example *Covenant strength check* and *Check rent
 arrears on the rent account* for an assignment. Tick tasks off as you go, and add your own.
 
@@ -31,6 +35,10 @@ arrears on the rent account* for an assignment. Tick tasks off as you go, and ad
 Every surveyor has a **supervisor**, who approves their recommendations. Most case types need the supervisor's
 approval before the case moves to **Decision**: consents, lease event cases, lease management, asset valuations,
 new lettings, wayleaves, land purchases and other activities. Enquiries, complaints and similar case types do not.
+
+![The approval banner seen by a supervisor](/static/help/case-approval.jpg)
+*What the supervisor sees: the recommendation and the conflict declaration.*
+
 
 When a case reaches a stage that needs approval, **Move to next stage** is replaced by **Ask for approval**:
 
@@ -64,6 +72,10 @@ date served, the tenant's response, the settlement, the council's costs and note
 lease is shown alongside. The Pre-Action Protocol for dilapidations claims expects the tenant to respond within 56
 days of the schedule, and the settlement is compared with the schedule.
 
+![The dilapidations section of a case](/static/help/dilapidations.jpg)
+*The dilapidations claim on a lease expiry.*
+
+
 ## Energy performance (MEES)
 
 On new lettings and renewals, when the compliance module is on, PHAEMA warns if the property's EPC (or its
@@ -83,6 +95,10 @@ case page has a **Heads of terms** section listing the 16 items the Code require
 fit-out and conditions. For a renewal, each item shows what the current agreement says as a starting point. Write
 "None" where an item does not apply.
 
+![The heads of terms section of a new letting case](/static/help/heads-of-terms.jpg)
+*Heads of terms, counted against the RICS Code.*
+
+
 Record whether the tenant has a professional adviser. If not, the Code requires the council to give them the Code
 and its supplemental guide and advise them to take professional advice: record the date you did.
 
@@ -93,6 +109,10 @@ answered. Administrators can turn the heads of terms check on for other case typ
 
 Lease renewal cases also record a **section 25 notice** from the council or a **section 26 request** from the
 tenant: the date given and the date in the notice. PHAEMA then shows:
+
+![The 1954 Act notices section of a renewal case](/static/help/notice-dates.jpg)
+*Notice dates and the court deadline worked out.*
+
 
 | Date | Rule |
 |---|---|
@@ -161,3 +181,18 @@ hoardings, filming or events. Administrators can change any type (its tasks, tar
 The ready-made **Cases** reports show open cases by stage and owner, cases past target, consent decisions with the
 days taken, and cases closed in the last year. Cases can also be used in your own [reports](reports.md), and every
 change to a case is in the [change log](change-log.md).
+
+## Worked example
+
+Northfield Pharmacy (DL-0511) asks to add a consultation room and a new shop front at 1 The Precinct.
+
+1. Rob Baker opens a **Licence for alterations** case from the agreement, received online. He records the
+   acknowledgement two days later.
+2. The drawings arrive and he records **Application complete**: the target becomes 28 days later.
+3. He ticks off the tasks, confirms under **Conflicts of interest** that there is none, and moves the case to
+   **Assessing**.
+4. He writes his recommendation, "Grant a licence for alterations with reinstatement on request and planning
+   consent for the shop front", and asks Sam Hughes for approval.
+5. Sam sees the recommendation and the conflict declaration on the case and on his dashboard, and approves. The
+   case moves to **Decision**; Rob records the decision and creates the consent letter from the
+   [document library](documents.md).

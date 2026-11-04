@@ -298,8 +298,11 @@ class Command(BaseCommand):
         self.load_inspire(refs)
         from apps.leases import demo as lease_demo
 
-        lease_count = lease_demo.load()
-        lease_count += demo_north.load_leases(date.today())
+        lease_demo.load()
+        demo_north.load_leases(date.today())
+        from apps.leases.models import Lease
+
+        lease_count = Lease.objects.filter(reference__startswith="DL-").count()
         from apps.ledger import demo as ledger_demo
 
         ledger_demo.UNPAID_LAST.update(demo_north.UNPAID_LAST)

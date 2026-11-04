@@ -13,6 +13,10 @@ always shows the data as it is now, so run it again to get up-to-date figures.
 Ready-made reports are grouped by topic. Reports for an optional module (rent ledger, service charges,
 maintenance, compliance, asset valuation) appear when that module is switched on.
 
+![The reports page](/static/help/reports.jpg)
+*Ready-made reports grouped by topic.*
+
+
 ### Property and assets
 
 | Report | What it shows |
@@ -120,6 +124,10 @@ Only administrators can change ready-made reports. Anyone can **copy** one to th
 
 Select **Make a new report** and choose what to report on:
 
+![Choosing what to report on](/static/help/report-new.jpg)
+*Start a report by choosing what to report on.*
+
+
 - **Properties**, **Leases and licences**, **Lease events**, **Tenants and other parties**, the **Rent schedule**
   (every rent, past and future), **Rent charges**, **Rent receipts** and **Rent accounts** (balances and arrears
   by agreement, from the [rent ledger](rent-ledger.md)),
@@ -147,3 +155,10 @@ Tick **Share this report with everyone** to let colleagues run it. They see it u
 you and administrators can change or delete it; colleagues can copy it.
 
 Reports you do not share are private to you, although administrators can see them.
+
+## Worked example
+
+To list every Northfield lease paying at least £15,000 a year that expires in the next two years: select **Make a
+new report**, choose **Leases and licences**, tick the reference, tenant, premises, rent and term end columns,
+filter rent to at least 15,000 and term end to the next 730 days, sort by term end, tick **Show totals**, and
+**Save and run**. Share it with colleagues if they need it too.

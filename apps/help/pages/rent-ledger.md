@@ -53,6 +53,10 @@ Each agreement has a rent account, which you can open from the agreement's page,
 list. It shows every charge and payment in date order with a running balance, and marks what is still owed on each
 charge, and whether it is overdue.
 
+![A tenant's rent account](/static/help/rent-account.jpg)
+*A rent account with its running balance.*
+
+
 Payments are set against the **oldest debt first**. The account can be downloaded to Excel or CSV, or opened as a
 **printable statement** to send to the tenant.
 
@@ -84,6 +88,10 @@ A negative amount records a refund or a returned payment.
 1–30 days, 31–60 days, 61–90 days and over 90 days. Download it to Excel for arrears meetings. The
 [dashboard](dashboard.md) shows the total arrears and the collection rate.
 
+![The arrears list aged by days overdue](/static/help/arrears.jpg)
+*Arrears, aged.*
+
+
 The **collection rate** is the rent received in the last 12 months as a percentage of the rent that fell due in the
 same period.
 
@@ -112,3 +120,11 @@ The columns are fixed, so the finance team can map them once:
 
 The [report builder](reports.md) has **Rent charges** and **Rent receipts** datasets, for example to list the rent
 charged on one estate, or the charges still waiting to go to finance.
+
+## Worked example
+
+Northfield Joinery Workshop (DL-0506) pays £14,400 a year monthly in advance, plus VAT: £1,440 a month. Its rent
+account shows the last two monthly charges unpaid, so it appears on the **Arrears** list, aged by how long each
+charge has been overdue. Northfield Bakery (DL-0514) has paid only part of its latest charge: payments are set against the
+oldest debt first, so the balance shows on that charge. To agree an allowance with a tenant, open the charge on the
+rent account, select **Credit this charge**, enter the amount and the reason.

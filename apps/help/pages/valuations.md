@@ -46,6 +46,10 @@ The asset valuation page lists the assets due at the year end, and why: not valu
 or reclassified since the last valuation. Download the **valuer's data pack** (Excel), with each asset's address,
 UPRN, class, basis, tenure, floor areas, leases and rents, and last value, to send with the instructions.
 
+![The asset valuation programme](/static/help/valuations.jpg)
+*This year's programme.*
+
+
 **Start the programme** (administrators) opens a programme case, and an **asset valuation case** for each asset,
 owned by its managing surveyor, with an instruction recorded against it. The cases carry the task lists and the
 supervisor approval described in [cases](cases.md).
@@ -67,6 +71,10 @@ and shown in the year-end schedule, as the accounts must disclose it.
 
 Values come back on each valuation's page, or all at once with the **Valuer's returned figures** import (see
 [importing](import-export.md)). PHAEMA records what the Red Book expects a valuation to document:
+
+![A valuation page](/static/help/valuation.jpg)
+*A valuation assigned to an external valuer.*
+
 
 - the basis, method and purpose;
 - when the terms of engagement were agreed;
@@ -125,3 +133,12 @@ page. PHAEMA then brings the last accepted value forward to the year end: the in
 only when land and buildings are split, and to the whole value otherwise. The indexed value and the factor appear
 on the property's valuation page and in the schedule. It is a guide for deciding whether a revaluation is needed,
 not a valuation.
+
+## Worked example
+
+In this year's programme, the water tower telecoms site (DM-N07) and Hilltop Farm (DM-N10) are assigned to Lena
+Chen as a council staff valuer, so they appear under **Assigned to you** for her; the rest go to the external
+valuer. Last year's valuation of
+**Northfield Market Hall** was flagged for audit: the auditor asked about the turnover rent assumption and the
+yield. Rob Baker, the managing surveyor, prepares the response; when it has been sent he records it as reported,
+and finance closes it off once the auditor is satisfied.
