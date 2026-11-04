@@ -61,6 +61,38 @@ TIERS = [
 SELF_HOST_RUNNING = 4000
 
 
+TOUR = [
+    ("my-work", "My work", "Every surveyor starts the day with what is overdue, what is due in 90 days, their cases and their properties.",
+     "A surveyor's My work page listing overdue items, upcoming events, open cases and managed properties."),
+    ("case", "Casework", "Consents, renewals and disposals move through set stages with statutory targets, tasks and supervisor approval.",
+     "A licence for alterations case at the assessing stage with key dates and its target date."),
+    ("heads-of-terms", "Lettings", "Heads of terms checked against all 16 items in the RICS leasing code before a draft lease goes out.",
+     "A new letting case showing heads of terms progress and the tenant's representation."),
+    ("compliance", "Compliance", "Every certificate on every building, worst first, with remedial actions and Golden Thread tiers.",
+     "The compliance register listing certificates by status with expired and missing ones first."),
+    ("rent-account", "Rents", "Demands, receipts and aged arrears per tenant, with a statement ready to send.",
+     "A tenant's rent account with charges, receipts and the running balance."),
+    ("sc-matrix", "Service charges", "Shares by floor area with caps, budgets, actuals and year-end statements on the RICS timetable.",
+     "A service charge apportionment matrix showing each lease's share of each cost heading."),
+    ("job", "Repairs", "Repairs with targets, who pays under the lease, works orders and site hazards before anyone visits.",
+     "An emergency repair job with its priority, target date and the Before you visit hazard panel."),
+    ("valuation", "Valuation", "The rolling valuation programme, Red Book records, fair value levels and audit queries in one place.",
+     "A fair value valuation of the market hall assigned to an external valuer."),
+]
+
+
+def tour_html():
+    tabs, panels = [], []
+    for i, (key, label, text, alt) in enumerate(TOUR):
+        sel = "true" if i == 0 else "false"
+        tabs.append(f'<button type="button" role="tab" id="tab-{key}" aria-controls="panel-{key}" aria-selected="{sel}"'
+                    f'{" tabindex=\"-1\"" if i else ""}>{label}</button>')
+        panels.append(f'<div class="tour__panel" role="tabpanel" id="panel-{key}" aria-labelledby="tab-{key}"'
+                      f'{" hidden" if i else ""}><p>{text}</p><img src="img/tour-{key}.jpg" width="1600" height="1000" '
+                      f'loading="lazy" alt="{alt}"></div>')
+    return "\n        ".join(tabs), "\n      ".join(panels)
+
+
 def money(n):
     return f"£{n:,.0f}"
 
@@ -143,26 +175,39 @@ BODY = r'''<div class="top"><div class="wrap top__inner">
 
 <main id="main">
 <section class="view" id="overview" aria-labelledby="h-overview">
-  <div class="wrap hero">
-    <div class="hero__text">
-      <p class="kicker">Property holding and estate management for councils in England and Wales</p>
-      <h1 id="h-overview">Estate management software your council owns.</h1>
-      <p class="lede">PHAEMA runs the property terrier, leases, casework, rents, service charges, repairs, compliance and asset valuations in one place. It is open source, so you never pay a licence fee, you can see every line of code, and you can move supplier without moving system.</p>
-      <div class="cta">
-        <a class="button" href="#value">See the cost comparison</a>
-        <a class="button button--quiet" href="https://github.com/phaema/phaema-app">Read the code</a>
+  <div class="hero-band">
+    <div class="wrap hero">
+      <div class="hero__text">
+        <p class="kicker">Property holding and estate management for councils in England and Wales</p>
+        <h1 id="h-overview">Estate management software your council owns.</h1>
+        <p class="lede">The terrier, leases, casework, rents, service charges, repairs, compliance and valuations in one place. Open source, so there is no licence fee, every line of code is public, and you can change supplier without changing system.</p>
+        <div class="cta">
+          <a class="button button--bright" href="#value">See what you could save</a>
+          <a class="button button--ghost" href="#features">Take the tour</a>
+        </div>
+        <ul class="proof">
+          <li><strong>£0</strong><span>licence fee</span></li>
+          <li><strong>10</strong><span>modules, all included</span></li>
+          <li><strong>30</strong><span>letter and notice templates</span></li>
+        </ul>
       </div>
-      <p class="fine">In alpha, November 2026. Built to RICS professional standards and the government's Technology Code of Practice.</p>
+      <figure class="plan plan--hero">
+        <div class="plan__sheet">
+          <img src="img/tour-my-work.jpg" width="1600" height="1000" alt="PHAEMA's My work dashboard for a surveyor: items that need attention, upcoming events, open cases and the properties they manage.">
+          <span class="edge" aria-hidden="true"></span>
+        </div>
+        <figcaption><span class="plan__key" aria-hidden="true"></span>As edged red: one surveyor's week in PHAEMA.</figcaption>
+      </figure>
     </div>
-    <figure class="plan">
-      <div class="plan__sheet"><img src="img/my-work.jpg" width="1920" height="1230" alt="PHAEMA's My work dashboard for a surveyor: items that need attention, upcoming events, open cases and the properties they manage."></div>
-      <figcaption><span class="plan__key" aria-hidden="true"></span>My work: one surveyor's overdue items, next 90 days, cases and properties.</figcaption>
-    </figure>
   </div>
 
-  <div class="wrap band">
-    <h2>What councils pay now</h2>
-    <p class="band__lead">Eight councils' published contracts for estates and property systems cost between <strong>£25,000 and £242,892 a year</strong>, with a median of <strong>£74,494</strong>. PHAEMA Hosted Standard is <strong>£14,000 a year</strong>, and self-hosting has no licence fee at all.</p>
+  <div class="wrap money" aria-labelledby="h-money">
+    <h2 id="h-money" class="visually-hidden">What councils pay</h2>
+    <div class="money__row">
+      <p class="money__fig"><strong>£74,494</strong><span>a year: what the typical council pays for its estates system, from eight published contracts</span></p>
+      <p class="money__fig money__fig--us"><strong>£14,000</strong><span>a year: PHAEMA Hosted Standard, everything included</span></p>
+    </div>
+    <div class="money__bars" aria-hidden="true"><span class="mb mb--them"></span><span class="mb mb--us"></span></div>
     <p><a href="#value">How the figures compare over five years</a></p>
   </div>
 
@@ -189,12 +234,13 @@ BODY = r'''<div class="top"><div class="wrap top__inner">
       <article><h3>Asset valuation</h3><p>Rolling programme, internal or external valuers, Red Book records, fair value levels, indexation between valuations, impairment prompts and audit queries.</p></article>
       <article><h3>Reports and open data</h3><p>Ready-made and custom reports to Excel, the Transparency Code land and assets list, an API and a full change log.</p></article>
     </div>
-    <div class="shots">
-      <figure><img src="img/case.jpg" width="1920" height="1230" loading="lazy" alt="A licence for alterations case at the assessing stage, with key dates, target date and linked agreement."><figcaption>A consent case with its statutory target date.</figcaption></figure>
-      <figure><img src="img/compliance.jpg" width="1920" height="1230" loading="lazy" alt="The compliance overview listing certificates by status, with expired and missing certificates first."><figcaption>Compliance across every building.</figcaption></figure>
-      <figure><img src="img/property.jpg" width="1920" height="1230" loading="lazy" alt="Northfield Business Park property record with its blocks and units."><figcaption>A property record and its parts.</figcaption></figure>
-      <figure><img src="img/estate.jpg" width="1920" height="1230" loading="lazy" alt="The whole estate dashboard with vacancy, rent roll and lease event figures."><figcaption>The whole estate at a glance.</figcaption></figure>
-    </div>
+    <div class="tour" data-tour>
+      <h3 class="gap">Take the tour</h3>
+      <div class="tour__tabs" role="tablist" aria-label="Product tour">
+        __TOUR_TABS__
+      </div>
+      __TOUR_PANELS__
+    </div></div>
   </div>
 </section>
 
@@ -336,10 +382,11 @@ BODY = r'''<div class="top"><div class="wrap top__inner">
 </div></footer>
 
 <script>
+document.documentElement.classList.add('js');
 (function () {
   var views = Array.prototype.slice.call(document.querySelectorAll('.view'));
   var links = Array.prototype.slice.call(document.querySelectorAll('.nav a'));
-  document.documentElement.classList.add('js');
+  
   function show() {
     var id = (location.hash || '#overview').slice(1);
     if (!document.getElementById(id) || !document.getElementById(id).classList.contains('view')) id = 'overview';
@@ -371,6 +418,36 @@ BODY = r'''<div class="top"><div class="wrap top__inner">
   });
   document.getElementById('calc').addEventListener('submit', function (e) { e.preventDefault(); });
   calc();
+
+  // Product tour tabs (arrow keys move between tabs)
+  var tabs = Array.prototype.slice.call(document.querySelectorAll('[role="tab"]'));
+  function select(tab) {
+    tabs.forEach(function (t) {
+      var on = t === tab;
+      t.setAttribute('aria-selected', on ? 'true' : 'false');
+      t.tabIndex = on ? 0 : -1;
+      document.getElementById(t.getAttribute('aria-controls')).hidden = !on;
+    });
+  }
+  tabs.forEach(function (t, i) {
+    t.addEventListener('click', function () { select(t); });
+    t.addEventListener('keydown', function (e) {
+      var j = e.key === 'ArrowRight' ? i + 1 : e.key === 'ArrowLeft' ? i - 1 : e.key === 'Home' ? 0 : e.key === 'End' ? tabs.length - 1 : null;
+      if (j === null) return;
+      e.preventDefault(); var n = tabs[(j + tabs.length) % tabs.length]; select(n); n.focus();
+    });
+  });
+
+  // The cost chart grows when it scrolls into view
+  var chart = document.querySelector('.chart');
+  if (chart && 'IntersectionObserver' in window) {
+    var seen = false;
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (en) { if (en.isIntersecting && !seen) { seen = true; chart.classList.add('grow'); io.disconnect(); } });
+    }, { threshold: 0.3 });
+    io.observe(chart);
+    window.addEventListener('hashchange', function () { if (location.hash === '#value') { chart.classList.remove('grow'); void chart.getBoundingClientRect(); chart.classList.add('grow'); } });
+  }
 })();
 </script>
 '''
@@ -521,6 +598,66 @@ thead th span { display: block; font-family: var(--body); font-weight: 400; font
   .calc__out { border-left: 0; padding-left: 0; border-top: 3px solid var(--survey); padding-top: 12px; }
 }
 @media (prefers-reduced-motion: no-preference) { html { scroll-behavior: smooth; } }
+
+/* ---------- flashier layer ---------- */
+.hero-band { --band: #0d1b2c; --band-ink: #f1f5f3; --band-muted: #b9c6cf; --grid: rgba(255,255,255,.07);
+  background-color: var(--band); color: var(--band-ink);
+  background-image: linear-gradient(var(--grid) 1px, transparent 1px), linear-gradient(90deg, var(--grid) 1px, transparent 1px),
+    radial-gradient(1200px 500px at 85% 20%, rgba(44,106,62,.35), transparent 60%);
+  background-size: 64px 64px, 64px 64px, auto; margin-top: -48px; padding-block: 72px 80px; }
+.hero-band h1 { color: var(--band-ink); font-size: clamp(2.6rem, 6vw, 4.8rem); }
+.hero-band .kicker { color: var(--band-muted); }
+.hero-band .lede { color: var(--band-ink); }
+.hero-band a:not(.button) { color: #9fd0f5; }
+.button--bright { background: #ff5b4f; color: #0d1b2c; box-shadow: 0 4px 0 #8f1f1a; }
+.button--bright:hover { background: #ff7a70; }
+.button--ghost { background: transparent; color: var(--band-ink); box-shadow: inset 0 0 0 2px var(--band-ink); }
+.proof { list-style: none; display: flex; flex-wrap: wrap; gap: 12px 36px; padding: 0; margin: 28px 0 0; }
+.proof li { display: grid; }
+.proof strong { font-family: var(--display); font-weight: 800; font-size: 2.4rem; line-height: 1; color: #ff8a80; }
+.proof span { color: var(--band-muted); font-size: .95rem; }
+.plan--hero { transform: perspective(1400px) rotateY(-9deg) rotateX(3deg); transform-origin: left center; }
+.plan--hero .plan__sheet { background: #fff; border: 0; padding: 12px; box-shadow: 0 30px 60px rgba(0,0,0,.45), 24px 24px 0 rgba(255,91,79,.18); }
+.plan--hero .plan__sheet::after { display: none; }
+.plan--hero figcaption { color: var(--band-muted); }
+.plan--hero .plan__key { border-color: #ff5b4f; }
+.edge { position: absolute; inset: 5px; border: 3px solid #e0312b; pointer-events: none; }
+@media (prefers-reduced-motion: no-preference) {
+  .js .edge { animation: draw 1.6s .4s cubic-bezier(.6,.05,.3,1) both; }
+  .js .plan--hero { animation: settle 1.1s cubic-bezier(.2,.7,.2,1) both; }
+  .grow .bar { animation: grow .9s cubic-bezier(.2,.7,.2,1) both; transform-box: fill-box; transform-origin: left; }
+  .grow .bar:nth-of-type(odd) { animation-delay: .08s; }
+  .tour__panel img { animation: fadein .35s ease-out; }
+}
+@keyframes draw { 0% { clip-path: inset(0 100% calc(100% - 3px) 0); } 35% { clip-path: inset(0 0 calc(100% - 3px) 0); } 100% { clip-path: inset(0 0 0 0); } }
+@keyframes settle { from { transform: perspective(1400px) rotateY(-18deg) rotateX(6deg) translateY(16px); } }
+@keyframes grow { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+@keyframes fadein { from { opacity: .3; transform: translateY(6px); } }
+
+.money { padding-block: 48px 8px; }
+.money__row { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 32px; }
+.money__fig { display: grid; gap: 6px; margin: 0; max-width: none; }
+.money__fig strong { font-family: var(--display); font-weight: 800; font-size: clamp(3rem, 8vw, 6rem); line-height: .95; letter-spacing: -.03em; color: var(--muted); font-variant-numeric: tabular-nums; }
+.money__fig--us strong { color: var(--survey); }
+.money__fig span { font-size: 1.05rem; max-width: 34ch; }
+.money__bars { display: grid; gap: 8px; margin: 24px 0 16px; }
+.mb { display: block; height: 14px; border-radius: 2px; }
+.mb--them { background: var(--muted); width: 100%; }
+.mb--us { background: var(--survey); width: 18.8%; }
+
+.tour__tabs { display: flex; flex-wrap: wrap; gap: 8px; margin: 8px 0 20px; }
+.tour__tabs [role="tab"] { font: 700 1rem var(--body); padding: 10px 16px; border: 2px solid var(--line); background: var(--sheet); color: var(--ink); cursor: pointer; border-radius: 999px; }
+.tour__tabs [role="tab"][aria-selected="true"] { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+.tour__tabs [role="tab"]:hover { border-color: var(--ink); }
+.tour__panel p { font-size: 1.15rem; }
+.tour__panel img { display: block; width: 100%; height: auto; border: 1px solid var(--line); box-shadow: 0 18px 40px rgba(13,27,44,.18); }
+html:not(.js) .tour__tabs { display: none; }
+html:not(.js) .tour__panel[hidden] { display: block !important; margin-top: 24px; }
+@media (max-width: 900px) {
+  .money__row { grid-template-columns: minmax(0, 1fr); }
+  .plan--hero { transform: none; }
+  .js .plan--hero { animation: none; }
+}
 </style>
 '''
 
@@ -531,7 +668,8 @@ def build(artifact=False):
     body = (BODY.replace("__CHART__", bar_chart()).replace("__CONTRACTS__", contract_rows())
             .replace("__TIERS__", tier_cards()).replace("__ASOF__", AS_OF)
             .replace("__TIERS_JSON__", json.dumps([[t[1], t[2]] for t in TIERS]))
-            .replace("__SELF_HOST__", str(SELF_HOST_RUNNING)))
+            .replace("__SELF_HOST__", str(SELF_HOST_RUNNING))
+            .replace("__TOUR_TABS__", tour_html()[0]).replace("__TOUR_PANELS__", tour_html()[1]))
     if artifact:
         return STYLE + body
     return ('<!doctype html>\n<html lang="en-GB">\n<head>\n<meta charset="utf-8">\n'
