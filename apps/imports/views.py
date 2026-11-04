@@ -24,7 +24,7 @@ def _available():
 
     settings = ModuleSettings.load()
     needs = {"receipts": settings.rent_ledger_enabled, "expenditure": settings.service_charges_enabled,
-             "maintenance": settings.maintenance_enabled}
+             "maintenance": settings.maintenance_enabled, "valuations": settings.valuation_enabled}
     return [wb for wb in WORKBOOKS.values() if needs.get(wb.key, True)]
 
 

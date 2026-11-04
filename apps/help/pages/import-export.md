@@ -80,6 +80,13 @@ can be left out.
 
 Use it to load a condition survey or an existing asset register in one go, then re-import corrected files.
 
+### Valuer's returned figures
+
+With [asset valuation](valuations.md) switched on, this template takes the values back from the valuer for the
+assets instructed in the year's programme: asset reference, valuation date, value, land and buildings, remaining
+life, method, inspection, report date, valuer, and any material uncertainty. Each row updates the instructed
+valuation; accepted valuations cannot be changed this way.
+
 ## Exporting
 
 Every list (properties, leases, parties, events and the change log) has **Download Excel** and **Download CSV**

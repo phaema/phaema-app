@@ -1,0 +1,19 @@
+{% extends "base.html" %}{% load i18n humanize phaema %}
+{% block title %}{% translate "Valuation audit" %}{% endblock %}
+{% block help_page %}valuations{% endblock %}
+{% block breadcrumbs %}<nav class="govuk-breadcrumbs" aria-label="Breadcrumb"><ol class="govuk-breadcrumbs__list"><li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="{% url 'valuations:home' %}">{% translate "Asset valuation" %}</a></li><li class="govuk-breadcrumbs__list-item">{% translate "Audit" %}</li></ol></nav>{% endblock %}
+{% block content %}
+<h1 class="govuk-heading-xl">{% translate "Valuation audit" %}{% if year %} {{ year }}{% endif %}</h1>
+{% include "core/_hint.html" with summary=_("How does the audit process work?") text=_("An administrator flags a valuation on its page, with the auditor's query and a due date. The person preparing the response is emailed. They record the response and any evidence, and mark it reported to the auditor. When the auditor is satisfied, an administrator closes it with the outcome. If the valuation has to change, closing it reopens the valuation for amendment.") page="valuations" anchor="audit" %}
+{% if years|length > 1 %}<p class="govuk-body">{% for y in years %}{% if y == year %}<strong>{{ y }}</strong>{% else %}<a class="govuk-link" href="?year={{ y }}">{{ y }}</a>{% endif %}{% if not forloop.last %} · {% endif %}{% endfor %}</p>{% endif %}
+{% if year %}<p class="govuk-body-s"><a class="govuk-link" href="?year={{ year }}&amp;format=xlsx">{% translate "Download the audit log for the auditor (Excel)" %}</a></p>{% endif %}
+{% for label, items in groups %}
+<h2 class="govuk-heading-m">{{ label }} ({{ items|length }})</h2>
+{% if items %}<table class="govuk-table"><tbody class="govuk-table__body">{% for a in items %}<tr class="govuk-table__row">
+  <td class="govuk-table__cell"><a class="govuk-link" href="{{ a.get_absolute_url }}">{{ a.valuation.property.reference }} {{ a.valuation.property.name }}</a><br><span class="govuk-body-s">{{ a.get_reason_display }}: {{ a.query|truncatewords:25 }}</span></td>
+  <td class="govuk-table__cell govuk-table__cell--numeric">{% if a.valuation.value is not None %}£{{ a.valuation.value|floatformat:0|intcomma }}{% endif %}</td>
+  <td class="govuk-table__cell govuk-body-s">{% if a.status == "open" %}{{ a.assigned_to|person:"–" }}{% if a.due_on %}<br>{% translate "Due" %} {{ a.due_on|date:"j M Y" }}{% if a.overdue %} <strong class="govuk-tag govuk-tag--red">{% translate "Overdue" %}</strong>{% endif %}{% endif %}{% elif a.status == "reported" %}{% translate "Reported" %} {{ a.reported_on|date:"j M Y" }}{% else %}{{ a.get_outcome_display }}<br>{{ a.closed_on|date:"j M Y" }}{% endif %}</td>
+</tr>{% endfor %}</tbody></table>{% else %}<p class="govuk-body">{% translate "None." %}</p>{% endif %}
+{% empty %}{% endfor %}
+{% if not year %}<p class="govuk-body">{% translate "No valuations have been flagged for audit yet. Flag one from its page." %}</p>{% endif %}
+{% endblock %}

@@ -1,0 +1,8 @@
+{% extends "base.html" %}{% load i18n %}
+{% block title %}{% translate "Asset valuation" %}{% endblock %}
+{% block help_page %}valuations{% endblock %}
+{% block content %}
+<h1 class="govuk-heading-l">{% translate "Asset valuation is switched off" %}</h1>
+<p class="govuk-body">{% translate "Your council has not switched on the asset valuation module in PHAEMA." %}</p>
+{% if is_administrator %}<p class="govuk-body">{% translate "To switch it on, go to Manage data, then Module settings, and tick Asset valuation." %}</p>{% endif %}
+{% endblock %}

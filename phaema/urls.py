@@ -39,6 +39,7 @@ urlpatterns = [
     path("service-charges/", include("apps.servicecharges.urls")),
     path("maintenance/", include("apps.maintenance.urls")),
     path("compliance/", include("apps.compliance.urls")),
+    path("valuations/", include("apps.valuations.urls")),
     path("open-data/", opendata.index, name="open-data"),
     path("open-data/<slug:slug>.<str:fmt>", opendata.dataset, name="open-data-file"),
     path("cases/", include("apps.cases.urls")),
