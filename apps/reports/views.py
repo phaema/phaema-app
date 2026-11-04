@@ -41,27 +41,57 @@ def report_list(request):
     grouped = {}
     for report in sorted(visible.exclude(starter=""), key=lambda r: order.get(r.starter, 999)):
         cat = category(report.starter)
-        if hidden.get(cat):
+        if hidden.get(cat) or not dataset_allowed(request.user, report.dataset):
             continue
         grouped.setdefault(cat, []).append(report)
     return render(request, "reports/report_list.html", {
         "starter_groups": [(c, grouped[c]) for c in CATEGORIES if c in grouped],
-        "shared": visible.filter(starter="", shared=True).exclude(owner=request.user).select_related("owner"),
-        "mine": visible.filter(starter="", owner=request.user),
-        "datasets": datasets.registry().values(),
+        "shared": [r for r in visible.filter(starter="", shared=True).exclude(owner=request.user).select_related("owner")
+                   if dataset_allowed(request.user, r.dataset)],
+        "mine": [r for r in visible.filter(starter="", owner=request.user) if dataset_allowed(request.user, r.dataset)],
+        "datasets": _datasets_for(request.user),
     })
+
+
+# Datasets that belong to an optional module: only people who can open the whole module may report on them.
+DATASET_MODULES = {
+    "charges": "ledger", "receipts": "ledger", "rent_accounts": "ledger",
+    "jobs": "maintenance", "components": "maintenance", "planned": "maintenance", "contracts": "maintenance",
+    "contractors": "maintenance",
+    "compliance": "compliance", "certificates": "compliance", "compliance_actions": "compliance",
+    "valuations": "valuations", "valuation_audit": "valuations",
+    "service_years": "servicecharges", "expenditure": "servicecharges",
+}
+
+
+def dataset_allowed(user, key):
+    from apps.core.access import scope
+
+    module = DATASET_MODULES.get(key)
+    return module is None or scope(user, module) == "full"
+
+
+def _datasets_for(user):
+    return [d for d in datasets.registry().values() if dataset_allowed(user, d.key)]
 
 
 def _get_visible(request, pk):
     report = get_object_or_404(Report, pk=pk)
     if not report.visible_to(request.user):
         raise Http404
+    if not dataset_allowed(request.user, report.dataset):
+        raise PermissionDenied
     return report
 
 
-def _queryset(report):
+def _queryset(report, user=None):
     ds = datasets.get(report.dataset)
-    qs = datasets.apply_filters(ds, ds.queryset(), report.filters)
+    base = ds.queryset()
+    if report.dataset == "changes" and user is not None:
+        from apps.core.access import audit_visible
+
+        base = audit_visible(user, base)
+    qs = datasets.apply_filters(ds, base, report.filters)
     sort = ds.field(report.sort_by)
     if sort and sort.filterable:
         order = sort.path if not sort.type == "user" else f"{sort.path}__first_name"
@@ -72,7 +102,7 @@ def _queryset(report):
 @login_required
 def report_run(request, pk):
     report = _get_visible(request, pk)
-    ds, qs = _queryset(report)
+    ds, qs = _queryset(report, request.user)
     if ds is None:
         raise Http404
     exported = export.download(request, report.name, ds, qs, report.columns, totals=report.show_totals)
@@ -230,8 +260,10 @@ def _form_context(ds, report, errors=None):
 @login_required
 def report_new(request):
     ds = datasets.get(request.GET.get("dataset", ""))
+    if ds is not None and not dataset_allowed(request.user, ds.key):
+        raise PermissionDenied
     if ds is None:
-        return render(request, "reports/report_choose.html", {"datasets": datasets.registry().values()})
+        return render(request, "reports/report_choose.html", {"datasets": _datasets_for(request.user)})
     report = Report(dataset=ds.key, columns=ds.default_columns, owner=request.user)
     return _edit(request, ds, report, new=True)
 

@@ -9,6 +9,13 @@ The rent ledger charges rent on agreements the council lets out, records payment
 and shows what each tenant owes. It is an optional module: an administrator switches it on in
 [settings](settings.md#rent-ledger-settings). When it is on, **Rents** appears in the menu.
 
+## Who can see and do what
+
+What you see depends on your [access areas](users-and-roles.md#access-areas). Finance staff and administrators
+see every account. People in the Estates area see rent and arrears for their own patch: the properties they
+manage, those of everyone they supervise, and anyone they are covering for. Raising rent, credit notes and the
+finance export are for administrators and finance officers.
+
 ## Who raises the invoices
 
 Councils work in one of two ways, chosen in settings:
@@ -23,7 +30,7 @@ Either way, the [finance export](#the-finance-export) is how charges reach the f
 
 ## Raising rent
 
-Administrators: select **Rents**, then **Raise rent**.
+Administrators and finance officers: select **Rents**, then **Raise rent**.
 
 1. Choose the range of **payment dates** to charge, for example the next quarter, and the **issue date**.
 2. Select **Preview the charges**. PHAEMA lists every charge due between the dates on current and holding-over
@@ -70,7 +77,7 @@ gets an invoice number in the same series and goes to finance in the next export
 
 ## Receipts
 
-Payments are recorded in the finance system and imported into PHAEMA. Administrators: select **Rents**, then
+Payments are recorded in the finance system and imported into PHAEMA. Administrators and finance officers: select **Rents**, then
 **Import receipts**, and follow the usual [import steps](import-export.md#how-every-import-works).
 
 Each payment is matched to an agreement by, in order:

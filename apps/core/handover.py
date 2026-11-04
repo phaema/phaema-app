@@ -27,6 +27,7 @@ class Item:
     paths: tuple = ()  # routes from the record to a Property, for the building limit
     roles: tuple = STAFF  # who may receive it
     move: Callable = None  # (record, old, new) -> None; default sets `field`
+    module: str = ""  # an optional module the receiver must be able to open (their access areas)
     field_name: str = ""
     extra: dict = field(default_factory=dict)
 
@@ -100,13 +101,13 @@ def items():
              ("lease__properties",), field_name="assigned_to"),
         Item("jobs", _("Maintenance jobs they own"), _("Jobs not yet closed or cancelled."),
              lambda u: Job.objects.filter(owner=u).exclude(status__in=(Job.Status.CLOSED, Job.Status.CANCELLED)),
-             ("property",), field_name="owner"),
+             ("property",), field_name="owner", module="maintenance"),
         Item("job_approvals", _("Works orders waiting for their approval"), "",
              lambda u: Job.objects.filter(approver=u, approval_status="pending"), ("property",),
-             field_name="approver"),
+             field_name="approver", module="maintenance"),
         Item("audit_reviews", _("Audit queries they are answering"), _("Valuation audit queries still open."),
              lambda u: AuditReview.objects.filter(assigned_to=u, status=AuditReview.Status.OPEN),
-             ("valuation__property",), field_name="assigned_to"),
+             ("valuation__property",), field_name="assigned_to", module="valuations"),
         Item("supervisees", _("Staff they supervise and approve for"),
              _("Not limited by building: moves everyone they supervise."),
              lambda u: StaffProfile.objects.filter(supervisor=u), (), move=_supervisee),
@@ -120,10 +121,17 @@ def candidates(roles, exclude=None):
     return qs.exclude(pk=exclude.pk) if exclude else qs
 
 
+def receivers(item, exclude=None):
+    """Who may receive this kind of work: the right role and, for module work, an access area that opens it."""
+    from .access import can_use
+
+    people = list(candidates(item.roles, exclude=exclude))
+    return [u for u in people if can_use(u, item.module)] if item.module else people
+
+
 def summary(user, building=None):
     """[(item, count, allowed receivers)] for everything this person holds."""
-    return [(item, item.records(user, building).count(), list(candidates(item.roles, exclude=user)))
-            for item in items()]
+    return [(item, item.records(user, building).count(), receivers(item, exclude=user)) for item in items()]
 
 
 @transaction.atomic
@@ -135,7 +143,7 @@ def hand_over(old, choices, building=None):
         new = choices.get(item.key)
         if new is None or new == old:
             continue
-        if not candidates(item.roles).filter(pk=new.pk).exists():
+        if not any(u.pk == new.pk for u in receivers(item)):
             raise ValueError(f"{new} cannot receive {item.label}")
         records = list(item.records(old, building))
         for record in records:

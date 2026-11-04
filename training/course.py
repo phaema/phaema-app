@@ -30,7 +30,7 @@ START = {
 }
 
 COURSES = [
-    {"id": "surveyor", "title": "Estates surveyor", "who": "Surveyors and estates officers who manage property, leases and casework.",
+    {"id": "surveyor", "title": "Estates surveyor", "who": "Surveyors and estates officers who manage property, leases and casework (Estates access area).",
      "modules": [START, {
         "id": "properties", "title": "Properties and the register", "minutes": 15,
         "intro": "Find a property, read its record and see how estates, buildings and units fit together.",
@@ -145,7 +145,7 @@ COURSES = [
             {"q": "Who can add a new template?", "options": ["Administrators", "Viewers", "Anyone"], "answer": 0,
              "why": "Templates are managed by administrators."},
         ]}]},
-    {"id": "finance", "title": "Finance officer", "who": "Finance and income staff who look after rents, service charges and the accounts.",
+    {"id": "finance", "title": "Finance officer", "who": "Finance and income staff who look after rents, service charges and the accounts (Finance access area).",
      "modules": [START, {
         "id": "rents", "title": "Rents and arrears", "minutes": 20,
         "intro": "Raise rent, read a tenant's account, credit a charge and chase arrears.",
@@ -239,7 +239,7 @@ COURSES = [
             {"q": "What happens to a charge once exported to finance?", "options": ["It is locked", "It is deleted", "It is sent again next time"], "answer": 0,
              "why": "Each charge goes to finance once."},
         ]}]},
-    {"id": "buildings", "title": "Maintenance and compliance", "who": "Building surveyors, facilities and compliance officers.",
+    {"id": "buildings", "title": "Maintenance and compliance", "who": "Building surveyors, facilities and compliance officers (Maintenance and compliance access area).",
      "modules": [START, {
         "id": "repairs", "title": "Repairs and works orders", "minutes": 20,
         "intro": "Report a repair, decide who pays, order the work and complete it.",
@@ -336,6 +336,12 @@ COURSES = [
              "why": "Contributors, such as legal colleagues, add to cases."},
             {"q": "Who can see the Import menu?", "options": ["Administrators", "Everyone", "Viewers"], "answer": 0,
              "why": "Imports change many records at once."},
+            {"q": "A finance officer needs to raise rent but should not manage users. What do you give them?",
+             "options": ["The Surveyor role and the Finance access area", "The Administrator role", "The Viewer role"],
+             "answer": 0, "why": "The role decides what they can change; the Finance area opens the ledger and its actions."},
+            {"q": "Lena is on leave for two weeks. How does Rob see her tenants' arrears meanwhile?",
+             "options": ["Arrange cover for absence until her return", "Hand over all her work", "Make Rob an administrator"],
+             "answer": 0, "why": "Cover adds what Rob can see and ends by itself; it moves no work."},
             {"q": "A surveyor leaves. What happens to their closed cases when you hand over their work?",
              "options": ["They keep the original owner's name", "They move to the new surveyor", "They are deleted"], "answer": 0,
              "why": "Only open work moves, so the history stays true."},

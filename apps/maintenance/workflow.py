@@ -49,6 +49,11 @@ def request_order_approval(job, user):
         raise ValueError("You have no supervisor in PHAEMA to approve this order. Ask an administrator to set one.")
     if approver.pk == user.pk:
         raise ValueError("You cannot approve your own order.")
+    from apps.core.access import can_use
+
+    if not can_use(approver, "maintenance"):
+        raise ValueError(f"Your supervisor, {approver.get_full_name() or approver.username}, cannot open maintenance in "
+                         "PHAEMA. Ask an administrator to add them to an access area that includes it.")
     job.approval_status, job.approver, job.approval_comments = "pending", approver, ""
     job.save(update_fields=["approval_status", "approver", "approval_comments", "updated_at"])
     _email(approver, f"Works order to approve: {job.reference}", "maintenance/email/approve_order.txt", job)
