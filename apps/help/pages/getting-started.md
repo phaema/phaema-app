@@ -33,6 +33,7 @@ The menu at the top of every page takes you to:
 | Changes | The [change log](change-log.md): who changed what, and when. |
 | Import | Administrators only: [import from spreadsheets](import-export.md). |
 | Manage data | Administrators and surveyors: add and edit records. |
+| Hand over work | Administrators: move a leaver's or mover's properties, cases and tasks to colleagues ([how](users-and-roles.md#handing-over-work)). |
 | Help | This manual. |
 
 ## Finding records

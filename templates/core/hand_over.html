@@ -41,7 +41,7 @@
   {% csrf_token %}
   <input type="hidden" name="from" value="{{ old.pk }}">
   {% if building %}<input type="hidden" name="building" value="{{ building.pk }}">{% endif %}
-  <table class="govuk-table">
+  <table class="govuk-table phaema-handover">
     <caption class="govuk-table__caption govuk-table__caption--m govuk-visually-hidden">{% translate "Work to hand over" %}</caption>
     <thead class="govuk-table__head"><tr class="govuk-table__row">
       <th scope="col" class="govuk-table__header">{% translate "Work" %}</th>
