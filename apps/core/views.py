@@ -5,7 +5,7 @@ from decimal import Decimal
 
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
-from django.core.exceptions import SuspiciousFileOperation
+from django.core.exceptions import PermissionDenied, SuspiciousFileOperation
 from django.core.files.storage import default_storage
 from django.core.paginator import Paginator
 from django.db import connection
@@ -22,10 +22,42 @@ from .models import ModuleSettings, AuditEntry
 
 TEXT_SIZES = {"smaller": "Smaller", "standard": "Standard", "large": "Large", "largest": "Largest"}
 THEMES = {"standard": "Standard", "dark": "Dark", "contrast": "High contrast", "auto": "Match my device"}
+SKINS = {"classic": "Classic", "clear": "Clear", "compact": "Compact"}
+DASHBOARDS = ("mine", "estate")
 
 
 @login_required
 def dashboard(request):
+    from .roles import SURVEYORS, role_of
+
+    view = request.GET.get("view", "")
+    if view not in DASHBOARDS:
+        view = request.COOKIES.get("phaema_dashboard", "")
+        if view not in DASHBOARDS:
+            view = "mine" if role_of(request.user) == SURVEYORS else "estate"
+    response = _my_work(request) if view == "mine" else _estate(request)
+    if request.GET.get("view") in DASHBOARDS:
+        response.set_cookie("phaema_dashboard", view, max_age=365 * 24 * 3600, samesite="Lax")
+    return response
+
+
+def _my_work(request):
+    from . import mywork
+
+    people = mywork.viewable(request.user)
+    person = request.user
+    wanted = request.GET.get("person", "")
+    if wanted.isdigit():
+        person = next((p for p in people if p.pk == int(wanted)), None)
+        if person is None:
+            raise PermissionDenied
+    context = mywork.build(person)
+    context.update({"view": "mine", "people": people if len(people) > 1 else [], "person": person,
+                    "is_me": person == request.user})
+    return render(request, "core/my_work.html", context)
+
+
+def _estate(request):
     P = Property
     by_type = P.objects.values("property_type").annotate(n=Count("id")).order_by("property_type")
     labels = dict(P.PropertyType.choices)
@@ -86,6 +118,7 @@ def dashboard(request):
         summary = billing.arrears_summary()
         context["ledger"] = {"arrears": summary["total"], "arrears_count": summary["count"],
                              "collection": billing.collection()}
+    context["view"] = "estate"
     return render(request, "core/dashboard.html", context)
 
 
@@ -196,6 +229,12 @@ def set_text_size(request, size):
     if size not in TEXT_SIZES:
         raise Http404
     return _remember(request, "phaema_text_size", size)
+
+
+def set_skin(request, skin):
+    if skin not in SKINS:
+        raise Http404
+    return _remember(request, "phaema_skin", skin)
 
 
 def set_theme(request, theme):

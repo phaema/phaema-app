@@ -50,6 +50,17 @@ Each person can choose how PHAEMA looks, using the links under the menu. Your ch
 | High contrast | Low vision. Yellow and white text on black. |
 | Match my device | Follows your computer's or phone's light or dark mode. |
 
+**Style** changes the layout and lettering. It works with any theme.
+
+| Style | What it looks like |
+|---|---|
+| Classic | The GOV.UK look. |
+| Clear | Each section sits in its own box with a coloured edge showing what it is about: purple for cases, blue for leases, green for buildings, brown for money and navy for the estate. The section heading always says the same, so the colour is only a help. Uses Atkinson Hyperlegible, a typeface the Braille Institute designed so that easily confused letters and numbers (such as I, l and 1, or O and 0) look different. |
+| Compact | Smaller headings and tighter tables, so more fits on a large screen. |
+
+**Hide and show sections.** Dashboard sections have a **Hide** link in their heading. PHAEMA remembers which you
+have hidden on that computer. **Hide all** and **Show all** do every section at once. Hidden sections still print.
+
 **Text size** makes all text smaller or larger. Your browser's zoom (Ctrl and + on Windows, Cmd and + on a Mac) also works
 on every page.
 

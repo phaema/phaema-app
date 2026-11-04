@@ -31,3 +31,65 @@ document.addEventListener("keydown", (event) => {
   if (event.key !== "Escape") return;
   menus.forEach((menu) => { if (menu.open) { menu.open = false; menu.querySelector("summary").focus(); } });
 });
+
+// Collapsible panels. Each <section class="phaema-panel" data-panel="key"> gets a show/hide button in its
+// heading. Closed panels are remembered in this browser. Without JavaScript every panel stays open.
+const PANEL_STORE = "phaema_closed_panels";
+function closedPanels() {
+  try { return new Set(JSON.parse(localStorage.getItem(PANEL_STORE) || "[]")); } catch (e) { return new Set(); }
+}
+function rememberPanels(set) {
+  try { localStorage.setItem(PANEL_STORE, JSON.stringify([...set])); } catch (e) { /* private browsing */ }
+}
+const panels = [...document.querySelectorAll(".phaema-panel[data-panel]")];
+function setPanel(panel, open, store) {
+  const button = panel.querySelector(".phaema-panel__toggle");
+  const body = panel.querySelector(".phaema-panel__body");
+  button.setAttribute("aria-expanded", String(open));
+  button.querySelector(".phaema-panel__state").textContent = open ? "Hide" : "Show";
+  body.hidden = !open;
+  panel.classList.toggle("phaema-panel--closed", !open);
+  if (store) {
+    const closed = closedPanels();
+    if (open) closed.delete(panel.dataset.panel); else closed.add(panel.dataset.panel);
+    rememberPanels(closed);
+  }
+}
+const closedAtStart = closedPanels();
+panels.forEach((panel, i) => {
+  const title = panel.querySelector(".phaema-panel__title");
+  const body = panel.querySelector(".phaema-panel__body");
+  if (!title || !body) return;
+  body.id = body.id || `panel-body-${i}`;
+  const button = document.createElement("button");
+  button.type = "button";
+  button.className = "phaema-panel__toggle";
+  button.setAttribute("aria-controls", body.id);
+  const label = document.createElement("span");
+  label.className = "phaema-panel__label";
+  while (title.firstChild) label.appendChild(title.firstChild);
+  const state = document.createElement("span");
+  state.className = "phaema-panel__state";
+  state.setAttribute("aria-hidden", "true");
+  button.append(label, state);
+  title.appendChild(button);
+  setPanel(panel, !closedAtStart.has(panel.dataset.panel), false);
+  button.addEventListener("click", () => setPanel(panel, button.getAttribute("aria-expanded") !== "true", true));
+});
+const panelsControl = document.querySelector("[data-panels-control]");
+if (panelsControl && panels.length > 1) {
+  const all = document.createElement("button");
+  all.type = "button";
+  all.className = "phaema-link-button govuk-body-s govuk-!-margin-0";
+  const refresh = () => {
+    all.textContent = panels.every((p) => !p.classList.contains("phaema-panel--closed")) ? "Hide all" : "Show all";
+  };
+  all.addEventListener("click", () => {
+    const open = all.textContent === "Show all";
+    panels.forEach((p) => setPanel(p, open, true));
+    refresh();
+  });
+  panels.forEach((p) => p.querySelector(".phaema-panel__toggle")?.addEventListener("click", refresh));
+  refresh();
+  panelsControl.appendChild(all);
+}

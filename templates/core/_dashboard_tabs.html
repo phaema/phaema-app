@@ -1,0 +1,5 @@
+{% load i18n %}<nav aria-label="{% translate 'Dashboards' %}"><ul class="phaema-tabs">
+  <li><a class="govuk-link" href="{% url 'dashboard' %}?view=mine"{% if view == "mine" %} aria-current="page"{% endif %}>{% translate "My work" %}</a></li>
+  <li><a class="govuk-link" href="{% url 'dashboard' %}?view=estate"{% if view == "estate" %} aria-current="page"{% endif %}>{% translate "Whole estate" %}</a></li>
+</ul></nav>
+<div class="phaema-panels-control" data-panels-control></div>

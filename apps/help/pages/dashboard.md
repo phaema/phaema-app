@@ -6,6 +6,30 @@ summary: What the dashboard figures mean and where they come from.
 # The dashboard
 
 The dashboard is the first page you see after signing in. Everything on it is a link to the records behind it.
+It has two tabs: **My work** and **Whole estate**. Surveyors start on My work and everyone else on Whole estate.
+PHAEMA remembers the tab you last chose.
+
+## My work
+
+Your own work in one place:
+
+- **Needs attention now**: anything overdue or waiting for you, oldest first. This covers your lease events
+  (and unassigned events on your properties), cases past their target, your overdue case tasks, approvals waiting
+  for you, repairs past target and overdue planned maintenance on your properties, missing or expired
+  certificates, and audit queries to answer.
+- **Coming up in the next 90 days**: the same things falling due soon, plus certificates expiring and valuations
+  assigned to you.
+- **Open cases** you own, with how each is doing against its target.
+- **Properties managed**: the properties you are managing surveyor for, with their parts, live lettings and rent.
+  A surveyor who manages an estate or building also manages everything within it.
+- **Compliance**, **rent arrears** and **open repairs** on your properties, when those modules are on.
+
+Supervisors can choose someone they supervise under **Show the work of**, for example to cover absence or for
+one-to-ones. Administrators can see anyone's.
+
+## Whole estate
+
+The figures for the whole council, described below.
 
 ## Cases
 
