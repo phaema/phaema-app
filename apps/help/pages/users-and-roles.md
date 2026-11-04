@@ -48,12 +48,15 @@ surveyor or an administrator, but nobody can approve their own work. The users
 list shows each person's supervisor, and the dashboard tells administrators about any surveyor without one.
 
 To stop someone using PHAEMA, untick **Active** on their user record rather than deleting it, so their name stays
-on the records they changed.
+on the records they changed. Hand their open work to colleagues first, as below.
 
 ## Handing over work
 
 When someone leaves, changes job or a new starter takes over part of a patch, administrators can move their work
 in one step at **Hand over work** (`/people/hand-over/`, also linked from each user record).
+
+![Hand over work](/static/help/hand-over.jpg)
+*Handing over Lena Chen's work to Rob Baker in the demonstration data.*
 
 1. Choose who the work comes **from**, who it goes **to**, and optionally **Only work on** one estate, site or
    building to hand over just that part of their patch.

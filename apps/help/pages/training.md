@@ -16,7 +16,7 @@ Your progress is saved in your browser.
 | Estates surveyor | Surveyors and estates officers | Getting around; properties; leases and key dates; cases and approvals; lettings, renewals and dilapidations; letters and notices |
 | Finance officer | Finance and income staff | Getting around; rents and arrears; service charges; valuations for the accounts; reports and exports |
 | Maintenance and compliance | Building surveyors, facilities and compliance officers | Getting around; repairs and works orders; planned maintenance and components; compliance and the Golden Thread |
-| System administrator | Administrators | Getting around; users, roles and supervisors; modules and settings; bringing data in; audit and the change log |
+| System administrator | Administrators | Getting around; users, roles, supervisors and handing over work; modules and settings; bringing data in; audit and the change log |
 | Viewer and contributor | Colleagues who look things up, and legal or other staff who add to cases | Getting around; finding information; contributing to a case |
 
 Use a training copy of PHAEMA loaded with the demonstration data for the exercises (an administrator runs
@@ -48,3 +48,4 @@ Use a training copy of PHAEMA loaded with the demonstration data for the exercis
 - [ ] Add users, give each a role and set each surveyor's supervisor.
 - [ ] Switch on the modules the council uses, and set the letterhead details.
 - [ ] Import properties, then parties, then leases.
+- [ ] Practise handing over a surveyor's work on the training copy (Hand over work), so you are ready for the first leaver.

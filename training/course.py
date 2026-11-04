@@ -312,8 +312,8 @@ COURSES = [
         ]}]},
     {"id": "admin", "title": "System administrator", "who": "Administrators who set PHAEMA up, manage users and bring data in.",
      "modules": [START, {
-        "id": "users", "title": "Users, roles and supervisors", "minutes": 15,
-        "intro": "Add people, give them a role and set who approves their work.",
+        "id": "users", "title": "Users, roles, supervisors and hand-overs", "minutes": 20,
+        "intro": "Add people, give them a role, set who approves their work and hand over work when someone leaves.",
         "steps": [
             (T, "/admin/auth/user/", "#result_list", "Users",
              "Manage data, Users lists everyone with access. Add user creates a new account."),
@@ -321,6 +321,11 @@ COURSES = [
              "Choose one role: Administrators, Surveyors, Contributors or Viewers. Roles decide what each person can see and change."),
             (T, "/admin/auth/user/248/change/", "h2:has-text('Staff details')", "Supervisor",
              "Set the person's supervisor and approver. Their approval requests go to this person."),
+            (T, "/people/hand-over/?from=248&to=249", "table.govuk-table", "Hand over work",
+             "When someone leaves or changes job, Hand over work (linked from their user record) moves their properties, "
+             "open cases, tasks, lease events, jobs, approvals and supervised staff to colleagues in one step. "
+             "Choose a person for each kind of work, or limit it to one estate or building, and tick the box to stop a "
+             "leaver signing in."),
         ],
         "exercise": {"q": "Who supervises Lena Chen?", "options": ["Sam Hughes", "Alex Morgan", "Nobody", "Rob Baker"], "answer": 0,
                      "hint": "Open her user record, Staff details."},
@@ -331,6 +336,9 @@ COURSES = [
              "why": "Contributors, such as legal colleagues, add to cases."},
             {"q": "Who can see the Import menu?", "options": ["Administrators", "Everyone", "Viewers"], "answer": 0,
              "why": "Imports change many records at once."},
+            {"q": "A surveyor leaves. What happens to their closed cases when you hand over their work?",
+             "options": ["They keep the original owner's name", "They move to the new surveyor", "They are deleted"], "answer": 0,
+             "why": "Only open work moves, so the history stays true."},
         ]}, {
         "id": "settings", "title": "Modules and settings", "minutes": 15,
         "intro": "Switch modules on, set branding and decide where approval is needed.",
