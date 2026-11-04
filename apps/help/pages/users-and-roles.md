@@ -53,7 +53,7 @@ on the records they changed. Hand their open work to colleagues first, as below.
 ## Handing over work
 
 When someone leaves, changes job or a new starter takes over part of a patch, administrators can move their work
-in one step at **Hand over work** (`/people/hand-over/`, also linked from each user record).
+in one step with **Hand over work** in the menu (also linked from each user record).
 
 ![Hand over work](/static/help/hand-over.jpg)
 *Handing over Lena Chen's work to Rob Baker in the demonstration data.*

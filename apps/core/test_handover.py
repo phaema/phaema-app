@@ -31,6 +31,12 @@ def test_page_is_for_administrators_only(make_user):
     client = Client(HTTP_HOST="localhost")
     client.force_login(surveyor)
     assert client.get("/people/hand-over/").status_code == 403
+    assert 'href="/people/hand-over/"' not in client.get("/").content.decode()
+
+
+def test_menu_link_for_administrators(make_user):
+    _, client = _admin(make_user)
+    assert 'href="/people/hand-over/">Hand over work</a>' in client.get("/").content.decode()
 
 
 def test_hand_over_everything_and_stop_sign_in(demo, make_user):

@@ -47,6 +47,7 @@
         {% if is_administrator %}<a href="{% url 'imports:hub' %}">{% translate "Import" %}</a>{% endif %}
         <a href="{% url 'help:index' %}">{% translate "Help" %}</a>
         {% if user.is_staff %}<a href="{% url 'admin:index' %}">{% translate "Manage data" %}</a>{% endif %}
+        {% if is_administrator %}<a href="{% url 'hand-over' %}">{% translate "Hand over work" %}</a>{% endif %}
         <span class="phaema-header__user">{{ user.get_full_name|default:user.get_username }} ({{ role|lower|slice:":-1" }})</span>
         <form method="post" action="{% url 'logout' %}" class="phaema-header__logout">
           {% csrf_token %}<button type="submit">{% translate "Sign out" %}</button>

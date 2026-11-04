@@ -110,3 +110,6 @@ html.phaema-text-largest { font-size: 150%; }
 .phaema-doc-preview .govuk-body { font-size: 1rem; }
 .phaema-blank { background: #fff2a8; color: #0b0c0c; padding: 0 2px; }
 .phaema-doc-number span { display: inline-block; min-width: 2em; }
+
+/* Hand over work: the receiver menus shrink to fit a phone screen. */
+.phaema-handover .govuk-select { min-width: 0; width: 100%; max-width: 20em; }
