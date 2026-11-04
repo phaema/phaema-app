@@ -2,7 +2,7 @@
   <a class="govuk-link" href="{% url 'ledger:home' %}"{% if section == "home" %} aria-current="page"{% endif %}>{% translate "Overview" %}</a>
   <a class="govuk-link" href="{% url 'ledger:arrears' %}"{% if section == "arrears" %} aria-current="page"{% endif %}>{% translate "Arrears" %}</a>
   <a class="govuk-link" href="{% url 'ledger:receipts' %}"{% if section == "receipts" %} aria-current="page"{% endif %}>{% translate "Receipts" %}</a>
-  {% if is_administrator %}<a class="govuk-link" href="{% url 'ledger:run-new' %}"{% if section == "run" %} aria-current="page"{% endif %}>{% translate "Raise rent" %}</a>
+  {% if can_finance %}<a class="govuk-link" href="{% url 'ledger:run-new' %}"{% if section == "run" %} aria-current="page"{% endif %}>{% translate "Raise rent" %}</a>
   <a class="govuk-link" href="{% url 'imports:upload' 'receipts' %}">{% translate "Import receipts" %}</a>{% endif %}
-  <a class="govuk-link" href="{% url 'ledger:exports' %}"{% if section == "exports" %} aria-current="page"{% endif %}>{% translate "Finance exports" %}</a>
+  {% if request.access_scope == "full" %}<a class="govuk-link" href="{% url 'ledger:exports' %}"{% if section == "exports" %} aria-current="page"{% endif %}>{% translate "Finance exports" %}</a>{% endif %}
 </nav>

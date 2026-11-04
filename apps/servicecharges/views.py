@@ -3,17 +3,16 @@
 from collections import namedtuple
 from datetime import date
 from decimal import Decimal
-from functools import wraps
 
 from django.contrib import messages
-from django.contrib.auth.decorators import login_required
+from django.core.exceptions import PermissionDenied
 from django.db.models import Sum
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils.translation import gettext as _
 from django.views.decorators.http import require_POST
 
 from apps.core.models import ModuleSettings
-from apps.core.roles import administrators_only, is_administrator
+from apps.core.access import can_do_finance, finance_only, lease_in_patch, module_view, patch_leases
 from apps.ledger.models import Charge
 from apps.reports.export import csv_response, xlsx_response
 
@@ -23,14 +22,18 @@ from .models import Schedule, ScheduleMember, ScheduleYear
 Col = namedtuple("Col", "label type")
 
 
-def service_view(view):
-    @wraps(view)
-    def wrapped(request, *args, **kwargs):
-        if not ModuleSettings.load().service_charges_enabled:
-            return render(request, "servicecharges/off.html", status=404)
-        return view(request, *args, **kwargs)
+service_view = module_view("servicecharges", "servicecharges/off.html")  # switched on for the council and opened by an access area
 
-    return login_required(wrapped)
+
+def _check_schedule(request, schedule):
+    """People who only see their own patch can open a schedule that includes at least one lease in it."""
+    if request.access_scope == "patch" and not schedule.members.filter(lease__in=patch_leases(request.user)).exists():
+        raise PermissionDenied
+
+
+def _check_member(request, member):
+    if request.access_scope == "patch" and not lease_in_patch(request.user, member.lease):
+        raise PermissionDenied
 
 
 def _year_summary(year):
@@ -42,7 +45,10 @@ def _year_summary(year):
 @service_view
 def schedule_list(request):
     rows = []
-    for schedule in Schedule.objects.prefetch_related("properties", "members"):
+    schedules = Schedule.objects.prefetch_related("properties", "members")
+    if request.access_scope == "patch":
+        schedules = schedules.filter(members__lease__in=patch_leases(request.user)).distinct()
+    for schedule in schedules:
         current = schedule.years.filter(start__lte=date.today()).first() or schedule.years.first()
         rows.append({"schedule": schedule, "current": _year_summary(current) if current else None})
     return render(request, "servicecharges/schedule_list.html", {
@@ -52,6 +58,7 @@ def schedule_list(request):
 @service_view
 def schedule_detail(request, pk):
     schedule = get_object_or_404(Schedule, pk=pk)
+    _check_schedule(request, schedule)
     share_list, total_area, void = apportion.shares(schedule)
     current = schedule.years.filter(start__lte=date.today(), status=ScheduleYear.Status.APPROVED).first()
     rows = [(s, apportion.on_account_annual(current, s) if current else None) for s in share_list]
@@ -68,6 +75,7 @@ BUDGET_COLUMNS = [Col("Heading", "text"), Col("Budget", "money"), Col("Actual", 
 @service_view
 def year_detail(request, pk):
     year = get_object_or_404(ScheduleYear.objects.select_related("schedule"), pk=pk)
+    _check_schedule(request, year.schedule)
     rows = apportion.by_heading(year)
     fmt = request.GET.get("format")
     if fmt in ("xlsx", "csv"):
@@ -83,13 +91,13 @@ def year_detail(request, pk):
     return render(request, "servicecharges/year_detail.html", {
         "year": year, "rows": rows, "summary": _year_summary(year), "members": members, "void": void,
         "expenditure": year.expenditure.select_related("heading").order_by("-spent_on", "-pk")[:100],
-        "expenditure_count": year.expenditure.count(), "can_manage": is_administrator(request.user),
+        "expenditure_count": year.expenditure.count(), "can_manage": can_do_finance(request.user),
         "today": date.today(), "income": apportion.income_total(year),
         "non_recoverable": apportion.non_recoverable_total(year), "net": apportion.actual_total(year),
     })
 
 
-@administrators_only
+@finance_only
 @service_view
 @require_POST
 def record_issue(request, pk):
@@ -124,6 +132,7 @@ def record_issue(request, pk):
 @service_view
 def year_matrix(request, pk):
     year = get_object_or_404(ScheduleYear.objects.select_related("schedule"), pk=pk)
+    _check_schedule(request, year.schedule)
     m = apportion.matrix(year)
     fmt = request.GET.get("format")
     if fmt in ("xlsx", "csv"):
@@ -146,6 +155,7 @@ def budget_statement(request, pk, member_pk):
     year = get_object_or_404(ScheduleYear.objects.select_related("schedule"), pk=pk)
     member = get_object_or_404(ScheduleMember.objects.select_related("lease", "lease__counterparty"),
                                pk=member_pk, schedule=year.schedule)
+    _check_member(request, member)
     share = next(s for s in apportion.shares(year.schedule)[0] if s.member.pk == member.pk)
     annual = apportion.on_account_annual(year, share)
     periods = PERIODS.get(member.lease.rent_frequency)
@@ -157,7 +167,7 @@ def budget_statement(request, pk, member_pk):
     })
 
 
-@administrators_only
+@finance_only
 @service_view
 @require_POST
 def year_approve(request, pk):
@@ -171,7 +181,7 @@ def year_approve(request, pk):
     return redirect(year)
 
 
-@administrators_only
+@finance_only
 @service_view
 def reconcile(request, pk):
     year = get_object_or_404(ScheduleYear.objects.select_related("schedule"), pk=pk)
@@ -194,6 +204,7 @@ def statement(request, pk, member_pk):
     year = get_object_or_404(ScheduleYear.objects.select_related("schedule"), pk=pk)
     member = get_object_or_404(ScheduleMember.objects.select_related("lease", "lease__counterparty"),
                                pk=member_pk, schedule=year.schedule)
+    _check_member(request, member)
     recon = apportion.reconcile(year)
     line = next(line for line in recon.lines if line.share.member.pk == member.pk)
     return render(request, "servicecharges/statement.html", {

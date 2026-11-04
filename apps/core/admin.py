@@ -1,8 +1,9 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
+from django import forms
 from django.contrib import admin
 
 from .admin_users import PhaemaUserAdmin
-from .models import AuditEntry, ModuleSettings
+from .models import AccessArea, AuditEntry, Cover, ModuleSettings
 
 
 @admin.register(ModuleSettings)
@@ -47,3 +48,41 @@ class AuditEntryAdmin(admin.ModelAdmin):
         return False
 
 __all__ = ["PhaemaUserAdmin", "ModuleSettingsAdmin", "AuditEntryAdmin"]
+
+
+class AccessAreaForm(forms.ModelForm):
+    modules = forms.MultipleChoiceField(
+        choices=AccessArea.MODULES, required=False, widget=forms.CheckboxSelectMultiple,
+        help_text="The modules everyone in this area can open in full.")
+
+    class Meta:
+        model = AccessArea
+        fields = ["name", "code", "description", "modules", "own_patch_finance", "finance_actions", "members", "order"]
+
+
+@admin.register(AccessArea)
+class AccessAreaAdmin(admin.ModelAdmin):
+    form = AccessAreaForm
+    list_display = ("name", "modules_list", "own_patch_finance", "finance_actions", "member_count")
+    filter_horizontal = ("members",)
+    prepopulated_fields = {"code": ("name",)}
+
+    @admin.display(description="Modules")
+    def modules_list(self, obj):
+        return ", ".join(obj.module_names()) or "Core only"
+
+    @admin.display(description="People")
+    def member_count(self, obj):
+        return obj.members.count()
+
+
+@admin.register(Cover)
+class CoverAdmin(admin.ModelAdmin):
+    list_display = ("user", "covered", "starts_on", "ends_on", "reason", "created_by")
+    list_filter = ("ends_on",)
+    autocomplete_fields = ("user", "covered")
+
+    def save_model(self, request, obj, form, change):
+        if not obj.created_by_id:
+            obj.created_by = request.user
+        super().save_model(request, obj, form, change)

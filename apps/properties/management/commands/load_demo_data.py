@@ -335,6 +335,8 @@ class Command(BaseCommand):
         valuation_demo.load()
         demo_north.load_valuations(date.today())
 
+        self.load_access_areas()
+
         modules = ModuleSettings.load()
         if not modules.organisation_name:
             modules.organisation_name = ORG_NAME
@@ -369,6 +371,23 @@ class Command(BaseCommand):
             if prop.managing_surveyor_id != (surveyor.pk if surveyor else None):
                 prop.managing_surveyor = surveyor
                 prop.save(update_fields=["managing_surveyor", "updated_at"])
+
+    def load_access_areas(self):
+        """Put the demonstration people in realistic access areas, and add a finance officer."""
+        from apps.core.models import AccessArea
+
+        User = get_user_model()
+        finance, created = User.objects.get_or_create(username="demo.finance", defaults={
+            "first_name": "Dana", "last_name": "Okafor", "email": "demo.finance@example.org"})
+        if created:
+            finance.set_unusable_password()
+            finance.save()
+        finance.groups.add(Group.objects.get(name=SURVEYOR_ROLE))
+        areas = {a.code: a for a in AccessArea.objects.all()}
+        plan = {username: ("estates", "maintenance", "valuation") for username in [*SURVEYORS, "demo.head"]}
+        plan.update({"demo.legal": ("legal",), "demo.finance": ("finance",)})
+        for user in User.objects.filter(username__in=plan):
+            user.access_areas.set([areas[c] for c in plan[user.username] if c in areas])
 
     def load_photos(self, refs):
         for ref, photos in PHOTOS.items():

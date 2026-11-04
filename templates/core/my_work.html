@@ -12,6 +12,7 @@
   <button class="govuk-button govuk-button--secondary govuk-!-margin-bottom-0" data-module="govuk-button">{% translate "Show" %}</button>
 </form>
 {% endif %}
+{% if can_arrange_cover %}<p class="govuk-body-s"><a class="govuk-link" href="{% url 'cover' %}">{% translate "Arrange cover for absence" %}</a></p>{% endif %}
 
 <div class="govuk-grid-row">
   <div class="govuk-grid-column-one-quarter"><div class="phaema-stat">

@@ -3,11 +3,9 @@
 from collections import defaultdict
 from datetime import date, timedelta
 from decimal import Decimal, InvalidOperation
-from functools import wraps
 
 from django import forms
 from django.contrib import messages
-from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import PermissionDenied
 from django.db.models import Q, Sum
@@ -20,6 +18,7 @@ from django.views.generic import ListView
 
 from apps.core import places
 from apps.core.models import ModuleSettings, supervisor_of
+from apps.core.access import module_view
 from apps.core.roles import SURVEYORS, can_edit, is_administrator
 from apps.core.tables import sortable
 from apps.properties.models import Property
@@ -30,14 +29,7 @@ from . import library, responsibility, workflow
 from .models import Category, Component, Contract, Contractor, Job, JobDocument, PlannedTask, Responsibility
 
 
-def maintenance_view(view):
-    @wraps(view)
-    def wrapped(request, *args, **kwargs):
-        if not ModuleSettings.load().maintenance_enabled:
-            return render(request, "maintenance/off.html", status=404)
-        return view(request, *args, **kwargs)
-
-    return login_required(wrapped)
+maintenance_view = module_view("maintenance", "maintenance/off.html")  # switched on for the council and opened by an access area
 
 
 def _can_raise(user):

@@ -11,7 +11,7 @@
 </form>
 <p class="govuk-body">{% blocktranslate count n=page_obj.paginator.count %}{{ n }} payment{% plural %}{{ n }} payments{% endblocktranslate %}{% if total %}, £{{ total|floatformat:2|intcomma }}{% endif %}.
   {% translate "Download:" %} <a class="govuk-link" href="?{{ querystring }}&amp;format=xlsx">Excel</a> · <a class="govuk-link" href="?{{ querystring }}&amp;format=csv">CSV</a>
-  {% if is_administrator %} · <a class="govuk-link" href="{% url 'imports:upload' 'receipts' %}">{% translate "Import receipts from finance" %}</a>{% endif %}</p>
+  {% if can_finance %} · <a class="govuk-link" href="{% url 'imports:upload' 'receipts' %}">{% translate "Import receipts from finance" %}</a>{% endif %}</p>
 <table class="govuk-table phaema-report">
   <thead class="govuk-table__head"><tr class="govuk-table__row">
     <th scope="col" class="govuk-table__header">{% translate "Received" %}</th><th scope="col" class="govuk-table__header">{% translate "Payment reference" %}</th>

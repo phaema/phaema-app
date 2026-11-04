@@ -1,0 +1,9 @@
+{% extends "base.html" %}{% load i18n %}
+{% block title %}{% blocktranslate %}No access to {{ module }}{% endblocktranslate %}{% endblock %}
+{% block help_page %}users-and-roles{% endblock %}
+{% block content %}
+<h1 class="govuk-heading-l">{% blocktranslate %}You do not have access to {{ module }}{% endblocktranslate %}</h1>
+<p class="govuk-body">{% translate "Your access areas do not include this part of PHAEMA." %}</p>
+<p class="govuk-body">{% translate "If you need it for your work, ask a PHAEMA administrator to add you to the right access area, for example Finance or Maintenance and compliance." %}</p>
+<p class="govuk-body"><a class="govuk-link" href="{% url 'dashboard' %}">{% translate "Go to your dashboard" %}</a></p>
+{% endblock %}

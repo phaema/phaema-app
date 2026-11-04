@@ -200,3 +200,65 @@ class StaffProfile(models.Model):
 def supervisor_of(user):
     profile = StaffProfile.objects.filter(user=user).select_related("supervisor").first()
     return profile.supervisor if profile and profile.supervisor and profile.supervisor.is_active else None
+
+
+class AccessArea(models.Model):
+    """A named group of people and the optional modules they can open (for example Finance).
+
+    Core PHAEMA (properties, leases, events, cases, documents) is open to everyone with a role. The role still
+    decides what a person can change; an area decides which modules they can see."""
+
+    MODULES = [("ledger", _("Rent ledger")), ("servicecharges", _("Service charges")),
+               ("maintenance", _("Maintenance")), ("compliance", _("Compliance")),
+               ("valuations", _("Asset valuation"))]
+
+    code = models.SlugField(_("code"), max_length=30, unique=True)
+    name = models.CharField(_("name"), max_length=60)
+    description = models.CharField(_("description"), max_length=255, blank=True)
+    modules = models.JSONField(_("modules"), default=list, blank=True,
+                               help_text=_("The modules everyone in this area can open in full."))
+    own_patch_finance = models.BooleanField(
+        _("rent and service charges for their own patch"), default=False,
+        help_text=_("Members see rent, arrears and service charges for the properties they manage, those of everyone "
+                    "they supervise (the whole chain) and anyone they are covering for."))
+    finance_actions = models.BooleanField(
+        _("can raise rent, credit notes and finance exports"), default=False,
+        help_text=_("For members whose role lets them change records (Surveyors). Administrators can always."))
+    members = models.ManyToManyField(settings.AUTH_USER_MODEL, blank=True, related_name="access_areas",
+                                     verbose_name=_("members"))
+    order = models.PositiveSmallIntegerField(default=0)
+
+    class Meta:
+        ordering = ["order", "name"]
+        verbose_name = _("access area")
+        verbose_name_plural = _("access areas")
+
+    def __str__(self):
+        return self.name
+
+    def module_names(self):
+        labels = dict(self.MODULES)
+        return [str(labels[m]) for m in self.modules if m in labels]
+
+
+class Cover(models.Model):
+    """One person covering another's work for a while: they see the other person's patch as their own."""
+
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="covering",
+                             verbose_name=_("covering"))
+    covered = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="covered_by",
+                                verbose_name=_("covering for"))
+    starts_on = models.DateField(_("from"))
+    ends_on = models.DateField(_("until"), help_text=_("Cover ends automatically after this day."))
+    reason = models.CharField(_("reason"), max_length=200, blank=True, help_text=_("For example: annual leave."))
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True,
+                                   related_name="+", editable=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-ends_on", "pk"]
+        verbose_name = _("cover")
+        verbose_name_plural = _("cover")
+
+    def __str__(self):
+        return f"{self.user} covering for {self.covered} until {self.ends_on:%d/%m/%Y}"

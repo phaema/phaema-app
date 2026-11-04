@@ -2,10 +2,8 @@
 """Compliance register, a property's certificates and building information, and higher-risk screening."""
 from datetime import date
 from decimal import Decimal, InvalidOperation
-from functools import wraps
 
 from django.contrib import messages
-from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils.translation import gettext as _
@@ -13,6 +11,7 @@ from django.utils.translation import gettext as _
 from apps.cases.models import validate_case_file
 from apps.core import places
 from apps.core.models import ModuleSettings
+from apps.core.access import module_view
 from apps.core.roles import can_edit
 from apps.properties.models import Property
 
@@ -20,14 +19,7 @@ from . import rules, workflow
 from .models import Action, BuildingDocument, BuildingSafety, Certificate, ComplianceType, Requirement
 
 
-def compliance_view(view):
-    @wraps(view)
-    def wrapped(request, *args, **kwargs):
-        if not ModuleSettings.load().compliance_enabled:
-            return render(request, "compliance/off.html", status=404)
-        return view(request, *args, **kwargs)
-
-    return login_required(wrapped)
+compliance_view = module_view("compliance", "compliance/off.html")  # switched on for the council and opened by an access area
 
 
 def _date(text, default=None):

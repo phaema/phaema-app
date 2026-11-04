@@ -3,7 +3,7 @@
 {% block help_page %}users-and-roles{% endblock %}
 {% block content %}
 <h1 class="govuk-heading-xl">{% translate "Hand over work" %}</h1>
-<p class="govuk-body">{% blocktranslate %}Move one person's properties, cases, tasks and approvals to colleagues in one step, when someone leaves, changes job or a new starter takes over part of a patch. Every change goes in the change log.{% endblocktranslate %}</p>
+<p class="govuk-body">{% blocktranslate %}Move one person's properties, cases, tasks and approvals to colleagues in one step, when someone leaves, changes job or a new starter takes over part of a patch. Every change goes in the change log.{% endblocktranslate %} {% translate "For someone who is away for a while, you can" %} <a class="govuk-link" href="{% url 'cover' %}">{% translate "arrange cover" %}</a> {% translate "instead." %}</p>
 
 <form method="get" class="phaema-filters">
   <div class="govuk-form-group">

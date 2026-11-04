@@ -3,19 +3,17 @@
 from collections import namedtuple
 from datetime import date, timedelta
 from decimal import Decimal, InvalidOperation
-from functools import wraps
 
 from django.contrib import messages
-from django.contrib.auth.decorators import login_required
+from django.core.exceptions import PermissionDenied
 from django.core.paginator import Paginator
 from django.db.models import Count, Sum
-from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils.translation import gettext as _
 from django.views.decorators.http import require_POST
 
 from apps.core.models import ModuleSettings
-from apps.core.roles import administrators_only, is_administrator
+from apps.core.access import can_do_finance, finance_only, lease_in_patch, module_view, patch_leases, require_full
 from apps.leases.models import Lease
 from apps.reports.export import csv_response, xlsx_response
 
@@ -25,15 +23,7 @@ from .models import Charge, DemandRun, ExportBatch, Receipt
 Col = namedtuple("Col", "label type")
 
 
-def ledger_view(view):
-    """Signed-in users only, and only when the council has switched the rent ledger on."""
-    @wraps(view)
-    def wrapped(request, *args, **kwargs):
-        if not ModuleSettings.load().rent_ledger_enabled:
-            return render(request, "ledger/off.html", status=404)
-        return view(request, *args, **kwargs)
-
-    return login_required(wrapped)
+ledger_view = module_view("ledger", "ledger/off.html")  # switched on for the council and opened by an access area
 
 
 def _date(text, default):
@@ -43,13 +33,21 @@ def _date(text, default):
         return None
 
 
+def _patch(request):
+    """The leases this person may see in the ledger, or None for all of them."""
+    return patch_leases(request.user) if request.access_scope == "patch" else None
+
+
 @ledger_view
 def home(request):
     today = date.today()
-    pending = finance.unexported().aggregate(n=Count("pk"), t=Sum("gross"))
+    leases = _patch(request)
+    full = leases is None
+    pending = finance.unexported().aggregate(n=Count("pk"), t=Sum("gross")) if full else None
     return render(request, "ledger/home.html", {
-        "arrears": billing.arrears_summary(today), "collection": billing.collection(today),
-        "pending": pending, "runs": DemandRun.objects.annotate(n=Count("charges"), t=Sum("charges__gross"))[:5],
+        "arrears": billing.arrears_summary(today, leases), "collection": billing.collection(today, leases=leases),
+        "pending": pending, "full": full,
+        "runs": DemandRun.objects.annotate(n=Count("charges"), t=Sum("charges__gross"))[:5] if full else [],
         "settings": ModuleSettings.load(), "today": today,
     })
 
@@ -63,7 +61,7 @@ def _quarter_end(day):
     return date(day.year + 1, 3, 24)
 
 
-@administrators_only
+@finance_only
 @ledger_view
 def run_new(request):
     today = date.today()
@@ -112,6 +110,7 @@ def _charge_rows(charges):
 
 @ledger_view
 def run_detail(request, pk):
+    require_full(request)
     run = get_object_or_404(DemandRun, pk=pk)
     charges = run.charges.select_related("lease", "lease__counterparty").order_by("due_date", "lease__reference")
     fmt = request.GET.get("format")
@@ -145,6 +144,8 @@ def _statement_rows(acc):
 @ledger_view
 def account(request, lease_pk):
     lease = get_object_or_404(Lease.objects.select_related("counterparty"), pk=lease_pk)
+    if request.access_scope == "patch" and not lease_in_patch(request.user, lease):
+        raise PermissionDenied
     acc = billing.account(lease, charges=lease.charges.select_related("credit_for"), receipts=lease.receipts.all())
     fmt = request.GET.get("format")
     title = f"Statement {lease.reference}"
@@ -153,12 +154,12 @@ def account(request, lease_pk):
     if fmt == "csv":
         return csv_response(title, STATEMENT_COLUMNS, _statement_rows(acc))
     return render(request, "ledger/account.html", {
-        "lease": lease, "account": acc, "today": date.today(), "can_credit": is_administrator(request.user),
+        "lease": lease, "account": acc, "today": date.today(), "can_credit": can_do_finance(request.user),
         "statement": request.GET.get("print") == "1",
     })
 
 
-@administrators_only
+@finance_only
 @ledger_view
 @require_POST
 def credit(request, charge_pk):
@@ -185,7 +186,7 @@ ARREARS_COLUMNS = [Col("Lease", "text"), Col("Tenant", "text"), Col("Customer re
 
 @ledger_view
 def arrears(request):
-    summary = billing.arrears_summary()
+    summary = billing.arrears_summary(leases=_patch(request))
     rows = ([a.lease.reference, a.lease.counterparty.name, a.lease.counterparty.finance_customer_ref, a.balance,
              a.overdue] + [amount for _label, amount in a.aged] for a in summary["accounts"])
     fmt = request.GET.get("format")
@@ -203,6 +204,8 @@ RECEIPT_COLUMNS = [Col("Received", "date"), Col("Payment reference", "text"), Co
 @ledger_view
 def receipts(request):
     qs = Receipt.objects.select_related("lease", "lease__counterparty").order_by("-received_on", "-pk")
+    if _patch(request) is not None:
+        qs = qs.filter(lease__in=_patch(request))
     since, until = _date(request.GET.get("from"), None), _date(request.GET.get("to"), None)
     if since:
         qs = qs.filter(received_on__gte=since)
@@ -227,9 +230,10 @@ def receipts(request):
 
 @ledger_view
 def exports(request):
+    require_full(request)
     if request.method == "POST":
-        if not is_administrator(request.user):
-            raise Http404
+        if not can_do_finance(request.user):
+            raise PermissionDenied
         batch = finance.create_batch()
         if batch is None:
             messages.info(request, _("There are no new charges to export."))
@@ -246,5 +250,6 @@ def exports(request):
 
 @ledger_view
 def export_download(request, pk):
+    require_full(request)
     batch = get_object_or_404(ExportBatch, pk=pk)
     return finance.download(batch, "csv" if request.GET.get("format") == "csv" else "xlsx", ModuleSettings.load())

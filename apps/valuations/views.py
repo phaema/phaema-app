@@ -3,17 +3,15 @@
 from collections import namedtuple
 from datetime import date
 from decimal import Decimal, InvalidOperation
-from functools import wraps
 
 from django import forms
 from django.contrib import messages
-from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils.translation import gettext as _
 
 from apps.core import places
-from apps.core.models import ModuleSettings
+from apps.core.access import module_view
 from apps.core.roles import is_administrator, manages
 from apps.properties.models import Property
 from apps.reports.export import csv_response, xlsx_response
@@ -26,14 +24,7 @@ from .seed import FROM_PURPOSE
 Col = namedtuple("Col", "label type")
 
 
-def valuation_view(view):
-    @wraps(view)
-    def wrapped(request, *args, **kwargs):
-        if not ModuleSettings.load().valuation_enabled:
-            return render(request, "valuations/off.html", status=404)
-        return view(request, *args, **kwargs)
-
-    return login_required(wrapped)
+valuation_view = module_view("valuations", "valuations/off.html")  # switched on for the council and opened by an access area
 
 
 def _can_work(user, prop):
