@@ -112,6 +112,7 @@
   {% include "core/_hint.html" with summary=_("How are break dates tracked?") text=_("Each break creates an event for the last date to serve notice and for the break date itself, assigned to the managing surveyor.") page="events" anchor="breaks" %}
   <ul class="govuk-list">{% for b in breaks %}<li><strong>{{ b.break_date|date:"j F Y" }}</strong> – {{ b.get_exercisable_by_display }}{% if b.notice_months %}, {% blocktranslate count n=b.notice_months %}{{ n }} month's notice{% plural %}{{ n }} months' notice{% endblocktranslate %} ({% translate "by" %} {{ b.notice_deadline|date:"j F Y" }}){% endif %}{% if b.conditions %}<br><span class="govuk-body-s">{{ b.conditions }}</span>{% endif %}</li>{% endfor %}</ul>
   {% endif %}{% endwith %}
+  {% if doc_templates %}<p class="govuk-body-s">{% translate "Create a letter:" %} {% for t in doc_templates %}<a class="govuk-link" href="{% url 'documents:create' t.code %}?lease={{ object.pk }}">{{ t.name }}</a>{% if not forloop.last %} · {% endif %}{% endfor %} · <a class="govuk-link" href="{% url 'documents:library' %}">{% translate "Document library" %}</a></p>{% endif %}
   <h2 class="govuk-heading-m">{% translate "Documents" %}</h2>
   {% with docs=object.documents.all %}
   {% if docs %}

@@ -1,0 +1,38 @@
+name: Section 25 notice, not opposing a new tenancy (particulars for Form 1)
+category: notices_1954
+source: case
+case_types: renewal, expiry
+prescribed_form: Form 1 in Schedule 2 to the Landlord and Tenant Act 1954, Part 2 (Notices) Regulations 2004 (landlord's notice ending a business tenancy with proposals for a new one)
+description: The particulars and the council's proposals for a new tenancy, to transfer to prescribed Form 1, with a service checklist. The termination date must be 6 to 12 months after the notice is given, and not before the contractual expiry.
+fields: termination_date|Date the tenancy is to end|| Not earlier than the contractual expiry, and 6 to 12 months after the notice is given. ; service_date|Date the notice will be given| ; proposed_rent|Proposed rent a year| ; proposed_term|Proposed term| ; other_terms|Other proposed terms|long|
+---
+# Section 25 notice: particulars for Form 1
+
+**Landlord's notice ending a business tenancy with proposals for a new one**
+
+| Case | {{ case_reference }} |
+| To (the tenant) | {{ tenant_name }}, {{ tenant_address }} |
+| From (the landlord) | {{ council_name }}, {{ council_address }} |
+| Property | {{ premises }} |
+| Tenancy | {{ agreement_type }} dated {{ lease_date }}, {{ term }}, contractual expiry {{ term_end }} |
+| Date the notice is to be given | {{ service_date }} |
+| Date the tenancy is to end | {{ termination_date }} |
+
+## The landlord's proposals for a new tenancy
+
+The council is not opposed to granting a new tenancy. Its proposals are:
+
+| Property to be let | {{ premises }} |
+| Rent | {{ proposed_rent }} a year, payable {{ rent_frequency }} |
+| Term | {{ proposed_term }} |
+| Other terms | {{ other_terms }} |
+
+## Before the notice is served
+
+1. Check the tenancy is protected by Part 2 of the 1954 Act: current status {{ security_of_tenure }}.
+2. Check the council is the "competent landlord" for the tenancy (section 44).
+3. Check the termination date: not earlier than {{ term_end }}, and not less than 6 nor more than 12 months after the notice is given.
+4. Name every tenant exactly as in the tenancy, as it now stands after any assignment.
+5. Use the current prescribed Form 1, with all its notes, and have the council's legal team check it.
+6. Serve by a method the lease or section 23 of the Landlord and Tenant Act 1927 allows, and keep evidence of service.
+7. Record the notice on case {{ case_reference }} in PHAEMA: the date given and the termination date. PHAEMA then shows the last day to apply to court.

@@ -1,0 +1,21 @@
+name: Consent granted (approval)
+category: consents
+source: case
+case_types: assignment, underletting, charging, sharing, alterations, change_of_use, signage, planning_consent
+description: Tells the tenant the council is willing to grant consent, subject to a formal licence where the lease requires one. Use once the decision has been approved.
+fields: licence_needed|Formal document needed|optional| For example: a licence to assign by deed. Leave blank if this letter is the consent.
+---
+[[letter_start]]
+
+**{{ premises }}**
+**Your application for consent: {{ request }}**
+
+I am pleased to tell you that the council, as landlord, is willing to give consent to your application dated {{ received_on }} for {{ request }}{% if case_title %} ({{ case_title }}){% endif %}.
+
+{% if licence_needed %}This consent will be given by {{ licence_needed }}, which the council's legal team will prepare. The consent does not take effect until that document has been completed. Please ask your solicitor to contact our legal team, quoting our reference.{% else %}This letter is the council's written consent.{% endif %}
+
+This consent is given only as landlord under the {{ agreement_type }} dated {{ lease_date }}. It does not give any other consent or approval the council may need to give in another capacity, such as planning permission or building regulations approval, which you must obtain separately.
+
+All other terms of your {{ agreement_type }} remain in full force. The council's costs are payable as previously agreed.
+
+[[signature]]

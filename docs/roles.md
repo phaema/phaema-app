@@ -36,6 +36,8 @@ PHAEMA has three roles. Give each person one role in **Manage data > Users** (ti
 | Record certificates, screen buildings, add building documents | All | Properties they manage | – |
 | Record valuations | All | Properties they manage | – |
 | Classify assets, start the valuation programme, accept valuations for the accounts | ✓ | – | – |
+| Create letters and notices from the document library | ✓ | ✓ (Contributors too) | – |
+| Add and change document templates | ✓ | – | – |
 | Module settings (OS Maps key, reminder lead times, brand colour, rent ledger) | ✓ | – | – |
 | Add users and give them roles | ✓ (not superusers) | – | – |
 | Use the API | Read and write | Read; change what they can change on screen | Read only |

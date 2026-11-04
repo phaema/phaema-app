@@ -1,0 +1,9 @@
+{% extends "base.html" %}{% load i18n %}
+{% block title %}{{ template.name }}{% endblock %}
+{% block help_page %}documents{% endblock %}
+{% block content %}
+<span class="govuk-caption-l">{{ template.name }}</span>
+<h1 class="govuk-heading-l">{% blocktranslate with s=template.get_source_display|lower %}Choose {{ s }}{% endblocktranslate %}</h1>
+<form method="get" class="phaema-inline-fields govuk-!-margin-bottom-4"><label class="govuk-label govuk-!-margin-right-2" for="q">{% translate "Search" %}</label><input class="govuk-input govuk-input--width-20" id="q" name="q" value="{{ q }}"><button class="govuk-button govuk-button--secondary govuk-!-margin-bottom-0" data-module="govuk-button">{% translate "Search" %}</button></form>
+<ul class="govuk-list">{% for kind, pk, label in options %}<li><a class="govuk-link" href="?{{ kind }}={{ pk }}">{{ label }}</a></li>{% empty %}<li>{% translate "Nothing found." %}</li>{% endfor %}</ul>
+{% endblock %}

@@ -1,0 +1,25 @@
+name: Breach of covenant: letter to remedy
+category: management
+source: case
+case_types: breach, encroachment
+description: An informal letter setting out a breach and a time to put it right, before any formal notice.
+fields: breach|What is wrong, and which clause of the lease it breaks|long| ; remedy|What the tenant must do|long| ; remedy_by|Put right by|
+---
+[[letter_start]]
+
+**{{ premises }}**
+**{{ case_title }}**
+
+It has come to the council's attention that:
+
+{{ breach }}
+
+Please put this right by {{ remedy_by }} by:
+
+{{ remedy }}
+
+If this is not done, the council will consider its options under the {{ agreement_type }}, which may include formal action. The council reserves all its rights, and nothing in this letter waives any breach.
+
+If there is a reason for this, or you would like to discuss it, please contact me at {{ author_email }}.
+
+[[signature]]

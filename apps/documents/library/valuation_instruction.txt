@@ -1,0 +1,51 @@
+name: Valuation: instruction and terms of engagement
+category: valuation
+source: valuation
+description: Instructs the valuer and sets out the terms of engagement the RICS Red Book requires (VPS 1), for valuations for the council's accounts. Record the date the terms are agreed on the valuation.
+fields: fee_basis|Fee| ; information|Information provided|long| ; report_by|Report required by|
+---
+{{ valuer_name }}
+{{ valuer_firm }}
+
+{{ today }}
+
+Our ref: {{ property_reference }} / {{ valuation_date }}
+
+Dear {{ valuer_name }}
+
+**Valuation of {{ property_name }} for the council's financial statements**
+
+The council instructs you to value the asset below on the following terms. Please confirm your acceptance, or tell us of anything you cannot accept, before starting work.
+
+| Client | {{ council_name }} |
+| Intended users | The council and its external auditor |
+| Purpose | {{ valuation_purpose }} |
+| Asset | {{ property_name }}, {{ property_address }} (asset reference {{ property_reference }}{% if uprn %}, UPRN {{ uprn }}{% endif %}) |
+| Interest | The council's interest, as set out in the data pack |
+| Asset class | {{ asset_class }} |
+| Basis of value | {{ valuation_basis }}, in accordance with the CIPFA Code of Practice on Local Authority Accounting and RICS Valuation – Global Standards, including the UK national supplement (UK VPGA 4 and, where relevant, UK VPGA 6) |
+| Valuation date | {{ valuation_date }} |
+| Currency | Pounds sterling |
+| Valuer | {{ valuer_name }}, {{ valuer_firm }}, acting as an {{ valuer_status }} valuer |
+| Report required by | {{ report_by }} |
+| Fee | {{ fee_basis }} |
+
+**Status and conflicts.** Please confirm that you are an RICS Registered Valuer with the knowledge and skills to undertake the valuation, and that you have no conflict of interest, or tell us of any.
+
+**Extent of investigations.** State the extent of your inspection (full, external or desktop) and any limits on your investigations.
+
+**Information relied on.** The council will provide:
+
+{{ information }}
+
+**Assumptions and special assumptions.** Please agree any assumptions and special assumptions with us in advance and state them in your report.
+
+**Components.** Where the building value exceeds the council's componentisation threshold, report the value and remaining useful life of each significant component, and the split between land and buildings.
+
+**Report.** Your report should comply with the Red Book reporting standards, including a statement of any material valuation uncertainty.
+
+**Use of the report.** The report is for the purpose above and may be disclosed to the council's auditor. It may not be relied on by others or published without your consent, except as the law or the council's accounts require.
+
+**Complaints.** Please confirm your firm's complaints handling procedure, and that the valuation may be subject to monitoring under RICS's conduct and disciplinary regulations.
+
+[[signature]]

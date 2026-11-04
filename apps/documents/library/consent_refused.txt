@@ -1,0 +1,23 @@
+name: Consent refused, with reasons
+category: consents
+source: case
+case_types: assignment, underletting, charging, sharing, alterations, change_of_use, signage, planning_consent
+description: Refuses consent, giving written reasons as the Landlord and Tenant Act 1988 requires. Have the reasons checked by legal before issue: an unreasonable refusal can lead to a claim for damages.
+fields: reasons|Reasons for refusing|long|Each reason, specific to this application and the lease.
+---
+[[letter_start]]
+
+**{{ premises }}**
+**Your application for consent: {{ request }}**
+
+The council has carefully considered your application dated {{ received_on }} for {{ request }}{% if case_title %} ({{ case_title }}){% endif %}.
+
+I am sorry to tell you that the council, as landlord, has decided to refuse consent, for the following reasons:
+
+{{ reasons }}
+
+{% if statutory_1988 %}This is the council's written notice of its decision, with its reasons, under section 1(3) of the Landlord and Tenant Act 1988.
+
+{% endif %}If you are able to address these reasons, the council will consider a fresh application. You may wish to take professional advice.
+
+[[signature]]

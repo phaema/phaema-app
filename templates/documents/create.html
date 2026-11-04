@@ -1,0 +1,32 @@
+{% extends "base.html" %}{% load i18n %}
+{% block title %}{{ template.name }}{% endblock %}
+{% block help_page %}documents{% endblock %}
+{% block breadcrumbs %}<nav class="govuk-breadcrumbs" aria-label="Breadcrumb"><ol class="govuk-breadcrumbs__list"><li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="{% url 'documents:library' %}">{% translate "Document library" %}</a></li>{% if case %}<li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="{{ case.get_absolute_url }}">{{ case.display_reference }}</a></li>{% endif %}</ol></nav>{% endblock %}
+{% block content %}
+<span class="govuk-caption-l">{% translate "Create a document" %}</span>
+<h1 class="govuk-heading-l">{{ template.name }}</h1>
+{% if template.prescribed_form %}<div class="govuk-warning-text"><span class="govuk-warning-text__icon" aria-hidden="true">!</span><strong class="govuk-warning-text__text"><span class="govuk-visually-hidden">{% translate "Warning" %}</span>{% blocktranslate with f=template.prescribed_form %}Prescribed form: {{ f }}. Put these particulars on the current form, with its notes, and have legal check it before service.{% endblocktranslate %}</strong></div>{% endif %}
+<div class="govuk-grid-row">
+<div class="govuk-grid-column-one-third">
+<form method="post">{% csrf_token %}
+  {% for k, v in hidden.items %}<input type="hidden" name="{{ k }}" value="{{ v }}">{% endfor %}
+  {% if extras %}<h2 class="govuk-heading-s">{% translate "Details for this document" %}</h2>
+  {% for key, label, value, long, help in extras %}<div class="govuk-form-group"><label class="govuk-label govuk-label--s" for="f-{{ key }}">{{ label }}</label>{% if help %}<div class="govuk-hint">{{ help }}</div>{% endif %}{% if long %}<textarea class="govuk-textarea" id="f-{{ key }}" name="f_{{ key }}" rows="4">{{ value }}</textarea>{% else %}<input class="govuk-input" id="f-{{ key }}" name="f_{{ key }}" value="{{ value }}">{% endif %}</div>{% endfor %}{% endif %}
+  <h2 class="govuk-heading-s">{% translate "Filled in by PHAEMA" %}</h2>
+  <p class="govuk-body-s">{% translate "Check these; anything blank shows as [highlighted] in the document." %}</p>
+  {% for group, rows in groups %}<details class="govuk-details govuk-!-margin-bottom-2" data-module="govuk-details"{% if forloop.first %} open{% endif %}><summary class="govuk-details__summary"><span class="govuk-details__summary-text">{{ group }}</span></summary><div class="govuk-details__text">
+    {% for key, label, value, long in rows %}<div class="govuk-form-group govuk-!-margin-bottom-3"><label class="govuk-label govuk-body-s" for="f-{{ key }}">{{ label }}</label>{% if long %}<textarea class="govuk-textarea govuk-!-margin-bottom-0" id="f-{{ key }}" name="f_{{ key }}" rows="3">{{ value }}</textarea>{% else %}<input class="govuk-input" id="f-{{ key }}" name="f_{{ key }}" value="{{ value }}">{% endif %}</div>{% endfor %}
+  </div></details>{% endfor %}
+  {% if case %}<div class="govuk-checkboxes govuk-checkboxes--small govuk-!-margin-bottom-4"><div class="govuk-checkboxes__item"><input class="govuk-checkboxes__input" id="save" name="save" type="checkbox" value="1" checked><label class="govuk-label govuk-checkboxes__label" for="save">{% blocktranslate with ref=case.display_reference %}Keep a copy of the draft on case {{ ref }}{% endblocktranslate %}</label></div></div>{% endif %}
+  <div class="govuk-button-group">
+    <button class="govuk-button govuk-button--secondary" name="action" value="preview" data-module="govuk-button">{% translate "Update the preview" %}</button>
+    <button class="govuk-button" name="action" value="word" data-module="govuk-button">{% translate "Download as Word" %}</button>
+  </div>
+</form>
+</div>
+<div class="govuk-grid-column-two-thirds">
+  <h2 class="govuk-heading-s">{% translate "Preview" %}</h2>
+  <div class="phaema-doc-preview">{{ preview|safe }}</div>
+</div>
+</div>
+{% endblock %}

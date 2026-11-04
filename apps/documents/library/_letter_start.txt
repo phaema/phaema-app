@@ -1,0 +1,9 @@
+{{ addressee }}
+{{ addressee_address }}
+
+{{ today }}
+
+Our ref: {{ our_ref }}{% if your_ref %}
+Your ref: {{ your_ref }}{% endif %}
+
+Dear {{ dear }}

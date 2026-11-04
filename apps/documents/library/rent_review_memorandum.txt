@@ -1,0 +1,28 @@
+name: Rent review memorandum
+category: rent
+source: case
+case_types: rent_review
+letterhead: no
+description: Records the rent agreed at a review, for signature by both parties and to be kept with the lease.
+fields: review_date|Review date| ; new_rent|Rent agreed a year| ; new_rent_words|Rent agreed, in words|
+---
+# Memorandum of rent review
+
+| Premises | {{ premises }} |
+| Lease | {{ agreement_type }} dated {{ lease_date }} |
+| Landlord | {{ council_name }} |
+| Tenant | {{ tenant_name }} |
+| Review date | {{ review_date }} |
+
+The landlord and the tenant record that the rent payable under the lease from and including {{ review_date }} has been agreed at **{{ new_rent }} ({{ new_rent_words }}) a year**, exclusive of VAT, payable in accordance with the lease.
+
+All other terms of the lease remain unchanged.
+
+| Signed for the landlord |   |
+| Name |   |
+| Date |   |
+| Signed for the tenant |   |
+| Name |   |
+| Date |   |
+
+Note: record the agreed rent on the rent schedule in PHAEMA, effective {{ review_date }}, by recording the outcome of the rent review event.

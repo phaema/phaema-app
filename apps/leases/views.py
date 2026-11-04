@@ -104,6 +104,9 @@ class LeaseDetailView(LoginRequiredMixin, DetailView):
         ctx["schedule"] = [(e, e == current, e.effective_from > today) for e in schedule]
         ctx["payments"] = workflow.payments_preview(lease, today, 4)
         ctx["rent_account"] = _rent_account(lease)
+        from apps.documents.views import _can_create, for_lease
+
+        ctx["doc_templates"] = for_lease() if _can_create(self.request.user) else []
         return ctx
 
 

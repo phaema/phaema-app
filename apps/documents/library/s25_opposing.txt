@@ -1,0 +1,38 @@
+name: Section 25 notice, opposing a new tenancy (particulars for Form 2)
+category: notices_1954
+source: case
+case_types: renewal, expiry
+prescribed_form: Form 2 in Schedule 2 to the Landlord and Tenant Act 1954, Part 2 (Notices) Regulations 2004 (landlord's notice ending a business tenancy and reasons for refusing a new one)
+description: The particulars and the grounds of opposition under section 30(1), to transfer to prescribed Form 2. The council must be able to prove the grounds it relies on; take legal advice before serving.
+fields: termination_date|Date the tenancy is to end| ; service_date|Date the notice will be given| ; opposition_grounds|Grounds of opposition (section 30(1) paragraphs)|long| For example: (f) the council intends to demolish or reconstruct the premises ; evidence|Evidence the council holds for each ground|long|
+---
+# Section 25 notice: particulars for Form 2
+
+**Landlord's notice ending a business tenancy and reasons for refusing a new one**
+
+| Case | {{ case_reference }} |
+| To (the tenant) | {{ tenant_name }}, {{ tenant_address }} |
+| From (the landlord) | {{ council_name }}, {{ council_address }} |
+| Property | {{ premises }} |
+| Tenancy | {{ agreement_type }} dated {{ lease_date }}, {{ term }}, contractual expiry {{ term_end }} |
+| Date the notice is to be given | {{ service_date }} |
+| Date the tenancy is to end | {{ termination_date }} |
+
+## Grounds on which the council opposes a new tenancy
+
+{{ opposition_grounds }}
+
+## Evidence for each ground (internal: not part of the notice)
+
+{{ evidence }}
+
+## Before the notice is served
+
+1. Check the tenancy is protected by Part 2 of the 1954 Act: current status {{ security_of_tenure }}.
+2. Check the council is the "competent landlord" (section 44).
+3. Check the termination date: not earlier than {{ term_end }}, and not less than 6 nor more than 12 months after the notice is given.
+4. Confirm the decision to oppose, and the grounds, have been approved (case {{ case_reference }}). For ground (f) or (g), keep the evidence of the council's intention, such as a Cabinet or committee resolution and funding.
+5. Consider whether compensation under section 37 will be payable (grounds (e), (f) and (g)).
+6. Use the current prescribed Form 2, with all its notes, and have the council's legal team check it.
+7. Serve by a method the lease or section 23 of the Landlord and Tenant Act 1927 allows, and keep evidence of service.
+8. Record the notice on the case in PHAEMA, so the court deadline is tracked.

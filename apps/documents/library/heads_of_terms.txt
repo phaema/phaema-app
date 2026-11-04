@@ -1,0 +1,37 @@
+name: Heads of terms (subject to contract)
+category: lettings
+source: case
+case_types: new_letting, renewal
+description: Heads of terms from the case, covering every item the RICS Code for leasing business premises requires. Fill in the heads of terms on the case first.
+---
+# Heads of terms
+
+**Subject to contract**
+
+| Landlord | {{ council_name }}, {{ council_address }} |
+| Tenant | {{ tenant_name }}{% if tenant_company_number %} (company {{ tenant_company_number }}){% endif %}, {{ tenant_address }} |
+| Date | {{ today }} |
+| Reference | {{ case_reference }} |
+
+| 1. Premises | {{ hot_premises }} |
+| 2. Special rights | {{ hot_rights }} |
+| 3. Term and security of tenure | {{ hot_term }} |
+| 4. Rights to renew or break | {{ hot_renewal_break }} |
+| 5. Guarantor and rent deposit | {{ hot_security }} |
+| 6. Rent and payment | {{ hot_rent }} |
+| 7. VAT | {{ hot_vat }} |
+| 8. Rent-free period or incentive | {{ hot_incentives }} |
+| 9. Rent review | {{ hot_review }} |
+| 10. Service charge and insurance | {{ hot_service_insurance }} |
+| 11. Assignment, subletting, charging and sharing | {{ hot_alienation }} |
+| 12. Repairs | {{ hot_repairs }} |
+| 13. Use | {{ hot_use }} |
+| 14. Alterations and reinstatement | {{ hot_alterations }} |
+| 15. Initial fit-out | {{ hot_fit_out }} |
+| 16. Conditions | {{ hot_conditions }} |
+
+These heads of terms are not binding on either party and are subject to contract, to the approval of the council, and to the completion of a formal lease. Each party will pay its own costs unless stated above.
+
+The council follows the RICS professional statement *Code for leasing business premises* (England and Wales). The tenant is recommended to take professional advice before agreeing these terms.
+
+Prepared by {{ author_name }}, {{ author_title }}, {{ council_name }}.

@@ -1,0 +1,17 @@
+name: Rent arrears: reminder
+category: arrears
+source: lease
+description: A first reminder of overdue rent, from the rent account.
+---
+[[letter_start]]
+
+**{{ premises }}**
+**Overdue rent: {{ lease_reference }}**
+
+Our records show that {{ arrears_overdue }} is overdue on your rent account for the above premises. The total balance on the account is {{ arrears_total }}.
+
+If you have already paid, thank you, and please ignore this letter. If not, please pay the overdue amount within 14 days, quoting your account reference {{ lease_reference }}.
+
+If you are having difficulty paying, please contact me straight away to discuss it. It is much easier to agree a way forward early.
+
+[[signature]]

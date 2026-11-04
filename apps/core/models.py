@@ -36,6 +36,13 @@ class ModuleSettings(models.Model):
     """Single-row table holding which optional modules this council has switched on."""
 
     organisation_name = models.CharField(_("organisation name"), max_length=200, blank=True)
+    department = models.CharField(_("department, for letters"), max_length=200, blank=True,
+                                  help_text=_("For example: Estates and Property Services."))
+    postal_address = models.TextField(_("postal address, for letters"), blank=True,
+                                      help_text=_("Also the address for service of notices on the council."))
+    letter_phone = models.CharField(_("phone, for letters"), max_length=40, blank=True)
+    letter_email = models.EmailField(_("email, for letters"), blank=True)
+    website = models.CharField(_("website"), max_length=200, blank=True)
     rent_ledger_enabled = models.BooleanField(
         _("rent ledger"), default=False,
         help_text=_("Raise rent charges, keep tenant accounts and arrears, and export to the finance system."),

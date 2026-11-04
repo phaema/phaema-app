@@ -71,6 +71,9 @@
     <div><button class="govuk-button govuk-button--secondary govuk-!-margin-bottom-0" data-module="govuk-button">{% translate "Add" %}</button></div>
   </form></div></details>{% endif %}
 
+{% if doc_templates %}<details class="govuk-details govuk-!-margin-top-6" data-module="govuk-details"><summary class="govuk-details__summary"><span class="govuk-details__summary-text">{% translate "Create a letter or notice" %}</span></summary><div class="govuk-details__text">
+  <p class="govuk-body-s">{% translate "Filled in from this case, checked by you, and downloaded as a Word document to finalise and issue." %}</p>
+  <ul class="govuk-list govuk-body-s">{% for t in doc_templates %}<li><a class="govuk-link" href="{% url 'documents:create' t.code %}?case={{ case.pk }}">{{ t.name }}</a>{% if t.prescribed_form %} <strong class="govuk-tag govuk-tag--purple">{% translate "Prescribed form" %}</strong>{% endif %}</li>{% endfor %}</ul></div></details>{% endif %}
 <h2 class="govuk-heading-m govuk-!-margin-top-6">{% translate "Notes, correspondence and documents" %}</h2>
 {% if can_contribute %}
 <details class="govuk-details" data-module="govuk-details"><summary class="govuk-details__summary"><span class="govuk-details__summary-text">{% translate "File an email" %}</span></summary><div class="govuk-details__text">

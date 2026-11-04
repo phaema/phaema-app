@@ -1,0 +1,27 @@
+name: Section 17 notice to a former tenant or guarantor (particulars)
+category: legal
+source: case
+case_types: arrears
+prescribed_form: Form 1 in the Schedule to the Landlord and Tenant (Covenants) Act 1995 (Notices) Regulations 1995 (notice to former tenant or guarantor of intention to recover a fixed charge)
+description: Particulars for the notice the council must serve on a former tenant or their guarantor within six months of a fixed charge (rent, service charge, liquidated sums) falling due, to preserve the right to recover it from them.
+fields: recipient|Former tenant or guarantor| ; recipient_address|Their address|long| ; amounts|Each sum, with the date it fell due|long| ; interest|Interest claimed, if any|optional
+---
+# Section 17 notice: particulars for Form 1
+
+| To | {{ recipient }}, {{ recipient_address }} |
+| From | {{ council_name }}, {{ council_address }} |
+| Premises | {{ premises }} |
+| Lease | {{ agreement_type }} dated {{ lease_date }} |
+| Current tenant | {{ tenant_name }} |
+
+## Fixed charges due and unpaid
+
+{{ amounts }}
+
+{% if interest %}Interest: {{ interest }}{% endif %}
+
+## Notes for the officer
+
+1. Serve within **six months** of each sum falling due, or the council loses the right to recover that sum from the former tenant or guarantor.
+2. Use the current prescribed form, with its notes. Check whether the former tenant gave an authorised guarantee agreement, and whether the lease was granted before or after 1 January 1996.
+3. Keep evidence of service on case {{ case_reference }}.

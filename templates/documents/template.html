@@ -1,0 +1,14 @@
+{% extends "base.html" %}{% load i18n %}
+{% block title %}{{ template.name }}{% endblock %}
+{% block help_page %}documents{% endblock %}
+{% block breadcrumbs %}<nav class="govuk-breadcrumbs" aria-label="Breadcrumb"><ol class="govuk-breadcrumbs__list"><li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="{% url 'documents:library' %}">{% translate "Document library" %}</a></li><li class="govuk-breadcrumbs__list-item">{{ template.name }}</li></ol></nav>{% endblock %}
+{% block content %}
+<span class="govuk-caption-l">{{ template.get_category_display }}</span>
+<h1 class="govuk-heading-l">{{ template.name }}</h1>
+<p class="govuk-body">{{ template.description }}</p>
+{% if template.prescribed_form %}<div class="govuk-warning-text"><span class="govuk-warning-text__icon" aria-hidden="true">!</span><strong class="govuk-warning-text__text"><span class="govuk-visually-hidden">{% translate "Warning" %}</span>{% blocktranslate with f=template.prescribed_form %}The law prescribes the form of this notice: {{ f }}. PHAEMA fills in the particulars; they must go on the current prescribed form, with its notes, before it is served.{% endblocktranslate %}</strong></div>{% endif %}
+<p class="govuk-body"><a class="govuk-button" href="{% url 'documents:create' template.code %}" data-module="govuk-button">{% translate "Create this document" %}</a>
+{% if is_admin %} <a class="govuk-link govuk-!-margin-left-3" href="{% url 'admin:documents_documenttemplate_change' template.pk %}">{% translate "Change the template" %}</a>{% endif %}</p>
+<h2 class="govuk-heading-m">{% translate "The template" %}</h2>
+<div class="phaema-doc-preview">{{ preview|safe }}</div>
+{% endblock %}

@@ -1,0 +1,22 @@
+name: Request for an undertaking for the council's costs
+category: consents
+source: case
+description: Asks the tenant, or their solicitor, for an undertaking to pay the council's costs before work on a consent or licence begins.
+fields: legal_costs|Estimate of legal costs| ; surveyor_costs|Estimate of surveyor's costs|
+---
+[[letter_start]]
+
+**{{ premises }}**
+**{{ case_title }}**
+
+Before the council can deal with your request, we need a written undertaking that you will pay the council's reasonable costs, whether or not the matter proceeds to completion.
+
+The council's costs are estimated at:
+
+| Legal costs | {{ legal_costs }} plus VAT |
+| Surveyor's costs | {{ surveyor_costs }} plus VAT |
+{% if fee %}| Council's fee | {{ fee }} plus VAT |{% endif %}
+
+If your solicitor is acting, an undertaking from them is acceptable. Please return the undertaking to me, quoting our reference.
+
+[[signature]]

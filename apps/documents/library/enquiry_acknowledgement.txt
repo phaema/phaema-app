@@ -1,0 +1,15 @@
+name: Enquiry: acknowledgement
+category: general
+source: case
+description: Acknowledges any enquiry or request, with the case reference and when to expect a reply.
+fields: reply_by|We will reply by|
+---
+[[letter_start]]
+
+**{{ case_title }}**
+
+Thank you for your enquiry received on {{ received_on }}. Your reference is **{{ case_reference }}**; please quote it if you contact us.
+
+{{ author_name }} is dealing with it, and we will reply by {{ reply_by }}.
+
+[[signature]]

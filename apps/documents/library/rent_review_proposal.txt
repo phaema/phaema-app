@@ -1,0 +1,27 @@
+name: Rent review: the council's proposal
+category: rent
+source: case
+case_types: rent_review
+description: Opens negotiations at a rent review with the council's proposed rent. Check the lease's review clause first: some require a formal trigger notice, and some make the timetable of the essence.
+fields: proposed_rent|Proposed rent a year| ; review_date|Review date| ; evidence|Summary of the evidence|long,optional|
+---
+[[letter_start]]
+
+**{{ premises }}**
+**Rent review at {{ review_date }}**
+
+**Subject to contract and without prejudice**
+
+Under the {{ agreement_type }} dated {{ lease_date }}, the rent is to be reviewed at {{ review_date }}. The current rent is {{ annual_rent }} a year.
+
+The council proposes that the rent from the review date should be **{{ proposed_rent }} a year**, on the basis set out in the lease ({{ review_basis }}).
+
+{% if evidence %}The council's proposal takes account of the following evidence:
+
+{{ evidence }}
+
+{% endif %}We would welcome your response, or that of your surveyor, within 28 days. If agreement cannot be reached, the lease provides for the rent to be decided by an independent third party.
+
+Until the new rent is agreed or decided, rent continues to be payable at the current rate. Any increase is payable from the review date, with interest if the lease provides for it.
+
+[[signature]]
