@@ -78,7 +78,7 @@
 </div>
 <div class="govuk-grid-column-one-third">
   <h2 class="govuk-heading-s">{% translate "Letters" %}</h2>
-  <p class="govuk-body-s"><a class="govuk-link" href="{% url 'documents:create' 'valuation-instruction' %}?valuation={{ v.pk }}">{% translate "Instruction and terms of engagement" %}</a></p>
+  <p class="govuk-body-s"><a class="govuk-link" href="{% url 'documents:create' 'valuation-instruction' %}?valuation={{ v.pk }}">{% translate "Instruction and terms of engagement" %}</a>{% if audits %}<br><a class="govuk-link" href="{% url 'documents:create' 'valuation-audit-response' %}?valuation={{ v.pk }}">{% translate "Response to the auditor" %}</a>{% endif %}</p>
   {% if is_admin and v.status != "accepted" %}<h2 class="govuk-heading-s">{% translate "Accept for the accounts" %}</h2>
     {% if problems %}<ul class="govuk-list govuk-list--bullet govuk-body-s">{% for p in problems %}<li>{{ p }}</li>{% endfor %}</ul>
     {% else %}<form method="post">{% csrf_token %}<input type="hidden" name="action" value="accept"><button class="govuk-button" data-module="govuk-button">{% translate "Accept" %}</button></form>{% endif %}

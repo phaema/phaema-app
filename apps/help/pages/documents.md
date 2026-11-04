@@ -38,7 +38,7 @@ email.
 | Rent and rent reviews | Rent review proposal; rent review memorandum |
 | Arrears and income | Arrears reminder; final notice before action |
 | Lease management | Tenant's break notice acknowledgement; breach of covenant letter; schedule of dilapidations covering letter; rent deposit return |
-| Asset valuation | Instruction and terms of engagement to the valuer |
+| Asset valuation | Instruction and terms of engagement to the valuer; response to the auditor's query (from a valuation flagged for audit) |
 | General | Enquiry acknowledgement; general letter |
 
 Consent letters for assignment, underletting, charging and sharing include the written notice of the decision the

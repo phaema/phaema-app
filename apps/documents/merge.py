@@ -72,6 +72,11 @@ FIELDS = OrderedDict([
     ("valuer_firm", ("Valuation", "Valuer's firm")),
     ("valuer_status", ("Valuation", "Valuer's status")),
     ("valuation_report_due", ("Valuation", "Report required by")),
+    ("valuation_value", ("Valuation", "Value")),
+    ("accounts_year", ("Audit", "Accounts")),
+    ("auditor", ("Audit", "Auditor")),
+    ("audit_query", ("Audit", "Auditor's query")),
+    ("audit_response", ("Audit", "The council's response")),
 ])
 
 # Left blank (not highlighted) when unknown, so templates can test them with {% if %}.
@@ -184,7 +189,16 @@ def _valuation(v):
         "addressee": v.valuer.name if v.valuer else "", "valuation_report_due": long_date(
             date(v.valuation_date.year, 4, 30)) if v.valuation_date else "",
         "council_finance_contact": ValuationSettings.load().finance_contact,
-    }
+        "valuation_value": f"£{v.value:,.0f}" if v.value is not None else "",
+    } | _audit(v)
+
+
+def _audit(v):
+    review = v.audit_reviews.exclude(status="closed").order_by("-pk").first() or v.audit_reviews.first()
+    if review is None:
+        return {}
+    return {"accounts_year": review.accounts_year, "auditor": review.auditor, "audit_query": review.query,
+            "audit_response": review.response, "addressee": review.auditor}
 
 
 def context(user=None, case=None, lease=None, prop=None, valuation=None):
