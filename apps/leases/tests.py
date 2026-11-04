@@ -71,21 +71,21 @@ def test_demo_helpers():
 
 
 def test_demo_leases_are_valid(demo):
-    assert Lease.objects.count() == 22
+    assert Lease.objects.count() == 46  # Exampleton 22, Northfield 24
     for obj in Lease.objects.all():
         obj.full_clean()
         assert obj.properties.exists()
-    assert Lease.objects.filter(direction="in").count() == 1
+    assert Lease.objects.filter(direction="in").count() == 2
     call_command("load_demo_data", verbosity=0)  # repeatable
-    assert Lease.objects.count() == 22 and BreakOption.objects.count() == 2
+    assert Lease.objects.count() == 46 and BreakOption.objects.count() == 5
 
 
 def test_lease_pages_and_filters(client, officer, demo):
     client.force_login(officer)
     url = reverse("leases:list")
     resp = client.get(url)
-    assert resp.status_code == 200 and resp.context["paginator"].count == 22
-    assert client.get(url, {"direction": "in"}).context["paginator"].count == 1
+    assert resp.status_code == 200 and resp.context["paginator"].count == 46
+    assert client.get(url, {"direction": "in"}).context["paginator"].count == 2
     expiring = client.get(url, {"expiring": "12"}).context["page_obj"]
     today = date.today()
     assert all(today <= lease.term_end <= add_months(today, 12) for lease in expiring)
@@ -105,6 +105,6 @@ def test_lease_pages_and_filters(client, officer, demo):
 def test_lease_api(client, officer, demo):
     client.force_login(officer)
     data = client.get("/api/leases/?page=1").json()
-    assert data["count"] == 22
+    assert data["count"] == 46
     l3 = next(r for r in data["results"] if r["reference"] == "DL-0003")
     assert l3["breaks"][0]["notice_deadline"]

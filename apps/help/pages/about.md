@@ -25,6 +25,6 @@ signed-in users.
 
 ## Demonstration data
 
-Training and test copies of PHAEMA may hold demonstration data for the fictional town of Exampleton. All of it is
-made up: references start with DM- or DL-, postcodes start ZZ99 and phone numbers are from the range set aside for
-drama.
+Training and test copies of PHAEMA may hold demonstration data for two fictional districts, Exampleton and
+Northfield. All of it is made up: references start with DM- or DL- (Northfield's are DM-N and DL-05), postcodes start
+ZZ99 or ZZ98 and phone numbers are from the range set aside for drama.

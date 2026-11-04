@@ -165,6 +165,11 @@ def build_records():
             holding_purpose="investment", tenure="leasehold", occupation=occ, use_description="Office suite",
             use_class="E(g)(i)", address_line_1=f"Suite {i}, Enterprise Way", postcode="ZZ99 6EW",
             nia_sqm=Decimal(nia), gia_sqm=Decimal(nia) * Decimal("1.08"))
+
+    # 7. The second district, Northfield
+    from apps.properties import demo_north
+
+    demo_north.add_records(add, rect)
     return records
 
 
@@ -199,6 +204,10 @@ TITLES = [
 ]
 
 
+from apps.properties import demo_north  # noqa: E402  (Northfield, the second district)
+
+TITLES += demo_north.TITLES
+
 # Fictional managing surveyors. They cannot sign in (no password is set).
 SURVEYORS = {
     "demo.amorgan": ("Alex", "Morgan"),
@@ -212,6 +221,8 @@ ASSIGNMENTS = {
     "DM-S02": "demo.ojones", "DM-S03": "demo.ojones", "DM-S04": "demo.ojones", "DM-S09": "demo.ojones",
     # DM-S06 and DM-S10 are left unassigned to show the "Unassigned" filter.
 }
+SURVEYORS.update(demo_north.SURVEYORS)
+ASSIGNMENTS.update(demo_north.ASSIGNMENTS)
 
 PHOTOS = {
     "DM-E01": [("Riverside Industrial Estate from the entrance", "industrial")],
@@ -222,6 +233,7 @@ PHOTOS = {
     "DM-S02": [("Town Hall front elevation", "civic"), ("Town Hall from High Street", "civic")],
     "DM-S06": [("Former Oak Street school site from Oak Street", "land")],
 }
+PHOTOS.update(demo_north.PHOTOS)
 
 DOCUMENTS = {
     "ZZ100001": [
@@ -287,7 +299,11 @@ class Command(BaseCommand):
         from apps.leases import demo as lease_demo
 
         lease_count = lease_demo.load()
+        lease_count += demo_north.load_leases(date.today())
         from apps.ledger import demo as ledger_demo
+
+        ledger_demo.UNPAID_LAST.update(demo_north.UNPAID_LAST)
+        ledger_demo.PART_PAID.update(demo_north.PART_PAID)
         from apps.servicecharges import demo as service_demo
 
         service_demo.setup()
@@ -295,15 +311,26 @@ class Command(BaseCommand):
         from apps.cases import demo as case_demo
 
         case_count = case_demo.load()
+        demo_north.load_cases(date.today())
+        from apps.cases.models import Case
+
+        case_count = Case.objects.count()
         from apps.maintenance import demo as maintenance_demo
 
-        job_count = maintenance_demo.load()
+        maintenance_demo.load()
+        demo_north.load_maintenance(date.today())
+        from apps.maintenance.models import Job
+
+        job_count = Job.objects.count()
         from apps.compliance import demo as compliance_demo
 
         compliance_demo.load()
+        demo_north.load_compliance(date.today())
         from apps.valuations import demo as valuation_demo
 
+        valuation_demo.HISTORY.update(demo_north.VALUATION_HISTORY)
         valuation_demo.load()
+        demo_north.load_valuations(date.today())
 
         modules = ModuleSettings.load()
         if not modules.organisation_name:
@@ -313,7 +340,7 @@ class Command(BaseCommand):
         self.stdout.write(self.style.SUCCESS(
             f"Demo data loaded: {created} properties added, {updated} refreshed, {len(TITLES)} titles, "
             f"{lease_count} leases and licences, {charge_count} rent charges, {case_count} cases, "
-            f"{job_count} maintenance jobs."
+            f"{job_count} maintenance jobs, across Exampleton and Northfield."
         ))
 
     def load_surveyors(self, refs):

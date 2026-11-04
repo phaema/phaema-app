@@ -178,7 +178,7 @@ def test_demo(db):
     year = ScheduleYear.objects.filter(schedule__name__startswith="Riverside").order_by("start").first()
     assert apportion.reconcile(year).actual > 0
     call_command("load_demo_data", "--reset", verbosity=0)
-    assert Schedule.objects.count() == 1
+    assert Schedule.objects.count() == 2  # Riverside and Northfield Business Park
 
 
 # ------------------------------------------------------------------ RICS 2nd edition additions

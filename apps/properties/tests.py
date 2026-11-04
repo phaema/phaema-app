@@ -128,7 +128,7 @@ def test_demo_data_loads_valid_records_and_is_repeatable(db):
 
     call_command("load_demo_data", verbosity=0)  # running again must not duplicate
     assert Property.objects.count() == first_count
-    assert Title.objects.count() == 8
+    assert Title.objects.count() == 15
 
     Property.objects.create(reference="REAL-1", name="A real council record", property_type="site")
     call_command("load_demo_data", "--reset", verbosity=0)  # reset leaves real records alone

@@ -174,4 +174,4 @@ def test_demo(db):
     assert Job.objects.filter(approval_status="pending").exists()
     assert PlannedTask.objects.filter(statutory=True, next_due__lt=date.today()).exists()
     call_command("load_demo_data", "--reset", verbosity=0)
-    assert Contractor.objects.count() == 4
+    assert Contractor.objects.count() == 6
