@@ -1,0 +1,21 @@
+name: Rent deposit return
+category: management
+source: case
+case_types: deposit_return
+description: Confirms the return of a rent deposit, with any deductions.
+fields: deposit_held|Deposit and interest held| ; deductions|Deductions, with reasons|long,optional| ; to_return|Amount to be returned| ; pay_date|Payment date|
+---
+[[letter_start]]
+
+**{{ premises }}**
+**Return of your rent deposit**
+
+The council holds a rent deposit of {{ deposit_held }} under the deed relating to your {{ agreement_type }} of the above premises.
+
+{% if deductions %}The council has made the following deductions, as the deed allows:
+
+{{ deductions }}
+
+{% endif %}The council will pay you **{{ to_return }}** on or about {{ pay_date }}. Please confirm the bank account details for payment in writing on your letterhead, and we will verify them by phone before paying.
+
+[[signature]]

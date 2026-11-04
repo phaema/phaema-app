@@ -1,0 +1,14 @@
+name: General letter
+category: general
+source: case
+description: A blank council letter with the addressee, references and premises filled in.
+fields: subject|Subject| ; body|Text of the letter|long|
+---
+[[letter_start]]
+
+**{{ premises }}**
+**{{ subject }}**
+
+{{ body }}
+
+[[signature]]

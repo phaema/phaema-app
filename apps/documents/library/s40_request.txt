@@ -1,0 +1,20 @@
+name: Request for information about occupation and sub-tenancies (particulars for Form 4)
+category: notices_1954
+source: lease
+prescribed_form: Form 4 in Schedule 2 to the Landlord and Tenant Act 1954, Part 2 (Notices) Regulations 2004 (landlord's request for information about occupation and sub-tenancies, section 40(1))
+description: Particulars for the council's request to the tenant for information about who occupies the premises and any sub-tenancies, usually before serving a section 25 notice. The tenant has one month to reply.
+fields: service_date|Date the request will be given|
+---
+# Section 40(1) request: particulars for Form 4
+
+| To (the tenant) | {{ tenant_name }}, {{ tenant_address }} |
+| From (the landlord) | {{ council_name }}, {{ council_address }} |
+| Property | {{ premises }} |
+| Tenancy | {{ agreement_type }} dated {{ lease_date }} |
+| Date the request is to be given | {{ service_date }} |
+
+## Notes for the officer
+
+- The tenant must reply within one month of the request.
+- The request cannot be made earlier than two years before the tenancy could be ended by a section 25 notice: the contractual expiry is {{ term_end }}.
+- Use the current prescribed Form 4, with its notes, and serve by a method the lease or section 23 of the Landlord and Tenant Act 1927 allows.

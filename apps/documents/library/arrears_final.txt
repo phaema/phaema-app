@@ -1,0 +1,23 @@
+name: Rent arrears: final notice before action
+category: arrears
+source: case
+case_types: arrears
+description: A final demand before the council takes action. If the tenant is an individual or sole trader, follow the Pre-Action Protocol for Debt Claims and enclose its information sheet and reply form. Consider a section 17 notice to any former tenant or guarantor.
+fields: pay_by|Pay by|
+---
+[[letter_start]]
+
+**{{ premises }}**
+**Final notice: rent arrears of {{ arrears_overdue }}**
+
+Despite previous reminders, {{ arrears_overdue }} remains overdue on your rent account for the above premises. The total balance is {{ arrears_total }}.
+
+Unless the overdue amount is paid in full by **{{ pay_by }}**, or you contact us before then to agree a repayment arrangement the council accepts, the council may take action without further notice to recover the debt. Depending on the circumstances, this may include:
+
+- a claim in the county court for the debt, interest and costs;
+- recovering the rent from any guarantor{% if guarantor_name %} ({{ guarantor_name }}){% endif %} or rent deposit;
+- commercial rent arrears recovery or forfeiture of the {{ agreement_type }}, where the law and the lease allow.
+
+The council would much prefer to resolve this with you. Please contact me at {{ author_email }} as soon as possible.
+
+[[signature]]

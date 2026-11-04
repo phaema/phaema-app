@@ -106,3 +106,7 @@ html.phaema-text-largest { font-size: 150%; }
 .phaema-timeline li { border-left: 3px solid var(--ph-border, #b1b4b6); padding: 0 0 15px 15px; margin-bottom: 5px; }
 .phaema-timeline__when { display: block; color: var(--ph-secondary, #505a5f); }
 .phaema-email-text { white-space: normal; font-size: 1rem; max-height: 300px; overflow-y: auto; }
+.phaema-doc-preview { border: 1px solid var(--ph-border, #b1b4b6); padding: 30px 35px; background: var(--ph-surface, #fff); max-height: 1100px; overflow: auto; }
+.phaema-doc-preview .govuk-body { font-size: 1rem; }
+.phaema-blank { background: #fff2a8; color: #0b0c0c; padding: 0 2px; }
+.phaema-doc-number span { display: inline-block; min-width: 2em; }

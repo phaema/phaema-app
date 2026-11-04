@@ -1,0 +1,32 @@
+name: Instruction to legal services
+category: consents
+source: case
+letterhead: no
+description: Internal instruction to the council's legal team to prepare a licence, deed or notice, with the approved terms.
+fields: document|Document to prepare|| For example: licence to assign; deed of variation ; terms|Approved terms and conditions|long| ; deadline|Needed by|
+---
+# Instruction to legal services
+
+| To | Legal Services |
+| From | {{ author_name }}, {{ author_title }} |
+| Date | {{ today }} |
+| Case | {{ case_reference }} |
+| Agreement | {{ lease_reference }}, {{ agreement_type }} dated {{ lease_date }} |
+| Premises | {{ premises }} |
+| Tenant | {{ tenant_name }}{% if tenant_company_number %} (company {{ tenant_company_number }}){% endif %} |
+| Tenant's address | {{ tenant_address }} |
+{% if guarantor_name %}| Guarantor | {{ guarantor_name }} |{% endif %}
+
+## What is needed
+
+Please prepare: **{{ document }}**, by {{ deadline }}.
+
+## Approved terms
+
+{{ terms }}
+
+## Costs
+
+The tenant has been asked for an undertaking for the council's costs{% if fee %} and the council's fee of {{ fee }}{% endif %}. Please confirm the undertaking is in place before completion.
+
+The case file in PHAEMA ({{ case_reference }}) holds the application, correspondence and the approval.

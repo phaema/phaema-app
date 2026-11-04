@@ -1,0 +1,40 @@
+name: Valuation: response to the auditor's query
+category: valuation
+source: valuation
+description: The council's response to an external auditor's query on a valuation flagged for audit. Record the response on the valuation and mark it reported once sent.
+fields: enclosures|Enclosures|long,optional|
+---
+{{ auditor }}
+
+{{ today }}
+
+Our ref: {{ property_reference }} / {{ accounts_year }}
+
+Dear {{ auditor }}
+
+**Audit of the {{ accounts_year }} accounts: valuation of {{ property_name }}**
+
+Thank you for your query about the valuation of {{ property_name }}, {{ property_address }}, at {{ valuation_date }}.
+
+| Asset | {{ property_name }} ({{ property_reference }}) |
+| Asset class | {{ asset_class }} |
+| Basis of value | {{ valuation_basis }} |
+| Valuation date | {{ valuation_date }} |
+| Value | {{ valuation_value }} |
+| Valuer | {{ valuer_name }}, {{ valuer_firm }} ({{ valuer_status }}) |
+
+**Your query**
+
+{{ audit_query }}
+
+**The council's response**
+
+{{ audit_response }}
+
+{% if enclosures %}I enclose:
+
+{{ enclosures }}
+
+{% endif %}Please let me know if you need anything further.
+
+[[signature]]

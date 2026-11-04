@@ -1,0 +1,19 @@
+name: Schedule of dilapidations: covering letter
+category: management
+source: case
+case_types: dilapidations, expiry
+description: Serves the schedule of dilapidations at or after the end of a lease, following the Pre-Action Protocol for claims for damages in relation to the physical state of commercial property at the end of a tenancy.
+fields: schedule_date|Date of the schedule| ; surveyor|Prepared by| ; quantified|Quantified demand (if served with the schedule)|optional
+---
+[[letter_start]]
+
+**{{ premises }}**
+**{{ agreement_type|capfirst }} dated {{ lease_date }}: schedule of dilapidations**
+
+The {{ agreement_type }} of the above premises ended on {{ term_end }}. I enclose the council's schedule of dilapidations dated {{ schedule_date }}, prepared by {{ surveyor }}, setting out the breaches of the repairing, decoration, reinstatement and yielding-up covenants, the work required to remedy them, and the council's estimate of the cost.
+
+{% if quantified %}The council's quantified demand is {{ quantified }}. {% endif %}In line with the Pre-Action Protocol for claims for damages in relation to the physical state of commercial property at the termination of a tenancy, please respond within 56 days, setting out your response to each item in the schedule.
+
+The council is willing to meet to discuss the schedule and try to agree a settlement. This letter is written without prejudice to the council's other rights under the lease.
+
+[[signature]]

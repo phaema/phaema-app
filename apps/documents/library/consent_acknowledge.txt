@@ -1,0 +1,29 @@
+name: Consent application: acknowledgement
+category: consents
+source: case
+case_types: assignment, underletting, charging, sharing, alterations, change_of_use, signage, planning_consent
+description: Acknowledges a tenant's application for the council's consent, says what else is needed, and asks for an undertaking for the council's costs. Send within the acknowledgement target.
+fields: missing|Information still needed (one per line)|long,optional|Leave blank if the application is complete.
+---
+[[letter_start]]
+
+**{{ premises }}**
+**Your application for consent: {{ request }}**
+
+Thank you for your application dated {{ received_on }} for the council's consent under your {{ agreement_type }} of the above premises dated {{ lease_date }}.
+
+We will deal with your application as quickly as we can.{% if statutory_1988 %} The council will give its decision in writing within a reasonable time once it has everything it needs, as the Landlord and Tenant Act 1988 requires.{% endif %}
+
+{% if missing %}To consider your application we also need:
+
+{{ missing }}
+
+The time for our decision runs from when we have received this information.{% else %}We believe we have the information we need, and will contact you if anything further is required.{% endif %}
+
+The council's reasonable legal and surveyor's costs of dealing with your application are payable by you whether or not consent is granted{% if fee %}, including the council's fee of {{ fee }} plus VAT{% endif %}. Please confirm in writing that you will pay these costs. We will not be able to complete any licence until we have this undertaking.
+
+Nothing in this letter is a consent. Consent will only be given in writing by the council, and where a formal licence is needed, by deed.
+
+If you have any questions, please contact me at {{ author_email }}.
+
+[[signature]]

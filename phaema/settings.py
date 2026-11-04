@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     "apps.maintenance",
     "apps.compliance",
     "apps.valuations",
+    "apps.documents",
 ]
 
 MIDDLEWARE = [

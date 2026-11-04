@@ -1,0 +1,23 @@
+name: Tenant's break notice: acknowledgement
+category: management
+source: case
+case_types: break
+description: Acknowledges receipt of a tenant's break notice without accepting that it is valid, and reminds the tenant of the break conditions.
+fields: notice_received|Date the tenant's notice was received| ; break_date|Break date in the notice| ; conditions|Break conditions in the lease|long|
+---
+[[letter_start]]
+
+**{{ premises }}**
+**{{ agreement_type|capfirst }} dated {{ lease_date }}: break notice**
+
+We acknowledge receipt on {{ notice_received }} of your notice to end the {{ agreement_type }} on {{ break_date }}.
+
+This letter acknowledges receipt only. It is not an acceptance that the notice is valid or that the break will be effective, and the council reserves all its rights.
+
+The lease allows the break only if the conditions it sets out are met. These include:
+
+{{ conditions }}
+
+To arrange the return of the premises, an inspection, and the return of keys, please contact me at {{ author_email }}.
+
+[[signature]]

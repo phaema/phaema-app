@@ -1,0 +1,18 @@
+{% extends "base.html" %}{% load i18n %}
+{% block title %}{% translate "Document library" %}{% endblock %}
+{% block help_page %}documents{% endblock %}
+{% block content %}
+<h1 class="govuk-heading-xl">{% translate "Document library" %}</h1>
+<p class="govuk-body-l">{% translate "Letters and notices filled in from PHAEMA's records and downloaded as Word documents to finalise and issue." %}</p>
+{% include "core/_hint.html" with summary=_("How do I use a template?") text=_("Most templates are used from a case: open the case and choose Create a document. PHAEMA fills in the tenant, premises, lease details, dates and case details; you check and complete them, preview, and download a Word document. Anything PHAEMA could not fill in is highlighted in yellow.") page="documents" %}
+{% if is_admin %}<p class="govuk-body"><a class="govuk-link" href="{% url 'admin:documents_documenttemplate_add' %}">{% translate "Add a template" %}</a> · <a class="govuk-link" href="{% url 'admin:documents_documenttemplate_changelist' %}">{% translate "Manage templates" %}</a></p>{% endif %}
+{% for label, items in groups %}
+<h2 class="govuk-heading-m">{{ label }}</h2>
+<table class="govuk-table"><tbody class="govuk-table__body">
+{% for t in items %}<tr class="govuk-table__row">
+  <td class="govuk-table__cell"><a class="govuk-link" href="{{ t.get_absolute_url }}">{{ t.name }}</a>{% if t.prescribed_form %} <strong class="govuk-tag govuk-tag--purple">{% translate "Prescribed form" %}</strong>{% endif %}<br><span class="govuk-body-s">{{ t.description|truncatewords:30 }}</span></td>
+  <td class="govuk-table__cell govuk-body-s">{% blocktranslate with s=t.get_source_display|lower %}From {{ s }}{% endblocktranslate %}</td>
+</tr>{% endfor %}
+</tbody></table>
+{% endfor %}
+{% endblock %}

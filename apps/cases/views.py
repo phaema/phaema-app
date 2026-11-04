@@ -250,11 +250,18 @@ def case_detail(request, pk):
         "rag": case.rag(today), "decisions": Case.Decision.choices,
         "people": _people(ADMINISTRATORS, SURVEYORS), "contributors": _people(CONTRIBUTORS),
         "lease": case.lease, "show_confidential": show_confidential,
+        "doc_templates": _templates_for(case) if can_contribute else [],
         "hidden_notes": case.notes.filter(confidential=True).count() if not show_confidential else 0,
         "is_administrator": is_administrator(request.user),
         **_approval_context(request.user, case),
         **_leasing_context(case),
     })
+
+
+def _templates_for(case):
+    from apps.documents.views import for_case
+
+    return for_case(case)
 
 
 def _optional_date(text):

@@ -1,0 +1,19 @@
+name: Consent application: request for further information
+category: consents
+source: case
+case_types: assignment, underletting, charging, sharing, alterations, change_of_use, signage, planning_consent
+description: Asks the tenant for the information still needed to decide an application for consent.
+fields: missing|Information needed (one per line)|long| ; deadline|Reply by|
+---
+[[letter_start]]
+
+**{{ premises }}**
+**Your application for consent: {{ request }}**
+
+Thank you for your application dated {{ received_on }}. To consider it, the council needs the following:
+
+{{ missing }}
+
+Please send this by {{ deadline }}. The council's decision will be made within a reasonable time of receiving everything it needs, and we will not be able to progress your application until then.
+
+[[signature]]

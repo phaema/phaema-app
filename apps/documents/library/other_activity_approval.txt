@@ -1,0 +1,31 @@
+name: Approval of an activity on council land
+category: consents
+source: case
+case_types: other_activity, wayleave, land_purchase
+description: Approves a request to use council land or property for an activity such as filming, an event, hoardings or a temporary structure, with conditions.
+fields: activity|The activity| ; dates|Dates and times| ; fee_amount|Fee| ; more_conditions|Further conditions|long,optional|
+---
+[[letter_start]]
+
+**{{ premises }}**
+**{{ case_title }}**
+
+I am pleased to confirm that the council, as landowner, gives permission for {{ activity }} at the above location on {{ dates }}, on the following conditions:
+
+1. You will pay the council's fee of {{ fee_amount }} before the activity starts.
+2. You will hold public liability insurance of at least £5 million for the activity and send us a copy of the certificate before it starts.
+3. You will indemnify the council against any claim, loss or damage arising from the activity.
+4. You will leave the land clean and in the same condition as before, and pay for any damage.
+5. You will obtain any other permissions needed, such as planning permission, highway licences or premises licences.
+
+{{ more_conditions }}
+
+This permission is personal to you, is given only as landowner, and may be withdrawn if any condition is broken. It does not create a tenancy.
+
+Please sign and return the enclosed copy of this letter to confirm your agreement.
+
+[[signature]]
+
+Agreed for and on behalf of {{ tenant_name }}:
+
+Signed: ______________________________   Date: ______________

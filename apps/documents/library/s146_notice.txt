@@ -1,0 +1,43 @@
+name: Section 146 notice (breach of covenant)
+category: legal
+source: case
+case_types: breach, dilapidations
+description: Draft notice under section 146 of the Law of Property Act 1925, needed before the council can forfeit a lease for a breach other than non-payment of rent. Draft for the council's legal team to check and serve: it must specify the breach precisely.
+fields: breaches|The breaches complained of (each covenant and how it is broken)|long| ; remedy|What the tenant must do to remedy them|long| ; remedy_time|Reasonable time to remedy| For example: within 3 months of service ; compensation|Compensation required|optional| Leave blank if none ; repairs_1938|Repairing breach, lease of 7 years or more with 3 or more years left?|optional| Type yes to add the Leasehold Property (Repairs) Act 1938 statement
+---
+# Notice under section 146 of the Law of Property Act 1925
+
+| To | {{ tenant_name }} of {{ tenant_address }} |
+{% if guarantor_name %}| And to | {{ guarantor_name }} of {{ guarantor_address }} |{% endif %}
+| From | {{ council_name }} of {{ council_address }} |
+| Premises | {{ premises }} |
+| Lease | {{ agreement_type }} dated {{ lease_date }} (reference {{ lease_reference }}) |
+
+1. {{ council_name }}, the landlord under the lease, gives you notice that you have broken the following covenants in the lease:
+
+{{ breaches }}
+
+2. The council requires you to remedy the breaches {{ remedy_time }} by carrying out the following:
+
+{{ remedy }}
+
+{% if compensation %}3. The council requires you to pay compensation for the breaches of {{ compensation }}.
+
+{% endif %}{% if repairs_1938 == "yes" %}4. You are entitled under the Leasehold Property (Repairs) Act 1938 to serve on the council, within 28 days from the service of this notice, a counter-notice claiming the benefit of that Act. The counter-notice should be served on the council at {{ council_address }}.
+
+{% endif %}If you fail to comply with this notice, the council may seek to forfeit the lease and claim damages.
+
+Signed: ______________________________
+
+{{ author_name }}, {{ author_title }}, for and on behalf of {{ council_name }}
+
+Date: {{ today }}
+
+---
+
+## Internal notes (delete before service)
+
+- A section 146 notice is not needed for forfeiture for non-payment of rent.
+- Check the lease's forfeiture clause and that the council has not waived the right to forfeit (for example by demanding or accepting rent with knowledge of the breach).
+- For repairing covenants: where the lease was granted for seven years or more and three or more years remain, the 1938 Act statement in paragraph 4 is required.
+- Serve on the tenant and any guarantor, by a method the lease or section 196 of the Law of Property Act 1925 allows, and keep evidence of service on case {{ case_reference }}.

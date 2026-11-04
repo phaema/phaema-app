@@ -1,0 +1,33 @@
+name: Contracting out of the 1954 Act: warning notice and declaration
+category: notices_1954
+source: case
+case_types: new_letting, renewal
+prescribed_form: Schedule 1 (warning notice) and Schedule 2 (declaration or statutory declaration) to the Regulatory Reform (Business Tenancies) (England and Wales) Order 2003
+description: Covering letter serving the warning notice on a prospective tenant where the new lease is to be contracted out of security of tenure, with the steps and timings. The notice and declaration are in prescribed forms.
+fields: lease_start|Proposed start of the lease| ; proposed_term|Proposed term|
+---
+[[letter_start]]
+
+**{{ premises }}**
+**Proposed lease: exclusion of security of tenure**
+
+The council proposes to grant you a lease of the above premises for {{ proposed_term }} from {{ lease_start }}, on terms that sections 24 to 28 of the Landlord and Tenant Act 1954 will not apply. This means you will not have a right to a new lease when it ends.
+
+The law requires the council to give you a warning notice before you commit to the lease, and requires you to make a declaration that you have received it and accept its consequences. The warning notice is enclosed. Please read it carefully, and we recommend that you take independent professional advice.
+
+- If you receive the notice at least 14 days before you sign the lease or become bound to take it, you need only sign the simple declaration.
+- If not, the declaration must be a statutory declaration made before an independent solicitor or other person able to administer oaths.
+
+Please return the signed declaration to the council's legal team, quoting our reference. The lease cannot be completed without it.
+
+[[signature]]
+
+---
+
+# Internal checklist (delete before issue)
+
+1. Use the current prescribed warning notice (Schedule 1 of the 2003 Order) and declaration (Schedule 2), unaltered.
+2. Serve the warning notice on the tenant before they enter into the lease or become contractually bound to do so.
+3. If served 14 or more days before: simple declaration. If fewer than 14 days: statutory declaration.
+4. The lease must refer to the notice and declaration, and contain or be endorsed with the agreement to exclude.
+5. Keep the notice, declaration and evidence of service on case {{ case_reference }}.

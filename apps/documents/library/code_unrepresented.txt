@@ -1,0 +1,20 @@
+name: Letter to an unrepresented tenant enclosing the RICS Code
+category: lettings
+source: case
+case_types: new_letting, renewal
+description: The RICS Code for leasing business premises requires the landlord to draw an unrepresented prospective tenant's attention to the Code and its supplemental guide and recommend professional advice. Record the date sent on the case.
+---
+[[letter_start]]
+
+**{{ premises }}**
+**Proposed lease**
+
+Thank you for your interest in leasing the above premises.
+
+As far as we know, you are not being advised by a property professional. Before you agree terms, we strongly recommend that you take advice from a qualified surveyor or solicitor.
+
+I enclose a copy of the RICS professional statement *Code for leasing business premises* (England and Wales) and its supplemental guide for occupiers. The guide explains in plain language what to look out for when taking a business lease, including the length of the lease, rent reviews, repairs, service charges and your rights at the end of the lease.
+
+Any terms we discuss will be subject to contract until a lease is completed.
+
+[[signature]]

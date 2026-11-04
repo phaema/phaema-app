@@ -1,0 +1,25 @@
+name: Consent granted subject to conditions
+category: consents
+source: case
+case_types: assignment, underletting, charging, sharing, alterations, change_of_use, signage, planning_consent
+description: Gives consent subject to conditions, with the reasons for each condition, as the Landlord and Tenant Act 1988 requires for assignment, underletting, charging and sharing.
+fields: conditions|Conditions, each with its reason|long|Number them, and give the reason for each.
+---
+[[letter_start]]
+
+**{{ premises }}**
+**Your application for consent: {{ request }}**
+
+The council has considered your application dated {{ received_on }} for {{ request }}{% if case_title %} ({{ case_title }}){% endif %}.
+
+The council, as landlord, gives its consent subject to the following conditions. The reason for each condition is given with it.
+
+{{ conditions }}
+
+{% if statutory_1988 %}This is the council's written notice of its decision under section 1(3) of the Landlord and Tenant Act 1988.
+
+{% endif %}The consent will be given formally by a licence prepared by the council's legal team once the conditions that must be met beforehand have been satisfied. It does not take effect until then.
+
+This consent is given only as landlord. It does not give any other consent or approval the council may need to give in another capacity, such as planning permission or building regulations approval.
+
+[[signature]]

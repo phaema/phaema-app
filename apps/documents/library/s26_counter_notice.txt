@@ -1,0 +1,36 @@
+name: Counter-notice to a section 26 request (opposing a new tenancy)
+category: notices_1954
+source: case
+case_types: renewal, expiry
+description: The council's notice, within two months of the tenant's section 26 request, that it will oppose an application for a new tenancy and on which grounds. There is no prescribed form, but the grounds must be stated and the two-month deadline is strict. Legal to check before service.
+fields: opposition_grounds|Grounds of opposition (section 30(1) paragraphs, in the words of the Act)|long|
+---
+# Notice under section 26(6) of the Landlord and Tenant Act 1954
+
+| To | {{ tenant_name }}, {{ tenant_address }} |
+| From | {{ council_name }}, {{ council_address }} |
+| Property | {{ premises }} |
+| Tenancy | {{ agreement_type }} dated {{ lease_date }} |
+
+1. You made a request for a new tenancy of the property under section 26 of the Landlord and Tenant Act 1954 dated {{ notice_served_on }}.
+
+2. {{ council_name }}, as your landlord, gives you notice under section 26(6) of the Act that it will oppose an application to the court for the grant of a new tenancy.
+
+3. The council will oppose an application on the following grounds mentioned in section 30(1) of the Act:
+
+{{ opposition_grounds }}
+
+Signed: ______________________________
+
+{{ author_name }}, {{ author_title }}, for and on behalf of {{ council_name }}
+
+Date: {{ today }}
+
+---
+
+## Internal checklist (delete before service)
+
+- The tenant's request was given on {{ notice_served_on }}. This notice must be **given within two months**, by **{{ counter_notice_due }}**.
+- The last day for an application to court is {{ court_deadline }}.
+- The grounds must be ones the council can prove at the hearing. Record the decision and the evidence on case {{ case_reference }}.
+- Serve by a method the lease or section 23 of the Landlord and Tenant Act 1927 allows, and keep evidence of service.

@@ -1,0 +1,20 @@
+name: Acknowledgement of a section 26 request
+category: notices_1954
+source: case
+case_types: renewal, expiry
+description: Acknowledges the tenant's request for a new tenancy, without committing the council, and sets out the next steps and dates.
+---
+[[letter_start]]
+
+**{{ premises }}**
+**Your request for a new tenancy under section 26 of the Landlord and Tenant Act 1954**
+
+Thank you for your request for a new tenancy dated {{ notice_served_on }}, proposing that the new tenancy begins on {{ notice_date }}.
+
+The council is considering your request. If the council intends to oppose the grant of a new tenancy, it will tell you within two months of your request, as the Act requires.
+
+We would be happy to discuss terms for a new tenancy with you or your adviser. Any discussions will be subject to contract.
+
+Please note that unless terms are agreed, or the time is extended by written agreement before it expires, an application to the court must be made before {{ notice_date }}. The council recommends that you take professional advice.
+
+[[signature]]
