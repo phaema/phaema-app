@@ -66,6 +66,12 @@ def dashboard(request):
         from apps.maintenance.workflow import summary
 
         context["maintenance"] = summary(request.user)
+    if ModuleSettings.load().valuation_enabled:
+        from apps.valuations.models import AuditReview, Valuation
+
+        context["valuations"] = {
+            "mine": Valuation.objects.filter(valuer__user=request.user).exclude(status="accepted").count(),
+            "audits": AuditReview.objects.filter(assigned_to=request.user, status="open").count()}
     if ModuleSettings.load().compliance_enabled:
         from apps.compliance.workflow import summary as compliance_summary
 

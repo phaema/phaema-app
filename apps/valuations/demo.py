@@ -6,7 +6,7 @@ from decimal import Decimal as D
 from apps.core.models import ModuleSettings
 from apps.properties.models import Property
 
-from . import programme
+from . import programme, workflow
 from .models import AssetClass, Classification, Valuation, ValuationComponent, ValuationSettings, Valuer
 from .seed import FROM_PURPOSE
 
@@ -84,6 +84,34 @@ def load(today=None):
                 "investment" if ref == "DM-E01" else "drc", "full"
             v.inspection_date, v.status = date(year_end.year - 1, 11, 25), "received"
             v.save()
+    # Two operational assets given to a council surveyor rather than the external firm
+    from django.contrib.auth import get_user_model
+
+    staff = get_user_model().objects.filter(username="demo.pshah").first()
+    if staff:
+        mine = workflow.staff_valuer(staff)
+        for ref in ("DM-S04", "DM-S09"):
+            v = Valuation.objects.filter(property__reference=ref, valuation_date=year_end).first()
+            if v:
+                workflow.assign(v, mine)
+    # Last year's audit: one query answered and closed, one reported and awaiting the auditor
+    last_end = date(year_end.year - 1, 3, 31)
+    head = get_user_model().objects.filter(username="demo.head").first()
+    for ref, query, reason, state in [
+        ("DM-S07", "Please provide the comparable lettings and the yield used, and explain the void allowance.",
+         "sample", "closed"),
+        ("DM-E01", "The value has risen 6% while regional indices for industrial property fell. Please explain.",
+         "query", "reported"),
+    ]:
+        v = Valuation.objects.filter(property__reference=ref, valuation_date=last_end).first()
+        if v is None:
+            continue
+        review = workflow.flag(v, head, query, reason, "Example Audit LLP (fictional)", date(last_end.year, 7, 31))
+        workflow.report(review, head, "Response sent with the valuer's comparable schedule and yield analysis. "
+                        "The increase reflects two new lettings at higher rents in the year (fictional).",
+                        on=date(last_end.year, 7, 20))
+        if state == "closed":
+            workflow.close(review, head, "no_change", "Auditor confirmed no further questions.")
     return Valuation.objects.count()
 
 
@@ -97,3 +125,4 @@ def remove():
     Case.objects.filter(case_type__code="valuation_programme", title__startswith="Valuation programme").delete()
     Classification.objects.filter(property__in=refs).delete()
     Valuer.objects.filter(rics_number__startswith=MARK).delete()
+    Valuer.objects.filter(user__username__startswith="demo.").delete()

@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 from django.contrib import admin
 
-from .models import AssetClass, Classification, Valuation, ValuationSettings, Valuer
+from .models import AssetClass, AuditReview, Classification, Valuation, ValuationSettings, Valuer
 
 
 @admin.register(AssetClass)
@@ -20,7 +20,8 @@ class ValuationSettingsAdmin(admin.ModelAdmin):
 
 @admin.register(Valuer)
 class ValuerAdmin(admin.ModelAdmin):
-    list_display = ("name", "firm", "status", "rics_number", "registered_valuer", "first_instructed", "active")
+    list_display = ("name", "firm", "status", "user", "rics_number", "registered_valuer", "first_instructed",
+                    "active")
     list_filter = ("status", "active")
 
 
@@ -37,6 +38,16 @@ class ValuationAdmin(admin.ModelAdmin):
     list_filter = ("status", "asset_class")
     search_fields = ("property__reference", "property__name")
     raw_id_fields = ("property", "case")
+
+    def view_on_site(self, obj):
+        return obj.get_absolute_url()
+
+
+@admin.register(AuditReview)
+class AuditReviewAdmin(admin.ModelAdmin):
+    list_display = ("__str__", "reason", "status", "due_on", "assigned_to", "outcome")
+    list_filter = ("status", "accounts_year", "reason")
+    raw_id_fields = ("valuation",)
 
     def view_on_site(self, obj):
         return obj.get_absolute_url()
