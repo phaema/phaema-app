@@ -10,8 +10,8 @@ always shows the data as it is now, so run it again to get up-to-date figures.
 
 ## Ready-made reports
 
-Ready-made reports are grouped by topic. Reports in **Rents and income** appear when the
-[rent ledger](rent-ledger.md) is switched on.
+Ready-made reports are grouped by topic. Reports for an optional module (rent ledger, service charges,
+maintenance, compliance, asset valuation) appear when that module is switched on.
 
 ### Property and assets
 
@@ -35,6 +35,20 @@ Ready-made reports are grouped by topic. Reports in **Rents and income** appear 
 | 1954 Act protected leases: ended or ending within 2 years | Leases with security of tenure that need section 25 notices or renewal planning, including any already continuing past their term. |
 | Nil and peppercorn rent lettings | Agreements let at no rent, for community lettings and subsidy reporting. |
 | Property leased in by the council | Agreements where the council is the tenant, with the rent it pays. |
+| Rent deposits held | Live agreements with a deposit, where it is held and who the interest belongs to. |
+
+### Cases
+
+| Report | What it shows |
+|---|---|
+| Open cases by stage and owner | Every open case. |
+| Cases past their target date | Open cases whose target has passed. |
+| Consent decisions: time to decision | Evidence of deciding consents within a reasonable time under the 1988 Act. |
+| Cases closed in the last 12 months | For annual reporting. |
+| Cases waiting for approval | Recommendations waiting for a supervisor, oldest first. |
+| Approval decisions in the last 12 months | Who approved or returned what, and when: the governance record. |
+| 1954 Act renewals: notices and court deadlines | Open renewal and expiry cases with the notice given and the last day to apply to court. |
+| New lettings and renewals: heads of terms | How many of the 16 heads of terms items in the RICS Code each case has covered. |
 
 ### Rents and income
 
@@ -45,6 +59,45 @@ Ready-made reports are grouped by topic. Reports in **Rents and income** appear 
 | Arrears over 90 days | Agreements to consider for debt recovery. |
 | Charges waiting to go to finance | Invoices and credit notes not yet in a [finance export](rent-ledger.md#the-finance-export). |
 | Rent received in the last 30 days | Payments received in the past month. |
+
+### Service charges
+
+| Report | What it shows |
+|---|---|
+| Service charge budgets to issue | Years starting soon whose budget has not gone to tenants. |
+| Year-end statements to issue | Years ended without statements, with the four-month due date. |
+| Costs not recovered from tenants | Costs the council bore itself in the last 12 months. |
+
+### Maintenance
+
+| Report | What it shows |
+|---|---|
+| Repairs past their target | Open jobs past their target date. |
+| Statutory maintenance overdue | Statutory inspections and tests past their due date. |
+| Planned maintenance due in the next 90 days | Planned and statutory tasks coming up. |
+| Repair spending in the last 12 months | Completed jobs, final costs and who paid. |
+| Repairs to recharge to tenants | Completed jobs to be recharged, with any recharge invoice. |
+| Components in poor or bad condition | Condition C and D components, for the capital programme. |
+| Contracts due for re-tender or benchmarking | Within six months. |
+| Contractor insurance expiring | Expired or expiring within 30 days. |
+
+### Compliance
+
+| Report | What it shows |
+|---|---|
+| Certificates expired | Required certificates past their expiry. |
+| Certificates expiring in the next 60 days | Inspections to book. |
+| Remedial actions overdue | Actions from certificates past their due date. |
+| EPC rated F or G | Below the minimum energy efficiency standard for letting. |
+
+### Asset valuation
+
+| Report | What it shows |
+|---|---|
+| Valuations not yet accepted | Instructed, received or returned valuations, and who they are assigned to. |
+| Valuations accepted in the last 12 months | With the change since the last valuation and whether the valuer was internal or external. |
+| Valuations with material uncertainty | Valuations reported with a material uncertainty statement. |
+| Audit queries not yet closed | Valuations flagged for audit being answered or waiting for the auditor. |
 
 ### Contacts
 
@@ -59,6 +112,7 @@ Ready-made reports are grouped by topic. Reports in **Rents and income** appear 
 | Properties with no managing surveyor | Nobody is responsible for these, so their lease events are not assigned. |
 | Properties without a UPRN | Properties that cannot yet be linked to GIS and other systems, or published. |
 | Floor areas with no measurement basis | Areas recorded without the RICS measurement standard they follow. |
+| Agreements with no repairing terms | Live lettings without repairing terms, which PHAEMA needs to work out who pays for repairs. |
 
 Only administrators can change ready-made reports. Anyone can **copy** one to their own reports and change the copy.
 

@@ -13,6 +13,7 @@ from django.utils.translation import gettext_lazy as _
 from django.views.decorators.http import require_POST
 from django.views.generic import ListView
 
+from apps.core import places
 from apps.core.roles import can_edit, has_role
 from apps.core.tables import sortable
 from apps.reports.mixins import ExportMixin
@@ -57,6 +58,7 @@ class EventListView(LoginRequiredMixin, ExportMixin, ListView):
             qs = qs.filter(assigned_to__isnull=True)
         elif who.isdigit():
             qs = qs.filter(assigned_to_id=int(who))
+        qs = places.apply(qs, get, self.request.user, "lease__properties")
         window, today = get.get("window", ""), date.today()
         if window == "overdue":
             qs = qs.filter(due_date__lt=today, status__in=workflow.OPEN)
@@ -81,6 +83,7 @@ class EventListView(LoginRequiredMixin, ExportMixin, ListView):
                 ("window", _("When"), WINDOWS, get.get("window", ""), True),
                 ("assigned", _("Assigned to"), [("me", _("Me")), ("none", _("Nobody"))]
                  + [(str(u.pk), u.get_full_name() or u.username) for u in officers], get.get("assigned", ""), True),
+                *places.filters(get),
             ],
             "headings": self.headings,
             "today": date.today(),

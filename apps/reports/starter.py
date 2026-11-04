@@ -1,11 +1,13 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 """Reports PHAEMA provides out of the box. Administrators can adjust them; anyone can copy them."""
 
-CATEGORIES = ["Property and assets", "Leases and key dates", "Cases", "Rents and income", "Maintenance",
-              "Compliance", "Contacts", "Data quality"]
+CATEGORIES = ["Property and assets", "Leases and key dates", "Cases", "Rents and income", "Service charges",
+              "Maintenance", "Compliance", "Asset valuation", "Contacts", "Data quality"]
 LEDGER_CATEGORY = "Rents and income"  # shown only when the rent ledger is switched on
 MAINTENANCE_CATEGORY = "Maintenance"  # shown only when maintenance is switched on
 COMPLIANCE_CATEGORY = "Compliance"  # shown only when compliance is switched on
+SERVICE_CATEGORY = "Service charges"  # shown only when service charges are switched on
+VALUATION_CATEGORY = "Asset valuation"  # shown only when asset valuation is switched on
 
 LIVE = {"in": ["current", "holding_over"]}
 OPEN = {"in": ["open", "in_progress"]}
@@ -210,6 +212,85 @@ STARTERS = [
                                             "letting: check before granting or renewing a lease.",
      "columns": ["property", "property_name", "occupation", "issued_on", "expires_on", "rating"],
      "filters": {"kind": {"in": ["epc"]}, "rating": {"in": ["F", "G"]}}, "sort_by": "rating"},
+    # ---- added with the case, valuation and service charge modules
+    {"starter": "approvals_waiting", "category": "Cases", "name": "Cases waiting for approval",
+     "dataset": "approvals", "description": "Recommendations waiting for a supervisor's approval, oldest first.",
+     "columns": ["case", "case_title", "case_type", "requested_by", "approver", "created_at"],
+     "filters": {"status": {"in": ["pending"]}}, "sort_by": "case"},
+    {"starter": "approvals_12m", "category": "Cases", "name": "Approval decisions in the last 12 months",
+     "dataset": "approvals", "description": "Who approved or returned what, and when: the governance record.",
+     "columns": ["case", "case_title", "case_type", "requested_by", "decided_by", "decided_at", "status",
+                 "comments"],
+     "filters": {"status": {"in": ["approved", "returned"]}}, "sort_by": "case", "sort_descending": True},
+    {"starter": "renewals_court", "category": "Cases", "name": "1954 Act renewals: notices and court deadlines",
+     "dataset": "cases", "description": "Open lease renewal cases with the section 25 or 26 notice and the last "
+                                       "day to apply to court.",
+     "columns": ["reference", "title", "notice_kind", "notice_served_on", "notice_date", "court_deadline",
+                 "owner", "stage"],
+     "filters": {"status": {"in": ["open", "on_hold"]}, "case_type_code": {"in": ["renewal", "expiry"]}},
+     "sort_by": "notice_date"},
+    {"starter": "lettings_heads", "category": "Cases", "name": "New lettings and renewals: heads of terms",
+     "dataset": "cases", "description": "Open letting and renewal cases with how many of the 16 heads of terms "
+                                       "items in the RICS Code are covered.",
+     "columns": ["reference", "title", "case_type", "stage", "heads_covered", "owner"],
+     "filters": {"status": {"in": ["open", "on_hold"]}, "case_type_code": {"in": ["new_letting", "renewal"]}},
+     "sort_by": "reference"},
+    {"starter": "deposits_held", "category": "Leases and key dates", "name": "Rent deposits held",
+     "dataset": "leases", "description": "Live agreements with a rent deposit, where it is held and who the interest "
+                                        "belongs to.",
+     "columns": ["reference", "counterparty", "premises", "deposit", "deposit_held", "term_end"],
+     "filters": {"status": {"in": ["current", "holding_over"]}, "deposit": {"min": "0.01"}},
+     "sort_by": "deposit", "sort_descending": True},
+    {"starter": "recharges_due", "category": "Maintenance", "name": "Repairs to recharge to tenants",
+     "dataset": "jobs", "description": "Completed jobs marked as recharged to the tenant: check each has a recharge "
+                                      "invoice.",
+     "columns": ["reference", "title", "property", "lease", "completed_on", "actual_cost", "recharged"],
+     "filters": {"status": {"in": ["completed", "closed"]}, "responsibility": {"in": ["recharge"]}},
+     "sort_by": "completed_on", "sort_descending": True},
+    {"starter": "sc_budgets_due", "category": "Service charges", "name": "Service charge budgets to issue",
+     "dataset": "service_years", "description": "Years starting in the next four months whose budget has not been "
+                                               "issued: the RICS standard expects it a month before the year starts.",
+     "columns": ["schedule", "label", "start", "budget_due", "status"],
+     "filters": {"budget_outstanding": {"is": True}, "start": {"upto_days": 122}}, "sort_by": "start"},
+    {"starter": "sc_statements_due", "category": "Service charges", "name": "Year-end statements to issue",
+     "dataset": "service_years", "description": "Years that have ended without statements issued: due within four "
+                                               "months of the year end.",
+     "columns": ["schedule", "label", "end", "statements_due", "status"],
+     "filters": {"statements_outstanding": {"is": True}, "end": {"before_today": True}}, "sort_by": "end"},
+    {"starter": "sc_not_recoverable", "category": "Service charges", "name": "Costs not recovered from tenants",
+     "dataset": "expenditure", "description": "Service charge costs the council bears itself, in the last 12 months.",
+     "columns": ["schedule", "year", "spent_on", "heading", "supplier", "description", "amount"],
+     "filters": {"recoverable": {"is": False}, "spent_on": {"last_days": 365}}, "sort_by": "spent_on"},
+    {"starter": "valuations_outstanding", "category": "Asset valuation", "name": "Valuations not yet accepted",
+     "dataset": "valuations", "description": "Instructed, received or returned valuations, with who they are "
+                                            "assigned to.",
+     "columns": ["property", "property_name", "asset_class", "valuation_date", "valuer", "valuer_status", "status",
+                 "value"],
+     "filters": {"status": {"in": ["instructed", "received", "rejected"]}}, "sort_by": "valuation_date"},
+    {"starter": "valuations_12m", "category": "Asset valuation", "name": "Valuations accepted in the last 12 months",
+     "dataset": "valuations", "description": "Accepted valuations with the change since the last one, and whether "
+                                            "the valuer was internal or external, for the accounts disclosures.",
+     "columns": ["property", "property_name", "asset_class", "basis", "valuation_date", "valuer", "valuer_status",
+                 "value", "change", "material_uncertainty"],
+     "filters": {"status": {"in": ["accepted"]}, "accepted_on": {"last_days": 365}}, "sort_by": "value",
+     "sort_descending": True},
+    {"starter": "valuations_uncertainty", "category": "Asset valuation",
+     "name": "Valuations with material uncertainty", "dataset": "valuations",
+     "description": "Valuations reported with a material valuation uncertainty statement.",
+     "columns": ["property", "property_name", "valuation_date", "valuer", "value", "status"],
+     "filters": {"material_uncertainty": {"is": True}}, "sort_by": "valuation_date", "sort_descending": True},
+    {"starter": "valuation_audit_open", "category": "Asset valuation", "name": "Audit queries not yet closed",
+     "dataset": "valuation_audit", "description": "Valuations flagged for audit that are being answered or are "
+                                                 "waiting for the auditor.",
+     "columns": ["accounts_year", "property", "property_name", "reason", "query", "due_on", "assigned_to",
+                 "status"],
+     "filters": {"status": {"in": ["open", "reported"]}}, "sort_by": "due_on"},
+    {"starter": "repairing_missing", "category": "Data quality", "name": "Agreements with no repairing terms",
+     "dataset": "leases", "description": "Live agreements let out without repairing terms recorded: PHAEMA uses them "
+                                        "to work out who pays for repairs.",
+     "columns": ["reference", "counterparty", "premises", "agreement_type", "surveyor"],
+     "filters": {"status": {"in": ["current", "holding_over"]}, "direction": {"in": ["out"]},
+                 "repairing": {"in": [""]}}, "sort_by": "reference"},
     {"starter": "missing_uprn", "category": "Data quality",
      "name": "Properties without a UPRN", "dataset": "properties",
      "description": "The UPRN links PHAEMA to GIS, council tax, business rates and the Transparency Code list.",

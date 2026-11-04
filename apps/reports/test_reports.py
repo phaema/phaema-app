@@ -180,3 +180,21 @@ def test_ready_made_reports_are_grouped_and_ledger_ones_hidden_when_off(client, 
     settings.rent_ledger_enabled = False
     settings.save()
     assert "Rents and income" not in dict(client.get("/reports/").context["starter_groups"])
+
+
+def test_every_starter_report_runs_with_demo_data(client, make_user, db):
+    """Every ready-made report, including those for the optional modules, opens and downloads."""
+    from django.core.management import call_command
+
+    from apps.reports.models import Report
+    from apps.reports.starter import STARTERS
+
+    call_command("load_demo_data", verbosity=0)
+    client.force_login(make_user("admin", "Administrators"))
+    page = client.get("/reports/").content.decode()
+    for name in ("Asset valuation", "Service charges", "Cases waiting for approval", "Valuations not yet accepted"):
+        assert name in page, name
+    for spec in STARTERS:
+        report = Report.objects.get(starter=spec["starter"])
+        assert client.get(report.get_absolute_url()).status_code == 200, spec["starter"]
+        assert client.get(report.get_absolute_url(), {"format": "xlsx"}).status_code == 200, spec["starter"]

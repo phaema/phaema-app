@@ -1,0 +1,4 @@
+{% load i18n %}{% for name, label, choices, current, any in place_filters %}
+  <label class="govuk-label govuk-!-margin-right-2" for="pf-{{ name }}">{{ label }}</label>
+  <select class="govuk-select" id="pf-{{ name }}" name="{{ name }}"><option value="">{% translate "Any" %}</option>{% for value, text in choices %}<option value="{{ value }}"{% if value == current %} selected{% endif %}>{{ text }}</option>{% endfor %}</select>
+{% endfor %}

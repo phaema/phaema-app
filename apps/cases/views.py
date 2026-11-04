@@ -60,6 +60,9 @@ class CaseListView(LoginRequiredMixin, ExportMixin, ListView):
             qs = qs.filter(owner__isnull=True)
         elif who.isdigit():
             qs = qs.filter(owner_id=int(who))
+        from apps.core import places
+
+        qs = places.apply(qs, get, self.request.user, "property", "lease__properties")
         if get.get("approval") == "mine":
             qs = qs.filter(approvals__status="pending", approvals__approver=self.request.user).distinct()
         elif get.get("approval") == "waiting":
@@ -93,6 +96,7 @@ class CaseListView(LoginRequiredMixin, ExportMixin, ListView):
                  get.get("approval", ""), True),
                 ("owner", "Owner", [("me", "Mine"), ("none", "Nobody")]
                  + [(str(u.pk), u.get_full_name() or u.username) for u in people], get.get("owner", ""), True),
+                *_place_filters(get),
             ],
             "can_open": _can_open(self.request.user),
         })
@@ -121,6 +125,12 @@ class NewCaseForm(forms.Form):
         self.fields["case_type"].label_from_instance = lambda t: f"{t.get_group_display()}: {t.name}"
         self.fields["lease"].label_from_instance = lambda lease: f"{lease.reference} – {lease.counterparty.name}"
         self.fields["property"].label_from_instance = lambda p: f"{p.reference} – {p.name}"
+
+
+def _place_filters(get):
+    from apps.core import places
+
+    return places.filters(get)
 
 
 def _can_open(user):

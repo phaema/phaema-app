@@ -5,7 +5,13 @@
 <h1 class="govuk-heading-xl govuk-!-margin-bottom-4">{% translate "Lifecycle forecast" %}</h1>
 {% include "maintenance/_nav.html" %}
 <p class="govuk-body">{% translate "When components reach the end of their expected life, and what replacing them costs, from the component register. Replacements already overdue are counted in this year." %}</p>
-<p class="govuk-body">{% translate "Show" %} <a class="govuk-link" href="?years=5">5</a> · <a class="govuk-link" href="?years=10">10</a> · <a class="govuk-link" href="?years=20">20</a> · <a class="govuk-link" href="?years=30">30</a> {% translate "years" %} · <a class="govuk-link" href="?years={{ span }}&amp;format=xlsx">{% translate "Download to Excel" %}</a></p>
+<form method="get" class="phaema-inline-fields govuk-!-margin-bottom-4">
+  <label class="govuk-label govuk-!-margin-right-2" for="years">{% translate "Years" %}</label>
+  <select class="govuk-select" id="years" name="years"><option{% if span == 5 %} selected{% endif %}>5</option><option{% if span == 10 %} selected{% endif %}>10</option><option{% if span == 20 %} selected{% endif %}>20</option><option{% if span == 30 %} selected{% endif %}>30</option></select>
+  {% include "core/_place_filters.html" %}
+  <button class="govuk-button govuk-button--secondary govuk-!-margin-bottom-0" data-module="govuk-button">{% translate "Show" %}</button>
+</form>
+<p class="govuk-body-s"><a class="govuk-link" href="?{{ query }}{% if query %}&amp;{% endif %}format=xlsx">{% translate "Download to Excel" %}</a></p>
 <p class="govuk-body-l">{% blocktranslate with t=total|floatformat:0|intcomma n=span %}£{{ t }} over {{ n }} years{% endblocktranslate %}</p>
 <table class="govuk-table">
   <thead class="govuk-table__head"><tr class="govuk-table__row"><th scope="col" class="govuk-table__header">{% translate "Year" %}</th><th scope="col" class="govuk-table__header govuk-table__header--numeric">{% translate "Capital" %}</th><th scope="col" class="govuk-table__header govuk-table__header--numeric">{% translate "Revenue" %}</th><th scope="col" class="govuk-table__header">{% translate "Components" %}</th></tr></thead>

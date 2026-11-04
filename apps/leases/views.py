@@ -9,6 +9,7 @@ from django.utils.translation import gettext_lazy as _
 from django.views.generic import DetailView, ListView
 
 from apps.core.tables import sortable
+from apps.core import places
 from apps.reports.mixins import ExportMixin
 
 from . import events
@@ -57,6 +58,7 @@ class LeaseListView(LoginRequiredMixin, ExportMixin, ListView):
             qs = qs.filter(term_end__gte=today, term_end__lte=today + timedelta(days=int(window) * 30.44))
         if get.get("property"):
             qs = qs.filter(properties__pk=get["property"])
+        qs = places.apply(qs, get, self.request.user, "properties")
         if get.get("event") in events.FILTERS:
             qs = events.filter_leases(qs, get["event"])
         ordering, self.headings = sortable(self.request, COLUMNS, "reference")
@@ -70,7 +72,7 @@ class LeaseListView(LoginRequiredMixin, ExportMixin, ListView):
             (f, Lease._meta.get_field(f).verbose_name, Lease._meta.get_field(f).choices, get.get(f, ""))
             for f in self.FILTERS
         ] + [("expiring", _("Expiry"), EXPIRY_WINDOWS, get.get("expiring", "")),
-             ("event", _("Lease events"), list(events.FILTERS.items()), get.get("event", ""))]
+             ("event", _("Lease events"), list(events.FILTERS.items()), get.get("event", ""))] + [row[:4] for row in places.filters(get)]
         ctx["event_label"] = events.FILTERS.get(get.get("event", ""))
         ctx["headings"] = self.headings
         ctx["rent_total"] = self.object_list.order_by().aggregate(t=Sum("annual_rent"))["t"]

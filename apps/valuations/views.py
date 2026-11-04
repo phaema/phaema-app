@@ -12,6 +12,7 @@ from django.core.exceptions import PermissionDenied
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils.translation import gettext as _
 
+from apps.core import places
 from apps.core.models import ModuleSettings
 from apps.core.roles import is_administrator, manages
 from apps.properties.models import Property
@@ -102,7 +103,7 @@ def home(request):
             messages.success(request, _("Impairment review %(ref)s opened.") % {"ref": case.display_reference})
             return redirect(case)
         return redirect(f"{request.path}?year={year_end.isoformat()}")
-    rows = programme.programme(year_end)
+    rows = [r for r in programme.programme(year_end) if places.keep(r.property, request.GET, request.user)]
     started = Valuation.objects.filter(valuation_date=year_end).exists()
     counts = {s: 0 for s, _l in Valuation.Status.choices}
     for v in Valuation.objects.filter(valuation_date=year_end):
@@ -114,7 +115,8 @@ def home(request):
     return render(request, "valuations/home.html", {
         "settings": settings, "year_end": year_end, "rows": rows, "started": started,
         "counts": [(n, dict(Valuation.Status.choices)[s]) for s, n in counts.items() if n],
-        "prompts": programme.prompts(), "unclassified": unclassified, "is_admin": admin,
+        "prompts": [p for p in programme.prompts() if places.keep(p.property, request.GET, request.user)],
+        "unclassified": unclassified, "is_admin": admin, "place_filters": places.filters(request.GET),
         "classes": AssetClass.objects.filter(active=True), "valuers": Valuer.objects.filter(active=True),
         "rotation": [(v, d) for v, d in rotation if d and d <= year_end],
         "years": [settings.year_end(date(date.today().year + n, 1, 1)) for n in (-2, -1, 0, 1)],

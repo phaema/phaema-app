@@ -17,6 +17,7 @@
     <button class="govuk-button govuk-button--secondary govuk-!-margin-bottom-0" data-module="govuk-button">{% translate "Classify" %}</button></form>{% endif %}</div>{% endif %}
 
 <h2 class="govuk-heading-m">{% blocktranslate with d=year_end|date:"j F Y" %}Programme for {{ d }}{% endblocktranslate %}</h2>
+<form method="get" class="phaema-inline-fields govuk-!-margin-bottom-4"><input type="hidden" name="year" value="{{ year_end|date:'Y-m-d' }}">{% include "core/_place_filters.html" %}<button class="govuk-button govuk-button--secondary govuk-!-margin-bottom-0" data-module="govuk-button">{% translate "Show" %}</button></form>
 {% if started %}<p class="govuk-body">{% for n, label in counts %}{{ n }} {{ label|lower }}{% if not forloop.last %} · {% endif %}{% endfor %}</p>{% endif %}
 {% if rows %}
 <table class="govuk-table">
