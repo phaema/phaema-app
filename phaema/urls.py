@@ -5,6 +5,7 @@ from django.urls import include, path
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 from rest_framework.routers import DefaultRouter
 
+from apps.core import handover_views
 from apps.core import views as core_views
 from apps.leases import event_views
 from apps.leases.api import LeaseViewSet, PartyViewSet
@@ -26,6 +27,7 @@ urlpatterns = [
     path("logout/", auth_views.LogoutView.as_view(), name="logout"),
     path("health/", core_views.health, name="health"),
     path("changes/", core_views.change_list, name="changes"),
+    path("people/hand-over/", handover_views.hand_over, name="hand-over"),
     path("changes/<int:pk>/", core_views.change_detail, name="change"),
     path("text-size/<str:size>/", core_views.set_text_size, name="text-size"),
     path("theme/<str:theme>/", core_views.set_theme, name="theme"),
