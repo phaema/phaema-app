@@ -1,0 +1,550 @@
+#!/usr/bin/env python3
+# SPDX-License-Identifier: AGPL-3.0-or-later
+"""Builds the PHAEMA sales site: one page, website/index.html.
+
+    python3 website/build.py            # writes website/index.html
+    python3 website/build.py --artifact # writes the body-only variant for a claude.ai artifact preview
+
+All figures are kept in the CONTRACTS and TIERS lists below so they can be updated in one place.
+"""
+import sys
+from pathlib import Path
+
+AS_OF = "4 November 2026"
+
+# Published council contracts for estates and property management systems (annualised = total / years).
+CONTRACTS = [
+    # council, supplier (product), total £, years, annual £, scope note, source url
+    ("Sheffield City Council", "Civica (Technology Forge)", 971568, 4, 242892,
+     "Property assets database used by property, finance, FM and school food teams; 2024–2028",
+     "https://www.stotles.com/explore/notices/230cbc05-ac91-4ac7-83b6-9f94b55a399a/technology-forge"),
+    ("Bath and North East Somerset Council", "Concerto", 460275, 3, 153425,
+     "Facilities and estates management system; 2024–2027",
+     "https://www.contractsfinder.service.gov.uk/Notice/f3d9d064-736c-4bc2-86b0-cf1687b63744"),
+    ("Stockport Council", "Brightly Software", 237204, 3, 79068,
+     "Enterprise asset management system for several council services; 2024–2026",
+     "https://www.contractsfinder.service.gov.uk/Notice/0a96078c-95e0-4d88-a1f5-91d01fd466b1"),
+    ("Chesterfield Borough Council", "MRI Software", 391501, 5, 78300,
+     "Commercial property and estates management software; 2025–2030",
+     "https://www.contractsfinder.service.gov.uk/Notice/b672b0bd-509e-4584-a83c-2a44b2560c13"),
+    ("London Borough of Camden", "Concerto", 353440, 5, 70688,
+     "Cloud commercial property asset management system, up to 5 years from July 2024",
+     "https://opencouncil.network/councils/camden/decisions/73881"),
+    ("London Borough of Sutton", "Civica", 125322, 2, 62661,
+     "Corporate property system: condition, compliance, repairs, valuations, leases; 2024–2026",
+     "https://www.contractsfinder.service.gov.uk/Notice/ca99479c-1375-4435-8ae6-7b9bd2af4eeb"),
+    ("Wigan Council", "Concerto", 45000, 1, 45000,
+     "Corporate stock, 1 August 2024 to 31 July 2025 (FOI response)",
+     "https://www.wigan.gov.uk/Docs/PDF/Council/Disclosure-Logs/2024/December/17391.pdf"),
+    ("Bury Council", "Concerto", None, None, 25000,
+     "£20,000 in year 1, then £25,000 a year, plus £34,000 one-off implementation (council report)",
+     "https://councildecisions.bury.gov.uk/documents/s23461/18B.%20214%20Appendix%201%20-%20Additional%20Concerto%20Information.docx.pdf"),
+]
+MEDIAN = (70688 + 78300) / 2  # median of the eight annual figures above
+
+# PHAEMA options: name, annual £, one-off onboarding £, users, what is included
+TIERS = [
+    ("Self-hosted", 0, 0, "Unlimited",
+     ["Full software, free under the AGPL", "Run on your own servers or cloud account",
+      "Community help on GitHub", "Typical running cost about £4,000 a year: a small server, backups and "
+                                  "a few days of IT time (our estimate)"]),
+    ("Hosted Essentials", 7500, 5000, "Up to 15 named users",
+     ["UK-hosted, backed up and patched for you", "Every module included", "Support in office hours",
+      "Onboarding: import from your terrier spreadsheets, two training sessions"]),
+    ("Hosted Standard", 14000, 9000, "Up to 50 named users",
+     ["Everything in Essentials", "Migration from your current system", "Training for each team",
+      "Test copy with demonstration data", "Quarterly service review"]),
+    ("Hosted Enterprise", 24000, 15000, "Unlimited users",
+     ["Everything in Standard", "Single sign-on with your Microsoft or Google accounts (in development)",
+      "99.9% availability target", "Help connecting your finance and GIS systems", "Named account manager"]),
+]
+SELF_HOST_RUNNING = 4000
+
+
+def money(n):
+    return f"£{n:,.0f}"
+
+
+def bar_chart():
+    """Horizontal bars: each council's annual cost, with PHAEMA's hosted tiers for comparison."""
+    rows = [(f"{c[0]}", c[1], c[4], "them") for c in CONTRACTS]
+    rows += [("PHAEMA Hosted Standard", "subscription", 14000, "us"),
+             ("PHAEMA self-hosted", "estimated running cost", SELF_HOST_RUNNING, "us")]
+    left, right, top, row_h, bar_h = 300, 120, 36, 40, 22
+    width = 980
+    plot = width - left - right
+    maximum = 250000
+    height = top + row_h * len(rows) + 30
+
+    def x(v):
+        return left + plot * v / maximum
+
+    parts = [f'<svg class="chart" viewBox="0 0 {width} {height}" role="img" aria-labelledby="chart-title chart-desc">',
+             '<title id="chart-title">What councils pay each year for estates software</title>',
+             f'<desc id="chart-desc">Annual cost of eight published council contracts, from {money(25000)} '
+             f'(Bury) to {money(242892)} (Sheffield), median {money(MEDIAN)}, compared with PHAEMA Hosted '
+             f'Standard at {money(14000)} and self-hosting at about {money(SELF_HOST_RUNNING)}.</desc>']
+    for tick in range(0, maximum + 1, 50000):
+        parts.append(f'<line class="grid" x1="{x(tick):.1f}" x2="{x(tick):.1f}" y1="{top - 8}" y2="{height - 26}"/>')
+        parts.append(f'<text class="tick" x="{x(tick):.1f}" y="{height - 8}" text-anchor="middle">'
+                     f'{"£0" if tick == 0 else f"£{tick // 1000}k"}</text>')
+    for i, (name, who, value, kind) in enumerate(rows):
+        y = top + i * row_h
+        parts.append(f'<text class="label" x="{left - 12}" y="{y + 10}" text-anchor="end">{name}</text>')
+        parts.append(f'<text class="sub" x="{left - 12}" y="{y + 26}" text-anchor="end">{who}</text>')
+        parts.append(f'<rect class="bar {kind}" x="{left}" y="{y}" width="{max(x(value) - left, 3):.1f}" '
+                     f'height="{bar_h}" rx="2"/>')
+        parts.append(f'<text class="value" x="{x(value) + 8:.1f}" y="{y + 16}">{money(value)}</text>')
+    mx = x(MEDIAN)
+    parts.append(f'<line class="median" x1="{mx:.1f}" x2="{mx:.1f}" y1="{top - 14}" y2="{height - 26}"/>')
+    parts.append(f'<text class="median-label" x="{mx + 6:.1f}" y="{top - 18}">median {money(MEDIAN)}</text>')
+    parts.append('</svg>')
+    return "\n".join(parts)
+
+
+def contract_rows():
+    out = []
+    for council, supplier, total, years, annual, scope, url in CONTRACTS:
+        total_cell = f"{money(total)} over {years} year{'s' if years != 1 else ''}" if total else "See note"
+        out.append(f'<tr><th scope="row"><a href="{url}">{council}</a></th><td>{supplier}</td>'
+                   f'<td class="num">{total_cell}</td><td class="num">{money(annual)}</td><td>{scope}</td></tr>')
+    return "\n".join(out)
+
+
+def tier_cards():
+    out = []
+    for name, annual, onboarding, users, items in TIERS:
+        five = (annual * 5 + onboarding) if annual else SELF_HOST_RUNNING * 5
+        price = f'{money(annual)}<span> a year</span>' if annual else '£0<span> licence</span>'
+        extra = f'Onboarding {money(onboarding)} once' if onboarding else 'No licence fee, ever'
+        lis = "".join(f"<li>{i}</li>" for i in items)
+        out.append(f'''<article class="tier{' tier--featured' if name == 'Hosted Standard' else ''}">
+  <h3>{name}</h3>
+  <p class="tier__users">{users}</p>
+  <p class="tier__price">{price}</p>
+  <p class="tier__extra">{extra}</p>
+  <ul>{lis}</ul>
+  <p class="tier__five">Five years: <strong>{money(five)}</strong>{' (estimated)' if not annual else ''}</p>
+</article>''')
+    return "\n".join(out)
+
+
+BODY = r'''<div class="top"><div class="wrap top__inner">
+  <a class="brand" href="#overview" aria-label="PHAEMA home"><span class="brand__mark" aria-hidden="true"></span>PHAEMA</a>
+  <nav aria-label="Sections"><ul class="nav">
+    <li><a href="#overview">Overview</a></li>
+    <li><a href="#features">Features</a></li>
+    <li><a href="#compare">Comparison</a></li>
+    <li><a href="#value">Costs and benefits</a></li>
+    <li><a href="#compliance">Compliance</a></li>
+    <li><a href="#pricing">Pricing</a></li>
+  </ul></nav>
+</div></div>
+
+<main id="main">
+<section class="view" id="overview" aria-labelledby="h-overview">
+  <div class="wrap hero">
+    <div class="hero__text">
+      <p class="kicker">Property holding and estate management for councils in England and Wales</p>
+      <h1 id="h-overview">Estate management software your council owns.</h1>
+      <p class="lede">PHAEMA runs the property terrier, leases, casework, rents, service charges, repairs, compliance and asset valuations in one place. It is open source, so you never pay a licence fee, you can see every line of code, and you can move supplier without moving system.</p>
+      <div class="cta">
+        <a class="button" href="#value">See the cost comparison</a>
+        <a class="button button--quiet" href="https://github.com/phaema/phaema-app">Read the code</a>
+      </div>
+      <p class="fine">In alpha, November 2026. Built to RICS professional standards and the government's Technology Code of Practice.</p>
+    </div>
+    <figure class="plan">
+      <div class="plan__sheet"><img src="img/my-work.jpg" width="1920" height="1230" alt="PHAEMA's My work dashboard for a surveyor: items that need attention, upcoming events, open cases and the properties they manage."></div>
+      <figcaption><span class="plan__key" aria-hidden="true"></span>My work: one surveyor's overdue items, next 90 days, cases and properties.</figcaption>
+    </figure>
+  </div>
+
+  <div class="wrap band">
+    <h2>What councils pay now</h2>
+    <p class="band__lead">Eight councils' published contracts for estates and property systems cost between <strong>£25,000 and £242,892 a year</strong>, with a median of <strong>£74,494</strong>. PHAEMA Hosted Standard is <strong>£14,000 a year</strong>, and self-hosting has no licence fee at all.</p>
+    <p><a href="#value">How the figures compare over five years</a></p>
+  </div>
+
+  <div class="wrap three">
+    <div><h3>No lock-in</h3><p>Your data stays in an open PostgreSQL database with exports to CSV, Excel and GeoJSON. Any supplier, or your own IT team, can host and support it.</p></div>
+    <div><h3>Built by surveyors</h3><p>Heads of terms to the RICS leasing code, 1954 Act notice dates, service charges to the RICS 2nd edition, Red Book valuation records and Golden Thread building information.</p></div>
+    <div><h3>Accessible by design</h3><p>Built on GOV.UK Frontend components and designed to meet WCAG 2.2 AA, with dark, high-contrast and large-text settings and a typeface designed for low-vision readers.</p></div>
+  </div>
+</section>
+
+<section class="view" id="features" aria-labelledby="h-features">
+  <div class="wrap">
+    <h2 id="h-features">Everything an estates team needs, in one system</h2>
+    <p class="lede">Each module can be switched on when you are ready. All are included at every price.</p>
+    <div class="modules">
+      <article><h3>Property register</h3><p>Estates, sites, buildings and units in a tree, with UPRN and USRN, floor areas to the RICS measurement codes, titles, deeds, photos and a map drawn from Land Registry INSPIRE parcels.</p></article>
+      <article><h3>Leases and key dates</h3><p>Leases, licences, wayleaves and farm tenancies, let out or held. Rent reviews, breaks, expiries and notice deadlines become events with reminders and a calendar feed.</p></article>
+      <article><h3>Cases and approvals</h3><p>Consents, renewals, dilapidations, disposals and enquiries with stages, tasks and target dates. Each surveyor's supervisor approves decisions, with conflicts of interest declared first.</p></article>
+      <article><h3>Document library</h3><p>30 letter and notice templates, from consent letters to section 25 notice particulars, filled from the case and downloaded to Word for final checking.</p></article>
+      <article><h3>Rents and arrears</h3><p>Demand runs, credit notes, receipts import, aged arrears and an export file for your finance system.</p></article>
+      <article><h3>Service charges</h3><p>Budgets, apportionment by floor area with caps, actual costs, year-end reconciliation and tenant statements on the RICS timetable.</p></article>
+      <article><h3>Maintenance</h3><p>Repairs with target dates, who pays under the lease, works orders, approval of larger orders, recharges, planned and statutory maintenance and component lifecycles.</p></article>
+      <article><h3>Compliance</h3><p>Certificates for fire, gas, electrical, water, asbestos, lifts and EPCs, with remedial actions, Golden Thread tiers, building documents and site hazards shown before every visit.</p></article>
+      <article><h3>Asset valuation</h3><p>Rolling programme, internal or external valuers, Red Book records, fair value levels, indexation between valuations, impairment prompts and audit queries.</p></article>
+      <article><h3>Reports and open data</h3><p>Ready-made and custom reports to Excel, the Transparency Code land and assets list, an API and a full change log.</p></article>
+    </div>
+    <div class="shots">
+      <figure><img src="img/case.jpg" width="1920" height="1230" loading="lazy" alt="A licence for alterations case at the assessing stage, with key dates, target date and linked agreement."><figcaption>A consent case with its statutory target date.</figcaption></figure>
+      <figure><img src="img/compliance.jpg" width="1920" height="1230" loading="lazy" alt="The compliance overview listing certificates by status, with expired and missing certificates first."><figcaption>Compliance across every building.</figcaption></figure>
+      <figure><img src="img/property.jpg" width="1920" height="1230" loading="lazy" alt="Northfield Business Park property record with its blocks and units."><figcaption>A property record and its parts.</figcaption></figure>
+      <figure><img src="img/estate.jpg" width="1920" height="1230" loading="lazy" alt="The whole estate dashboard with vacancy, rent roll and lease event figures."><figcaption>The whole estate at a glance.</figcaption></figure>
+    </div>
+  </div>
+</section>
+
+<section class="view" id="compare" aria-labelledby="h-compare">
+  <div class="wrap">
+    <h2 id="h-compare">How PHAEMA compares</h2>
+    <p class="lede">The main systems councils use for estates management are proprietary products sold as a service. This table uses only what suppliers publish on their websites and the government's Digital Marketplace, as at __ASOF__. Where a supplier publishes nothing, we say so.</p>
+    <div class="scroll" tabindex="0" role="region" aria-label="Comparison table, scrolls sideways">
+    <table class="compare">
+      <thead><tr><th scope="col"><span class="visually-hidden">Question</span></th><th scope="col" class="us">PHAEMA</th><th scope="col"><a href="https://concerto.co.uk/why-concerto">Concerto</a><span>Bellrock</span></th><th scope="col"><a href="https://www.applytosupply.digitalmarketplace.service.gov.uk/g-cloud/services/211720831746484">Tf Cloud</a><span>Civica (Technology Forge)</span></th><th scope="col"><a href="https://www.applytosupply.digitalmarketplace.service.gov.uk/g-cloud/services/234608500376076">MRI Horizon</a><span>MRI Software</span></th></tr></thead>
+      <tbody>
+        <tr><th scope="row">Licence</th><td class="us">Open source (AGPL-3.0)</td><td>Proprietary, sold as software as a service</td><td>Proprietary</td><td>Proprietary</td></tr>
+        <tr><th scope="row">Can you read the source code?</th><td class="us">Yes, all of it, on GitHub</td><td>Not published</td><td>Not published</td><td>Not published</td></tr>
+        <tr><th scope="row">Who can host and support it?</th><td class="us">You, us, or any supplier you choose</td><td>The supplier (software as a service)</td><td>The supplier, in UK data centres</td><td>The supplier; data may be stored or processed in the UK, EEA or elsewhere</td></tr>
+        <tr><th scope="row">Published price</th><td class="us">Yes: £0 self-hosted; hosted from £7,500 a year</td><td>Not published</td><td>From £1,680 an instance a year (G-Cloud 13 listing)</td><td>£25,500 to £151,000 an instance a year (G-Cloud 13 listing)</td></tr>
+        <tr><th scope="row">Getting your data out</th><td class="us">Whole database and open-format exports at any time, free</td><td>Not published</td><td>CSV or Excel exports at any time; data returned free at the end</td><td>Database extract on request; removal help at standard rates; data deleted 30 days after the contract ends</td></tr>
+        <tr><th scope="row">Leases and key dates</th><td class="us">Yes</td><td>Yes</td><td>Property and asset management</td><td>Yes, with IFRS 16 lease accounting</td></tr>
+        <tr><th scope="row">Statutory compliance</th><td class="us">Yes, with Golden Thread tiers</td><td>Health and safety module</td><td>Yes</td><td>Not listed</td></tr>
+        <tr><th scope="row">Repairs and facilities</th><td class="us">Yes</td><td>Yes (CAFM)</td><td>Yes (CAFM and help desk)</td><td>Yes</td></tr>
+        <tr><th scope="row">Asset valuation records</th><td class="us">Yes, Red Book and CIPFA Code</td><td>Not listed</td><td>Not listed</td><td>Not listed</td></tr>
+        <tr><th scope="row">API</th><td class="us">Yes, documented (OpenAPI)</td><td>Not listed</td><td>REST APIs</td><td>REST and SOAP web services</td></tr>
+        <tr><th scope="row">Maturity</th><td class="us">Alpha, 2026</td><td>Established; part of Bellrock</td><td>Established; Civica bought Technology Forge in September 2022</td><td>Established</td></tr>
+      </tbody>
+    </table>
+    </div>
+    <p class="fine">Idox Uniform also has an estates module, but its current features and prices are not published; Bolsover District Council paid £16,100 in 2014 to buy it for five concurrent users (<a href="https://committees.bolsover.gov.uk/Data/Executive/20140203/Agenda/report15255.pdf">council report</a>). "Not listed" means the supplier's public material does not mention it, not that the product cannot do it.</p>
+
+    <h3 class="gap">Where others go further today</h3>
+    <ul class="honest">
+      <li>Offline mobile apps for site surveys. PHAEMA works in a phone browser but not offline.</li>
+      <li>Room and desk booking, permits to work and key management (Concerto).</li>
+      <li>IFRS 16 accounting for leases the council holds (MRI Horizon).</li>
+      <li>Years of live use in large councils. PHAEMA is new, so start with a pilot.</li>
+    </ul>
+  </div>
+</section>
+
+<section class="view" id="value" aria-labelledby="h-value">
+  <div class="wrap">
+    <h2 id="h-value">Costs and benefits</h2>
+    <p class="lede">Over five years a typical estates system costs a council about <strong>£372,000</strong> in fees. PHAEMA Hosted Standard costs <strong>£79,000</strong>, including onboarding: <strong>79% less</strong>. Self-hosting costs about £20,000 in running costs.</p>
+    <figure class="chart-wrap">
+      <div class="scroll" tabindex="0" role="region" aria-label="Chart of annual costs, scrolls sideways">__CHART__</div>
+      <figcaption>Annual cost of published council contracts (total divided by years), and PHAEMA's prices. Scopes differ: Sheffield, Bath and North East Somerset and Stockport also cover facilities or wider asset management.</figcaption>
+    </figure>
+
+    <h3 class="gap">Work out your own saving</h3>
+    <form class="calc" id="calc" novalidate>
+      <div class="calc__inputs">
+        <label for="c-current">What you pay now each year (£)<input id="c-current" inputmode="numeric" value="74494"></label>
+        <label for="c-tier">PHAEMA option
+          <select id="c-tier">
+            <option value="0">Self-hosted</option>
+            <option value="1">Hosted Essentials</option>
+            <option value="2" selected>Hosted Standard</option>
+            <option value="3">Hosted Enterprise</option>
+          </select></label>
+        <label for="c-years">Years<input id="c-years" type="number" min="1" max="10" value="5"></label>
+        <label for="c-days">Your staff days to move across<input id="c-days" type="number" min="0" value="15"></label>
+        <label for="c-rate">Cost of a staff day (£)<input id="c-rate" inputmode="numeric" value="300"></label>
+      </div>
+      <div class="calc__out" aria-live="polite">
+        <p class="calc__line"><span>Staying where you are</span><strong id="o-now">£372,470</strong></p>
+        <p class="calc__line"><span>Moving to PHAEMA</span><strong id="o-us">£83,500</strong></p>
+        <p class="calc__saving"><span>You save</span><strong id="o-save">£288,970</strong><em id="o-pct">78% less</em></p>
+        <p class="fine" id="o-note">Includes onboarding and your staff time. Self-hosting uses our estimate of £4,000 a year to run.</p>
+      </div>
+    </form>
+
+    <h3 class="gap">Benefits beyond the price</h3>
+    <div class="benefits">
+      <div><h4>Simpler procurement</h4><p>A five-year Hosted Standard contract is about £79,000, well below the £207,720 threshold for council services under the Procurement Act 2023 (<a href="https://www.gov.uk/government/publications/ppn-023-2026-threshold-amounts/ppn-023-2026-threshold-amounts-html">PPN 023</a>). Self-hosting has no software licence to buy.</p></div>
+      <div><h4>Exit costs fall to near zero</h4><p>The government's open standards guidance asks you to estimate exit and migration costs at the start of any IT project (<a href="https://www.gov.uk/government/publications/open-standards-principles/open-standards-principles">Open Standards Principles</a>). With PHAEMA you keep the system and the data when you change supplier.</p></div>
+      <div><h4>Shared improvements</h4><p>A feature one council pays for is available to every council. Councils can fund changes together instead of each paying for the same thing.</p></div>
+      <div><h4>Audit and transparency</h4><p>Every change is logged with who and when. The Transparency Code land and assets list publishes in one click, leaving out sensitive sites.</p></div>
+      <div><h4>Less double keying</h4><p>Leases, rents, service charges, repairs, compliance and valuations share one property record, so a change to a unit or tenant is made once.</p></div>
+      <div><h4>Risks to manage</h4><p>PHAEMA is in alpha. Start with a pilot on one service, keep your current system until it passes your tests, and agree support in writing.</p></div>
+    </div>
+
+    <h3 class="gap">Published contracts used</h3>
+    <div class="scroll" tabindex="0" role="region" aria-label="Contracts table, scrolls sideways">
+    <table class="data">
+      <thead><tr><th scope="col">Council</th><th scope="col">Supplier</th><th scope="col" class="num">Contract</th><th scope="col" class="num">A year</th><th scope="col">Scope</th></tr></thead>
+      <tbody>__CONTRACTS__</tbody>
+    </table>
+    </div>
+    <p class="fine">Figures from Contracts Finder, council reports and a freedom of information response, as at __ASOF__. "A year" divides the total by the contract years. Contracts may include modules PHAEMA does not offer, and extension options.</p>
+  </div>
+</section>
+
+<section class="view" id="compliance" aria-labelledby="h-compliance">
+  <div class="wrap">
+    <h2 id="h-compliance">Meets government and professional requirements</h2>
+    <p class="lede">What each rule asks of a council's software, and where PHAEMA stands. We mark anything not yet finished.</p>
+    <div class="scroll" tabindex="0" role="region" aria-label="Compliance table, scrolls sideways">
+    <table class="data reqs">
+      <thead><tr><th scope="col">Requirement</th><th scope="col">What it asks</th><th scope="col">How PHAEMA meets it</th><th scope="col">Status</th></tr></thead>
+      <tbody>
+        <tr><th scope="row"><a href="https://www.gov.uk/guidance/be-open-and-use-open-source">Technology Code of Practice, point 3</a></th><td>Give open source equal consideration; publish code openly</td><td>All code is public under the AGPL</td><td><span class="status done">Done</span></td></tr>
+        <tr><th scope="row"><a href="https://www.gov.uk/government/publications/open-standards-principles/open-standards-principles">Open Standards Principles</a></th><td>Use open standards to avoid lock-in and keep exit costs low</td><td>PostgreSQL, CSV, Excel, GeoJSON, OpenAPI, UPRN and USRN</td><td><span class="status done">Done</span></td></tr>
+        <tr><th scope="row"><a href="https://media.localdigital.gov.uk/uploads/2024/10/29092519/Local-Digital-Declaration.pdf">Local Digital Declaration</a></th><td>Modular technology, control of your data, new IT to follow the Technology Code of Practice</td><td>Modules switch on separately; your data in an open database; open API</td><td><span class="status done">Done</span></td></tr>
+        <tr><th scope="row"><a href="https://www.gov.uk/guidance/meet-the-requirements-of-equality-and-accessibility-regulations">Accessibility regulations</a></th><td>Websites and intranets meet WCAG 2.2 AA, with an accessibility statement</td><td>GOV.UK Frontend components, keyboard and screen reader support, theme and text-size settings</td><td><span class="status part">Audit due</span></td></tr>
+        <tr><th scope="row">UK GDPR and Data Protection Act 2018</th><td>Lawful, secure processing of tenants' and contacts' personal data</td><td>UK or EU hosting, roles, audit log, sign-in for every page and file</td><td><span class="status part">DPIA template due</span></td></tr>
+        <tr><th scope="row">Cyber Essentials Plus and NCSC Cloud Security Principles</th><td>Commonly asked for in council IT tenders</td><td>For the hosted service</td><td><span class="status plan">Planned</span></td></tr>
+        <tr><th scope="row">Local Government Transparency Code 2015</th><td>Publish land and building assets</td><td>One-click CSV, JSON and GeoJSON under the Open Government Licence</td><td><span class="status done">Done</span></td></tr>
+        <tr><th scope="row">CIPFA Code and IFRS 13</th><td>Valuation programme, fair value levels, current values between valuations</td><td>Rolling programme, fair value levels, indexation, audit queries</td><td><span class="status done">Done</span></td></tr>
+        <tr><th scope="row">RICS professional standards</th><td>Leasing code, service charges 2nd edition, conflicts of interest, surveying safely, Red Book</td><td>Heads of terms checks, service charge timetable, conflict declarations, site hazards, valuation records</td><td><span class="status done">Done</span></td></tr>
+        <tr><th scope="row">Building Safety Act 2022</th><td>Golden Thread information for higher-risk buildings</td><td>Tier screening, building documents with versions, responsible person</td><td><span class="status done">Done</span></td></tr>
+        <tr><th scope="row">Landlord and Tenant Acts 1954 and 1988</th><td>Notice dates and deciding consents within a reasonable time</td><td>Section 25 and 26 dates, court deadlines, consent targets and decision reports</td><td><span class="status done">Done</span></td></tr>
+        <tr><th scope="row">Energy efficiency (MEES) 2015</th><td>No new lettings below EPC band E without an exemption</td><td>Warning on lettings and renewals; EPC report</td><td><span class="status done">Done</span></td></tr>
+        <tr><th scope="row">G-Cloud listing</th><td>Lets councils buy through the Digital Marketplace</td><td>For the hosted service</td><td><span class="status plan">Planned</span></td></tr>
+      </tbody>
+    </table>
+    </div>
+  </div>
+</section>
+
+<section class="view" id="pricing" aria-labelledby="h-pricing">
+  <div class="wrap">
+    <h2 id="h-pricing">Pricing</h2>
+    <p class="lede">The software is free. You pay only if you want us to host and support it. Prices are indicative until the hosted service launches, and exclude VAT.</p>
+    <div class="tiers">__TIERS__</div>
+    <p class="fine">Support for self-hosted councils is available from £4,000 a year. Any other supplier may host or support PHAEMA too: that is what the open licence is for.</p>
+
+    <h3 class="gap">Start with a pilot</h3>
+    <ol class="steps">
+      <li><strong>Try the demonstration.</strong> Load the two fictional districts and run our 12-day test programme.</li>
+      <li><strong>Import your terrier.</strong> Bring in properties, leases and parties from spreadsheets with the import templates.</li>
+      <li><strong>Run one service in parallel.</strong> For example lease events and consents, for three months.</li>
+      <li><strong>Decide.</strong> Switch over, extend the pilot, or stop. Your data leaves with you either way.</li>
+    </ol>
+    <p class="cta"><a class="button" href="https://github.com/phaema/phaema-app">Get PHAEMA on GitHub</a></p>
+  </div>
+</section>
+</main>
+
+<footer class="foot"><div class="wrap">
+  <p>PHAEMA is free software under the GNU Affero General Public License v3.0. Competitor information comes from public sources as at __ASOF__ and may change; product names belong to their owners. Screenshots show fictional demonstration data.</p>
+</div></footer>
+
+<script>
+(function () {
+  var views = Array.prototype.slice.call(document.querySelectorAll('.view'));
+  var links = Array.prototype.slice.call(document.querySelectorAll('.nav a'));
+  document.documentElement.classList.add('js');
+  function show() {
+    var id = (location.hash || '#overview').slice(1);
+    if (!document.getElementById(id) || !document.getElementById(id).classList.contains('view')) id = 'overview';
+    views.forEach(function (v) { v.hidden = v.id !== id; });
+    links.forEach(function (a) { if (a.getAttribute('href') === '#' + id) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current'); });
+  }
+  window.addEventListener('hashchange', function () { show(); window.scrollTo(0, 0); });
+  show();
+  window.setTimeout(function () { window.scrollTo(0, 0); }, 0);
+
+  var TIERS = __TIERS_JSON__;
+  var RUN = __SELF_HOST__;
+  function num(id) { var v = parseFloat(String(document.getElementById(id).value).replace(/[£,\s]/g, '')); return isNaN(v) ? 0 : v; }
+  function gbp(n) { return '£' + Math.round(n).toLocaleString('en-GB'); }
+  function calc() {
+    var years = Math.max(1, Math.min(10, num('c-years')));
+    var t = TIERS[+document.getElementById('c-tier').value];
+    var now = num('c-current') * years;
+    var yearly = t[0] === 0 ? RUN : t[0];
+    var us = yearly * years + t[1] + num('c-days') * num('c-rate');
+    var save = now - us;
+    document.getElementById('o-now').textContent = gbp(now);
+    document.getElementById('o-us').textContent = gbp(us);
+    document.getElementById('o-save').textContent = save >= 0 ? gbp(save) : '-' + gbp(-save);
+    document.getElementById('o-pct').textContent = now > 0 ? Math.round(100 * save / now) + '% ' + (save >= 0 ? 'less' : 'more') : '';
+  }
+  ['c-current', 'c-tier', 'c-years', 'c-days', 'c-rate'].forEach(function (id) {
+    document.getElementById(id).addEventListener('input', calc);
+  });
+  document.getElementById('calc').addEventListener('submit', function (e) { e.preventDefault(); });
+  calc();
+})();
+</script>
+'''
+
+STYLE = r'''<title>PHAEMA for councils</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&display=swap">
+<style>
+/* Layout: a single-column estates "terrier" page; the one bold device is the red edging of a title plan. */
+:root {
+  --paper: #f6f8f7; --sheet: #ffffff; --ink: #13233a; --muted: #4a5864; --line: #cfd6d8;
+  --edge: #c1272d; --survey: #2c6a3e; --link: #1b5c89; --tint: #e8efec; --focus: #ffdd00; --on-survey: #ffffff;
+  --display: "Bricolage Grotesque", "Arial Narrow", Arial, sans-serif;
+  --body: "Atkinson Hyperlegible", Verdana, Arial, sans-serif;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --paper: #0e151d; --sheet: #15202b; --ink: #e6ecef; --muted: #a9b5be; --line: #2d3b48;
+  --edge: #ff6f69; --survey: #7fc78f; --link: #86bfe9; --tint: #1a2732; --on-survey: #0e151d; color-scheme: dark; } }
+:root[data-theme="dark"] {
+  --paper: #0e151d; --sheet: #15202b; --ink: #e6ecef; --muted: #a9b5be; --line: #2d3b48;
+  --edge: #ff6f69; --survey: #7fc78f; --link: #86bfe9; --tint: #1a2732; --on-survey: #0e151d; color-scheme: dark; }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--paper); color: var(--ink); font: 1.0625rem/1.6 var(--body); }
+.wrap { max-width: 1140px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+a { color: var(--link); text-underline-offset: .15em; }
+a:hover { text-decoration-thickness: 3px; }
+a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible, .scroll:focus-visible {
+  outline: 3px solid var(--focus); outline-offset: 0; background-color: var(--focus); color: #0b0c0c; box-shadow: 0 4px 0 #0b0c0c; }
+.scroll:focus-visible { background: none; box-shadow: none; }
+h1, h2, h3, h4 { font-family: var(--display); line-height: 1.1; text-wrap: balance; margin: 0 0 .5em; font-weight: 800; }
+h1 { font-size: clamp(2.3rem, 5.2vw, 4rem); letter-spacing: -.02em; }
+h2 { font-size: clamp(1.75rem, 3.4vw, 2.5rem); letter-spacing: -.01em; }
+h3 { font-size: 1.3rem; font-weight: 600; }
+h4 { font-size: 1.1rem; font-weight: 600; }
+p { margin: 0 0 1em; max-width: 68ch; }
+.skip { position: absolute; left: -9999px; top: 0; z-index: 20; }
+.skip:focus { left: 16px; top: 8px; background: var(--focus); color: #0b0c0c; padding: 8px 12px; }
+.visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+.top { background: var(--ink); color: var(--paper); position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--ink); }
+.top__inner { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 28px; padding-block: 12px; }
+.brand { color: var(--paper); text-decoration: none; font-family: var(--display); font-weight: 800; font-size: 1.35rem; letter-spacing: .14em; display: inline-flex; align-items: center; gap: 10px; }
+.brand__mark { width: 18px; height: 14px; border: 2.5px solid var(--edge); display: inline-block; }
+.nav { list-style: none; display: flex; flex-wrap: wrap; gap: 4px 20px; margin: 0; padding: 0; }
+.nav a { color: var(--paper); font-weight: 700; font-size: 1rem; }
+.nav a[aria-current="page"] { text-decoration: none; border-bottom: 3px solid var(--edge); }
+
+.view { padding-block: 48px 64px; scroll-margin-top: 90px; }
+.hero { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); gap: 48px; align-items: center; }
+.hero__text { min-width: 0; }
+.kicker { color: var(--muted); font-size: 1rem; margin-bottom: .75em; }
+.lede { font-size: 1.2rem; color: var(--ink); }
+.fine { font-size: .92rem; color: var(--muted); }
+.cta { display: flex; flex-wrap: wrap; gap: 12px; margin: 1.5em 0; }
+.button { display: inline-block; background: var(--survey); color: var(--on-survey); font-weight: 700; text-decoration: none; padding: 12px 20px; border-radius: 3px; box-shadow: 0 3px 0 rgba(0,0,0,.35); }
+.button--quiet { background: transparent; color: var(--link); box-shadow: inset 0 0 0 2px var(--link); }
+
+/* The title plan: a product screenshot "edged red", as on a Land Registry plan */
+.plan { margin: 0; min-width: 0; }
+.plan__sheet { background: var(--sheet); border: 1px solid var(--line); padding: 14px; position: relative; }
+.plan__sheet::after { content: ""; position: absolute; inset: 7px; border: 3px solid var(--edge); pointer-events: none; }
+.plan__sheet img { display: block; width: 100%; height: auto; }
+.plan figcaption { display: flex; gap: 10px; align-items: center; font-size: .95rem; color: var(--muted); margin-top: 10px; }
+.plan__key { width: 26px; height: 14px; border: 3px solid var(--edge); flex: none; }
+
+.band { margin-top: 56px; padding-block: 28px; border-top: 3px solid var(--ink); border-bottom: 1px solid var(--line); }
+.band__lead { font-size: 1.25rem; }
+.three, .benefits { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 32px; margin-top: 40px; }
+.three p, .benefits p { font-size: 1rem; }
+
+.modules { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 40px; margin-top: 24px; }
+.modules article { border-top: 1px solid var(--line); padding-block: 18px 6px; }
+.modules p { font-size: 1rem; }
+.shots { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 28px; margin-top: 40px; }
+.shots figure { margin: 0; }
+.shots img { display: block; width: 100%; height: auto; border: 1px solid var(--line); }
+.shots figcaption { font-size: .95rem; color: var(--muted); margin-top: 8px; }
+
+.scroll { overflow-x: auto; max-width: 100%; }
+table { border-collapse: collapse; width: 100%; font-size: .98rem; }
+th, td { text-align: left; vertical-align: top; padding: 12px 14px 12px 0; border-bottom: 1px solid var(--line); }
+thead th { font-family: var(--display); font-weight: 600; font-size: 1.05rem; border-bottom: 2px solid var(--ink); }
+thead th span { display: block; font-family: var(--body); font-weight: 400; font-size: .85rem; color: var(--muted); }
+.compare { min-width: 860px; margin-top: 16px; }
+.compare tbody th { width: 21%; font-weight: 700; }
+.compare .us { background: var(--tint); padding-left: 14px; border-left: 3px solid var(--survey); }
+.data { min-width: 760px; margin-top: 8px; }
+.num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.reqs tbody th { width: 22%; }
+.status { display: inline-block; font-size: .85rem; font-weight: 700; padding: 2px 8px; border: 2px solid currentColor; white-space: nowrap; }
+.status.done { color: var(--survey); }
+.status.part { color: var(--muted); border-style: dashed; }
+.status.plan { color: var(--muted); border-style: dotted; }
+.gap { margin-top: 48px; }
+.honest { padding-left: 1.2em; }
+.honest li { margin-bottom: .4em; max-width: 68ch; }
+
+.chart-wrap { margin: 24px 0 0; }
+.chart { width: 100%; min-width: 720px; height: auto; display: block; }
+.chart .grid { stroke: var(--line); stroke-width: 1; }
+.chart .tick, .chart .sub { fill: var(--muted); font: 13px var(--body); }
+.chart .label { fill: var(--ink); font: 700 14px var(--body); }
+.chart .value { fill: var(--ink); font: 700 14px var(--body); font-variant-numeric: tabular-nums; }
+.chart .bar.them { fill: var(--muted); }
+.chart .bar.us { fill: var(--survey); }
+.chart .median { stroke: var(--edge); stroke-width: 2; stroke-dasharray: 5 4; }
+.chart .median-label { fill: var(--edge); font: 700 13px var(--body); }
+.chart-wrap figcaption { font-size: .92rem; color: var(--muted); margin-top: 10px; max-width: 80ch; }
+
+.calc { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 32px; background: var(--sheet); border: 1px solid var(--line); padding: 24px; margin-top: 16px; }
+.calc__inputs { display: grid; gap: 14px; }
+.calc label { display: grid; gap: 4px; font-weight: 700; font-size: .98rem; }
+.calc input, .calc select { font: inherit; font-weight: 400; padding: 8px 10px; border: 2px solid var(--ink); background: var(--paper); color: var(--ink); max-width: 16rem; border-radius: 0; }
+.calc__out { border-left: 3px solid var(--survey); padding-left: 24px; }
+.calc__line, .calc__saving { display: flex; justify-content: space-between; gap: 16px; border-bottom: 1px solid var(--line); padding-block: 10px; margin: 0; max-width: none; }
+.calc strong { font-variant-numeric: tabular-nums; font-size: 1.25rem; }
+.calc__saving { border-bottom: 0; flex-wrap: wrap; }
+.calc__saving strong { font-family: var(--display); font-size: 2.2rem; color: var(--survey); }
+.calc__saving em { font-style: normal; flex-basis: 100%; text-align: right; color: var(--muted); }
+
+.tiers { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 20px; margin-top: 24px; }
+.tier { background: var(--sheet); border: 1px solid var(--line); padding: 20px; display: flex; flex-direction: column; }
+.tier--featured { border: 3px solid var(--edge); }
+.tier h3 { margin-bottom: .2em; }
+.tier__users { color: var(--muted); font-size: .95rem; margin-bottom: .6em; }
+.tier__price { font-family: var(--display); font-weight: 800; font-size: 1.9rem; margin: 0; font-variant-numeric: tabular-nums; }
+.tier__price span { font-family: var(--body); font-weight: 400; font-size: 1rem; color: var(--muted); }
+.tier__extra { font-size: .95rem; color: var(--muted); }
+.tier ul { padding-left: 1.1em; font-size: .98rem; flex: 1; }
+.tier li { margin-bottom: .35em; }
+.tier__five { border-top: 1px solid var(--line); padding-top: 10px; margin: 0; font-size: .95rem; }
+.steps { padding-left: 1.4em; }
+.steps li { margin-bottom: .6em; max-width: 68ch; }
+
+.foot { border-top: 1px solid var(--line); padding-block: 24px 40px; color: var(--muted); font-size: .92rem; }
+
+@media (max-width: 900px) {
+  .hero, .calc { grid-template-columns: minmax(0, 1fr); }
+  .tiers { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .three, .benefits { grid-template-columns: minmax(0, 1fr); gap: 8px; }
+}
+@media (max-width: 600px) {
+  .modules, .shots, .tiers { grid-template-columns: minmax(0, 1fr); }
+  .view { padding-block: 28px 40px; }
+  .calc__out { border-left: 0; padding-left: 0; border-top: 3px solid var(--survey); padding-top: 12px; }
+}
+@media (prefers-reduced-motion: no-preference) { html { scroll-behavior: smooth; } }
+</style>
+'''
+
+
+def build(artifact=False):
+    import json
+
+    body = (BODY.replace("__CHART__", bar_chart()).replace("__CONTRACTS__", contract_rows())
+            .replace("__TIERS__", tier_cards()).replace("__ASOF__", AS_OF)
+            .replace("__TIERS_JSON__", json.dumps([[t[1], t[2]] for t in TIERS]))
+            .replace("__SELF_HOST__", str(SELF_HOST_RUNNING)))
+    if artifact:
+        return STYLE + body
+    return ('<!doctype html>\n<html lang="en-GB">\n<head>\n<meta charset="utf-8">\n'
+            '<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">\n'
+            '<meta name="description" content="PHAEMA: open-source estate management software for councils in '
+            'England and Wales. Compare costs and features with proprietary systems.">\n'
+            + STYLE + '</head>\n<body>\n<a class="skip" href="#main">Skip to content</a>\n'
+            + body + '\n</body>\n</html>\n')
+
+
+if __name__ == "__main__":
+    here = Path(__file__).parent
+    artifact = "--artifact" in sys.argv
+    out = here / ("artifact.html" if artifact else "index.html")
+    out.write_text(build(artifact), encoding="utf-8")
+    print(f"Wrote {out}")
