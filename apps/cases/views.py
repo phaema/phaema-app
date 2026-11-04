@@ -12,6 +12,7 @@ from django.core.files.base import ContentFile
 from django.db.models import Count, Q
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils.translation import gettext as _
+from django.utils.translation import gettext_lazy
 from django.views.generic import ListView
 
 from apps.core.roles import ADMINISTRATORS, CONTRIBUTORS, SURVEYORS, is_administrator
@@ -20,7 +21,7 @@ from apps.leases.models import Lease, LeaseEvent
 from apps.properties.models import Property
 from apps.reports.mixins import ExportMixin
 
-from . import emails, leasing, workflow
+from . import emails, leasing, standards, workflow
 from .models import STAGE_ORDER, Case, CaseDocument, CaseNote, CaseTask, CaseType, Correspondence, Stage
 
 COLUMNS = {
@@ -220,7 +221,7 @@ def _file_email(case, upload, direction):
 
 ACTIONS_WORK = {"next_stage", "hold", "resume", "acknowledge", "complete_application", "decide", "close", "reopen",
                 "add_task", "task_done", "assign", "raise_fee", "links", "request_approval", "withdraw_approval",
-                "save_heads", "save_notice"}
+                "save_heads", "save_notice", "save_dilaps", "save_conflict"}
 ACTIONS_APPROVER = {"approve", "return", "reassign_approval"}
 ACTIONS_CONTRIBUTE = {"add_note", "add_correspondence", "add_document", "file_email"}
 
@@ -265,7 +266,46 @@ def case_detail(request, pk):
         "is_administrator": is_administrator(request.user),
         **_approval_context(request.user, case),
         **_leasing_context(case),
+        **_standards_context(case),
     })
+
+
+DILAPS_FIELDS = [
+    ("dilaps_schedule_value", gettext_lazy("Schedule of dilapidations (£)"), "money"),
+    ("dilaps_served_on", gettext_lazy("Date the schedule was served"), "date"),
+    ("dilaps_response_value", gettext_lazy("Tenant's response (£)"), "money"),
+    ("dilaps_response_on", gettext_lazy("Date the response was received"), "date"),
+    ("dilaps_settlement_value", gettext_lazy("Settlement (£)"), "money"),
+    ("dilaps_settled_on", gettext_lazy("Date settled"), "date"),
+    ("dilaps_costs", gettext_lazy("Council's costs (£)"), "money"),
+    ("dilaps_notes", gettext_lazy("Notes"), "text"),
+]
+
+
+def _standards_context(case):
+    from apps.compliance.safety import info
+
+    return {
+        "mees_warnings": standards.mees(case) if case.is_open else [],
+        "dilaps": standards.dilaps(case),
+        "dilaps_fields": [(n, label, getattr(case, n), kind) for n, label, kind in DILAPS_FIELDS],
+        "safety": info(case.property or (case.lease.property if case.lease_id else None)),
+    }
+
+
+def _money(text):
+    from decimal import Decimal, InvalidOperation
+
+    text = (text or "").replace(",", "").replace("£", "").strip()
+    if not text:
+        return None
+    try:
+        value = Decimal(text)
+    except InvalidOperation:
+        raise ValueError(text)
+    if value < 0:
+        raise ValueError(text)
+    return value.quantize(Decimal("0.01"))
 
 
 def _templates_for(case):
@@ -418,6 +458,9 @@ def _do(request, case, action):  # noqa: C901 - one branch per action keeps each
             return
         if _blocked_by_terms(request, case, stage):
             return
+        if standards.conflict_missing(case):
+            messages.error(request, _("Confirm whether there is a conflict of interest before asking for approval."))
+            return
         if not post.get("recommendation", "").strip():
             messages.error(request, _("Write your recommendation for the approver."))
             return
@@ -451,6 +494,37 @@ def _do(request, case, action):  # noqa: C901 - one branch per action keeps each
         messages.success(request, _("Notice dates saved."))
         for warning in leasing.notice_dates(case).warnings:
             messages.warning(request, warning)
+    elif action == "save_dilaps":
+        changed = []
+        for name, label, kind in DILAPS_FIELDS:
+            raw = post.get(name, "")
+            if kind == "money":
+                try:
+                    value = _money(raw)
+                except ValueError:
+                    messages.error(request, _("%(label)s must be an amount in pounds.") % {"label": label})
+                    return
+            elif kind == "date":
+                value = _optional_date(raw)
+            else:
+                value = raw.strip()
+            setattr(case, name, value)
+            changed.append(name)
+        case.save(update_fields=[*changed, "updated_at"])
+        messages.success(request, _("Dilapidations saved."))
+    elif action == "save_conflict":
+        choice = post.get("conflict", "")
+        details = post.get("conflict_details", "").strip()
+        if choice not in ("none", "declared"):
+            messages.error(request, _("Choose whether there is a conflict of interest."))
+            return
+        if choice == "declared" and not details:
+            messages.error(request, _("Describe the conflict and how it is managed."))
+            return
+        case.conflict, case.conflict_details = choice, details if choice == "declared" else ""
+        case.conflict_by, case.conflict_on = request.user, date.today()
+        case.save(update_fields=["conflict", "conflict_details", "conflict_by", "conflict_on", "updated_at"])
+        messages.success(request, _("Conflict of interest declaration saved."))
     elif action == "withdraw_approval":
         approval = workflow.pending_approval(case)
         if approval and approval.requested_by_id == request.user.pk:

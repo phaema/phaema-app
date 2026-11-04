@@ -52,6 +52,7 @@
     <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Grid reference" %}</dt><dd class="govuk-summary-list__value">{% if object.easting %}{{ object.easting }}, {{ object.northing }}{% else %}–{% endif %}</dd></div>
     {% if object.exclude_from_publication %}<div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Open data" %}</dt><dd class="govuk-summary-list__value"><strong class="govuk-tag govuk-tag--red">{% translate "Excluded from publication" %}</strong></dd></div>{% endif %}
   </dl>
+  {% if object.site_hazards %}<div class="govuk-warning-text"><span class="govuk-warning-text__icon" aria-hidden="true">!</span><strong class="govuk-warning-text__text"><span class="govuk-visually-hidden">{% translate "Warning" %}</span>{% translate "Site hazards:" %} {{ object.site_hazards|linebreaksbr }}</strong></div>{% endif %}
   {% if object.notes %}<h2 class="govuk-heading-m">{% translate "Notes" %}</h2><p class="govuk-body">{{ object.notes|linebreaksbr }}</p>{% endif %}
 
   {% if breakdown %}

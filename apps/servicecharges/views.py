@@ -101,15 +101,22 @@ def record_issue(request, pk):
     except ValueError:
         messages.error(request, _("Enter the date it was issued."))
         return redirect(year)
+    reason = request.POST.get("late_reason", "").strip()
+    due = year.budget_due if what == "budget" else year.statements_due
+    if when > due and not reason:
+        messages.error(request, _("That is after the due date of %(d)s. Give the reason for the delay: the RICS "
+                                  "standard expects tenants to be told.") % {"d": due.strftime("%-d %B %Y")})
+        return redirect(year)
     if what == "budget":
-        year.budget_issued_on = when
-        year.save(update_fields=["budget_issued_on", "updated_at"])
+        year.budget_issued_on, year.budget_late_reason = when, reason if when > due else ""
+        year.save(update_fields=["budget_issued_on", "budget_late_reason", "updated_at"])
         messages.success(request, _("Budget issue date recorded."))
     elif what == "statements":
-        year.statements_issued_on = when
+        year.statements_issued_on, year.statements_late_reason = when, reason if when > due else ""
         year.certified_by = request.POST.get("certified_by", "").strip()[:150]
         year.certification_notes = request.POST.get("certification_notes", "").strip()
-        year.save(update_fields=["statements_issued_on", "certified_by", "certification_notes", "updated_at"])
+        year.save(update_fields=["statements_issued_on", "statements_late_reason", "certified_by",
+                                 "certification_notes", "updated_at"])
         messages.success(request, _("Year-end statement issue recorded."))
     return redirect(year)
 

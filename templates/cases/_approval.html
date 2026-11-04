@@ -5,6 +5,7 @@
   <div class="govuk-notification-banner__content">
     <p class="govuk-body">{% blocktranslate with who=pending_approval.requested_by|person:"PHAEMA" approver=pending_approval.approver|person:"–" stage=pending_approval.get_stage_display when=pending_approval.created_at|date:"j M Y" %}{{ who }} asked {{ approver }} on {{ when }} to approve moving to {{ stage }}.{% endblocktranslate %}</p>
     <p class="govuk-body"><strong>{% translate "Recommendation" %}</strong><br>{{ pending_approval.recommendation|linebreaksbr }}</p>
+    <p class="govuk-body"><strong>{% translate "Conflicts of interest" %}</strong><br>{% if case.conflict == "declared" %}<strong class="govuk-tag govuk-tag--orange">{% translate "Declared" %}</strong> {{ case.conflict_details|linebreaksbr }}{% elif case.conflict == "none" %}{% blocktranslate with who=case.conflict_by|person:"–" %}None, confirmed by {{ who }}.{% endblocktranslate %}{% else %}{% translate "Not confirmed." %}{% endif %}</p>
     {% if can_decide_approval %}
     <form method="post">{% csrf_token %}
       <div class="govuk-form-group"><label class="govuk-label govuk-label--s" for="approval-comments">{% translate "Your comments" %}</label><div class="govuk-hint">{% translate "Needed if you return it. Kept on the case." %}</div><textarea class="govuk-textarea" id="approval-comments" name="comments" rows="3"></textarea></div>
@@ -30,6 +31,8 @@
   <h2 class="govuk-heading-s govuk-!-margin-bottom-2">{% blocktranslate with stage=approval_gate_label %}Approval needed to move to {{ stage }}{% endblocktranslate %}</h2>
   {% if terms_problems and approval_gate == "decision" %}
   <p class="govuk-body">{% translate "Cover every heads of terms item first (see above)." %}</p>
+  {% elif my_approver and not case.conflict %}
+  <p class="govuk-body">{% translate "Confirm whether there is a conflict of interest first (see Conflicts of interest)." %}</p>
   {% elif my_approver %}
   <form method="post">{% csrf_token %}<input type="hidden" name="action" value="request_approval"><input type="hidden" name="stage" value="{{ approval_gate }}">
     <div class="govuk-form-group"><label class="govuk-label govuk-label--s" for="recommendation">{% translate "Your recommendation" %}</label><div class="govuk-hint">{% translate "What you propose, and why. For a consent, include any conditions." %}</div><textarea class="govuk-textarea" id="recommendation" name="recommendation" rows="5"></textarea></div>

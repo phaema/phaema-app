@@ -1,0 +1,12 @@
+{% load i18n phaema %}{% if safety %}
+<details class="govuk-details phaema-safety" data-module="govuk-details"{% if safety.hazards %} open{% endif %}><summary class="govuk-details__summary"><span class="govuk-details__summary-text">{% translate "Before you visit" %}{% if safety.hazards %} <strong class="govuk-tag govuk-tag--red">{% translate "Hazards noted" %}</strong>{% endif %}</span></summary><div class="govuk-details__text">
+  {% for p, text in safety.hazards %}<p class="govuk-body-s"><strong>{{ p.reference }}:</strong> {{ text|linebreaksbr }}</p>{% empty %}<p class="govuk-body-s">{% translate "No site hazards recorded. Add them on the property record." %}</p>{% endfor %}
+  {% if safety.compliance %}
+  <p class="govuk-body-s"><strong>{% translate "Asbestos:" %}</strong>
+    {% if safety.asbestos.register %}<a class="govuk-link" href="{{ safety.asbestos.register.file.url }}">{{ safety.asbestos.register.title }}</a>{% if safety.asbestos.register.document_date %} ({{ safety.asbestos.register.document_date|date:"M Y" }}){% endif %}{% endif %}
+    {% if safety.asbestos.certificate %}{% if safety.asbestos.register %}; {% endif %}{% translate "reviewed" %} {{ safety.asbestos.certificate.issued_on|date:"j M Y" }}{% if safety.asbestos.certificate.file %} (<a class="govuk-link" href="{{ safety.asbestos.certificate.file.url }}">{% translate "record" %}</a>){% endif %}{% endif %}
+    {% if not safety.asbestos.register and not safety.asbestos.certificate %}<strong class="govuk-tag govuk-tag--yellow">{% translate "No asbestos information held" %}</strong> {% translate "Assume asbestos may be present in buildings built before 2000 until checked." %}{% endif %}</p>
+  {% if safety.actions %}<p class="govuk-body-s"><strong>{% translate "Open compliance actions:" %}</strong></p><ul class="govuk-list govuk-list--bullet govuk-body-s">{% for a in safety.actions %}<li>{{ a.description }} ({{ a.certificate.requirement.kind.name }})</li>{% endfor %}</ul>{% endif %}
+  {% if safety.tier_a %}<p class="govuk-body-s"><strong class="govuk-tag govuk-tag--purple">{% translate "Higher-risk building" %}</strong></p>{% endif %}
+  {% endif %}
+</div></details>{% endif %}

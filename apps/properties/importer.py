@@ -47,6 +47,8 @@ COLUMNS = [
     ("Measured to", "area_standard", False, "RICS Code of Measuring Practice, 6th edition; IPMS: All Buildings; or Other."),
     ("Source of areas", "area_source", False, "Measured survey, Taken from drawings, Lease or title plan, or Estimate."),
     ("Areas measured on", "areas_measured_on", False, "Date the areas were measured, dd/mm/yyyy."),
+    ("Site hazards", "site_hazards", False, "What anyone visiting should know first: access, lone working, "
+                                            "fragile roofs, dogs, confined spaces."),
 ]
 CHOICE_FIELDS = {"property_type", "holding_purpose", "tenure", "occupation", "area_standard", "area_source"}
 DECIMAL_FIELDS = {"gia_sqm", "nia_sqm", "site_area_ha", "gea_sqm"}

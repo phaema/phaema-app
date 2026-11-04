@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 from django.contrib import admin
 
-from .models import AssetClass, AuditReview, Classification, Valuation, ValuationSettings, Valuer
+from .models import AssetClass, AuditReview, Classification, IndexPoint, Valuation, ValuationSettings, Valuer
 
 
 @admin.register(AssetClass)
@@ -51,3 +51,9 @@ class AuditReviewAdmin(admin.ModelAdmin):
 
     def view_on_site(self, obj):
         return obj.get_absolute_url()
+
+
+@admin.register(IndexPoint)
+class IndexPointAdmin(admin.ModelAdmin):
+    list_display = ("index", "on", "value", "source")
+    list_filter = ("index",)

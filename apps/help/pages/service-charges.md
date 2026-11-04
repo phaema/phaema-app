@@ -66,6 +66,16 @@ Two kinds of entry need care:
 - **Costs not recoverable from tenants**, such as improvements or costs the leases do not allow, are recorded
   with **Recoverable** unticked. The council bears them, and they are shown separately on statements.
 
+Each cost can also be given a **category**:
+
+- **Improvement**: the RICS service charge standard treats improvements as not recoverable unless the lease
+  allows them or tenants have agreed. PHAEMA will not save a recoverable improvement unless **Tenants agreed** is
+  ticked.
+- **Building Safety Act defect**: costs of remedying relevant defects that the Building Safety Act 2022 protects
+  leaseholders from. These are always recorded as not recoverable.
+
+The spending import has **Category** and **Tenants agreed improvement** columns for these.
+
 The year page compares **budget and actual** by heading, and can be downloaded to Excel.
 
 ## Timetable
@@ -77,6 +87,9 @@ the dashboard and the Service charges page, and administrators get a list by ema
 reminds you to set up next year's budget as the current year draws to a close.
 
 When the year-end statements are issued, record the date, who certified them and any accountant's review.
+
+If you record a budget or statements as issued **after the due date**, PHAEMA asks for the reason. The standard
+expects tenants to be told why, so the reason is printed on the budget and statements, with an apology.
 
 ## Apportionment matrix
 

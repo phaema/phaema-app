@@ -18,6 +18,7 @@
   <button class="govuk-button govuk-button--secondary" data-module="govuk-button">{% translate "Save" %}</button></form></div></details>{% endif %}
 
 <h2 class="govuk-heading-m">{% translate "Valuations" %}</h2>
+{% if indexed.value %}<p class="govuk-body">{% blocktranslate with v=indexed.value|floatformat:0|intcomma y=year_end|date:"j F Y" f=indexed.factor n=indexed.note %}Indexed to {{ y }}: £{{ v }} (factor {{ f }}; {{ n }}).{% endblocktranslate %}</p>{% elif indexed.note %}<p class="govuk-body-s">{% translate "Indexation:" %} {{ indexed.note }}</p>{% endif %}
 {% if valuations %}<table class="govuk-table">
   <thead class="govuk-table__head"><tr class="govuk-table__row"><th scope="col" class="govuk-table__header">{% translate "Valuation date" %}</th><th scope="col" class="govuk-table__header">{% translate "Basis" %}</th><th scope="col" class="govuk-table__header">{% translate "Valuer" %}</th><th scope="col" class="govuk-table__header govuk-table__header--numeric">{% translate "Value" %}</th><th scope="col" class="govuk-table__header">{% translate "Status" %}</th></tr></thead>
   <tbody class="govuk-table__body">{% for v in valuations %}<tr class="govuk-table__row">

@@ -169,6 +169,26 @@ class Case(TimeStampedModel):
     landlord_opposes = models.BooleanField(_("council opposes a new tenancy"), default=False)
     opposition_grounds = models.CharField(_("grounds of opposition"), max_length=100, blank=True,
                                           help_text=_("Section 30(1) paragraphs, for example (f) redevelopment."))
+    # Dilapidations
+    dilaps_schedule_value = models.DecimalField(_("schedule of dilapidations (£)"), max_digits=12,
+                                                decimal_places=2, null=True, blank=True)
+    dilaps_served_on = models.DateField(_("schedule served"), null=True, blank=True)
+    dilaps_response_value = models.DecimalField(_("tenant's response (£)"), max_digits=12, decimal_places=2,
+                                                null=True, blank=True)
+    dilaps_response_on = models.DateField(_("response received"), null=True, blank=True)
+    dilaps_settlement_value = models.DecimalField(_("settlement (£)"), max_digits=12, decimal_places=2, null=True,
+                                                  blank=True)
+    dilaps_settled_on = models.DateField(_("settled"), null=True, blank=True)
+    dilaps_costs = models.DecimalField(_("council's costs (£)"), max_digits=12, decimal_places=2, null=True,
+                                       blank=True)
+    dilaps_notes = models.TextField(_("dilapidations notes"), blank=True)
+    # Conflicts of interest
+    conflict = models.CharField(_("conflicts of interest"), max_length=8, blank=True,
+                                choices=[("none", _("None")), ("declared", _("Declared"))])
+    conflict_details = models.TextField(_("conflict declared and how it is managed"), blank=True)
+    conflict_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True,
+                                    related_name="+", verbose_name=_("declared by"))
+    conflict_on = models.DateField(_("declared"), null=True, blank=True)
     fee_charge = models.ForeignKey("ledger.Charge", on_delete=models.SET_NULL, null=True, blank=True,
                                    related_name="cases", editable=False)
 

@@ -115,6 +115,7 @@
 </div>{% endif %}
 </div>
 <div class="govuk-grid-column-one-third">
+  {% include "compliance/_safety.html" %}
   {% if job.lease %}<h2 class="govuk-heading-s">{% translate "Tenant" %}</h2><p class="govuk-body-s">{{ job.lease.counterparty }}{% if job.lease.counterparty.phone %}<br>{{ job.lease.counterparty.phone }}{% endif %}</p>{% endif %}
   {% if job.contractor %}<h2 class="govuk-heading-s">{% translate "Contractor" %}</h2><p class="govuk-body-s">{{ job.contractor }}{% if job.contractor.phone %}<br>{{ job.contractor.phone }}{% endif %}{% if job.contractor.emergency_phone %}<br>{% translate "Out of hours:" %} {{ job.contractor.emergency_phone }}{% endif %}</p>{% endif %}
 </div>

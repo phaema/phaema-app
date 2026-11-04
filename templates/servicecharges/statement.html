@@ -11,6 +11,7 @@
   <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Your share" %}</dt><dd class="govuk-summary-list__value">{{ percent }}% ({% translate "shared by" %} {{ year.schedule.get_basis_display }}){% if line.days < year.days %}, {% blocktranslate with d=line.days t=year.days %}for {{ d }} of {{ t }} days{% endblocktranslate %}{% endif %}{% if member.annual_cap %}, {% translate "capped at" %} £{{ member.annual_cap|floatformat:2|intcomma }} {% translate "a year" %}{% endif %}</dd></div>
   <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Statement date" %}</dt><dd class="govuk-summary-list__value">{{ today|date:"j F Y" }}</dd></div>
 </dl>
+{% if year.statements_late_reason %}<div class="govuk-inset-text">{% blocktranslate with d=year.statements_due|date:"j F Y" %}This statement was due by {{ d }}. We are sorry it is late:{% endblocktranslate %} {{ year.statements_late_reason }}</div>{% endif %}
 <h2 class="govuk-heading-m">{% translate "Costs for the whole schedule" %}</h2>
 <table class="govuk-table">
   <thead class="govuk-table__head"><tr class="govuk-table__row"><th scope="col" class="govuk-table__header">{% translate "Heading" %}</th><th scope="col" class="govuk-table__header govuk-table__header--numeric">{% translate "Budget" %}</th><th scope="col" class="govuk-table__header govuk-table__header--numeric">{% translate "Actual" %}</th></tr></thead>

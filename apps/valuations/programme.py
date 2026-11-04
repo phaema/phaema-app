@@ -160,3 +160,35 @@ def schedule(year_end):
         v = last_accepted(c.property, year_end)
         rows.append((c.property, c.asset_class, v))
     return rows
+
+
+# ------------------------------------------------------------------ indexation
+
+@dataclass
+class Indexed:
+    value: object = None
+    factor: object = None
+    note: str = ""
+
+
+def indexed(valuation, year_end):
+    """The last accepted value brought forward to the year end with the class's index (VA-07). The index is applied
+    to the buildings where land and buildings are split, and to the whole value otherwise."""
+    from decimal import ROUND_HALF_UP, Decimal
+
+    from .models import IndexPoint
+
+    if valuation is None or valuation.value is None or valuation.valuation_date >= year_end:
+        return Indexed()
+    name = valuation.asset_class.index.strip()
+    if not name:
+        return Indexed(note="No index set for this class")
+    start, end = IndexPoint.at(name, valuation.valuation_date), IndexPoint.at(name, year_end)
+    if start is None or end is None or not start.value:
+        return Indexed(note=f"{name}: index values missing")
+    factor = (end.value / start.value).quantize(Decimal("0.0001"), ROUND_HALF_UP)
+    if valuation.building_value is not None and valuation.land_value is not None:
+        value = valuation.land_value + (valuation.building_value * factor)
+    else:
+        value = valuation.value * factor
+    return Indexed(value.quantize(Decimal("1"), ROUND_HALF_UP), factor, f"{name} {start.value} to {end.value}")

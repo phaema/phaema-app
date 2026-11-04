@@ -238,7 +238,7 @@ def job_detail(request, pk):
         "responsibilities": Responsibility.choices, "sc_years": years,
         "headings": CostHeading.objects.all() if years else [],
         "ledger_on": modules.rent_ledger_enabled, "sc_on": modules.service_charges_enabled,
-        "suggested": responsibility.decide(job.property, job.category),
+        "suggested": responsibility.decide(job.property, job.category), "safety": _safety(job.property),
     })
 
 
@@ -320,6 +320,12 @@ def _do(request, job, action):
         JobDocument.objects.create(job=job, file=upload, original_filename=upload.name[:255],
                                    description=post.get("description", "").strip()[:200] or upload.name[:200])
         messages.success(request, _("Document added."))
+
+
+def _safety(prop):
+    from apps.compliance.safety import info
+
+    return info(prop)
 
 
 @maintenance_view
@@ -407,7 +413,7 @@ def property_maintenance(request, pk):
         "matrix": responsibility.matrix(prop), "leases": responsibility.leases_for(prop),
         "library": [t for t in library.TASKS if t[1] not in have], "contractors": Contractor.objects.filter(active=True),
         "replace_soon": [c for c in components if c.replace_year and c.replace_year <= today.year + 5],
-        "can_raise": _can_raise(request.user),
+        "can_raise": _can_raise(request.user), "safety": _safety(prop),
     })
 
 

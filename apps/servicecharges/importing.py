@@ -27,6 +27,10 @@ class ExpenditureSheet(Sheet):
                         "service charge."),
         Column("Recoverable", "recoverable", "bool", example="Yes",
                guidance="No for costs the council bears itself, such as improvements. Defaults to Yes."),
+        Column("Category", "category", "choice", example="Service cost",
+               guidance="Service cost (the default); Building Safety Act defect (never recoverable); or Improvement "
+                        "or enhancement (recoverable only if tenants agreed)."),
+        Column("Tenants agreed improvement", "improvement_agreed", "bool", example="No"),
     ]
 
     def duplicate_key(self, values):
