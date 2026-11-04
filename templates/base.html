@@ -1,6 +1,6 @@
 {% load static i18n %}<!DOCTYPE html>
 {% get_current_language as LANG %}
-<html lang="{{ LANG }}" class="govuk-template phaema-text-{{ text_size }}" data-theme="{{ theme }}">
+<html lang="{{ LANG }}" class="govuk-template phaema-text-{{ text_size }}" data-theme="{{ theme }}" data-skin="{{ skin }}">
 <head>
   <meta charset="utf-8">
   <title>{% block title %}PHAEMA{% endblock %} – PHAEMA</title>
@@ -8,6 +8,7 @@
   <link rel="stylesheet" href="{% static 'vendor/govuk-frontend/govuk-frontend.min.css' %}">
   <link rel="stylesheet" href="{% static 'css/phaema.css' %}">
   <link rel="stylesheet" href="{% static 'css/themes.css' %}">
+  <link rel="stylesheet" href="{% static 'css/skins.css' %}">
   {% if brand_colour %}<style>:root { --ph-brand: {{ brand_colour }}; }</style>{% endif %}
 </head>
 <body class="govuk-template__body">
@@ -66,6 +67,13 @@
     </div>
     <div class="phaema-settings-bar">
     {% block help_link %}{% if user.is_authenticated %}<p class="govuk-body-s govuk-!-margin-0 phaema-help-link"><a class="govuk-link" href="{% url 'help:index' %}{% block help_page %}{% endblock %}">{% translate "Help with this page" %}</a></p>{% endif %}{% endblock %}
+    <nav class="phaema-text-size" aria-label="{% translate 'Page style' %}">
+      <span class="govuk-body-s">{% translate "Style:" %}</span>
+      {% for key, label in skins.items %}
+        {% if key == skin %}<span class="govuk-body-s phaema-text-size__current" aria-current="true">{{ label }}</span>
+        {% else %}<a class="govuk-link govuk-body-s" href="{% url 'skin' key %}?next={{ request.get_full_path|urlencode }}">{{ label }}</a>{% endif %}
+      {% endfor %}
+    </nav>
     <nav class="phaema-text-size" aria-label="{% translate 'Colour theme' %}">
       <span class="govuk-body-s">{% translate "Theme:" %}</span>
       {% for key, label in themes.items %}

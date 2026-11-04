@@ -3,6 +3,7 @@
 {% block help_page %}dashboard{% endblock %}
 {% block content %}
 <h1 class="govuk-heading-xl">{% translate "Dashboard" %}</h1>
+{% include "core/_dashboard_tabs.html" %}
 
 <div class="govuk-grid-row">
   <div class="govuk-grid-column-one-quarter">
@@ -35,7 +36,7 @@
 
 <div class="govuk-grid-row">
   <div class="govuk-grid-column-one-half">
-    <h2 class="govuk-heading-m">{% translate "Vacant floor space" %}</h2>
+    <section class="phaema-panel" data-panel="estate-vacant" data-area="estate"><h2 class="govuk-heading-m phaema-panel__title">{% translate "Vacant floor space" %}</h2><div class="phaema-panel__body">
     <dl class="govuk-summary-list">
       <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Vacant lettable spaces" %}</dt><dd class="govuk-summary-list__value">{{ vacant_space.n }}</dd></div>
       <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Net internal area (NIA)" %}</dt><dd class="govuk-summary-list__value">{% if vacant_space.nia %}{{ vacant_space.nia|floatformat:0|intcomma }} m²{% else %}–{% endif %}</dd></div>
@@ -44,9 +45,10 @@
     </dl>
     <p class="govuk-body-s">{% translate "Floor space is counted on the lowest-level records (units, or buildings with no units), so nothing is counted twice." %}</p>
     {% if my_count %}<p class="govuk-body"><a class="govuk-link" href="{% url 'properties:list' %}?surveyor=me">{% blocktranslate count n=my_count %}You manage {{ n }} property{% plural %}You manage {{ n }} properties{% endblocktranslate %}</a></p>{% endif %}
+    </div></section>
   </div>
   <div class="govuk-grid-column-one-half">
-    <h2 class="govuk-heading-m">{% translate "Register by type" %}</h2>
+    <section class="phaema-panel" data-panel="estate-types" data-area="estate"><h2 class="govuk-heading-m phaema-panel__title">{% translate "Register by type" %}</h2><div class="phaema-panel__body">
     {% if by_type %}
     <table class="govuk-table">
       <thead class="govuk-table__head"><tr class="govuk-table__row"><th scope="col" class="govuk-table__header">{% translate "Type" %}</th><th scope="col" class="govuk-table__header govuk-table__header--numeric">{% translate "Number" %}</th></tr></thead>
@@ -57,6 +59,7 @@
     {% else %}
     <p class="govuk-body">{% translate "No properties yet." %}{% if perms.properties.add_property %} <a class="govuk-link" href="{% url 'admin:properties_property_add' %}">{% translate "Add the first property" %}</a>.{% endif %}</p>
     {% endif %}
+    </div></section>
   </div>
 </div>
 
@@ -64,18 +67,19 @@
   <div class="govuk-grid-column-one-half">
     {% if service_deadlines %}<div class="govuk-inset-text govuk-!-margin-top-0"><strong>{% translate "Service charge deadlines" %}</strong>
       <ul class="govuk-list govuk-body-s govuk-!-margin-bottom-0">{% for d in service_deadlines %}<li><strong class="govuk-tag govuk-tag--{{ d.colour }}">{% if d.days < 0 %}{% translate "Overdue" %}{% else %}{{ d.due|date:"j M" }}{% endif %}</strong> <a class="govuk-link" href="{% if d.year %}{{ d.year.get_absolute_url }}{% else %}{{ d.schedule.get_absolute_url }}{% endif %}">{{ d.schedule.name }}</a>: {{ d.what }}</li>{% endfor %}</ul></div>{% endif %}
-    <h2 class="govuk-heading-m">{% translate "Cases" %}</h2>
+    <section class="phaema-panel" data-panel="estate-cases" data-area="cases"><h2 class="govuk-heading-m phaema-panel__title">{% translate "Cases" %}</h2><div class="phaema-panel__body">
     <p class="govuk-body"><a class="govuk-link" href="{% url 'cases:list' %}">{% blocktranslate count n=cases.open %}{{ n }} open case{% plural %}{{ n }} open cases{% endblocktranslate %}</a>{% if cases.past_target %} · <a class="govuk-link phaema-overdue" href="{% url 'cases:list' %}?when=past">{{ cases.past_target }} {% translate "past target" %}</a>{% endif %}{% if cases.mine %} · <a class="govuk-link" href="{% url 'cases:list' %}?owner=me">{{ cases.mine }} {% translate "yours" %}</a>{% endif %}{% if cases.tasks_overdue %} · {{ cases.tasks_overdue }} {% translate "overdue tasks" %}{% endif %}</p>
     {% if cases.to_approve %}<div class="govuk-inset-text govuk-!-margin-top-0"><a class="govuk-link" href="{% url 'cases:list' %}?approval=mine"><strong>{% blocktranslate count n=cases.to_approve %}{{ n }} case waiting for your approval{% plural %}{{ n }} cases waiting for your approval{% endblocktranslate %}</strong></a></div>{% endif %}
     {% if cases.no_supervisor %}<p class="govuk-body-s"><strong class="govuk-tag govuk-tag--yellow">{% translate "No supervisor" %}</strong> {% for p in cases.no_supervisor %}{{ p.get_full_name|default:p.username }}{% if not forloop.last %}, {% endif %}{% endfor %}. <a class="govuk-link" href="{% url 'admin:auth_user_changelist' %}">{% translate "Set supervisors" %}</a></p>{% endif %}
-    {% if maintenance %}<h2 class="govuk-heading-m">{% translate "Maintenance" %}</h2>
+    </div></section>
+    {% if maintenance %}<section class="phaema-panel" data-panel="estate-maintenance" data-area="buildings"><h2 class="govuk-heading-m phaema-panel__title">{% translate "Maintenance" %}</h2><div class="phaema-panel__body">
     <p class="govuk-body"><a class="govuk-link" href="{% url 'maintenance:jobs' %}">{% blocktranslate count n=maintenance.open %}{{ n }} open job{% plural %}{{ n }} open jobs{% endblocktranslate %}</a>{% if maintenance.emergency %} · <strong class="govuk-tag govuk-tag--red">{{ maintenance.emergency }} {% translate "emergency" %}</strong>{% endif %}{% if maintenance.past_target %} · <a class="govuk-link phaema-overdue" href="{% url 'maintenance:jobs' %}?when=past">{{ maintenance.past_target }} {% translate "past target" %}</a>{% endif %}{% if maintenance.mine %} · <a class="govuk-link" href="{% url 'maintenance:jobs' %}?owner=me">{{ maintenance.mine }} {% translate "yours" %}</a>{% endif %}
       {% if maintenance.statutory_overdue %}<br><a class="govuk-link phaema-overdue" href="{% url 'maintenance:planned' %}?when=overdue&amp;statutory=1">{% blocktranslate count n=maintenance.statutory_overdue %}{{ n }} statutory task overdue{% plural %}{{ n }} statutory tasks overdue{% endblocktranslate %}</a>{% endif %}</p>
-    {% if maintenance.to_approve %}<div class="govuk-inset-text govuk-!-margin-top-0"><a class="govuk-link" href="{% url 'maintenance:jobs' %}?approval=mine"><strong>{% blocktranslate count n=maintenance.to_approve %}{{ n }} works order waiting for your approval{% plural %}{{ n }} works orders waiting for your approval{% endblocktranslate %}</strong></a></div>{% endif %}{% endif %}
+    {% if maintenance.to_approve %}<div class="govuk-inset-text govuk-!-margin-top-0"><a class="govuk-link" href="{% url 'maintenance:jobs' %}?approval=mine"><strong>{% blocktranslate count n=maintenance.to_approve %}{{ n }} works order waiting for your approval{% plural %}{{ n }} works orders waiting for your approval{% endblocktranslate %}</strong></a></div>{% endif %}</div></section>{% endif %}
     {% if valuations.mine or valuations.audits %}<div class="govuk-inset-text govuk-!-margin-top-0"><a class="govuk-link" href="{% url 'valuations:home' %}"><strong>{% if valuations.mine %}{% blocktranslate count n=valuations.mine %}{{ n }} valuation assigned to you{% plural %}{{ n }} valuations assigned to you{% endblocktranslate %}{% endif %}{% if valuations.mine and valuations.audits %} · {% endif %}{% if valuations.audits %}{% blocktranslate count n=valuations.audits %}{{ n }} audit query to answer{% plural %}{{ n }} audit queries to answer{% endblocktranslate %}{% endif %}</strong></a></div>{% endif %}
-    {% if compliance and compliance.total %}<h2 class="govuk-heading-m">{% translate "Compliance" %}</h2>
-    <p class="govuk-body"><a class="govuk-link" href="{% url 'compliance:home' %}">{% blocktranslate with p=compliance.compliant_pct %}{{ p }}% of required certificates in date{% endblocktranslate %}</a>{% if compliance.expired or compliance.missing %} · <a class="govuk-link phaema-overdue" href="{% url 'compliance:home' %}">{% blocktranslate with e=compliance.expired m=compliance.missing %}{{ e }} expired, {{ m }} missing{% endblocktranslate %}</a>{% endif %}{% if compliance.actions_overdue %} · {{ compliance.actions_overdue }} {% translate "remedial actions overdue" %}{% endif %}</p>{% endif %}
-    <h2 class="govuk-heading-m">{% translate "Lease events" %}</h2>
+    {% if compliance and compliance.total %}<section class="phaema-panel" data-panel="estate-compliance" data-area="buildings"><h2 class="govuk-heading-m phaema-panel__title">{% translate "Compliance" %}</h2><div class="phaema-panel__body">
+    <p class="govuk-body"><a class="govuk-link" href="{% url 'compliance:home' %}">{% blocktranslate with p=compliance.compliant_pct %}{{ p }}% of required certificates in date{% endblocktranslate %}</a>{% if compliance.expired or compliance.missing %} · <a class="govuk-link phaema-overdue" href="{% url 'compliance:home' %}">{% blocktranslate with e=compliance.expired m=compliance.missing %}{{ e }} expired, {{ m }} missing{% endblocktranslate %}</a>{% endif %}{% if compliance.actions_overdue %} · {{ compliance.actions_overdue }} {% translate "remedial actions overdue" %}{% endif %}</p></div></section>{% endif %}
+    <section class="phaema-panel" data-panel="estate-events" data-area="leases"><h2 class="govuk-heading-m phaema-panel__title">{% translate "Lease events" %}</h2><div class="phaema-panel__body">
   {% include "core/_hint.html" with summary=_("What counts as overdue?") text=_("An event is overdue when its date has passed and nobody has recorded the outcome. Break dates and notice deadlines lapse on their own once passed.") page="events" anchor="status-and-colours" %}
     <table class="govuk-table">
       <thead class="govuk-table__head"><tr class="govuk-table__row">
@@ -96,9 +100,10 @@
     <p class="govuk-body-s">{% translate "Overdue: the date has passed and no outcome has been recorded. Breaks and notice deadlines simply lapse once passed, so only upcoming ones are shown." %}
       <a class="govuk-link" href="{% url 'leases:events' %}">{% translate "All events" %}</a></p>
     {% if my_events %}<p class="govuk-body"><a class="govuk-link" href="{% url 'leases:events' %}?assigned=me">{% blocktranslate count n=my_events %}You have {{ n }} open event{% plural %}You have {{ n }} open events{% endblocktranslate %}</a>{% if my_overdue %}, <a class="govuk-link phaema-overdue" href="{% url 'leases:events' %}?assigned=me&amp;window=overdue">{{ my_overdue }} {% translate "overdue" %}</a>{% endif %}</p>{% endif %}
+    </div></section>
   </div>
   <div class="govuk-grid-column-one-half">
-    <h2 class="govuk-heading-m">{% translate "Rent roll" %}</h2>
+    <section class="phaema-panel" data-panel="estate-rent" data-area="money"><h2 class="govuk-heading-m phaema-panel__title">{% translate "Rent roll" %}</h2><div class="phaema-panel__body">
     <div class="phaema-stat">
       <span class="phaema-stat__value">£{{ rent_roll.total|floatformat:0|intcomma }}</span>
       <span class="govuk-body">{% blocktranslate count n=rent_roll.agreements %}a year from {{ n }} live agreement{% plural %}a year from {{ n }} live agreements{% endblocktranslate %}{% if rent_roll.nil_rent %} ({{ rent_roll.nil_rent }} {% translate "at nil or peppercorn rent" %}){% endif %}</span>
@@ -116,10 +121,11 @@
       {% endif %}
     </dl>
     <p class="govuk-body-s">{% translate "WAULT: weighted average unexpired lease term, weighted by rent; periodic agreements are excluded." %}{% if not ledger %} {% translate "Arrears and collection rates appear here when the rent ledger is switched on." %}{% endif %}</p>
+    </div></section>
   </div>
 </div>
 
-<h2 class="govuk-heading-m">{% translate "Recent changes" %}</h2>
+<section class="phaema-panel" data-panel="estate-changes" data-area="estate"><h2 class="govuk-heading-m phaema-panel__title">{% translate "Recent changes" %}</h2><div class="phaema-panel__body">
 {% if recent_changes %}
 <table class="govuk-table">
   <thead class="govuk-table__head"><tr class="govuk-table__row">
@@ -135,4 +141,5 @@
 </table>
 <p class="govuk-body"><a class="govuk-link" href="{% url 'changes' %}">{% translate "See all changes" %}</a></p>
 {% else %}<p class="govuk-body">{% translate "Nothing changed yet." %}</p>{% endif %}
+</div></section>
 {% endblock %}

@@ -1,0 +1,7 @@
+{% load i18n %}{% if items %}
+<ul class="phaema-agenda">{% for i in items %}
+  <li><span class="phaema-agenda__when{% if late and i.when %} phaema-agenda__when--late{% endif %}">{% if i.when %}{{ i.when|date:"j M Y" }}{% if late %}<span class="govuk-visually-hidden"> ({% translate "overdue" %})</span>{% endif %}{% else %}{% translate "Now" %}{% endif %}</span>
+    <span class="phaema-agenda__what">{% if i.url %}<a class="govuk-link" href="{{ i.url }}">{{ i.title }}</a>{% else %}{{ i.title }}{% endif %}
+      <span class="govuk-body-s">{{ i.kind }}{% if i.note %}: {{ i.note }}{% endif %}</span></span></li>{% endfor %}
+</ul>
+{% else %}<p class="govuk-body">{{ empty }}</p>{% endif %}

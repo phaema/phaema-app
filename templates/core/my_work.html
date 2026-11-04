@@ -1,0 +1,107 @@
+{% extends "base.html" %}{% load i18n humanize phaema %}
+{% block title %}{% translate "My work" %}{% endblock %}
+{% block help_page %}dashboard{% endblock %}
+{% block content %}
+<h1 class="govuk-heading-xl">{% if is_me %}{% translate "Dashboard" %}{% else %}{% blocktranslate with name=person.get_full_name|default:person.username %}Work for {{ name }}{% endblocktranslate %}{% endif %}</h1>
+{% include "core/_dashboard_tabs.html" %}
+
+{% if people %}
+<form method="get" class="phaema-person"><input type="hidden" name="view" value="mine">
+  <div class="govuk-form-group"><label class="govuk-label govuk-label--s" for="person">{% translate "Show the work of" %}</label>
+    <select class="govuk-select" id="person" name="person">{% for p in people %}<option value="{{ p.pk }}"{% if p == person %} selected{% endif %}>{{ p.get_full_name|default:p.username }}{% if p == request.user %} ({% translate "you" %}){% endif %}</option>{% endfor %}</select></div>
+  <button class="govuk-button govuk-button--secondary govuk-!-margin-bottom-0" data-module="govuk-button">{% translate "Show" %}</button>
+</form>
+{% endif %}
+
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-one-quarter"><div class="phaema-stat">
+    <span class="phaema-stat__value">{{ now|length }}</span>
+    <a class="govuk-link govuk-body" href="#attention">{% translate "need attention now" %}</a></div></div>
+  <div class="govuk-grid-column-one-quarter"><div class="phaema-stat">
+    <span class="phaema-stat__value">{{ ahead|length }}</span>
+    <a class="govuk-link govuk-body" href="#coming-up">{% translate "coming up in the next 90 days" %}</a></div></div>
+  <div class="govuk-grid-column-one-quarter"><div class="phaema-stat">
+    <span class="phaema-stat__value">{{ cases|length }}</span>
+    <a class="govuk-link govuk-body" href="{% url 'cases:list' %}?owner={% if is_me %}me{% else %}{{ person.pk }}{% endif %}">{% translate "open cases" %}</a></div></div>
+  <div class="govuk-grid-column-one-quarter"><div class="phaema-stat">
+    <span class="phaema-stat__value">{{ property_count }}</span>
+    <a class="govuk-link govuk-body" href="{% url 'properties:list' %}?surveyor={% if is_me %}me{% else %}{{ person.pk }}{% endif %}">{% translate "properties managed, including their parts" %}</a></div></div>
+</div>
+
+{% if is_me %}
+{% if approvals %}<div class="govuk-inset-text govuk-!-margin-top-0"><a class="govuk-link" href="{% url 'cases:list' %}?approval=mine"><strong>{% blocktranslate count n=approvals|length %}{{ n }} case waiting for your approval{% plural %}{{ n }} cases waiting for your approval{% endblocktranslate %}</strong></a></div>{% endif %}
+{% if jobs_to_approve %}<div class="govuk-inset-text govuk-!-margin-top-0"><a class="govuk-link" href="{% url 'maintenance:jobs' %}?approval=mine"><strong>{% blocktranslate count n=jobs_to_approve %}{{ n }} works order waiting for your approval{% plural %}{{ n }} works orders waiting for your approval{% endblocktranslate %}</strong></a></div>{% endif %}
+{% if valuations.mine or valuations.audits %}<div class="govuk-inset-text govuk-!-margin-top-0"><a class="govuk-link" href="{% url 'valuations:home' %}"><strong>{% if valuations.mine %}{% blocktranslate count n=valuations.mine %}{{ n }} valuation assigned to you{% plural %}{{ n }} valuations assigned to you{% endblocktranslate %}{% endif %}{% if valuations.mine and valuations.audits %} · {% endif %}{% if valuations.audits %}{% blocktranslate count n=valuations.audits %}{{ n }} audit query to answer{% plural %}{{ n }} audit queries to answer{% endblocktranslate %}{% endif %}</strong></a></div>{% endif %}
+{% endif %}
+
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+    <section class="phaema-panel" data-panel="mine-now" data-area="cases" id="attention"><h2 class="govuk-heading-m phaema-panel__title">{% translate "Needs attention now" %}</h2><div class="phaema-panel__body">
+      {% include "core/_agenda.html" with items=now late=True empty=_("Nothing overdue.") %}
+    </div></section>
+    <section class="phaema-panel" data-panel="mine-ahead" data-area="leases" id="coming-up"><h2 class="govuk-heading-m phaema-panel__title">{% translate "Coming up in the next 90 days" %}</h2><div class="phaema-panel__body">
+      {% include "core/_agenda.html" with items=ahead empty=_("Nothing due in the next 90 days.") %}
+    </div></section>
+  </div>
+  <div class="govuk-grid-column-one-third">
+    <section class="phaema-panel" data-panel="mine-cases" data-area="cases"><h2 class="govuk-heading-m phaema-panel__title">{% translate "Open cases" %}</h2><div class="phaema-panel__body">
+      {% if cases %}<ul class="govuk-list govuk-body-s">{% for c in cases|slice:":12" %}{% with rag=c.rag %}
+        <li><a class="govuk-link" href="{{ c.get_absolute_url }}">{{ c.display_reference }}</a> {{ c.title }}<br><strong class="govuk-tag govuk-tag--{{ rag.0 }}">{{ rag.1 }}</strong> {{ c.get_stage_display }}</li>{% endwith %}{% endfor %}</ul>
+      {% if cases|length > 12 %}<p class="govuk-body-s"><a class="govuk-link" href="{% url 'cases:list' %}?owner={% if is_me %}me{% else %}{{ person.pk }}{% endif %}">{% blocktranslate count n=cases|length %}See all {{ n }} cases{% plural %}See all {{ n }} cases{% endblocktranslate %}</a></p>{% endif %}
+      {% else %}<p class="govuk-body">{% translate "No open cases." %}</p>{% endif %}
+    </div></section>
+    {% if compliance %}<section class="phaema-panel" data-panel="mine-compliance" data-area="buildings"><h2 class="govuk-heading-m phaema-panel__title">{% translate "Compliance" %}</h2><div class="phaema-panel__body">
+      {% if compliance.total %}<p class="govuk-body">{% blocktranslate with v=compliance.valid t=compliance.total %}{{ v }} of {{ t }} required certificates in date.{% endblocktranslate %}{% if compliance.problems %} {% blocktranslate count n=compliance.problems %}{{ n }} needs action.{% plural %}{{ n }} need action.{% endblocktranslate %}{% endif %}</p>
+      <p class="govuk-body-s"><a class="govuk-link" href="{% url 'compliance:home' %}?surveyor={% if is_me %}me{% else %}{{ person.pk }}{% endif %}">{% translate "See the certificates" %}</a></p>
+      {% else %}<p class="govuk-body">{% translate "No certificates are required on these properties yet." %}</p>{% endif %}
+    </div></section>{% endif %}
+    {% if arrears is not None %}<section class="phaema-panel" data-panel="mine-arrears" data-area="money"><h2 class="govuk-heading-m phaema-panel__title">{% translate "Rent arrears" %}</h2><div class="phaema-panel__body">
+      {% if arrears %}<p class="govuk-body"><strong>£{{ arrears_total|floatformat:0|intcomma }}</strong> {% translate "overdue on these properties" %}</p>
+      <ul class="govuk-list govuk-body-s">{% for a in arrears %}<li><a class="govuk-link" href="{{ a.lease.get_absolute_url }}">{{ a.lease.reference }}</a> {{ a.lease.counterparty.name }}: £{{ a.overdue|floatformat:2|intcomma }}</li>{% endfor %}</ul>
+      {% else %}<p class="govuk-body">{% translate "No rent overdue on these properties." %}</p>{% endif %}
+    </div></section>{% endif %}
+  </div>
+</div>
+
+<section class="phaema-panel" data-panel="mine-properties" data-area="estate"><h2 class="govuk-heading-m phaema-panel__title">{% translate "Properties managed" %}</h2><div class="phaema-panel__body">
+{% if properties %}
+<div class="phaema-table-scroll"><table class="govuk-table">
+  <thead class="govuk-table__head"><tr class="govuk-table__row">
+    <th scope="col" class="govuk-table__header">{% translate "Property" %}</th>
+    <th scope="col" class="govuk-table__header">{% translate "Type" %}</th>
+    <th scope="col" class="govuk-table__header">{% translate "Occupation" %}</th>
+    <th scope="col" class="govuk-table__header govuk-table__header--numeric">{% translate "Parts" %}</th>
+    <th scope="col" class="govuk-table__header govuk-table__header--numeric">{% translate "Live lettings" %}</th>
+    <th scope="col" class="govuk-table__header govuk-table__header--numeric">{% translate "Rent a year" %}</th>
+  </tr></thead>
+  <tbody class="govuk-table__body">{% for row in properties %}<tr class="govuk-table__row">
+    <td class="govuk-table__cell"><a class="govuk-link" href="{{ row.property.get_absolute_url }}">{{ row.property.reference }}</a> {{ row.property.name }}{% if row.property.site_hazards %} <strong class="govuk-tag govuk-tag--red">{% translate "Hazards noted" %}</strong>{% endif %}</td>
+    <td class="govuk-table__cell">{{ row.property.get_property_type_display }}</td>
+    <td class="govuk-table__cell">{{ row.property.get_occupation_display|default:"–" }}</td>
+    <td class="govuk-table__cell govuk-table__cell--numeric">{{ row.parts|default:"–" }}</td>
+    <td class="govuk-table__cell govuk-table__cell--numeric">{{ row.leases|default:"–" }}</td>
+    <td class="govuk-table__cell govuk-table__cell--numeric">{% if row.rent %}£{{ row.rent|floatformat:0|intcomma }}{% else %}–{% endif %}</td>
+  </tr>{% endfor %}</tbody>
+</table></div>
+{% else %}<p class="govuk-body">{% translate "No properties are managed by this person. Administrators set the managing surveyor on each property." %}</p>{% endif %}
+</div></section>
+
+{% if jobs is not None %}<section class="phaema-panel" data-panel="mine-jobs" data-area="buildings"><h2 class="govuk-heading-m phaema-panel__title">{% translate "Open repairs" %}</h2><div class="phaema-panel__body">
+{% if jobs %}
+<div class="phaema-table-scroll"><table class="govuk-table">
+  <thead class="govuk-table__head"><tr class="govuk-table__row">
+    <th scope="col" class="govuk-table__header">{% translate "Job" %}</th>
+    <th scope="col" class="govuk-table__header">{% translate "Property" %}</th>
+    <th scope="col" class="govuk-table__header">{% translate "Priority" %}</th>
+    <th scope="col" class="govuk-table__header">{% translate "Target" %}</th>
+  </tr></thead>
+  <tbody class="govuk-table__body">{% for j in jobs|slice:":15" %}<tr class="govuk-table__row">
+    <td class="govuk-table__cell"><a class="govuk-link" href="{{ j.get_absolute_url }}">{{ j.title }}</a></td>
+    <td class="govuk-table__cell">{{ j.property.reference }}</td>
+    <td class="govuk-table__cell">{{ j.get_priority_display }}</td>
+    <td class="govuk-table__cell">{{ j.target_date|date:"j M Y"|default:"–" }}{% if j.target_date and j.target_date < today %} <strong class="govuk-tag govuk-tag--red">{% translate "Past target" %}</strong>{% endif %}</td>
+  </tr>{% endfor %}</tbody>
+</table></div>
+{% else %}<p class="govuk-body">{% translate "No open repairs on these properties." %}</p>{% endif %}
+</div></section>{% endif %}
+{% endblock %}

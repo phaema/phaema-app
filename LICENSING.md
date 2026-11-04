@@ -12,6 +12,7 @@ PHAEMA uses different open licences for different parts of the project.
 ## Third-party components
 
 - **GOV.UK Frontend** (`static/vendor/govuk-frontend/`): MIT licence, © Crown copyright. Modified to remove the GDS Transport typeface, which is licensed only for GOV.UK services. PHAEMA does not use GOV.UK branding.
+- **Atkinson Hyperlegible** typeface (`static/vendor/fonts/atkinson-hyperlegible/`): SIL Open Font License 1.1, © Braille Institute of America. Used by the Clear style.
 - Python packages listed in `requirements.txt` are used under their own open-source licences.
 
 ## Licensed data and standards

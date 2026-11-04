@@ -45,10 +45,11 @@ a record depends on your [role](users-and-roles.md). Every change is recorded in
 
 ## Making PHAEMA easier to read
 
-Under the menu there are two settings that PHAEMA remembers on your computer:
+Under the menu there are three settings that PHAEMA remembers on your computer:
 
 - **Theme**: Standard, Dark, High contrast (yellow on black), or Match my device, which follows your computer's
   light or dark setting.
+- **Style**: Classic (GOV.UK), Clear (boxed sections and an easy-to-read typeface) or Compact (more on screen).
 - **Text size**: make all text smaller or larger.
 
 See [themes and accessibility](settings.md#themes-and-accessibility).
