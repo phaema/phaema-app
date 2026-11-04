@@ -201,3 +201,35 @@ def patch_leases(user, today=None):
     from apps.leases.models import Lease
 
     return Lease.objects.filter(lease_filter(user, today=today)).distinct()
+
+
+def ledger_leases(user, leases):
+    """Of these leases, the ones whose rent this person may see (all of them, their patch, or none)."""
+    found = scope(user, "ledger")
+    if found == "full":
+        return leases
+    if found == "patch":
+        return leases.filter(pk__in=patch_leases(user))
+    return leases.none()
+
+
+def can_see_rent(user, lease):
+    found = scope(user, "ledger")
+    return found == "full" or (found == "patch" and lease_in_patch(user, lease))
+
+
+# ------------------------------------------------------------------ the change log and reports
+
+APP_MODULES = {"ledger": "ledger", "servicecharges": "servicecharges", "maintenance": "maintenance",
+               "compliance": "compliance", "valuations": "valuations"}
+
+
+def hidden_apps(user):
+    """Apps whose records this person may not see in the change log or reports (needs the whole module)."""
+    return [app for app, module in APP_MODULES.items() if scope(user, module) != "full"]
+
+
+def audit_visible(user, qs):
+    """Change log entries this person may see: none about records in modules they cannot open in full."""
+    hidden = hidden_apps(user)
+    return qs.exclude(content_type__app_label__in=hidden) if hidden else qs

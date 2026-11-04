@@ -47,13 +47,17 @@ def property_ids(user):
     return ids
 
 
-def build(user, today=None):
+def build(user, today=None, viewer=None):
+    """`user` is whose work it is; `viewer` (default the same person) decides which modules appear, through their
+    access areas."""
     from apps.cases.models import Case, CaseTask
     from apps.leases.models import Lease, LeaseEvent
 
     today = today or date.today()
     horizon = today + timedelta(days=AHEAD)
-    modules = ModuleSettings.load()
+    from .access import ModulesForUser
+
+    modules = ModulesForUser(ModuleSettings.load(), viewer or user)
     props = property_ids(user)
     now, ahead = [], []
 

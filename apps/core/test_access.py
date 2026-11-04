@@ -180,3 +180,84 @@ def test_new_user_form_offers_areas(demo):
     admin = _person("form.admin", role="Administrators")
     page = _client(admin).get("/admin/auth/user/add/").content.decode()
     assert "Access areas" in page and "Finance: Rent ledger" in page
+
+
+# ------------------------------------------------------------------ part 2: the same rules across PHAEMA
+
+def test_rent_panel_on_lease_and_party_pages(demo):
+    lena = demo["demo.lchen"]
+    client = _client(lena)
+    mine, other = _leases_with_charges(lena).first(), _leases_with_charges(lena, inside=False).first()
+    assert "See the account and statement" in client.get(mine.get_absolute_url()).content.decode()
+    assert "See the account and statement" not in client.get(other.get_absolute_url()).content.decode()
+    party = client.get(other.counterparty.get_absolute_url()).content.decode()
+    assert f"/rents/accounts/{other.pk}/" not in party
+
+    no_ledger = _person("no.ledger", areas=("maintenance",))
+    assert "See the account and statement" not in _client(no_ledger).get(mine.get_absolute_url()).content.decode()
+
+
+def test_dashboards_follow_access(demo):
+    lena = demo["demo.lchen"]
+    estate = _client(lena).get("/?view=estate").content.decode()
+    assert "Rent arrears" in estate and "your patch" in estate
+    no_ledger = _person("dash.noledger", areas=("legal",))
+    assert "Rent arrears" not in _client(no_ledger).get("/?view=estate").content.decode()
+    mine = _client(no_ledger).get("/?view=mine").content.decode()
+    assert 'data-panel="mine-arrears"' not in mine
+
+
+def test_change_log_hides_modules_you_cannot_open(demo):
+    from django.contrib.contenttypes.models import ContentType
+
+    from apps.core.models import AuditEntry as A
+    from apps.ledger.models import Charge
+
+    charge = Charge.objects.first()
+    entry = A.objects.create(content_type=ContentType.objects.get_for_model(Charge), object_id=str(charge.pk),
+                             object_repr=str(charge), action="update", changes={})
+    estates_only = _person("log.estates", areas=("estates",))
+    assert _client(estates_only).get(f"/changes/{entry.pk}/").status_code == 404
+    officer = demo["demo.finance"]
+    assert _client(officer).get(f"/changes/{entry.pk}/").status_code == 200
+
+
+def test_reports_follow_access(demo):
+    lena = demo["demo.lchen"]
+    client = _client(lena)
+    assert client.get("/reports/new/?dataset=charges").status_code == 403
+    assert client.get("/reports/new/?dataset=jobs").status_code == 200
+    listing = client.get("/reports/").content.decode()
+    from apps.reports.models import Report
+
+    charges_report = Report.objects.filter(dataset="charges").first()
+    if charges_report:
+        assert f"/reports/{charges_report.pk}/" not in listing
+        assert client.get(f"/reports/{charges_report.pk}/").status_code == 403
+    assert _client(demo["demo.finance"]).get("/reports/new/?dataset=charges").status_code == 200
+
+
+def test_hand_over_only_offers_people_who_can_open_the_work(demo):
+    from apps.core import handover
+
+    no_maintenance = _person("handover.nomaint", areas=("estates",))
+    jobs = next(i for i in handover.items() if i.key == "jobs")
+    properties = next(i for i in handover.items() if i.key == "properties")
+    assert no_maintenance not in handover.receivers(jobs)
+    assert no_maintenance in handover.receivers(properties)
+
+
+def test_works_order_approver_must_open_maintenance(demo):
+    from apps.maintenance import workflow
+    from apps.maintenance.models import Job
+
+    boss = _person("boss.nomaint", areas=("estates",))
+    worker = _person("worker.maint", areas=("estates", "maintenance"))
+    StaffProfile.objects.update_or_create(user=worker, defaults={"supervisor": boss})
+    job = Job.objects.filter(status__in=Job.OPEN).first()
+    with pytest.raises(ValueError, match="cannot open maintenance"):
+        workflow.request_order_approval(job, worker)
+    boss.access_areas.add(_area("maintenance"))
+    workflow.request_order_approval(job, User.objects.get(pk=worker.pk))
+    job.refresh_from_db()
+    assert job.approver == boss

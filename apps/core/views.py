@@ -51,10 +51,16 @@ def _my_work(request):
         person = next((p for p in people if p.pk == int(wanted)), None)
         if person is None:
             raise PermissionDenied
-    context = mywork.build(person)
+    context = mywork.build(person, viewer=request.user)
     context.update({"view": "mine", "people": people if len(people) > 1 else [], "person": person,
                     "is_me": person == request.user})
     return render(request, "core/my_work.html", context)
+
+
+def _visible_changes(user):
+    from .access import audit_visible
+
+    return audit_visible(user, AuditEntry.objects.select_related("user", "content_type"))
 
 
 def _estate(request):
@@ -89,35 +95,45 @@ def _estate(request):
         "my_overdue": LeaseEvent.objects.filter(assigned_to=request.user, status__in=("open", "in_progress"),
                                                 due_date__lt=date.today()).count(),
         "rent_roll": lease_events.rent_roll(),
-        "recent_changes": _with_targets(AuditEntry.objects.select_related("user", "content_type")[:10]),
+        "recent_changes": _with_targets(_visible_changes(request.user)[:10]),
     }
     from apps.cases.views import cases_summary
 
     context["cases"] = cases_summary(request.user)
-    if ModuleSettings.load().maintenance_enabled:
+    from . import access
+
+    settings = ModuleSettings.load()
+    if access.can_use(request.user, "maintenance", settings):
         from apps.maintenance.workflow import summary
 
         context["maintenance"] = summary(request.user)
-    if ModuleSettings.load().valuation_enabled:
+    if access.can_use(request.user, "valuations", settings):
         from apps.valuations.models import AuditReview, Valuation
 
         context["valuations"] = {
             "mine": Valuation.objects.filter(valuer__user=request.user).exclude(status="accepted").count(),
             "audits": AuditReview.objects.filter(assigned_to=request.user, status="open").count()}
-    if ModuleSettings.load().compliance_enabled:
+    if access.can_use(request.user, "compliance", settings):
         from apps.compliance.workflow import summary as compliance_summary
 
         context["compliance"] = compliance_summary()
-    if ModuleSettings.load().service_charges_enabled:
+    service = access.scope(request.user, "servicecharges", settings)
+    if service:
         from apps.servicecharges.deadlines import upcoming
 
-        context["service_deadlines"] = upcoming()
-    if ModuleSettings.load().rent_ledger_enabled:
+        deadlines = upcoming()
+        if service == "patch":
+            mine = set(access.patch_leases(request.user).values_list("pk", flat=True))
+            deadlines = [d for d in deadlines if d.schedule.members.filter(lease_id__in=mine).exists()]
+        context["service_deadlines"] = deadlines
+    ledger = access.scope(request.user, "ledger", settings)
+    if ledger:
         from apps.ledger import billing
 
-        summary = billing.arrears_summary()
+        leases = access.patch_leases(request.user) if ledger == "patch" else None
+        summary = billing.arrears_summary(leases=leases)
         context["ledger"] = {"arrears": summary["total"], "arrears_count": summary["count"],
-                             "collection": billing.collection()}
+                             "collection": billing.collection(leases=leases), "patch": ledger == "patch"}
     context["view"] = "estate"
     return render(request, "core/dashboard.html", context)
 
@@ -142,7 +158,9 @@ def _with_targets(entries):
 
 @login_required
 def change_list(request):
-    qs = AuditEntry.objects.select_related("user", "content_type")
+    from .access import audit_visible
+
+    qs = audit_visible(request.user, AuditEntry.objects.select_related("user", "content_type"))
     user_id = request.GET.get("user", "")
     if user_id == "system":
         qs = qs.filter(user__isnull=True)
@@ -164,7 +182,10 @@ def change_list(request):
 
 @login_required
 def change_detail(request, pk):
-    entry = get_object_or_404(AuditEntry.objects.select_related("user", "content_type"), pk=pk)
+    from .access import audit_visible
+
+    entry = get_object_or_404(audit_visible(request.user, AuditEntry.objects.select_related("user", "content_type")),
+                              pk=pk)
     model = entry.content_type.model_class()
     rows = []
     for name, values in (entry.changes or {}).items():
