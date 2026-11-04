@@ -28,12 +28,15 @@ services:
       DEBUG: ${DEBUG:-False}
       SECURE_COOKIES: ${SECURE_COOKIES:-False}
       ALLOWED_HOSTS: ${ALLOWED_HOSTS:-localhost,127.0.0.1}
+      CSRF_TRUSTED_ORIGINS: ${CSRF_TRUSTED_ORIGINS:-}
+      BEHIND_HTTPS_PROXY: ${BEHIND_HTTPS_PROXY:-False}
       PHAEMA_ORGANISATION_NAME: ${PHAEMA_ORGANISATION_NAME:-Demonstration Council}
       PHAEMA_BASE_URL: ${PHAEMA_BASE_URL:-http://localhost:8000}
       EMAIL_HOST: ${EMAIL_HOST:-}
       EMAIL_PORT: ${EMAIL_PORT:-587}
       EMAIL_HOST_USER: ${EMAIL_HOST_USER:-}
       EMAIL_HOST_PASSWORD: ${EMAIL_HOST_PASSWORD:-}
+      EMAIL_USE_TLS: ${EMAIL_USE_TLS:-True}
       DEFAULT_FROM_EMAIL: ${DEFAULT_FROM_EMAIL:-PHAEMA <phaema@localhost>}
       MEDIA_ROOT: /app/media
     ports:
@@ -56,6 +59,7 @@ services:
       EMAIL_PORT: ${EMAIL_PORT:-587}
       EMAIL_HOST_USER: ${EMAIL_HOST_USER:-}
       EMAIL_HOST_PASSWORD: ${EMAIL_HOST_PASSWORD:-}
+      EMAIL_USE_TLS: ${EMAIL_USE_TLS:-True}
       DEFAULT_FROM_EMAIL: ${DEFAULT_FROM_EMAIL:-PHAEMA <phaema@localhost>}
       MEDIA_ROOT: /app/media
     command: ["sh", "-c", "sleep 60; while true; do python manage.py daily_tasks; sleep 3600; done"]
