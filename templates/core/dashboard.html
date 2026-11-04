@@ -16,7 +16,7 @@
     <div class="phaema-stat">
       <span class="phaema-stat__value">{{ unit_count }}</span>
       <a class="govuk-link govuk-body" href="{% url 'properties:list' %}?property_type=unit">{% translate "lettable units" %}</a>
-      <p class="govuk-body-s govuk-!-margin-bottom-0"><a class="govuk-link" href="{% url 'properties:list' %}?property_type=unit&amp;occupation=vacant">{% blocktranslate count n=vacant_unit_count %}{{ n }} vacant{% plural %}{{ n }} vacant{% endblocktranslate %}</a></p>
+      <p class="govuk-body-s govuk-!-margin-top-2 govuk-!-margin-bottom-0"><a class="govuk-link" href="{% url 'properties:list' %}?property_type=unit&amp;occupation=vacant">{% blocktranslate count n=vacant_unit_count %}{{ n }} vacant{% plural %}{{ n }} vacant{% endblocktranslate %}</a></p>
     </div>
   </div>
   <div class="govuk-grid-column-one-quarter">
@@ -127,7 +127,7 @@
 
 <section class="phaema-panel" data-panel="estate-changes" data-area="estate"><h2 class="govuk-heading-m phaema-panel__title">{% translate "Recent changes" %}</h2><div class="phaema-panel__body">
 {% if recent_changes %}
-<table class="govuk-table">
+<div class="phaema-table-scroll" tabindex="0" role="region" aria-label="{% translate "Recent changes" %}"><table class="govuk-table">
   <thead class="govuk-table__head"><tr class="govuk-table__row">
     <th scope="col" class="govuk-table__header">{% translate "When" %}</th>
     <th scope="col" class="govuk-table__header">{% translate "Who" %}</th>
@@ -138,7 +138,7 @@
   <tbody class="govuk-table__body">
   {% for e in recent_changes %}{% include "core/_change_row.html" %}{% endfor %}
   </tbody>
-</table>
+</table></div>
 <p class="govuk-body"><a class="govuk-link" href="{% url 'changes' %}">{% translate "See all changes" %}</a></p>
 {% else %}<p class="govuk-body">{% translate "Nothing changed yet." %}</p>{% endif %}
 </div></section>
