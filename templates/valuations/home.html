@@ -1,0 +1,50 @@
+{% extends "base.html" %}{% load i18n humanize phaema %}
+{% block title %}{% translate "Asset valuation" %}{% endblock %}
+{% block help_page %}valuations{% endblock %}
+{% block content %}
+<h1 class="govuk-heading-xl govuk-!-margin-bottom-4">{% translate "Asset valuation" %}</h1>
+<p class="govuk-body">{% translate "Valuations for the council's accounts at" %}
+  {% for y in years %}{% if y == year_end %}<strong>{{ y|date:"j F Y" }}</strong>{% else %}<a class="govuk-link" href="?year={{ y|date:'Y-m-d' }}">{{ y|date:"j M Y" }}</a>{% endif %}{% if not forloop.last %} · {% endif %}{% endfor %}</p>
+<p class="govuk-body-s"><a class="govuk-link" href="{% url 'valuations:schedule' %}?year={{ year_end|date:'Y-m-d' }}">{% translate "Year-end schedule for finance (Excel)" %}</a> · <a class="govuk-link" href="{% url 'valuations:data-pack' %}?year={{ year_end|date:'Y-m-d' }}">{% translate "Valuer's data pack (Excel)" %}</a>{% if is_admin %} · <a class="govuk-link" href="{% url 'admin:valuations_valuer_changelist' %}">{% translate "Valuers" %}</a> · <a class="govuk-link" href="{% url 'admin:valuations_assetclass_changelist' %}">{% translate "Asset classes" %}</a> · <a class="govuk-link" href="{% url 'admin:valuations_valuationsettings_changelist' %}">{% translate "Finance's criteria" %}</a>{% endif %}</p>
+
+{% if unclassified %}<div class="govuk-inset-text">{% blocktranslate count n=unclassified %}{{ n }} top-level property has no asset class yet.{% plural %}{{ n }} top-level properties have no asset class yet.{% endblocktranslate %}
+  {% if is_admin %}<form method="post" class="phaema-inline-fields govuk-!-margin-top-2">{% csrf_token %}<input type="hidden" name="action" value="classify">
+    <label class="govuk-label govuk-!-margin-right-2" for="from">{% translate "Classify them from their holding purpose, from" %}</label><input class="govuk-input govuk-input--width-10" type="date" id="from" name="from" value="{{ year_end|date:'Y-m-d' }}">
+    <button class="govuk-button govuk-button--secondary govuk-!-margin-bottom-0" data-module="govuk-button">{% translate "Classify" %}</button></form>{% endif %}</div>{% endif %}
+
+<h2 class="govuk-heading-m">{% blocktranslate with d=year_end|date:"j F Y" %}Programme for {{ d }}{% endblocktranslate %}</h2>
+{% if started %}<p class="govuk-body">{% for n, label in counts %}{{ n }} {{ label|lower }}{% if not forloop.last %} · {% endif %}{% endfor %}</p>{% endif %}
+{% if rows %}
+<table class="govuk-table">
+  <thead class="govuk-table__head"><tr class="govuk-table__row"><th scope="col" class="govuk-table__header">{% translate "Asset" %}</th><th scope="col" class="govuk-table__header">{% translate "Class and basis" %}</th><th scope="col" class="govuk-table__header">{% translate "Why" %}</th><th scope="col" class="govuk-table__header govuk-table__header--numeric">{% translate "Last value" %}</th><th scope="col" class="govuk-table__header">{% translate "This year" %}</th></tr></thead>
+  <tbody class="govuk-table__body">{% for d in rows %}<tr class="govuk-table__row">
+    <td class="govuk-table__cell"><a class="govuk-link" href="{% url 'valuations:property' d.property.pk %}">{{ d.property.reference }}</a><br><span class="govuk-body-s">{{ d.property.name }}</span></td>
+    <td class="govuk-table__cell govuk-body-s">{{ d.asset_class.name }}<br>{{ d.asset_class.get_basis_display }}</td>
+    <td class="govuk-table__cell govuk-body-s">{{ d.reason }}</td>
+    <td class="govuk-table__cell govuk-table__cell--numeric">{% if d.last.value is not None %}£{{ d.last.value|floatformat:0|intcomma }}{% else %}–{% endif %}</td>
+    <td class="govuk-table__cell">{% if d.current %}<a class="govuk-link" href="{{ d.current.get_absolute_url }}">{{ d.current.get_status_display }}</a>{% if d.current.valuer %}<br><span class="govuk-body-s">{{ d.current.valuer }}</span>{% endif %}{% else %}–{% endif %}</td>
+  </tr>{% endfor %}</tbody>
+</table>
+{% if is_admin and not started %}<form method="post" class="phaema-inline-fields">{% csrf_token %}<input type="hidden" name="action" value="start"><input type="hidden" name="year" value="{{ year_end|date:'Y-m-d' }}">
+  <label class="govuk-label govuk-!-margin-right-2" for="valuer">{% translate "Valuer" %}</label><select class="govuk-select" id="valuer" name="valuer"><option value="">{% translate "Choose later" %}</option>{% for v in valuers %}<option value="{{ v.pk }}">{{ v }}</option>{% endfor %}</select>
+  <button class="govuk-button govuk-!-margin-bottom-0" data-module="govuk-button">{% translate "Start the programme" %}</button></form>
+  <p class="govuk-body-s govuk-!-margin-top-2">{% translate "Opens a programme case, and an asset valuation case with an instruction for each asset listed." %}</p>{% endif %}
+{% else %}<p class="govuk-body">{% translate "Nothing is due. Classify properties and record their valuations to build the programme." %}</p>{% endif %}
+
+<h2 class="govuk-heading-m">{% translate "Prompts for an impairment or material change review" %}</h2>
+{% if prompts %}<table class="govuk-table"><tbody class="govuk-table__body">{% for p in prompts %}<tr class="govuk-table__row">
+  <td class="govuk-table__cell"><a class="govuk-link" href="{% url 'valuations:property' p.property.pk %}">{{ p.property.reference }}</a> {{ p.property.name }}<br><span class="govuk-body-s">{% blocktranslate with d=p.last.valuation_date|date:"j M Y" %}Since the valuation at {{ d }}:{% endblocktranslate %} {{ p.reasons|join:"; " }}</span></td>
+  <td class="govuk-table__cell">{% if is_admin %}<form method="post">{% csrf_token %}<input type="hidden" name="action" value="review"><input type="hidden" name="property" value="{{ p.property.pk }}"><button class="govuk-button govuk-button--secondary govuk-!-margin-bottom-0" data-module="govuk-button">{% translate "Open a review" %}</button></form>{% endif %}</td>
+</tr>{% endfor %}</tbody></table>
+{% else %}<p class="govuk-body">{% translate "None." %}</p>{% endif %}
+
+{% if rotation %}<h2 class="govuk-heading-m">{% translate "Valuer rotation" %}</h2>
+<ul class="govuk-list">{% for v, d in rotation %}<li>{{ v }}: {% blocktranslate with d=d|date:"M Y" n=settings.rotation_years %}instructed for {{ n }} years by {{ d }}; consider rotating{% endblocktranslate %}</li>{% endfor %}</ul>{% endif %}
+
+<h2 class="govuk-heading-m">{% translate "Finance's criteria" %}</h2>
+<p class="govuk-body-s">{% blocktranslate with dm=settings.de_minimis|floatformat:0|intcomma ct=settings.component_threshold|floatformat:0|intcomma cs=settings.component_share %}De minimis £{{ dm }} · components for buildings over £{{ ct }} (significant at {{ cs }}% of the building value){% endblocktranslate %}{% if settings.rotation_years %} · {% blocktranslate with n=settings.rotation_years %}rotate external valuers every {{ n }} years{% endblocktranslate %}{% endif %}</p>
+<table class="govuk-table">
+  <thead class="govuk-table__head"><tr class="govuk-table__row"><th scope="col" class="govuk-table__header">{% translate "Class" %}</th><th scope="col" class="govuk-table__header">{% translate "Basis" %}</th><th scope="col" class="govuk-table__header">{% translate "Revalued" %}</th></tr></thead>
+  <tbody class="govuk-table__body">{% for c in classes %}<tr class="govuk-table__row"><td class="govuk-table__cell">{{ c.name }}</td><td class="govuk-table__cell govuk-body-s">{{ c.get_basis_display }}{% if c.alternative_basis %}; {{ c.get_alternative_basis_display }}{% endif %}</td><td class="govuk-table__cell govuk-body-s">{% if c.cycle_years %}{% blocktranslate count n=c.cycle_years %}every year{% plural %}every {{ n }} years{% endblocktranslate %}{% if c.index %}; {{ c.index }} between{% endif %}{% else %}{% translate "Not revalued" %}{% endif %}</td></tr>{% endfor %}</tbody>
+</table>
+{% endblock %}

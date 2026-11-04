@@ -1,0 +1,35 @@
+{% extends "base.html" %}{% load i18n humanize phaema %}
+{% block title %}{% translate "Valuations" %}: {{ property.reference }}{% endblock %}
+{% block help_page %}valuations{% endblock %}
+{% block breadcrumbs %}<nav class="govuk-breadcrumbs" aria-label="Breadcrumb"><ol class="govuk-breadcrumbs__list"><li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="{% url 'valuations:home' %}">{% translate "Asset valuation" %}</a></li><li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="{{ property.get_absolute_url }}">{{ property.reference }}</a></li></ol></nav>{% endblock %}
+{% block content %}
+<span class="govuk-caption-l">{% translate "Asset valuation" %}</span>
+<h1 class="govuk-heading-l">{{ property.reference }} {{ property.name }}</h1>
+
+<h2 class="govuk-heading-m">{% translate "Asset class" %}</h2>
+{% if current %}<p class="govuk-body"><strong>{{ current.asset_class.name }}</strong>, {{ current.asset_class.get_basis_display|lower }}, {% translate "from" %} {{ current.effective_from|date:"j F Y" }}{% if current.reason %}<br><span class="govuk-body-s">{{ current.reason }}</span>{% endif %}</p>
+{% else %}<p class="govuk-body">{% translate "Not classified." %}{% if property.holding_purpose %} {% blocktranslate with p=property.get_holding_purpose_display|lower %}Holding purpose: {{ p }}.{% endblocktranslate %}{% endif %}</p>{% endif %}
+{% if classifications|length > 1 %}<details class="govuk-details" data-module="govuk-details"><summary class="govuk-details__summary"><span class="govuk-details__summary-text">{% translate "History" %}</span></summary><div class="govuk-details__text"><ul class="govuk-list govuk-body-s">{% for c in classifications %}<li>{{ c.effective_from|date:"j M Y" }}: {{ c.asset_class.name }}{% if c.reason %} ({{ c.reason }}){% endif %}</li>{% endfor %}</ul></div></details>{% endif %}
+{% if is_admin %}<details class="govuk-details" data-module="govuk-details"><summary class="govuk-details__summary"><span class="govuk-details__summary-text">{% translate "Reclassify" %}</span></summary><div class="govuk-details__text">
+<form method="post">{% csrf_token %}<input type="hidden" name="action" value="classify">
+  <div class="govuk-form-group"><label class="govuk-label govuk-label--s" for="cls">{% translate "Asset class" %}</label><select class="govuk-select" id="cls" name="asset_class">{% for c in classes %}<option value="{{ c.pk }}"{% if c.pk == current.asset_class_id %} selected{% endif %}>{{ c.name }}</option>{% endfor %}</select></div>
+  <div class="govuk-form-group"><label class="govuk-label govuk-label--s" for="from">{% translate "From" %}</label><input class="govuk-input govuk-input--width-10" type="date" id="from" name="from" value="{{ today|date:'Y-m-d' }}"></div>
+  <div class="govuk-form-group"><label class="govuk-label govuk-label--s" for="reason">{% translate "Reason" %}</label><div class="govuk-hint">{% translate "For example: declared surplus by Cabinet, 12 March 2026." %}</div><input class="govuk-input" id="reason" name="reason" maxlength="200"></div>
+  <button class="govuk-button govuk-button--secondary" data-module="govuk-button">{% translate "Save" %}</button></form></div></details>{% endif %}
+
+<h2 class="govuk-heading-m">{% translate "Valuations" %}</h2>
+{% if valuations %}<table class="govuk-table">
+  <thead class="govuk-table__head"><tr class="govuk-table__row"><th scope="col" class="govuk-table__header">{% translate "Valuation date" %}</th><th scope="col" class="govuk-table__header">{% translate "Basis" %}</th><th scope="col" class="govuk-table__header">{% translate "Valuer" %}</th><th scope="col" class="govuk-table__header govuk-table__header--numeric">{% translate "Value" %}</th><th scope="col" class="govuk-table__header">{% translate "Status" %}</th></tr></thead>
+  <tbody class="govuk-table__body">{% for v in valuations %}<tr class="govuk-table__row">
+    <td class="govuk-table__cell"><a class="govuk-link" href="{{ v.get_absolute_url }}">{{ v.valuation_date|date:"j M Y" }}</a></td>
+    <td class="govuk-table__cell govuk-body-s">{{ v.get_basis_display }}</td>
+    <td class="govuk-table__cell govuk-body-s">{{ v.valuer|default:"–" }}</td>
+    <td class="govuk-table__cell govuk-table__cell--numeric">{% if v.value is not None %}£{{ v.value|floatformat:0|intcomma }}{% else %}–{% endif %}{% if v.material_uncertainty %}<br><strong class="govuk-tag govuk-tag--orange">{% translate "Uncertainty" %}</strong>{% endif %}</td>
+    <td class="govuk-table__cell"><strong class="govuk-tag govuk-tag--{% if v.status == 'accepted' %}green{% elif v.status == 'rejected' %}red{% else %}blue{% endif %}">{{ v.get_status_display }}</strong></td>
+  </tr>{% endfor %}</tbody></table>
+{% else %}<p class="govuk-body">{% translate "None recorded." %}</p>{% endif %}
+{% if can_work and current %}<form method="post" class="phaema-inline-fields">{% csrf_token %}<input type="hidden" name="action" value="new">
+  <label class="govuk-label govuk-!-margin-right-2" for="vdate">{% translate "Record a valuation at" %}</label><input class="govuk-input govuk-input--width-10" type="date" id="vdate" name="valuation_date" value="{{ year_end|date:'Y-m-d' }}">
+  <label class="govuk-label govuk-!-margin-right-2" for="purpose">{% translate "for" %}</label><select class="govuk-select" id="purpose" name="purpose"><option>Financial statements (CIPFA Code)</option><option>Disposal</option><option>Acquisition</option><option>Insurance reinstatement</option><option>Other</option></select>
+  <button class="govuk-button govuk-button--secondary govuk-!-margin-bottom-0" data-module="govuk-button">{% translate "Start" %}</button></form>{% endif %}
+{% endblock %}

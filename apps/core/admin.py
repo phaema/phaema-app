@@ -10,7 +10,8 @@ class ModuleSettingsAdmin(admin.ModelAdmin):
     fieldsets = [
         (None, {"fields": ["organisation_name", "brand_colour"]}),
         ("Modules", {"fields": ["rent_ledger_enabled", "service_charges_enabled", "maintenance_enabled",
-                                "compliance_enabled", "golden_thread_enabled", "open_data_enabled"]}),
+                                "compliance_enabled", "golden_thread_enabled", "valuation_enabled",
+                                "open_data_enabled"]}),
         ("Rent ledger", {"fields": ["invoicing", "invoice_prefix", "next_invoice_number", "vat_rate",
                                     "rent_income_code", "service_charge_income_code", "vat_code_standard",
                                     "vat_code_exempt"]}),

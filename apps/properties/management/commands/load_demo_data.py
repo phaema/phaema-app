@@ -299,6 +299,9 @@ class Command(BaseCommand):
         from apps.compliance import demo as compliance_demo
 
         compliance_demo.load()
+        from apps.valuations import demo as valuation_demo
+
+        valuation_demo.load()
 
         modules = ModuleSettings.load()
         if not modules.organisation_name:
@@ -396,6 +399,9 @@ class Command(BaseCommand):
         from apps.compliance import demo as compliance_demo
 
         compliance_demo.remove()
+        from apps.valuations import demo as valuation_demo
+
+        valuation_demo.remove()
         case_demo.remove()
         ledger_demo.remove()
         service_demo.remove()
