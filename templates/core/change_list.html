@@ -16,7 +16,7 @@
   <button class="govuk-button govuk-!-margin-bottom-0" data-module="govuk-button">{% translate "Apply" %}</button>
 </form>
 {% include "core/_downloads.html" %}
-<table class="govuk-table">
+<div class="phaema-table-scroll" tabindex="0" role="region" aria-label="{% translate "Changes" %}"><table class="govuk-table">
   <thead class="govuk-table__head"><tr class="govuk-table__row">
     <th scope="col" class="govuk-table__header">{% translate "When" %}</th>
     <th scope="col" class="govuk-table__header">{% translate "Who" %}</th>
@@ -28,7 +28,7 @@
   {% for e in page_obj.object_list %}{% include "core/_change_row.html" %}{% empty %}
   <tr class="govuk-table__row"><td class="govuk-table__cell" colspan="5">{% translate "No changes found." %}</td></tr>{% endfor %}
   </tbody>
-</table>
+</table></div>
 {% if page_obj.has_other_pages %}
 <nav class="govuk-pagination" aria-label="{% translate 'Pagination' %}">
   {% if page_obj.has_previous %}<div class="govuk-pagination__prev"><a class="govuk-link govuk-pagination__link" href="?user={{ selected_user }}&amp;page={{ page_obj.previous_page_number }}" rel="prev"><span class="govuk-pagination__link-title">{% translate "Previous" %}</span></a></div>{% endif %}

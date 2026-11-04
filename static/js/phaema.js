@@ -93,3 +93,49 @@ if (panelsControl && panels.length > 1) {
   refresh();
   panelsControl.appendChild(all);
 }
+
+// Wide tables scroll sideways inside their own box on small screens, instead of the whole page.
+// A table that is wider than the screen becomes a labelled, focusable region so keyboard users can scroll it.
+// Without JavaScript the page itself scrolls, as before.
+function tableName(table) {
+  const caption = table.querySelector("caption");
+  if (caption && caption.textContent.trim()) return caption.textContent.trim();
+  let el = table.closest(".phaema-table-scroll") || table;
+  while (el && el !== document.body) {
+    let prev = el.previousElementSibling;
+    while (prev) {
+      if (/^H[1-4]$/.test(prev.tagName)) return prev.textContent.trim();
+      const inner = prev.querySelectorAll ? prev.querySelectorAll("h1, h2, h3, h4") : [];
+      if (inner.length) return inner[inner.length - 1].textContent.trim();
+      prev = prev.previousElementSibling;
+    }
+    el = el.parentElement;
+  }
+  return "Table";
+}
+const scrollBoxes = [];
+document.querySelectorAll("main table.govuk-table").forEach((table) => {
+  let box = table.parentElement;
+  if (!box.classList.contains("phaema-table-scroll")) {
+    box = document.createElement("div");
+    box.className = "phaema-table-scroll";
+    table.parentNode.insertBefore(box, table);
+    box.appendChild(table);
+  }
+  scrollBoxes.push(box);
+});
+function markScrollable() {
+  scrollBoxes.forEach((box) => {
+    if (box.scrollWidth > box.clientWidth + 1) {
+      box.setAttribute("tabindex", "0");
+      box.setAttribute("role", "region");
+      if (!box.hasAttribute("aria-label")) box.setAttribute("aria-label", tableName(box.querySelector("table")));
+    } else if (!box.dataset.keep) {
+      box.removeAttribute("tabindex");
+      box.removeAttribute("role");
+    }
+  });
+}
+scrollBoxes.forEach((box) => { if (box.hasAttribute("tabindex")) box.dataset.keep = "1"; });
+markScrollable();
+window.addEventListener("resize", markScrollable);

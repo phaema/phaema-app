@@ -74,7 +74,8 @@ html.phaema-text-largest { font-size: 150%; }
 .phaema-code { font-family: monospace; word-break: break-all; font-size: 1rem; }
 .phaema-link-button { background: none; border: 0; padding: 0; color: #1d70b8; text-decoration: underline; cursor: pointer; font-family: inherit; }
 .phaema-inline-fields { display: flex; flex-wrap: wrap; gap: 10px 20px; }
-.phaema-table-scroll { overflow-x: auto; }
+.phaema-table-scroll { overflow-x: auto; position: relative; } /* relative keeps visually hidden text inside the scroll area */
+.phaema-table-scroll:focus { outline: 3px solid #ffdd00; outline-offset: 0; }
 .phaema-report .govuk-table__cell, .phaema-report .govuk-table__header { font-size: 1rem; padding-right: 15px; }
 .phaema-total-row .govuk-table__cell { border-top: 2px solid var(--ph-text, #0b0c0c); }
 .phaema-compact .govuk-table__cell { padding-top: 4px; padding-bottom: 4px; }
@@ -113,3 +114,8 @@ html.phaema-text-largest { font-size: 150%; }
 
 /* Hand over work: the receiver menus shrink to fit a phone screen. */
 .phaema-handover .govuk-select { min-width: 0; width: 100%; max-width: 20em; }
+
+/* WCAG 2.2 target size: menu and display-setting links are at least 24px tall, with room between rows. */
+.phaema-header__nav > a, .phaema-header__nav > .phaema-menu > summary, .phaema-header__nav button,
+.phaema-settings-bar a { display: inline-block; min-height: 24px; line-height: 24px; }
+.phaema-header__nav { row-gap: 8px; }
