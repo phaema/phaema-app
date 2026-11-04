@@ -221,20 +221,25 @@ def accounts(today=None, leases=None):
     return [account(lease, today, lease.charges.all(), lease.receipts.all()) for lease in qs]
 
 
-def arrears_summary(today=None):
-    """Totals across all accounts: overdue debt by age, and the number of leases in arrears."""
-    rows = [a for a in accounts(today) if a.overdue > 0]
+def arrears_summary(today=None, leases=None):
+    """Totals across all accounts (or just these leases): overdue debt by age, and the number of leases in arrears."""
+    if leases is not None:
+        leases = leases.filter(Q(charges__isnull=False) | Q(receipts__isnull=False))
+    rows = [a for a in accounts(today, leases) if a.overdue > 0]
     bands = [(label, sum((dict(a.aged)[label] for a in rows), Decimal("0"))) for _l, label in AGE_BANDS]
     return {"accounts": sorted(rows, key=lambda a: -a.overdue), "total": sum((a.overdue for a in rows), Decimal("0")),
             "bands": bands, "count": len(rows)}
 
 
-def collection(today=None, days=365):
-    """Rent collected compared with rent that fell due, over the last `days` days."""
+def collection(today=None, days=365, leases=None):
+    """Rent collected compared with rent that fell due, over the last `days` days (for all leases, or just these)."""
     today = today or date.today()
     since = today - timedelta(days=days)
-    due = Charge.objects.filter(due_date__gt=since, due_date__lte=today).aggregate(t=Sum("gross"))["t"] or Decimal(0)
-    received = Receipt.objects.filter(received_on__gt=since, received_on__lte=today).aggregate(
+    charges, receipts = Charge.objects.all(), Receipt.objects.all()
+    if leases is not None:
+        charges, receipts = charges.filter(lease__in=leases), receipts.filter(lease__in=leases)
+    due = charges.filter(due_date__gt=since, due_date__lte=today).aggregate(t=Sum("gross"))["t"] or Decimal(0)
+    received = receipts.filter(received_on__gt=since, received_on__lte=today).aggregate(
         t=Sum("amount"))["t"] or Decimal(0)
     rate = (received / due * 100).quantize(Decimal("0.1")) if due > 0 else None
     return {"due": due, "received": received, "rate": rate}

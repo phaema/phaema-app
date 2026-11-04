@@ -3,6 +3,7 @@
 {% block help_page %}rent-ledger{% endblock %}
 {% block content %}
 <h1 class="govuk-heading-xl">{% translate "Rents" %}</h1>
+{% if not full %}<p class="govuk-body">{% translate "Showing rent for your patch: the properties you manage, those of everyone you supervise, and anyone you are covering for." %}</p>{% endif %}
 {% include "ledger/_nav.html" with section="home" %}
 <div class="govuk-grid-row">
   <div class="govuk-grid-column-one-third phaema-stat">
@@ -13,10 +14,10 @@
     <span class="phaema-stat__value">{% if collection.rate is not None %}{{ collection.rate }}%{% else %}–{% endif %}</span>
     {% translate "collected in the last 12 months" %}<br><span class="govuk-body-s">£{{ collection.received|floatformat:0|intcomma }} {% translate "of" %} £{{ collection.due|floatformat:0|intcomma }} {% translate "due" %}</span>
   </div>
-  <div class="govuk-grid-column-one-third phaema-stat">
+  {% if full %}<div class="govuk-grid-column-one-third phaema-stat">
     <span class="phaema-stat__value">{{ pending.n }}</span>
     <a class="govuk-link" href="{% url 'ledger:exports' %}">{% translate "charges waiting to go to finance" %}</a>{% if pending.t %}<br><span class="govuk-body-s">£{{ pending.t|floatformat:2|intcomma }}</span>{% endif %}
-  </div>
+  </div>{% endif %}
 </div>
 <div class="govuk-grid-row govuk-!-margin-top-6">
   <div class="govuk-grid-column-one-half">
@@ -25,12 +26,12 @@
       {% for label, amount in arrears.bands %}<tr class="govuk-table__row"><th scope="row" class="govuk-table__header">{{ label }} {% translate "overdue" %}</th><td class="govuk-table__cell govuk-table__cell--numeric">£{{ amount|floatformat:2|intcomma }}</td></tr>{% endfor %}
     </tbody></table>
   </div>
-  <div class="govuk-grid-column-one-half">
+  {% if full %}<div class="govuk-grid-column-one-half">
     <h2 class="govuk-heading-m">{% translate "Recent demand runs" %}</h2>
     {% if runs %}<ul class="govuk-list">{% for r in runs %}<li><a class="govuk-link" href="{{ r.get_absolute_url }}">{% translate "Due" %} {{ r.due_from|date:"j M Y" }} – {{ r.due_to|date:"j M Y" }}</a><br><span class="govuk-body-s">{{ r.n }} {% translate "charges" %}, £{{ r.t|floatformat:2|intcomma }}</span></li>{% endfor %}</ul>
     {% else %}<p class="govuk-body">{% translate "No rent has been raised yet." %}</p>{% endif %}
-    {% if is_administrator %}<a class="govuk-button govuk-!-margin-bottom-0" href="{% url 'ledger:run-new' %}" data-module="govuk-button">{% translate "Raise rent" %}</a>{% endif %}
-  </div>
+    {% if can_finance %}<a class="govuk-button govuk-!-margin-bottom-0" href="{% url 'ledger:run-new' %}" data-module="govuk-button">{% translate "Raise rent" %}</a>{% endif %}
+  </div>{% endif %}
 </div>
 <p class="govuk-body-s">{% if settings.invoicing == "phaema" %}{% translate "PHAEMA numbers the rent invoices and sends them to the finance system." %}{% else %}{% translate "PHAEMA sends charges to the finance system, which raises the invoices." %}{% endif %}</p>
 {% endblock %}

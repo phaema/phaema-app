@@ -6,7 +6,7 @@
 {% include "ledger/_nav.html" with section="exports" %}
 <p class="govuk-body">{% translate "Each export holds the charges and credit notes raised since the last one, in a fixed layout the finance system loads. A charge is only ever in one export." %} <a class="govuk-link" href="{% url 'help:page' 'rent-ledger' %}#the-finance-export">{% translate "See the columns" %}</a>.</p>
 <div class="govuk-inset-text">{% blocktranslate count n=pending.n %}{{ n }} charge is waiting to be exported{% plural %}{{ n }} charges are waiting to be exported{% endblocktranslate %}{% if pending.t %} (£{{ pending.t|floatformat:2|intcomma }}){% endif %}.</div>
-{% if is_administrator and pending.n %}<form method="post">{% csrf_token %}<button class="govuk-button" data-module="govuk-button">{% translate "Create a finance export" %}</button></form>{% endif %}
+{% if can_finance and pending.n %}<form method="post">{% csrf_token %}<button class="govuk-button" data-module="govuk-button">{% translate "Create a finance export" %}</button></form>{% endif %}
 <table class="govuk-table">
   <thead class="govuk-table__head"><tr class="govuk-table__row">
     <th scope="col" class="govuk-table__header">{% translate "Export" %}</th><th scope="col" class="govuk-table__header">{% translate "Created" %}</th>

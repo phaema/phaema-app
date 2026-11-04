@@ -32,3 +32,24 @@ class CoreConfig(AppConfig):
                     sync_staff_status(user)
 
         m2m_changed.connect(groups_changed, sender=User.groups.through, dispatch_uid="phaema_sync_staff", weak=False)
+
+        # Access areas and cover go in the change log, so it is clear who could see what, and when.
+        from . import audit
+        from .models import AccessArea, Cover
+
+        audit.register(Cover)
+        audit.register(AccessArea)
+
+        def members_changed(sender, instance, action, reverse, pk_set, **kwargs):
+            if action not in ("post_add", "post_remove") or not pk_set:
+                return
+            verb = "added" if action == "post_add" else "removed"
+            if reverse:  # user.access_areas changed: instance is the user
+                names = ", ".join(AccessArea.objects.filter(pk__in=pk_set).values_list("name", flat=True))
+                audit._record(instance, "update", {"access areas": [None, f"{verb}: {names}"]})
+            else:  # area.members changed
+                for user in User.objects.filter(pk__in=pk_set):
+                    audit._record(user, "update", {"access areas": [None, f"{verb}: {instance.name}"]})
+
+        m2m_changed.connect(members_changed, sender=AccessArea.members.through, dispatch_uid="phaema_area_members",
+                            weak=False)

@@ -44,7 +44,7 @@
           {% if modules.valuation_enabled %}<a href="{% url 'valuations:home' %}">{% translate "Asset valuation" %}</a>{% endif %}</div></details>{% endif %}
         <a href="{% url 'reports:list' %}">{% translate "Reports" %}</a>
         <a href="{% url 'changes' %}">{% translate "Changes" %}</a>
-        {% if is_administrator %}<a href="{% url 'imports:hub' %}">{% translate "Import" %}</a>{% endif %}
+        {% if is_administrator or can_finance %}<a href="{% url 'imports:hub' %}">{% translate "Import" %}</a>{% endif %}
         <a href="{% url 'help:index' %}">{% translate "Help" %}</a>
         {% if user.is_staff %}<a href="{% url 'admin:index' %}">{% translate "Manage data" %}</a>{% endif %}
         {% if is_administrator %}<a href="{% url 'hand-over' %}">{% translate "Hand over work" %}</a>{% endif %}

@@ -1,12 +1,40 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 """User administration: administrators manage users and roles, but only superusers can grant superuser powers."""
+from django import forms
 from django.contrib import admin
 from django.contrib.auth import get_user_model
 from django.contrib.auth.admin import UserAdmin
+from django.contrib.auth.forms import UserChangeForm, UserCreationForm
 from django.contrib.auth.models import Group
 
 from .roles import ROLES
-from apps.core.models import StaffProfile, supervisor_of
+from apps.core.models import AccessArea, StaffProfile, supervisor_of
+
+AREAS_HELP = ("Which optional modules this person can open. Everyone with a role can use properties, leases, events, "
+              "cases and documents. The role still decides what they can change.")
+
+
+class _AreasMixin(forms.Form):
+    access_areas = forms.ModelMultipleChoiceField(
+        queryset=AccessArea.objects.all(), required=False, widget=forms.CheckboxSelectMultiple,
+        label="Access areas", help_text=AREAS_HELP)
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["access_areas"].label_from_instance = (
+            lambda a: f"{a.name}: {', '.join(a.module_names()) or 'core only'}"
+                      f"{'; rent and service charges for their own patch' if a.own_patch_finance else ''}"
+                      f"{'; can raise rent and credit notes' if a.finance_actions else ''}")
+        if self.instance and self.instance.pk:
+            self.fields["access_areas"].initial = list(self.instance.access_areas.all())
+
+
+class PhaemaUserChangeForm(_AreasMixin, UserChangeForm):
+    pass
+
+
+class PhaemaUserCreationForm(_AreasMixin, UserCreationForm):
+    pass
 
 User = get_user_model()
 admin.site.unregister(User)
@@ -24,6 +52,8 @@ class StaffProfileInline(admin.StackedInline):
 
 @admin.register(User)
 class PhaemaUserAdmin(UserAdmin):
+    form = PhaemaUserChangeForm
+    add_form = PhaemaUserCreationForm
     inlines = [StaffProfileInline]
     search_fields = ("username", "first_name", "last_name", "email")
     list_display = ("username", "first_name", "last_name", "email", "role", "supervisor", "is_active", "last_login")
@@ -37,11 +67,12 @@ class PhaemaUserAdmin(UserAdmin):
                                  "When someone leaves or changes job, use "
                                  "<a href=\"/people/hand-over/\">Hand over work</a> to move their properties, "
                                  "cases and tasks to colleagues."}),
+        ("Access areas", {"fields": ("access_areas",)}),
         ("Dates", {"fields": ("last_login", "date_joined")}),
     )
     add_fieldsets = (
         (None, {"classes": ("wide",), "fields": ("username", "first_name", "last_name", "email",
-                                                 "password1", "password2", "groups")}),
+                                                 "password1", "password2", "groups", "access_areas")}),
     )
 
     @admin.display(description="Supervisor")
@@ -66,6 +97,13 @@ class PhaemaUserAdmin(UserAdmin):
             fields.append("is_superuser")
         return fields
 
+    def get_fieldsets(self, request, obj=None):
+        sets = super().get_fieldsets(request, obj)
+        if obj is not None and not self.has_change_permission(request, obj):
+            # Read-only view (a superuser seen by an administrator): access areas are a form field, not a model one.
+            sets = [s for s in sets if s[0] != "Access areas"]
+        return sets
+
     def has_change_permission(self, request, obj=None):
         # Only superusers may edit superuser accounts.
         if obj is not None and obj.is_superuser and not request.user.is_superuser:
@@ -74,6 +112,8 @@ class PhaemaUserAdmin(UserAdmin):
 
     def save_related(self, request, form, formsets, change):
         super().save_related(request, form, formsets, change)
+        if "access_areas" in form.cleaned_data:
+            form.instance.access_areas.set(form.cleaned_data["access_areas"])
         from .roles import sync_staff_status
 
         sync_staff_status(form.instance)

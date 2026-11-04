@@ -1,0 +1,79 @@
+{% extends "base.html" %}{% load i18n %}
+{% block title %}{% if errors %}{% translate "Error:" %} {% endif %}{% translate "Cover for absence" %}{% endblock %}
+{% block help_page %}users-and-roles{% endblock %}
+{% block content %}
+{% if errors %}
+<div class="govuk-error-summary" data-module="govuk-error-summary"><div role="alert">
+  <h2 class="govuk-error-summary__title">{% translate "There is a problem" %}</h2>
+  <div class="govuk-error-summary__body"><ul class="govuk-list govuk-error-summary__list">
+    {% for field, message in errors %}<li><a href="#{{ field }}">{{ message }}</a></li>{% endfor %}
+  </ul></div>
+</div></div>
+{% endif %}
+<h1 class="govuk-heading-xl">{% translate "Cover for absence" %}</h1>
+<p class="govuk-body">{% translate "While someone is away, the person covering sees their patch as their own: rent, arrears and service charges for the properties they manage and for everyone they supervise. Cover ends automatically after its last day, and is recorded in the change log." %}</p>
+
+<h2 class="govuk-heading-m">{% translate "Current and planned cover" %}</h2>
+{% if current %}
+<table class="govuk-table">
+  <thead class="govuk-table__head"><tr class="govuk-table__row">
+    <th scope="col" class="govuk-table__header">{% translate "Away" %}</th>
+    <th scope="col" class="govuk-table__header">{% translate "Covered by" %}</th>
+    <th scope="col" class="govuk-table__header">{% translate "Dates" %}</th>
+    <th scope="col" class="govuk-table__header">{% translate "Reason" %}</th>
+    <th scope="col" class="govuk-table__header"><span class="govuk-visually-hidden">{% translate "Action" %}</span></th>
+  </tr></thead>
+  <tbody class="govuk-table__body">
+  {% for c in current %}
+    <tr class="govuk-table__row">
+      <td class="govuk-table__cell">{{ c.covered.get_full_name|default:c.covered.username }}</td>
+      <td class="govuk-table__cell">{{ c.user.get_full_name|default:c.user.username }}</td>
+      <td class="govuk-table__cell">{{ c.starts_on|date:"j M Y" }} {% translate "to" %} {{ c.ends_on|date:"j M Y" }}{% if c.starts_on <= today %}<br><strong class="govuk-tag govuk-tag--green">{% translate "Now" %}</strong>{% endif %}</td>
+      <td class="govuk-table__cell">{{ c.reason|default:"–" }}</td>
+      <td class="govuk-table__cell">
+        <form method="post">{% csrf_token %}<input type="hidden" name="end" value="{{ c.pk }}">
+          <button class="phaema-link-button govuk-body-s">{% if c.starts_on < today %}{% translate "End now" %}{% else %}{% translate "Cancel" %}{% endif %}<span class="govuk-visually-hidden"> {% translate "cover for" %} {{ c.covered.get_full_name|default:c.covered.username }}</span></button>
+        </form>
+      </td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% else %}<p class="govuk-body">{% translate "No cover is arranged." %}</p>{% endif %}
+
+<h2 class="govuk-heading-m">{% translate "Arrange cover" %}</h2>
+<form method="post" novalidate>{% csrf_token %}
+  <div class="govuk-form-group{% if error_fields.covered %} govuk-form-group--error{% endif %}">
+    <label class="govuk-label govuk-label--s" for="covered">{% translate "Who is away" %}</label>
+    {% if error_fields.covered %}<p class="govuk-error-message"><span class="govuk-visually-hidden">{% translate "Error:" %}</span> {{ error_fields.covered }}</p>{% endif %}
+    <select class="govuk-select" id="covered" name="covered">
+      <option value="">{% translate "Choose a person" %}</option>
+      {% for p in allowed %}<option value="{{ p.pk }}"{% if form.covered == p.pk|stringformat:"s" %} selected{% endif %}>{{ p.get_full_name|default:p.username }}</option>{% endfor %}
+    </select>
+  </div>
+  <div class="govuk-form-group{% if error_fields.user %} govuk-form-group--error{% endif %}">
+    <label class="govuk-label govuk-label--s" for="user">{% translate "Who is covering" %}</label>
+    {% if error_fields.user %}<p class="govuk-error-message"><span class="govuk-visually-hidden">{% translate "Error:" %}</span> {{ error_fields.user }}</p>{% endif %}
+    <select class="govuk-select" id="user" name="user">
+      <option value="">{% translate "Choose a person" %}</option>
+      {% for p in staff %}<option value="{{ p.pk }}"{% if form.user == p.pk|stringformat:"s" %} selected{% endif %}>{{ p.get_full_name|default:p.username }}</option>{% endfor %}
+    </select>
+  </div>
+  <div class="govuk-form-group{% if error_fields.starts_on %} govuk-form-group--error{% endif %}">
+    <label class="govuk-label govuk-label--s" for="starts_on">{% translate "From" %}</label>
+    {% if error_fields.starts_on %}<p class="govuk-error-message"><span class="govuk-visually-hidden">{% translate "Error:" %}</span> {{ error_fields.starts_on }}</p>{% endif %}
+    <input class="govuk-input govuk-input--width-10" id="starts_on" name="starts_on" type="date" value="{{ form.starts_on }}">
+  </div>
+  <div class="govuk-form-group{% if error_fields.ends_on %} govuk-form-group--error{% endif %}">
+    <label class="govuk-label govuk-label--s" for="ends_on">{% translate "Until (the last day of cover)" %}</label>
+    {% if error_fields.ends_on %}<p class="govuk-error-message"><span class="govuk-visually-hidden">{% translate "Error:" %}</span> {{ error_fields.ends_on }}</p>{% endif %}
+    <input class="govuk-input govuk-input--width-10" id="ends_on" name="ends_on" type="date" value="{{ form.ends_on }}">
+  </div>
+  <div class="govuk-form-group">
+    <label class="govuk-label govuk-label--s" for="reason">{% translate "Reason (optional)" %}</label>
+    <input class="govuk-input govuk-!-width-two-thirds" id="reason" name="reason" type="text" maxlength="200" value="{{ form.reason }}">
+  </div>
+  <button class="govuk-button" data-module="govuk-button">{% translate "Arrange cover" %}</button>
+</form>
+<p class="govuk-body-s">{% translate "Cover adds what the person covering can see. To move the work itself, use Hand over work." %}</p>
+{% endblock %}

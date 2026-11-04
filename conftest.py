@@ -2,6 +2,32 @@
 import pytest
 
 
+def pytest_configure(config):
+    config.addinivalue_line("markers", "own_areas: users start with no access areas (tests of access areas)")
+
+
+@pytest.fixture(autouse=True)
+def _all_access_areas(request):
+    """Most tests are about what a role can do, not access areas, so new users join every area, as existing users
+    did when access areas arrived. Tests marked own_areas set areas themselves."""
+    if request.node.get_closest_marker("own_areas"):
+        yield
+        return
+    from django.contrib.auth import get_user_model
+    from django.db.models.signals import post_save
+
+    def join(sender, instance, created, **kwargs):
+        if created:
+            from apps.core.models import AccessArea
+
+            instance.access_areas.add(*AccessArea.objects.all())
+
+    User = get_user_model()
+    post_save.connect(join, sender=User, dispatch_uid="test_all_areas")
+    yield
+    post_save.disconnect(sender=User, dispatch_uid="test_all_areas")
+
+
 @pytest.fixture(autouse=True)
 def _test_storage(settings, tmp_path):
     """Plain static storage (no collectstatic in tests) and a throwaway folder for uploads."""

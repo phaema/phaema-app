@@ -12,11 +12,11 @@
     <th scope="col" class="govuk-table__header">{% translate "Template" %}</th>
   </tr></thead>
   <tbody class="govuk-table__body">
-    <tr class="govuk-table__row">
+    {% if is_administrator %}<tr class="govuk-table__row">
       <td class="govuk-table__cell"><a class="govuk-link" href="{% url 'properties:import' %}">{% translate "Properties" %}</a></td>
       <td class="govuk-table__cell">{% translate "Estates, sites, buildings, units and land, with addresses, UPRNs, areas and managing surveyors." %}</td>
       <td class="govuk-table__cell"><a class="govuk-link" href="{% url 'properties:import-template' %}">{% translate "Excel template" %}</a></td>
-    </tr>
+    </tr>{% endif %}
     {% for wb in workbooks %}
     <tr class="govuk-table__row">
       <td class="govuk-table__cell"><a class="govuk-link" href="{% url 'imports:upload' wb.key %}">{{ wb.title }}</a></td>
@@ -24,11 +24,11 @@
       <td class="govuk-table__cell"><a class="govuk-link" href="{% url 'imports:template' wb.key %}">{% translate "Excel template" %}</a></td>
     </tr>
     {% endfor %}
-    <tr class="govuk-table__row">
+    {% if is_administrator %}<tr class="govuk-table__row">
       <td class="govuk-table__cell"><a class="govuk-link" href="{% url 'properties:inspire-upload' %}">{% translate "Land Registry boundaries" %}</a></td>
       <td class="govuk-table__cell">{% translate "HM Land Registry INSPIRE Index Polygons (GML), to show title boundaries on the map." %}</td>
       <td class="govuk-table__cell"></td>
-    </tr>
+    </tr>{% endif %}
   </tbody>
 </table>
 <p class="govuk-body">{% translate "To take data out of PHAEMA, use the Excel and CSV links on any list, or" %} <a class="govuk-link" href="{% url 'reports:list' %}">{% translate "build a report" %}</a>.</p>
