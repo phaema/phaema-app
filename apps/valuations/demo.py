@@ -7,7 +7,8 @@ from apps.core.models import ModuleSettings
 from apps.properties.models import Property
 
 from . import programme, workflow
-from .models import AssetClass, Classification, Valuation, ValuationComponent, ValuationSettings, Valuer
+from .models import (AssetClass, Classification, IndexPoint, Valuation, ValuationComponent, ValuationSettings,
+                     Valuer)
 from .seed import FROM_PURPOSE
 
 MARK = "DEMO"
@@ -43,6 +44,10 @@ def load(today=None):
                                      email="valuations@example.org", first_instructed=date(2021, 11, 1),
                                      conflicts="None declared.")
     classes = {c.code: c for c in AssetClass.objects.all()}
+    index = classes["operational"].index or "BCIS All-in Tender Price Index"
+    for year, value in ((2021, 330), (2022, 365), (2023, 378), (2024, 386), (2025, 394), (2026, 402)):
+        IndexPoint.objects.get_or_create(index=index, on=date(year, 3, 31), defaults={
+            "value": D(value), "source": "Fictional demonstration values, not the published index"})
     props = {p.reference: p for p in Property.objects.filter(reference__startswith="DM-", parent__isnull=True)}
     for ref, prop in props.items():
         code = FROM_PURPOSE.get(prop.holding_purpose)
@@ -64,6 +69,7 @@ def load(today=None):
                       inspection="full" if year != 2026 or ref == "DM-S07" else "desktop",
                       report_date=date(year, 4, 20), method=method, value=D(value), land_value=D(land),
                       building_value=D(buildings), remaining_life=life, status="accepted",
+                      fair_value_level="3" if cls.asset_class.basis.startswith("fv") else "",
                       accepted_on=date(year, 5, 10))
         if ref == "DM-S07":
             v.occupation_then = "let"  # fully let when valued; partly vacant now: an impairment prompt
@@ -125,4 +131,5 @@ def remove():
     Case.objects.filter(case_type__code="valuation_programme", title__startswith="Valuation programme").delete()
     Classification.objects.filter(property__in=refs).delete()
     Valuer.objects.filter(rics_number__startswith=MARK).delete()
+    IndexPoint.objects.filter(source__startswith="Fictional").delete()
     Valuer.objects.filter(user__username__startswith="demo.").delete()

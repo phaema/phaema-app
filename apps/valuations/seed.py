@@ -4,7 +4,7 @@ They are defaults: finance sets the bases and cycles it uses, under Manage data.
 
 # code, name, basis, alternative basis, revalue every (years), index, depreciated, notes
 CLASSES = [
-    ("operational", "Other land and buildings (operational)", "euv", "drc", 5, "BCIS for DRC valuations", True,
+    ("operational", "Other land and buildings (operational)", "euv", "drc", 5, "BCIS All-in Tender Price Index", True,
      "Existing use value; depreciated replacement cost for specialised buildings with no market evidence."),
     ("investment", "Investment property", "fv", "", 1, "", False,
      "Fair value at each balance sheet date; not depreciated."),

@@ -1,0 +1,38 @@
+{% load i18n humanize phaema %}
+{% for w in mees_warnings %}<div class="govuk-warning-text"><span class="govuk-warning-text__icon" aria-hidden="true">!</span><strong class="govuk-warning-text__text"><span class="govuk-visually-hidden">{% translate "Warning" %}</span>{{ w }}</strong></div>{% endfor %}
+
+{% if dilaps %}
+<h2 class="govuk-heading-m">{% translate "Dilapidations" %}</h2>
+<dl class="govuk-summary-list">
+  <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Schedule" %}</dt><dd class="govuk-summary-list__value">{% if case.dilaps_schedule_value is not None %}£{{ case.dilaps_schedule_value|floatformat:2|intcomma }}{% else %}–{% endif %}{% if case.dilaps_served_on %}, {% translate "served" %} {{ case.dilaps_served_on|date:"j M Y" }}{% endif %}</dd></div>
+  <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Tenant's response" %}</dt><dd class="govuk-summary-list__value">{% if case.dilaps_response_value is not None %}£{{ case.dilaps_response_value|floatformat:2|intcomma }}{% else %}–{% endif %}{% if case.dilaps_response_on %}, {% translate "received" %} {{ case.dilaps_response_on|date:"j M Y" }}{% endif %}{% if case.dilaps_served_on and not case.dilaps_response_on %}<br><span class="govuk-body-s">{% translate "The Pre-Action Protocol expects a response within 56 days of the schedule." %}</span>{% endif %}</dd></div>
+  <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Settlement" %}</dt><dd class="govuk-summary-list__value">{% if case.dilaps_settlement_value is not None %}£{{ case.dilaps_settlement_value|floatformat:2|intcomma }}{% else %}–{% endif %}{% if case.dilaps_settled_on %}, {{ case.dilaps_settled_on|date:"j M Y" }}{% endif %}{% if dilaps.gap is not None %}<br><span class="govuk-body-s">{% blocktranslate with gap=dilaps.gap|floatformat:2|intcomma %}£{{ gap }} less than the schedule.{% endblocktranslate %}</span>{% endif %}</dd></div>
+  {% if case.dilaps_costs is not None %}<div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Council's costs" %}</dt><dd class="govuk-summary-list__value">£{{ case.dilaps_costs|floatformat:2|intcomma }}</dd></div>{% endif %}
+  {% if dilaps.lease.deposit %}<div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Rent deposit held" %}</dt><dd class="govuk-summary-list__value">£{{ dilaps.lease.deposit|floatformat:2|intcomma }}{% if dilaps.lease.deposit_held %} ({{ dilaps.lease.deposit_held }}){% endif %}</dd></div>{% endif %}
+  {% if case.dilaps_notes %}<div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Notes" %}</dt><dd class="govuk-summary-list__value">{{ case.dilaps_notes|linebreaksbr }}</dd></div>{% endif %}
+</dl>
+{% if can_work and case.is_open %}<details class="govuk-details" data-module="govuk-details"><summary class="govuk-details__summary"><span class="govuk-details__summary-text">{% translate "Record the claim" %}</span></summary><div class="govuk-details__text">
+  <form method="post">{% csrf_token %}<input type="hidden" name="action" value="save_dilaps">
+    {% for name, label, value, kind in dilaps_fields %}
+    <div class="govuk-form-group"><label class="govuk-label govuk-label--s" for="d-{{ name }}">{{ label }}</label>
+      {% if kind == "money" %}<div class="govuk-input__wrapper"><div class="govuk-input__prefix" aria-hidden="true">£</div><input class="govuk-input govuk-input--width-10" id="d-{{ name }}" name="{{ name }}" inputmode="decimal" value="{{ value|default_if_none:'' }}"></div>
+      {% elif kind == "date" %}<input class="govuk-input govuk-input--width-10" type="date" id="d-{{ name }}" name="{{ name }}" value="{{ value|date:'Y-m-d' }}">
+      {% else %}<textarea class="govuk-textarea" id="d-{{ name }}" name="{{ name }}" rows="3">{{ value }}</textarea>{% endif %}</div>
+    {% endfor %}
+    <button class="govuk-button" data-module="govuk-button">{% translate "Save" %}</button>
+  </form></div></details>{% endif %}
+{% endif %}
+
+<h2 class="govuk-heading-s">{% translate "Conflicts of interest" %}</h2>
+{% if case.conflict %}
+<p class="govuk-body-s">{% if case.conflict == "none" %}{% translate "None declared" %}{% else %}<strong class="govuk-tag govuk-tag--orange">{% translate "Declared" %}</strong> {{ case.conflict_details|linebreaksbr }}{% endif %}<br>{{ case.conflict_by|person:"–" }}, {{ case.conflict_on|date:"j M Y" }}</p>
+{% else %}<p class="govuk-body-s">{% translate "Not yet confirmed. Needed before asking for approval." %}</p>{% endif %}
+{% if can_work and case.is_open %}<details class="govuk-details" data-module="govuk-details"{% if not case.conflict and approval_gate %} open{% endif %}><summary class="govuk-details__summary"><span class="govuk-details__summary-text govuk-body-s">{% if case.conflict %}{% translate "Change" %}{% else %}{% translate "Confirm" %}{% endif %}</span></summary><div class="govuk-details__text">
+  <form method="post">{% csrf_token %}<input type="hidden" name="action" value="save_conflict">
+    <div class="govuk-form-group"><fieldset class="govuk-fieldset"><legend class="govuk-fieldset__legend govuk-fieldset__legend--s">{% translate "Do you, or anyone working on this case, have a conflict of interest?" %}</legend><div class="govuk-hint">{% translate "For example a personal or business link to the applicant, or the council acting on both sides." %}</div><div class="govuk-radios govuk-radios--small">
+      <div class="govuk-radios__item"><input class="govuk-radios__input" id="conflict-none" name="conflict" type="radio" value="none"{% if case.conflict == "none" %} checked{% endif %}><label class="govuk-label govuk-radios__label" for="conflict-none">{% translate "No conflict" %}</label></div>
+      <div class="govuk-radios__item"><input class="govuk-radios__input" id="conflict-declared" name="conflict" type="radio" value="declared"{% if case.conflict == "declared" %} checked{% endif %}><label class="govuk-label govuk-radios__label" for="conflict-declared">{% translate "Yes, I am declaring one" %}</label></div>
+    </div></fieldset></div>
+    <div class="govuk-form-group"><label class="govuk-label govuk-label--s" for="conflict-details">{% translate "The conflict, and how it is managed" %}</label><textarea class="govuk-textarea" id="conflict-details" name="conflict_details" rows="3">{{ case.conflict_details }}</textarea></div>
+    <button class="govuk-button govuk-button--secondary" data-module="govuk-button">{% translate "Save" %}</button>
+  </form></div></details>{% endif %}

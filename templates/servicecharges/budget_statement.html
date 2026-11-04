@@ -12,6 +12,7 @@
   <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Date" %}</dt><dd class="govuk-summary-list__value">{{ year.budget_issued_on|default:today|date:"j F Y" }}</dd></div>
 </dl>
 {% if year.budget_commentary %}<h2 class="govuk-heading-m">{% translate "About this budget" %}</h2><p class="govuk-body">{{ year.budget_commentary|linebreaksbr }}</p>{% endif %}
+{% if year.budget_late_reason %}<div class="govuk-inset-text">{% blocktranslate with d=year.budget_due|date:"j F Y" %}This budget was due by {{ d }}. We are sorry it is late:{% endblocktranslate %} {{ year.budget_late_reason }}</div>{% endif %}
 <h2 class="govuk-heading-m">{% translate "Budget for the whole schedule" %}</h2>
 <table class="govuk-table">
   <thead class="govuk-table__head"><tr class="govuk-table__row"><th scope="col" class="govuk-table__header">{% translate "Heading" %}</th><th scope="col" class="govuk-table__header govuk-table__header--numeric">{% translate "Budget" %}</th></tr></thead>

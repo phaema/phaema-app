@@ -50,6 +50,32 @@ someone else, or approve it themselves. You can withdraw a request you made whil
 Administrators choose which stages need approval for each case type, under **Manage data**, **Case types**. The
 supervisor for each person is set on their user record (see [Users and roles](users-and-roles.md#supervisors)).
 
+### Conflicts of interest
+
+Before asking for approval, the case owner confirms under **Conflicts of interest** on the case page either that
+there is no conflict, or declares one and says how it is managed (for example, a colleague takes over the
+negotiation). This follows the RICS professional standard on conflicts of interest. PHAEMA records who confirmed it
+and when, and the approver sees it with the recommendation.
+
+## Dilapidations
+
+Dilapidations and lease expiry cases have a **Dilapidations** section for the claim: the schedule's value and the
+date served, the tenant's response, the settlement, the council's costs and notes. Any rent deposit held under the
+lease is shown alongside. The Pre-Action Protocol for dilapidations claims expects the tenant to respond within 56
+days of the schedule, and the settlement is compared with the schedule.
+
+## Energy performance (MEES)
+
+On new lettings and renewals, when the compliance module is on, PHAEMA warns if the property's EPC (or its
+building's, if the unit has none of its own) is rated F or G, has expired, or is missing. Letting below band E
+breaks the minimum energy efficiency standard unless an exemption is registered. It is a warning, not a block.
+
+## Before you visit
+
+Case, job and valuation pages show a **Before you visit** panel: site hazards recorded on the property and the
+buildings it is part of, asbestos information, open compliance actions and whether it is a higher-risk building.
+This supports the RICS *Surveying safely* standard.
+
 ## New lettings and renewals
 
 The **New letting** and **Lease renewal** case types follow the RICS *Code for leasing business premises*. Their

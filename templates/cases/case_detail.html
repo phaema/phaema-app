@@ -33,6 +33,7 @@
 </dl>
 
 {% include "cases/_leasing.html" %}
+{% include "cases/_standards.html" %}
 {% include "cases/_approval.html" %}
 
 {% if can_work and case.is_open %}
@@ -124,6 +125,7 @@
 </div>
 
 <div class="govuk-grid-column-one-third">
+  {% include "compliance/_safety.html" %}
   <h2 class="govuk-heading-s">{% translate "Linked to" %}</h2>
   <ul class="govuk-list govuk-body-s">
     {% if case.lease %}<li>{% translate "Agreement" %}: <a class="govuk-link" href="{{ case.lease.get_absolute_url }}">{{ case.lease.reference }}</a></li>{% endif %}

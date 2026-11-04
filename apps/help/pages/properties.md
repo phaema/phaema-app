@@ -30,6 +30,7 @@ A property's page lists its parts. Lettable parts are shown in bold.
 | Occupation | Occupied by the council, let, partly let, vacant, or not applicable. |
 | Managing surveyor | The surveyor responsible. Surveyors can change the properties they manage (see [roles](users-and-roles.md)). Events on the property's leases are assigned to them. |
 | Exclude from open data | Tick for sensitive properties so they are left out of any published asset list. |
+| Site hazards | What anyone visiting should know first, such as fragile roofs, confined spaces, lone working or dogs. Shown on cases, jobs and valuations for the property and everything within it. |
 
 ## Floor areas
 

@@ -145,6 +145,10 @@ class Property(TimeStampedModel):
         _("exclude from open data"), default=False,
         help_text=_("Tick for sensitive assets (e.g. refuges) that must not appear in the Transparency Code register."),
     )
+    site_hazards = models.TextField(
+        _("hazards and safety notes for visits"), blank=True,
+        help_text=_("For anyone visiting: access, lone working, dogs, unsafe areas, confined spaces. Shown on jobs, "
+                    "cases and valuations for this property and its parts."))
     notes = models.TextField(_("notes"), blank=True)
 
     class Meta:

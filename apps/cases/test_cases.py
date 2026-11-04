@@ -253,6 +253,15 @@ def test_approval_is_needed_before_the_decision(client, make_user, mailoutbox, s
     case.refresh_from_db()
     assert case.stage == "assessing" and case.decision == ""
     _supervise(surveyor, head)
+    # A conflict of interest declaration comes first (RICS Conflicts of interest).
+    client.post(url, {"action": "request_approval", "stage": "decision", "recommendation": "Grant, with an AGA"})
+    assert not case.approvals.exists()
+    client.post(url, {"action": "save_conflict", "conflict": "declared"})  # details are needed
+    case.refresh_from_db()
+    assert case.conflict == ""
+    client.post(url, {"action": "save_conflict", "conflict": "none"})
+    case.refresh_from_db()
+    assert case.conflict == "none" and case.conflict_by == surveyor
     client.post(url, {"action": "request_approval", "stage": "decision", "recommendation": "Grant, with an AGA"})
     approval = case.approvals.get()
     assert approval.approver == head and approval.status == "pending"
@@ -360,6 +369,7 @@ def test_heads_of_terms_before_a_new_letting_decision(client, make_user, setup):
     client.post(url, data)
     case.refresh_from_db()
     assert leasing.problems(case) == [] and case.code_given_on == date(2026, 11, 2)
+    client.post(url, {"action": "save_conflict", "conflict": "none"})
     client.post(url, {"action": "request_approval", "stage": "decision", "recommendation": "Let it"})
     assert case.approvals.filter(status="pending").exists()
 

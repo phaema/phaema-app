@@ -75,6 +75,7 @@ Values come back on each valuation's page, or all at once with the **Valuer's re
 - special assumptions and key assumptions;
 - any material valuation uncertainty, with the valuer's statement;
 - the valuer, whether internal or external, their RICS number, and any conflicts of interest declared;
+- for fair value, the **fair value hierarchy level** (1, 2 or 3) the accounts must disclose;
 - the value, split between land and buildings, the remaining life of the buildings, and significant components;
 - the report itself.
 
@@ -113,4 +114,14 @@ impairment review case with the reasons in its notes.
 
 **Year-end schedule for finance** downloads every classified asset with its class, basis, valuer, valuation date,
 value, land and buildings split, remaining life, material uncertainty and components, for the fixed asset
-register and the working papers.
+register and the working papers. It also gives the fair value level and the **indexed value**.
+
+### Indexation between valuations
+
+Between full valuations, the CIPFA Code expects the council to check that carrying amounts are not materially
+different from current value. Each asset class can name an index, for example the BCIS All-in Tender Price Index
+for operational buildings. Administrators record index values under **Index values** on the Asset valuation
+page. PHAEMA then brings the last accepted value forward to the year end: the index is applied to the buildings
+only when land and buildings are split, and to the whole value otherwise. The indexed value and the factor appear
+on the property's valuation page and in the schedule. It is a guide for deciding whether a revaluation is needed,
+not a valuation.

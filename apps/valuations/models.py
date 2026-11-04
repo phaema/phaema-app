@@ -199,6 +199,12 @@ class Valuation(TimeStampedModel):
     building_value = models.DecimalField(_("buildings (£)"), max_digits=14, decimal_places=0, null=True, blank=True)
     remaining_life = models.PositiveSmallIntegerField(_("remaining life of the buildings (years)"), null=True,
                                                       blank=True)
+    fair_value_level = models.CharField(
+        _("fair value hierarchy level"), max_length=1, blank=True,
+        choices=[("1", _("Level 1: quoted prices for identical assets")),
+                 ("2", _("Level 2: other observable inputs")), ("3", _("Level 3: unobservable inputs"))],
+        help_text=_("For fair value measurements (investment, surplus and held for sale assets), as the accounts "
+                    "must disclose."))
     report = models.FileField(_("valuation report"), upload_to=_report_path, blank=True,
                               validators=[validate_case_file])
     # Snapshot of the property when valued, for impairment prompts
@@ -310,3 +316,25 @@ class AuditReview(TimeStampedModel):
     @builtins.property
     def overdue(self):
         return bool(self.status == self.Status.OPEN and self.due_on and self.due_on < date.today())
+
+
+class IndexPoint(models.Model):
+    """A published index value, used to index asset values in the years between full valuations."""
+
+    index = models.CharField(_("index"), max_length=100,
+                             help_text=_("The same name as the asset class's index, for example BCIS All-in TPI."))
+    on = models.DateField(_("date"))
+    value = models.DecimalField(_("index value"), max_digits=12, decimal_places=3)
+    source = models.CharField(_("source"), max_length=200, blank=True)
+
+    class Meta:
+        ordering = ["index", "-on"]
+        constraints = [models.UniqueConstraint(fields=["index", "on"], name="index_point_unique")]
+        verbose_name = _("index value")
+
+    def __str__(self):
+        return f"{self.index} {self.on:%d/%m/%Y}: {self.value}"
+
+    @classmethod
+    def at(cls, index, on):
+        return cls.objects.filter(index__iexact=index, on__lte=on).first()

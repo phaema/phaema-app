@@ -175,6 +175,7 @@ def property_valuations(request, pk):
         "property": prop, "can_work": work, "is_admin": is_administrator(request.user),
         "classifications": prop.classifications.select_related("asset_class"),
         "current": programme.current_class(prop), "valuations": prop.valuations.select_related("valuer"),
+        "indexed": programme.indexed(programme.last_accepted(prop), ValuationSettings.load().year_end()),
         "classes": AssetClass.objects.filter(active=True), "today": date.today(),
         "year_end": ValuationSettings.load().year_end(),
     })
@@ -185,7 +186,7 @@ def property_valuations(request, pk):
 class ValuationForm(forms.ModelForm):
     class Meta:
         model = Valuation
-        fields = ["basis", "purpose", "terms_agreed_on", "valuation_date", "report_date", "inspection_date",
+        fields = ["basis", "fair_value_level", "purpose", "terms_agreed_on", "valuation_date", "report_date", "inspection_date",
                   "inspection", "method", "value", "land_value", "building_value", "remaining_life",
                   "special_assumptions", "key_assumptions", "material_uncertainty", "uncertainty_statement",
                   "conflicts", "report", "notes"]
@@ -285,6 +286,7 @@ def valuation_detail(request, pk):
             "assigned_to", "reported_by", "closed_by")],
         "audit_reasons": AuditReview._meta.get_field("reason").choices, "outcomes": AuditReview.Outcome.choices,
         "accounts_year": workflow.accounts_year(v.valuation_date), "today": date.today(),
+        "safety": _safety(v.property),
     })
 
 
@@ -334,6 +336,12 @@ def _audit_or_assign(request, v, action):
                              _("Audit closed. The valuation is reopened for amendment."))
 
 
+def _safety(prop):
+    from apps.compliance.safety import info
+
+    return info(prop)
+
+
 def _acceptance_problems(v):
     out = []
     if v.value is None:
@@ -344,6 +352,8 @@ def _acceptance_problems(v):
         out.append(_("Record the report date."))
     if not v.terms_agreed_on:
         out.append(_("Record when the terms of engagement were agreed."))
+    if v.basis in ("fv", "fv_sale") and not v.fair_value_level:
+        out.append(_("Record the fair value hierarchy level."))
     if not v.split_ok():
         out.append(_("Land and buildings do not add up to the value."))
     if v.material_uncertainty and not v.uncertainty_statement.strip():
@@ -391,7 +401,9 @@ SCHEDULE_COLUMNS = [Col("Asset reference", "text"), Col("Name", "text"), Col("UP
                     Col("Asset class", "text"), Col("Basis", "text"), Col("Valuation date", "date"),
                     Col("Valuer", "text"), Col("Internal or external", "text"), Col("Value", "money"),
                     Col("Land", "money"), Col("Buildings", "money"), Col("Remaining life (years)", "number"),
-                    Col("Material uncertainty", "text"), Col("Status", "text"), Col("Components", "text")]
+                    Col("Material uncertainty", "text"), Col("Status", "text"), Col("Components", "text"),
+                    Col("Fair value level", "text"), Col("Indexed to year end", "money"), Col("Index factor", "number"),
+                    Col("Indexation", "text")]
 
 
 @valuation_view
@@ -407,11 +419,18 @@ def schedule(request):
                      v.remaining_life if v else None, ("Yes" if v.material_uncertainty else "No") if v else "",
                      "Accepted" if v else "Not valued",
                      "; ".join(f"{c.name} £{c.value:,.0f} ({c.useful_life or '?'} yrs)" for c in v.components.all())
-                     if v else ""])
+                     if v else "", v.fair_value_level if v else ""] + _indexed_cells(v, year_end))
     title = f"Asset valuations at {year_end:%d %B %Y}"
     fmt = request.GET.get("format", "xlsx")
     return csv_response(title, SCHEDULE_COLUMNS, data) if fmt == "csv" else \
         xlsx_response(title, SCHEDULE_COLUMNS, data, totals=True)
+
+
+def _indexed_cells(v, year_end):
+    if v is None or v.valuation_date >= year_end:
+        return [None, None, ""]
+    i = programme.indexed(v, year_end)
+    return [i.value, i.factor, i.note]
 
 
 PACK_COLUMNS = [Col("Asset reference", "text"), Col("Name", "text"), Col("Address", "text"), Col("Postcode", "text"),

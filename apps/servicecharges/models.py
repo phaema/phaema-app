@@ -116,10 +116,14 @@ class ScheduleYear(TimeStampedModel):
     budget_issued_on = models.DateField(
         _("budget issued to tenants"), null=True, blank=True,
         help_text=_("RICS expects the budget to reach tenants at least one month before the year starts."))
+    budget_late_reason = models.TextField(
+        _("why the budget was late"), blank=True,
+        help_text=_("The RICS standard expects tenants to be given a clear explanation if a deadline is missed."))
     reconciled_on = models.DateField(_("reconciled"), null=True, blank=True)
     statements_issued_on = models.DateField(
         _("year-end statements issued"), null=True, blank=True,
         help_text=_("RICS expects year-end statements within four months of the year end."))
+    statements_late_reason = models.TextField(_("why the statements were late"), blank=True)
     certified_by = models.CharField(_("certified by"), max_length=150, blank=True,
                                     help_text=_("Who certified the year-end statement."))
     certification_notes = models.TextField(_("certification and review"), blank=True,
@@ -199,6 +203,18 @@ class Expenditure(TimeStampedModel):
         help_text=_("Untick for costs the council bears itself, such as improvements or costs the leases "
                     "do not allow."))
 
+    class Category(models.TextChoices):
+        STANDARD = "", _("Service cost")
+        BSA_DEFECT = "bsa_defect", _("Building Safety Act defect (not recoverable)")
+        IMPROVEMENT = "improvement", _("Improvement or enhancement")
+
+    category = models.CharField(
+        _("category"), max_length=12, choices=Category.choices, blank=True, default="",
+        help_text=_("Remedying defects covered by the Building Safety Act 2022 is not recoverable. Improvements are "
+                    "recoverable only where tenants have agreed, with a cost-benefit case."))
+    improvement_agreed = models.BooleanField(
+        _("tenants agreed the improvement, with a cost-benefit case"), default=False)
+
     class Meta:
         ordering = ["spent_on", "pk"]
         verbose_name = _("expenditure")
@@ -210,3 +226,12 @@ class Expenditure(TimeStampedModel):
     def clean(self):
         if self.year_id and self.spent_on and not (self.year.start <= self.spent_on <= self.year.end):
             raise ValidationError({"spent_on": _("The date must fall within the service charge year.")})
+        if self.category == self.Category.IMPROVEMENT and self.recoverable and not self.improvement_agreed:
+            raise ValidationError({"recoverable": _("An improvement is recoverable only where tenants have agreed "
+                                                    "it, with a cost-benefit case. Tick that, or untick "
+                                                    "recoverable.")})
+
+    def save(self, *args, **kwargs):
+        if self.category == self.Category.BSA_DEFECT:
+            self.recoverable = False
+        super().save(*args, **kwargs)

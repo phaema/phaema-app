@@ -77,6 +77,7 @@
 {% endif %}
 </div>
 <div class="govuk-grid-column-one-third">
+  {% include "compliance/_safety.html" %}
   <h2 class="govuk-heading-s">{% translate "Letters" %}</h2>
   <p class="govuk-body-s"><a class="govuk-link" href="{% url 'documents:create' 'valuation-instruction' %}?valuation={{ v.pk }}">{% translate "Instruction and terms of engagement" %}</a>{% if audits %}<br><a class="govuk-link" href="{% url 'documents:create' 'valuation-audit-response' %}?valuation={{ v.pk }}">{% translate "Response to the auditor" %}</a>{% endif %}</p>
   {% if is_admin and v.status != "accepted" %}<h2 class="govuk-heading-s">{% translate "Accept for the accounts" %}</h2>

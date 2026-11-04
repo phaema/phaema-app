@@ -7,6 +7,7 @@
 <h1 class="govuk-heading-l">{{ property.reference }} {{ property.name }}</h1>
 <p class="govuk-body"><a class="govuk-link" href="{{ property.get_absolute_url }}">{% translate "Property record" %}</a>{% if can_raise %} · <a class="govuk-link" href="{% url 'maintenance:job-new' %}?property={{ property.pk }}">{% translate "Report a repair" %}</a>{% endif %}{% if editable %} · <a class="govuk-link" href="{% url 'admin:maintenance_component_add' %}?property={{ property.pk }}">{% translate "Add a component" %}</a>{% endif %}</p>
 
+{% include "compliance/_safety.html" %}
 <h2 class="govuk-heading-m">{% translate "Who pays for repairs" %}</h2>
 {% include "core/_hint.html" with summary=_("How is this worked out?") text=_("From the repairing terms of the current lease of this property: full repairing leases leave repairs to the tenant; on internal repairing terms the tenant looks after the inside and the council the structure and exterior, recovered through the service charge where the lease has one. Common parts of a let building go to the service charge. Check the lease itself for anything unusual.") page="maintenance" anchor="who-pays" %}
 {% if leases %}<p class="govuk-body-s">{% translate "Current agreements:" %} {% for l in leases %}<a class="govuk-link" href="{{ l.get_absolute_url }}">{{ l.reference }}</a> ({{ l.get_repairing_display|default:_("repairing terms not recorded") }}){% if not forloop.last %}, {% endif %}{% endfor %}</p>{% endif %}

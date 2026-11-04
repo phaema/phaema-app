@@ -37,7 +37,7 @@ class PropertyAdmin(AdministratorOnlyEditingMixin, RoleAdminMixin, admin.GISMode
         ("Areas", {"fields": ("gia_sqm", "nia_sqm", "gea_sqm", "site_area_ha", "area_standard", "area_source",
                               "areas_measured_on")}),
         ("Location", {"fields": ("easting", "northing", "boundary", "boundary_source")}),
-        ("Other", {"fields": ("exclude_from_publication", "notes")}),
+        ("Other", {"fields": ("site_hazards", "exclude_from_publication", "notes")}),
     )
 
     def get_readonly_fields(self, request, obj=None):

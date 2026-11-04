@@ -157,6 +157,8 @@ def build_records():
         tenure="leasehold", occupation="part_let", use_description="Small business offices", use_class="E(g)(i)",
         address_line_1="Enterprise Way", postcode="ZZ99 6EW", gia_sqm=Decimal("1450"),
         boundary=rect(150, 500, 50, 35),
+        site_hazards="Flat roof is fragile in places: roof access only with the facilities team and a permit. "
+                     "Plant room in the basement is a confined space.",
         notes="Held by the council on a 125-year ground lease; suites let on short business leases outside the 1954 Act.")
     for i, (occ, nia) in enumerate([("let", 45), ("let", 45), ("vacant", 60), ("let", 120)], start=1):
         add(f"DM-S07-U0{i}", f"Suite {i}, Enterprise Centre", "unit", "DM-S07", uprn=uprn(),
