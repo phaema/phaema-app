@@ -18,6 +18,18 @@ DEBUG = env("DEBUG")
 ALLOWED_HOSTS = env("ALLOWED_HOSTS")
 CSRF_TRUSTED_ORIGINS = env("CSRF_TRUSTED_ORIGINS")
 
+# Behind a reverse proxy that ends HTTPS (nginx, Caddy, a load balancer), Django only sees plain HTTP.
+# Set BEHIND_HTTPS_PROXY=True so it trusts the proxy's X-Forwarded-Proto header and treats requests
+# as secure. Only do this when PHAEMA can be reached through the proxy alone (docker-compose binds the
+# app to 127.0.0.1 for this reason), otherwise a client could claim HTTPS itself.
+if env.bool("BEHIND_HTTPS_PROXY", default=False):
+    SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+
+# The public address is always a trusted origin for forms, so a correct PHAEMA_BASE_URL is enough.
+_base_url = env("PHAEMA_BASE_URL", default="http://localhost:8000").rstrip("/")
+if _base_url.startswith("https://") and _base_url not in CSRF_TRUSTED_ORIGINS:
+    CSRF_TRUSTED_ORIGINS = [*CSRF_TRUSTED_ORIGINS, _base_url]
+
 INSTALLED_APPS = [
     "django.contrib.admin",
     "django.contrib.auth",
