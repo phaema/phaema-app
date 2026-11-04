@@ -713,9 +713,9 @@ def load_valuations(today):
     users = {u.username: u for u in get_user_model().objects.filter(username__in=("demo.lchen", "demo.head"))}
     if "demo.lchen" in users:
         mine = workflow.staff_valuer(users["demo.lchen"])
-        for ref in ("DM-N05", "DM-N11"):
+        for ref in ("DM-N07", "DM-N10"):  # in this year's programme; Lena Chen manages both
             v = Valuation.objects.filter(property__reference=ref, valuation_date=year_end).first()
-            if v and v.valuer_id is None:
+            if v and v.valuer_id != mine.pk:
                 workflow.assign(v, mine)
     last = Valuation.objects.filter(property__reference="DM-N09", valuation_date__lt=year_end,
                                     status="accepted").order_by("-valuation_date").first()

@@ -31,12 +31,20 @@ reassign an event on its page.
 | Green | Later. |
 | Grey | Completed or lapsed. |
 
+![The lease events list](/static/help/events.jpg)
+*Lease events, with overdue items in red.*
+
+
 Events can be **to do**, **in progress**, **completed** or **lapsed**. Use the filters on the **Events** page to
 see, for example, your overdue events or everything due in the next 3 months.
 
 ## Recording the outcome
 
 Open the event and select **Record the outcome**. What PHAEMA asks for depends on the event.
+
+![A rent review event with Record the outcome](/static/help/event.jpg)
+*A rent review ready for its outcome.*
+
 
 ### Rent reviews
 
@@ -80,3 +88,11 @@ notes, emails, tasks and documents. Recording the event's outcome closes the cas
 
 PHAEMA emails people about their upcoming and overdue events, and events can appear in Outlook. See
 [reminders and calendar](reminders.md).
+
+## Worked example
+
+Northfield Packaging's lease (DL-0502) has a tenant's break. Six months before the break date, PHAEMA shows a
+**break notice deadline** event, assigned to Lena Chen. If the tenant serves notice, she opens the event, selects
+**Record the outcome** and chooses **Break notice served**: the break date event stays open. If no notice arrives by
+the deadline, she records **No notice served** (or lets it lapse): the break date event closes too, and the lease
+runs on to its rent review and expiry.

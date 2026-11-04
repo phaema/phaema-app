@@ -9,6 +9,10 @@ summary: Loading records from spreadsheets and downloading lists to Excel or CSV
 
 Administrators can add or update many records at once from an Excel or CSV file. Select **Import** in the menu.
 
+![The import page](/static/help/import.jpg)
+*Import in the order listed.*
+
+
 Import in this order, so each record can find the records it links to:
 
 1. [Properties](#properties)

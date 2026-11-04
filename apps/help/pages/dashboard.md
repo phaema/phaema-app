@@ -13,6 +13,10 @@ PHAEMA remembers the tab you last chose.
 
 Your own work in one place:
 
+![A surveyor's My work dashboard](/static/help/my-work.jpg)
+*My work for Lena Chen in the demonstration data.*
+
+
 - **Needs attention now**: anything overdue or waiting for you, oldest first. This covers your lease events
   (and unassigned events on your properties), cases past their target, your overdue case tasks, approvals waiting
   for you, repairs past target and overdue planned maintenance on your properties, missing or expired
@@ -30,6 +34,10 @@ one-to-ones. Administrators can see anyone's.
 ## Whole estate
 
 The figures for the whole council, described below.
+
+![The Whole estate dashboard](/static/help/estate.jpg)
+*The Whole estate tab.*
+
 
 ## Cases
 

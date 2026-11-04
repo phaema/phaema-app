@@ -33,5 +33,6 @@ You can remove an entry that was added in error. An agreement always keeps at le
 ## Payments
 
 The agreement page shows the next payments due, worked out from the rent frequency (usual quarter days, other
-quarterly dates, monthly or annually in advance). This is a guide: part periods are not apportioned. Rent demands,
-receipts and arrears will come with the rent ledger.
+quarterly dates, monthly or annually in advance). This is a guide: part periods are not apportioned. When the
+[rent ledger](rent-ledger.md) is switched on, it raises the actual demands, apportions part periods and records
+receipts and arrears.
