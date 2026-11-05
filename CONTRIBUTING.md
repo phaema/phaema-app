@@ -4,7 +4,7 @@ Thank you for helping. Councils, suppliers and individuals are all welcome to co
 
 ## How to contribute
 
-1. Raise an issue describing the problem or improvement, so it can be discussed first.
+1. Raise an issue describing the problem or improvement, so it can be discussed first. For questions, or if you are not sure where to start, email stuart@phaema.co.uk.
 2. Make your change on a branch and open a pull request.
 3. Make sure the tests pass (`python -m pytest`) and add tests for new behaviour.
 4. Sign off every commit (see below).
@@ -42,4 +42,4 @@ If your council pays a supplier to develop PHAEMA features, please make it a con
 
 ## Security issues
 
-Please do not report security vulnerabilities in public issues. Email the maintainers privately (contact to be published in `SECURITY.md`).
+Please do not report security vulnerabilities in public issues. Email stuart@phaema.co.uk instead; see [SECURITY.md](SECURITY.md).

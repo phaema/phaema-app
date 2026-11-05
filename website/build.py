@@ -17,7 +17,7 @@ AS_OF = "November 2026"
 # Where things live. An empty string shows "coming soon" instead of a link.
 LINKS = {
     "test_site": "",  # e.g. https://demo.phaema.co.uk once the IONOS test site is running
-    "contact": "",  # an email address for enquiries; leave empty to point people to GitHub
+    "contact": "stuart@phaema.co.uk",  # an email address for enquiries; leave empty to point people to GitHub
     "repo": "https://github.com/phaema/phaema-app",
     "issues": "https://github.com/phaema/phaema-app/issues",
     "new_issue": "https://github.com/phaema/phaema-app/issues/new",
@@ -197,8 +197,9 @@ def test_site_cta():
 
 def contact_line():
     if LINKS["contact"]:
-        return (f'<p>Or email <strong class="copy">{esc(LINKS["contact"])}</strong>, '
-                f'or raise an issue on GitHub.</p>')
+        e = esc(LINKS["contact"])
+        return (f'<p>Email <a class="copy" href="mailto:{e}">{e}</a> with questions, ideas or offers of help, '
+                f'or raise an issue on GitHub. Councils interested in a pilot are especially welcome to get in touch.</p>')
     return '<p>The quickest way to reach the project is to raise an issue on GitHub: questions, ideas and offers of help are all welcome there.</p>'
 
 
@@ -328,7 +329,7 @@ __INVOLVE__
 </main>
 
 <footer class="foot"><div class="wrap">
-  <p>PHAEMA is free software under the GNU Affero General Public License v3.0. It is in alpha and not yet ready for live estate management. Screenshots show fictional demonstration data. Updated __ASOF__.</p>
+  <p>PHAEMA is free software under the GNU Affero General Public License v3.0. It is in alpha and not yet ready for live estate management. Screenshots show fictional demonstration data. Updated __ASOF__. Contact: __EMAIL__.</p>
 </div></footer>
 
 <script>
@@ -482,6 +483,7 @@ def build(artifact=False):
             .replace("__MAC_LINK__", link("mac_setup", "Mac setup guide"))
             .replace("__NEW_ISSUE__", esc(LINKS["new_issue"]))
             .replace("__CONTRIBUTING__", esc(LINKS["contributing"]))
+            .replace("__EMAIL__", esc(LINKS["contact"]) or "via GitHub")
             .replace("__ASOF__", AS_OF))
     if artifact:
         return STYLE + body
