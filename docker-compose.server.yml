@@ -1,0 +1,23 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# Adds a public web server with automatic HTTPS (Caddy and Let's Encrypt) for running PHAEMA on an internet
+# server. deploy/install-server.sh switches it on by setting COMPOSE_FILE in .env; on a laptop it is not used.
+services:
+  caddy:
+    image: caddy:2.8
+    depends_on:
+      - web
+    environment:
+      PHAEMA_DOMAIN: ${PHAEMA_DOMAIN:?Set PHAEMA_DOMAIN in .env}
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    volumes:
+      - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    restart: unless-stopped
+
+volumes:
+  caddy-data:
+  caddy-config:

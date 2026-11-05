@@ -1,0 +1,15 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# Caddy gets and renews a free Let's Encrypt certificate for the domain by itself.
+{$PHAEMA_DOMAIN} {
+	encode zstd gzip
+	request_body {
+		max_size 60MB
+	}
+	header {
+		Strict-Transport-Security "max-age=31536000"
+		X-Content-Type-Options "nosniff"
+		Referrer-Policy "same-origin"
+		-Server
+	}
+	reverse_proxy web:8000
+}
