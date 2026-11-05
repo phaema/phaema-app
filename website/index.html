@@ -50,7 +50,7 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 .nav a { color: var(--paper); font-weight: 700; font-size: 1rem; }
 .nav a[aria-current="page"] { text-decoration: none; border-bottom: 3px solid var(--edge); }
 
-.view { padding-block: 48px 64px; }
+.view { padding-block: 48px 64px; scroll-margin-top: 120px; }
 .hero { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); gap: 48px; align-items: center; }
 .hero__text { min-width: 0; }
 .kicker { color: var(--muted); font-size: 1rem; margin-bottom: .75em; }
@@ -128,7 +128,8 @@ pre { font: .95rem/1.5 var(--mono); background: var(--sheet); border: 1px solid 
   <nav aria-label="Sections"><ul class="nav">
     <li><a href="#about">About</a></li>
     <li><a href="#capabilities">What it does</a></li>
-    <li><a href="#open-source">Why open source</a></li>
+    <li><a href="#open-source">Why Open Source</a></li>
+    <li><a href="tour.html">Tour</a></li>
     <li><a href="#roadmap">Roadmap</a></li>
     <li><a href="#resources">Resources</a></li>
     <li><a href="#take-part">Take part</a></li>
@@ -139,11 +140,12 @@ pre { font: .95rem/1.5 var(--mono); background: var(--sheet); border: 1px solid 
 <section class="view" id="about" aria-labelledby="h-about">
   <div class="wrap hero">
     <div class="hero__text">
-      <p class="kicker">Open-source property and estate management for councils in England and Wales</p>
+      <p class="kicker">Open-source Property Holdings and Estate Management Application for councils in England and Wales</p>
       <h1 id="h-about">Estate management software, built in the open.</h1>
       <p class="lede">PHAEMA (Property Holding and Estate Management Application) covers a council's property register, leases, casework, projects, rents, service charges, repairs, compliance and asset valuations in one system. It is free, open source and being developed in public. Councils, surveyors and developers are invited to try it and help shape it.</p>
       <div class="cta">
         <a class="button" href="https://demo.phaema.co.uk">Try the test site</a>
+        <a class="button button--quiet" href="tour.html">Watch the tour</a>
         <a class="button button--quiet" href="#take-part">Take part</a>
       </div>
       <p class="status-line"><span class="pill">Alpha</span> In testing, November 2026. Not yet ready for live estate management.</p>
@@ -162,7 +164,7 @@ pre { font: .95rem/1.5 var(--mono); background: var(--sheet); border: 1px solid 
 
   <div class="wrap three">
     <div><h3>Free to use</h3><p>No licence fee, ever. Councils can run it themselves or have any supplier host it.</p></div>
-    <div><h3>Built by surveyors</h3><p>Heads of terms to the RICS leasing code, 1954 Act notice dates, service charges to the RICS 2nd edition, Red Book valuation records and Golden Thread building information.</p></div>
+    <div><h3>Built by surveyors</h3><p>Covering all day-to-day aspects of estate and asset management in the public sector, and ensuring compliance: heads of terms to the RICS leasing code, 1954 Act notice dates, service charges to the RICS 2nd edition, Red Book valuation records and Golden Thread building information.</p></div>
     <div><h3>Accessible by design</h3><p>Built on the GOV.UK Design System and aiming for WCAG 2.2 AA, with dark, high-contrast and large-text settings.</p></div>
   </div>
 </section>
@@ -176,7 +178,7 @@ pre { font: .95rem/1.5 var(--mono); background: var(--sheet); border: 1px solid 
       <article><h3>Leases and key dates</h3><p>Leases, licences and wayleaves, let out or held. Rent reviews, breaks, expiries and notice deadlines become events with email reminders and a calendar feed.</p></article>
       <article><h3>Cases and approvals</h3><p>Consents, renewals, dilapidations and enquiries with stages, tasks and statutory target dates. Supervisors approve decisions, with conflicts of interest declared first.</p></article>
       <article><h3>Projects</h3><p>Developments, acquisitions, disposals and programmes taken through four gateways, with milestones, a budget by financial year, risks and a checklist of the register changes completion needs.</p></article>
-      <article><h3>Document library</h3><p>Thirty letter and notice templates, from consent letters to section 25 notice particulars, filled in from the case and downloaded to Word.</p></article>
+      <article><h3>Document library</h3><p>Thirty letter and notice templates, from consent letters to section 25 notice particulars, filled in from the case and downloaded to Word. Councils can adapt them and add their own.</p></article>
       <article><h3>Rents and arrears</h3><p>Demand runs, VAT, credit notes, receipts imported from finance, aged arrears and an export file for the finance system.</p></article>
       <article><h3>Service charges</h3><p>Budgets, apportionment by floor area with caps, actual costs and year-end reconciliation on the RICS service charge timetable.</p></article>
       <article><h3>Maintenance</h3><p>Repairs with target dates, who pays under the lease, works orders and their approval, recharges, planned maintenance and component lifecycles.</p></article>
@@ -221,7 +223,7 @@ pre { font: .95rem/1.5 var(--mono); background: var(--sheet); border: 1px solid 
     <p class="lede">What is built, what is being tested now, and what comes next. Councils taking part help decide the order.</p>
     <div class="stages">
       <section class="stage stage--done" aria-label="Built"><h3><span class="stage__mark" aria-hidden="true"></span>Built</h3><ul><li>Property register, map and Land Registry boundaries</li><li>Leases, key dates, reminders and calendar feed</li><li>Cases, approvals and the document library</li><li>Rent ledger and service charges</li><li>Maintenance, compliance and the Golden Thread</li><li>Asset valuation</li><li>Projects with gateways, budgets, risks and completion</li><li>Access areas, cover and hand-over of work</li><li>Reports, imports, open data and API</li><li>Help, user and technical manuals, and e-learning for five roles</li><li>One-step server installation with HTTPS and nightly backups</li><li>A public test site, reset every 48 hours</li></ul></section>
-      <section class="stage stage--now" aria-label="Now: testing"><h3><span class="stage__mark" aria-hidden="true"></span>Now: testing</h3><ul><li>A 12-day test programme run by council staff</li><li>Feedback from testers on the public test site</li><li>Fixing what testing finds</li></ul></section>
+      <section class="stage stage--now" aria-label="Now: testing"><h3><span class="stage__mark" aria-hidden="true"></span>Now: testing</h3><ul><li>A major test programme run by council staff</li><li>Feedback from testers on the public test site</li><li>Fixing what testing finds</li></ul></section>
       <section class="stage stage--next" aria-label="Next: connectors"><h3><span class="stage__mark" aria-hidden="true"></span>Next: connectors</h3><ul><li>Single sign-on with the council&#x27;s own accounts</li><li>Ordnance Survey address, UPRN and EPC lookups</li><li>Map layers for QGIS, ArcGIS and other GIS</li><li>Texts and letters to tenants through GOV.UK Notify</li><li>Notifications in Teams, Matrix or Nextcloud Talk</li><li>Documents kept in SharePoint or Nextcloud</li></ul></section>
       <section class="stage stage--later" aria-label="Later"><h3><span class="stage__mark" aria-hidden="true"></span>Later</h3><ul><li>Tenant and contractor portals</li><li>Condition surveys and lifecycle planning</li><li>Full Golden Thread information management</li><li>Live finance, legal and CRM connectors</li><li>Welsh translation</li></ul></section>
     </div>
@@ -235,6 +237,7 @@ pre { font: .95rem/1.5 var(--mono); background: var(--sheet); border: 1px solid 
     <h2 id="h-resources">Resources</h2>
     <p class="lede">Everything you need to try PHAEMA, learn it, test it or run it.</p>
     <ul class="resources">
+      <li><h3>Tour</h3><p>A self-running, clickable tour of every part of PHAEMA, for a first look or a screen at an event.</p><p class="go"><a href="tour.html">Watch the tour</a></p></li>
       <li><h3>Test site</h3><p>Try PHAEMA with fictional data: a council estate, leases, cases and projects to explore. Request a sign-in on the site; the data is reset every 48 hours.</p><p class="go"><a href="https://demo.phaema.co.uk">Open the test site</a></p></li>
       <li><h3>Training</h3><p>Interactive courses for surveyors, finance, maintenance, administrators and viewers, using the real screens.</p><p class="go"><a href="https://claude.ai/artifact/7wkjDTdrtqLZwuf3zo79VE">Start the training</a></p></li>
       <li><h3>User manual</h3><p>How to do each task in PHAEMA, with worked examples from the demonstration data.</p><p class="go"><a href="https://claude.ai/artifact/CTsfQjqNtVH4qBZjg5QjRo">Read the user manual</a></p></li>
@@ -296,6 +299,7 @@ cd phaema-app
   }
   window.addEventListener('hashchange', function () { show(); window.scrollTo(0, 0); });
   show();
+  window.scrollTo(0, 0);
 })();
 </script>
 

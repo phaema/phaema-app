@@ -1,0 +1,411 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>PHAEMA Tour</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="A self-running, clickable tour of PHAEMA, the open-source estate management system for councils.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&display=swap">
+<style>
+/* Layout: a self-running "plan room" show. A dark drawing-board stage; each scene pairs a short caption with a
+   screenshot edged red, like a Land Registry title plan. One deliberate dark look, used for kiosks and screens. */
+:root {
+  --board: #0d1b2c; --board-2: #13263b; --sheet: #f6f8f7; --ink: #eef3f1; --muted: #b3c2cc; --line: #2b4058;
+  --edge: #ff5b4f; --survey: #7fc78f; --link: #9fd0f5; --focus: #ffdd00;
+  --display: "Bricolage Grotesque", "Arial Narrow", Arial, sans-serif;
+  --body: "Atkinson Hyperlegible", Verdana, Arial, sans-serif;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body { margin: 0; background: var(--board); color: var(--ink); font: 1.0625rem/1.55 var(--body);
+  background-image: linear-gradient(rgba(255,255,255,.045) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.045) 1px, transparent 1px);
+  background-size: 48px 48px; }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--board); }
+.wrap { max-width: 1280px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+a { color: var(--link); text-underline-offset: .15em; }
+button { font: inherit; }
+:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+#stage:focus, #stage:focus-visible { outline: none; }
+h1, h2, h3 { font-family: var(--display); line-height: 1.08; margin: 0 0 .45em; text-wrap: balance; }
+p { margin: 0 0 .9em; max-width: 60ch; }
+
+.app { min-height: 100%; display: grid; grid-template-rows: auto 1fr auto; }
+
+/* Top: brand and chapter progress */
+.top { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: rgba(13,27,44,.94); border-bottom: 1px solid var(--line); }
+.top__inner { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 24px; padding-block: 12px; }
+.brand { color: var(--ink); text-decoration: none; font: 800 1.3rem var(--display); letter-spacing: .14em; display: inline-flex; gap: 10px; align-items: center; }
+.brand__mark { width: 18px; height: 14px; border: 2.5px solid var(--edge); }
+.chapters { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 4px 6px; flex: 1; justify-content: flex-end; }
+.chapters button { background: none; border: 0; color: var(--muted); padding: 6px 10px; border-radius: 999px; cursor: pointer; font-size: .95rem; font-weight: 700; }
+.chapters button:hover { color: var(--ink); background: var(--board-2); }
+.chapters button[aria-current="true"] { color: var(--board); background: var(--ink); }
+.track { display: flex; gap: 3px; height: 4px; }
+.track span { flex: 1; background: var(--line); position: relative; overflow: hidden; }
+.track span.done { background: var(--muted); }
+.track span i { position: absolute; inset: 0; background: var(--edge); transform-origin: left; transform: scaleX(0); }
+
+/* Stage */
+.stage { padding-block: 32px 24px; display: grid; align-items: center; }
+.scene { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: 48px; align-items: center; }
+.scene--text { grid-template-columns: minmax(0, 1fr); max-width: 980px; }
+.scene__text { min-width: 0; }
+.eyebrow { color: var(--edge); font-weight: 700; letter-spacing: .12em; text-transform: uppercase; font-size: .85rem; margin-bottom: .8em; }
+.scene h1 { font-size: clamp(2.4rem, 5.6vw, 4.6rem); letter-spacing: -.02em; font-weight: 800; }
+.scene h2 { font-size: clamp(1.9rem, 3.8vw, 3.1rem); letter-spacing: -.01em; font-weight: 800; }
+.scene .lede { font-size: 1.25rem; color: var(--ink); }
+.scene p, .scene li { color: var(--muted); }
+.scene ul { margin: 0 0 1em; padding-left: 1.1em; max-width: 60ch; }
+.scene li { margin-bottom: .35em; }
+.scene strong { color: var(--ink); }
+.related { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 1.2em; align-items: center; }
+.related span { color: var(--muted); font-size: .95rem; margin-right: 4px; }
+.chip { display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px; border-radius: 999px; border: 1.5px solid var(--line); background: var(--board-2); color: var(--ink); text-decoration: none; font-weight: 700; font-size: .95rem; }
+.chip:hover { border-color: var(--link); }
+.chip::after { content: "→"; color: var(--edge); }
+
+/* The title plan: screenshot edged red */
+.plan { margin: 0; min-width: 0; }
+.plan__sheet { background: var(--sheet); padding: 12px; position: relative; box-shadow: 0 28px 60px rgba(0,0,0,.45); }
+.plan__sheet::after { content: ""; position: absolute; inset: 6px; border: 3px solid var(--edge); pointer-events: none; }
+.plan img { display: block; width: 100%; height: auto; aspect-ratio: 16 / 10; object-fit: cover; object-position: top left; }
+.plan figcaption { color: var(--muted); font-size: .92rem; margin-top: 10px; display: flex; gap: 10px; align-items: center; }
+.plan figcaption::before { content: ""; width: 24px; height: 12px; border: 3px solid var(--edge); flex: none; }
+
+/* The hub: clickable modules */
+.hub { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin-top: 8px; }
+.tile { display: grid; gap: 4px; padding: 16px; background: var(--board-2); border: 1.5px solid var(--line); color: var(--ink); text-decoration: none; min-width: 0; }
+.tile:hover { border-color: var(--edge); }
+.tile b { font: 600 1.15rem var(--display); }
+.tile small { color: var(--muted); font-size: .9rem; line-height: 1.35; }
+.tile--opt { border-style: dashed; }
+.key { color: var(--muted); font-size: .9rem; margin-top: 12px; }
+.key i { display: inline-block; width: 18px; height: 10px; border: 1.5px dashed var(--muted); margin-right: 6px; vertical-align: middle; }
+
+.big { display: flex; flex-wrap: wrap; gap: 28px 48px; margin: 8px 0 24px; }
+.big div { display: grid; }
+.big strong { font: 800 clamp(2.4rem, 5vw, 3.6rem)/1 var(--display); color: var(--edge); }
+.big span { color: var(--muted); font-size: .98rem; }
+.cols { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; margin-top: 8px; }
+.cols > div { border-top: 2px solid var(--line); padding-top: 12px; min-width: 0; }
+.cols h3 { font-size: 1.2rem; font-weight: 600; }
+.cols p, .cols li { font-size: .98rem; }
+.cta { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 1.2em; }
+.button { display: inline-block; padding: 12px 20px; font-weight: 700; text-decoration: none; border-radius: 3px; background: var(--edge); color: var(--board); }
+.button--quiet { background: none; color: var(--ink); box-shadow: inset 0 0 0 2px var(--ink); }
+.copy { user-select: all; color: var(--ink); font-weight: 700; }
+
+/* Controls */
+.controls { border-top: 1px solid var(--line); background: rgba(13,27,44,.94); padding-bottom: env(safe-area-inset-bottom, 0px); }
+.controls__inner { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px; padding-block: 12px; }
+.ctl { background: var(--board-2); color: var(--ink); border: 1.5px solid var(--line); border-radius: 999px; padding: 8px 16px; cursor: pointer; font-weight: 700; display: inline-flex; gap: 8px; align-items: center; }
+.ctl:hover { border-color: var(--ink); }
+.ctl--play[aria-pressed="false"] { background: var(--edge); color: var(--board); border-color: var(--edge); }
+.where { color: var(--muted); font-size: .95rem; flex: 1; min-width: 12ch; }
+.hint { color: var(--muted); font-size: .85rem; }
+
+@media (prefers-reduced-motion: no-preference) {
+  .scene.enter .scene__text { animation: up .55s cubic-bezier(.2,.7,.2,1) both; }
+  .scene.enter .plan { animation: settle .7s cubic-bezier(.2,.7,.2,1) both; }
+  .scene.enter .plan__sheet::after { animation: draw 1.1s .25s cubic-bezier(.6,.05,.3,1) both; }
+}
+@keyframes up { from { opacity: .2; transform: translateY(14px); } }
+@keyframes settle { from { opacity: .3; transform: translateX(18px); } }
+@keyframes draw { 0% { clip-path: inset(0 100% calc(100% - 3px) 0); } 40% { clip-path: inset(0 0 calc(100% - 3px) 0); } 100% { clip-path: inset(0 0 0 0); } }
+
+@media (max-width: 960px) {
+  .scene { grid-template-columns: minmax(0, 1fr); gap: 24px; }
+  .hub { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .cols { grid-template-columns: minmax(0, 1fr); }
+  .chapters { justify-content: flex-start; }
+}
+@media (max-width: 480px) { .hint { display: none; } .hub { grid-template-columns: minmax(0, 1fr); } }
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="top">
+    <div class="wrap top__inner">
+      <a class="brand" href="#welcome" aria-label="PHAEMA tour, start"><span class="brand__mark" aria-hidden="true"></span>PHAEMA</a>
+      <a class="chip" href="index.html" style="padding:5px 12px">Website</a>
+      <nav aria-label="Chapters"><ul class="chapters" id="chapters"></ul></nav>
+    </div>
+    <div class="wrap"><div class="track" id="track" aria-hidden="true"></div></div>
+  </header>
+
+  <main class="stage wrap" id="stage" tabindex="-1"></main>
+
+  <footer class="controls">
+    <div class="wrap controls__inner">
+      <button class="ctl" id="prev" type="button" aria-label="Previous scene">◀ Back</button>
+      <button class="ctl ctl--play" id="play" type="button" aria-pressed="true">❚❚ Pause</button>
+      <button class="ctl" id="next" type="button" aria-label="Next scene">Next ▶</button>
+      <span class="where" id="where" aria-live="polite"></span>
+      <span class="hint">Space pauses · arrow keys move · click any link to jump</span>
+    </div>
+  </footer>
+</div>
+
+<script>
+(function () {
+  var CHAPTERS = [
+    ["intro", "Introduction"], ["work", "Day to day"], ["money", "Money"], ["buildings", "Buildings"],
+    ["control", "Control"], ["open", "Open source"]
+  ];
+  function rel(items) {
+    return '<div class="related"><span>See also</span>' + items.map(function (x) {
+      return '<a class="chip" href="#' + x[0] + '">' + x[1] + '</a>';
+    }).join('') + '</div>';
+  }
+  function shot(img, alt, cap) {
+    return '<figure class="plan"><div class="plan__sheet"><img src="img/' + img + '.jpg" width="1280" height="800" alt="' + alt + '"></div><figcaption>' + cap + '</figcaption></figure>';
+  }
+  var MODULES = [
+    ["register", "Property register", "Estates, buildings, units, titles and the map"],
+    ["leases", "Leases and key dates", "Reviews, breaks and expiries as events"],
+    ["cases", "Cases and approvals", "Consents and casework with targets"],
+    ["lettings", "Lettings and renewals", "Heads of terms and the 1954 Act"],
+    ["letters", "Letters and notices", "Thirty templates, filled in"],
+    ["projects", "Projects", "Gateways, budgets, risks"],
+    ["rents", "Rents and arrears", "Demands, receipts and arrears", 1],
+    ["service", "Service charges", "Budgets to year-end", 1],
+    ["valuation", "Asset valuation", "The rolling programme", 1],
+    ["repairs", "Maintenance", "Repairs and works orders", 1],
+    ["compliance", "Compliance", "Certificates and the Golden Thread", 1],
+    ["reports", "Reports and open data", "Reports, exports and the API"]
+  ];
+  var S = [
+    {id: "welcome", ch: "intro", t: 9, html:
+      '<div class="scene"><div class="scene__text"><p class="eyebrow">Open-source estate management for councils</p>' +
+      '<h1>PHAEMA</h1><p class="lede">Property Holding and Estate Management Application: one system for a council&#8217;s property, leases, casework, projects, rents, repairs, compliance and valuations.</p>' +
+      '<p>Free to use, built in the open, and designed by a chartered surveyor around how estates teams actually work.</p>' +
+      '<div class="cta"><a class="button" href="#hub">Explore the modules</a><a class="button button--quiet" href="#try">Try it yourself</a></div></div>' +
+      shot("my-work", "A surveyor&#8217;s My work page: overdue items, events in the next 90 days, open cases and managed properties.", "My work: each surveyor&#8217;s day on one page.") + '</div>'},
+    {id: "problem", ch: "intro", t: 10, html:
+      '<div class="scene scene--text"><div class="scene__text"><p class="eyebrow">Why it exists</p><h2>Most council estates are run from separate systems and spreadsheets.</h2>' +
+      '<div class="cols"><div><h3>Scattered records</h3><p>The terrier, leases, repairs and certificates live in different places, so one change is keyed several times.</p></div>' +
+      '<div><h3>Missed dates</h3><p>Rent reviews, break notices and expiring certificates depend on someone remembering.</p></div>' +
+      '<div><h3>Costly lock-in</h3><p>Each council pays separately for proprietary systems, and changing supplier means changing system.</p></div></div>' +
+      rel([["hub", "How PHAEMA joins it up"], ["why-open", "Why open source helps"]]) + '</div></div>'},
+    {id: "hub", ch: "intro", t: 14, html:
+      '<div class="scene scene--text" style="max-width:none"><div class="scene__text"><p class="eyebrow">One property record at the centre</p><h2>Twelve parts, one system. Choose one to jump to it.</h2>' +
+      '<div class="hub">' + MODULES.map(function (m) {
+        return '<a class="tile' + (m[3] ? ' tile--opt' : '') + '" href="#' + m[0] + '"><b>' + m[1] + '</b><small>' + m[2] + '</small></a>';
+      }).join('') + '</div><p class="key"><i></i>Optional modules: each council switches them on when it is ready, or keeps its existing system.</p></div></div>'},
+    {id: "my-work", ch: "work", t: 10, html:
+      '<div class="scene"><div class="scene__text"><p class="eyebrow">Day to day</p><h2>Start each day with what needs doing</h2>' +
+      '<p>My work shows each surveyor what is overdue, what falls due in the next 90 days, their open cases and the properties they manage. Supervisors can see their team&#8217;s work too.</p>' +
+      rel([["leases", "Where the dates come from"], ["cases", "Working a case"]]) + '</div>' +
+      shot("start-3", "The Needs attention now section of the dashboard, listing overdue events and tasks.", "Needs attention now: overdue items first.") + '</div>'},
+    {id: "register", ch: "work", t: 10, html:
+      '<div class="scene"><div class="scene__text"><p class="eyebrow">Property register</p><h2>Every property, in context</h2>' +
+      '<p>Estates, sites, buildings and units sit in a tree, with UPRNs, floor areas to the RICS measurement codes, titles, photos and boundaries drawn from Land Registry INSPIRE parcels.</p>' +
+      '<p>Everything else, leases, cases, repairs, certificates and valuations, hangs off this one record.</p>' +
+      rel([["leases", "Its leases"], ["compliance", "Its certificates"], ["projects", "Projects on it"]]) + '</div>' +
+      shot("properties-2", "A property record showing its key facts, map and related records.", "The property record.") + '</div>'},
+    {id: "leases", ch: "work", t: 10, html:
+      '<div class="scene"><div class="scene__text"><p class="eyebrow">Leases and key dates</p><h2>Key dates become events, with reminders</h2>' +
+      '<p>Leases, licences and wayleaves, let out or held. Rent reviews, breaks, expiries and notice deadlines become events with email reminders at the lead times the council sets, and a calendar feed.</p>' +
+      rel([["cases", "Cases opened automatically"], ["rents", "The rent account"], ["lettings", "Renewals"]]) + '</div>' +
+      shot("leases-2", "An agreement&#8217;s key dates listed as events with due dates and status.", "Key dates as events.") + '</div>'},
+    {id: "cases", ch: "work", t: 11, html:
+      '<div class="scene"><div class="scene__text"><p class="eyebrow">Cases and approvals</p><h2>Casework with targets and a second pair of eyes</h2>' +
+      '<p>Consents, assignments, renewals and enquiries move through five stages with tasks and statutory target dates. Before a decision, the surveyor declares any conflict of interest and their supervisor approves the recommendation.</p>' +
+      '<p>Notes, saved emails, documents and fees stay with the case.</p>' +
+      rel([["letters", "Letters from a case"], ["lettings", "Lettings cases"], ["my-work", "Back to My work"]]) + '</div>' +
+      shot("cases-5", "A case awaiting the supervisor&#8217;s approval, with the recommendation and approval history.", "Supervisor approval.") + '</div>'},
+    {id: "lettings", ch: "work", t: 10, html:
+      '<div class="scene"><div class="scene__text"><p class="eyebrow">Lettings and renewals</p><h2>Professional standards built in</h2>' +
+      '<p>Heads of terms are checked against the 16 items in the RICS code for leasing business premises. Renewals track section 25 and 26 notices under the 1954 Act, with counter-notice and court deadlines.</p>' +
+      rel([["letters", "The notices"], ["leases", "The resulting lease"]]) + '</div>' +
+      shot("lettings-1", "Heads of terms on a new letting case, with progress against the RICS code items.", "Heads of terms against the RICS code.") + '</div>'},
+    {id: "letters", ch: "work", t: 9, html:
+      '<div class="scene"><div class="scene__text"><p class="eyebrow">Letters and notices</p><h2>Thirty templates, filled in from the case</h2>' +
+      '<p>From consent letters to section 25 notice particulars: previewed with any blanks highlighted, then downloaded to Word for final checking. Councils add their own templates.</p>' +
+      rel([["cases", "Back to the case"]]) + '</div>' +
+      shot("letters-2", "A letter preview filled in from a case, with blanks highlighted.", "Check the preview, then download to Word.") + '</div>'},
+    {id: "projects", ch: "work", t: 11, html:
+      '<div class="scene"><div class="scene__text"><p class="eyebrow">Projects</p><h2>Developments, acquisitions and disposals</h2>' +
+      '<p>Projects move through five phases and four gateways, each decision recorded with who made it. Milestones, a budget by financial year and a risk register sit alongside, and confidential acquisitions are seen only by their team.</p>' +
+      '<p>At completion, a checklist prompts every change the register needs.</p>' +
+      rel([["project-checklist", "The completion checklist"], ["register", "The register"], ["valuation", "Valuing the result"]]) + '</div>' +
+      shot("projects-2", "A project page showing its five phases and gateway decisions.", "Phases and gateways.") + '</div>'},
+    {id: "project-checklist", ch: "work", t: 9, html:
+      '<div class="scene"><div class="scene__text"><p class="eyebrow">Projects</p><h2>Nothing forgotten at completion</h2>' +
+      '<p>The checklist links to each form the register needs, already filled in from the project: a new property and title after an acquisition, or each disposal after a sale. PHAEMA never changes the register by itself.</p>' +
+      rel([["projects", "Back to projects"], ["register", "The register"]]) + '</div>' +
+      shot("projects-6", "A project&#8217;s completion checklist with steps linking to prefilled forms.", "The completion checklist.") + '</div>'},
+    {id: "rents", ch: "money", t: 10, html:
+      '<div class="scene"><div class="scene__text"><p class="eyebrow">Rents and arrears &middot; optional</p><h2>From demand to receipt</h2>' +
+      '<p>Demand runs with VAT, credit notes, receipts imported from the finance system and aged arrears, with a statement for each tenant and an export file for finance. Surveyors see rent for their own patch.</p>' +
+      rel([["service", "Service charges"], ["leases", "The lease behind it"], ["people", "Who sees what"]]) + '</div>' +
+      shot("rents-4", "A tenant&#8217;s rent account with charges, receipts and running balance.", "A tenant&#8217;s account.") + '</div>'},
+    {id: "service", ch: "money", t: 10, html:
+      '<div class="scene"><div class="scene__text"><p class="eyebrow">Service charges &middot; optional</p><h2>Fair shares, on the RICS timetable</h2>' +
+      '<p>Budgets by cost heading, apportionment by floor area with caps, spending entered or imported, and year-end reconciliation with balancing charges and statements, following the RICS service charge code.</p>' +
+      rel([["rents", "Demands"], ["repairs", "Costs from repairs"]]) + '</div>' +
+      shot("service-3", "The service charge apportionment matrix showing each lease&#8217;s share of each cost heading.", "The apportionment matrix.") + '</div>'},
+    {id: "valuation", ch: "money", t: 10, html:
+      '<div class="scene"><div class="scene__text"><p class="eyebrow">Asset valuation &middot; optional</p><h2>The valuation programme, run as casework</h2>' +
+      '<p>CIPFA asset classes, a rolling programme, internal or external valuers, Red Book records, impairment prompts, audit queries and the year-end schedule for finance.</p>' +
+      rel([["reports", "Year-end reports"], ["projects", "Assets from projects"]]) + '</div>' +
+      shot("valuation-1", "The valuation programme listing this year&#8217;s valuations and their status.", "This year&#8217;s programme.") + '</div>'},
+    {id: "repairs", ch: "buildings", t: 10, html:
+      '<div class="scene"><div class="scene__text"><p class="eyebrow">Maintenance &middot; optional</p><h2>Repairs that know the lease</h2>' +
+      '<p>Who pays is worked out from the lease repairing terms. Works orders go to contractors, with approval above a set value, and recharges reach the rent account. Site hazards show before anyone visits.</p>' +
+      rel([["compliance", "Statutory checks"], ["service", "Costs to the service charge"]]) + '</div>' +
+      shot("repairs-3", "A repair job showing the Before you visit panel with site hazards.", "Before you visit: hazards first.") + '</div>'},
+    {id: "compliance", ch: "buildings", t: 10, html:
+      '<div class="scene"><div class="scene__text"><p class="eyebrow">Compliance &middot; optional</p><h2>Every certificate, worst first</h2>' +
+      '<p>Fire, gas, electrical, water, asbestos, lift and EPC certificates, each with remedial actions. Higher-risk buildings are screened for their Golden Thread tier and keep building information with versions.</p>' +
+      rel([["repairs", "Raise a repair"], ["register", "The building"]]) + '</div>' +
+      shot("compliance-2", "A building&#8217;s certificates with their status and remedial actions.", "A building&#8217;s certificates.") + '</div>'},
+    {id: "reports", ch: "control", t: 10, html:
+      '<div class="scene"><div class="scene__text"><p class="eyebrow">Reports and open data</p><h2>Your data, out whenever you want it</h2>' +
+      '<p>Ready-made and custom reports to Excel and CSV, the Transparency Code land and assets list in one click, imports from spreadsheets, an open API and a change log of every edit.</p>' +
+      rel([["why-open", "No lock-in"], ["people", "Who sees what"]]) + '</div>' +
+      shot("reports-3", "Building a custom report by choosing records, columns and filters.", "Build your own report.") + '</div>'},
+    {id: "people", ch: "control", t: 10, html:
+      '<div class="scene"><div class="scene__text"><p class="eyebrow">People and access</p><h2>The right people see the right things</h2>' +
+      '<p>Four roles decide what people can change; access areas decide which modules they open. Supervision chains, cover for absence, and handing a leaver&#8217;s work to colleagues in one step.</p>' +
+      rel([["cases", "Supervisor approval"], ["reports", "The change log"]]) + '</div>' +
+      shot("users-4", "Hand over work: one person&#8217;s properties, cases and tasks ready to pass to a colleague.", "Hand over work.") + '</div>'},
+    {id: "why-open", ch: "open", t: 11, html:
+      '<div class="scene scene--text"><div class="scene__text"><p class="eyebrow">Why open source</p><h2>Pay once, together, and own the result</h2>' +
+      '<div class="big"><div><strong>&pound;0</strong><span>licence fee</span></div><div><strong>AGPL</strong><span>improvements stay shared</span></div><div><strong>UK / EU</strong><span>hosting of your choice</span></div></div>' +
+      '<div class="cols"><div><h3>No lock-in</h3><p>An open database and open formats: any supplier, or your own IT team, can run it.</p></div>' +
+      '<div><h3>Open to inspection</h3><p>Every line of code can be read and security-reviewed by anyone the council trusts.</p></div>' +
+      '<div><h3>Built once, shared</h3><p>When one council funds a feature, every council gets it.</p></div></div>' +
+      rel([["roadmap", "What comes next"], ["try", "Try it"]]) + '</div></div>'},
+    {id: "roadmap", ch: "open", t: 11, html:
+      '<div class="scene scene--text"><div class="scene__text"><p class="eyebrow">Where it is going</p><h2>Built, in testing, then connectors</h2>' +
+      '<div class="cols"><div><h3>Now: testing</h3><ul><li>Council staff run the test programme</li><li>Public test site, reset every 48 hours</li><li>Fixing what testing finds</li></ul></div>' +
+      '<div><h3>Next: connectors</h3><ul><li>Single sign-on</li><li>Ordnance Survey, UPRN and EPC lookups</li><li>Map layers for QGIS and other GIS</li><li>GOV.UK Notify for tenants</li></ul></div>' +
+      '<div><h3>Later</h3><ul><li>Tenant and contractor portals</li><li>Condition surveys</li><li>Welsh translation</li></ul></div></div>' +
+      '<p>Connectors use open standards, so they work with Microsoft 365 or with open-source alternatives such as Nextcloud.</p>' +
+      rel([["try", "Take part"], ["hub", "Back to the modules"]]) + '</div></div>'},
+    {id: "try", ch: "open", t: 13, html:
+      '<div class="scene"><div class="scene__text"><p class="eyebrow">Try it and take part</p><h2>Try PHAEMA today</h2>' +
+      '<p>The test site holds a fictional council&#8217;s estate. Select <strong>Request a test account</strong> there to get a sign-in; the data resets every 48 hours.</p>' +
+      '<div class="cta"><a class="button" href="https://demo.phaema.co.uk">Open the test site</a><a class="button button--quiet" href="https://github.com/phaema/phaema-app">The code on GitHub</a></div>' +
+      '<p>Councils interested in a pilot, surveyors who can check the processes, and developers: email <span class="copy">stuart@phaema.co.uk</span>.</p>' +
+      rel([["welcome", "Watch again"], ["hub", "Explore the modules"]]) + '</div>' +
+      shot("estate", "The whole estate dashboard with vacancy, rent roll and lease event figures.", "The whole estate at a glance.") + '</div>'}
+  ];
+
+  var stage = document.getElementById('stage'), track = document.getElementById('track');
+  var where = document.getElementById('where'), playBtn = document.getElementById('play');
+  var chaptersEl = document.getElementById('chapters');
+  var index = 0, playing = true, timer = null, started = 0, remaining = 0, idleTimer = null;
+  var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var IDLE_RESUME = 90000;
+
+  chaptersEl.innerHTML = CHAPTERS.map(function (c) {
+    return '<li><button type="button" data-ch="' + c[0] + '">' + c[1] + '</button></li>';
+  }).join('');
+  track.innerHTML = S.map(function () { return '<span><i></i></span>'; }).join('');
+  var bars = track.querySelectorAll('span');
+
+  function find(id) { for (var i = 0; i < S.length; i++) if (S[i].id === id) return i; return -1; }
+
+  function render(focus) {
+    var s = S[index];
+    stage.innerHTML = s.html;
+    var scene = stage.querySelector('.scene');
+    if (!reduce) { scene.classList.add('enter'); }
+    Array.prototype.forEach.call(bars, function (b, k) {
+      b.className = k < index ? 'done' : '';
+      var fill = b.querySelector('i');
+      fill.style.transition = 'none';
+      fill.style.transform = k < index ? 'scaleX(1)' : 'scaleX(0)';
+    });
+    Array.prototype.forEach.call(chaptersEl.querySelectorAll('button'), function (b) {
+      b.setAttribute('aria-current', b.dataset.ch === s.ch ? 'true' : 'false');
+    });
+    var heading = stage.querySelector('h1, h2');
+    where.textContent = (index + 1) + ' of ' + S.length + ': ' + (heading ? heading.textContent : '');
+    if (location.hash.slice(1) !== s.id) {
+      try { history.replaceState(null, '', '#' + s.id); } catch (e) {}
+    }
+    if (focus) { stage.focus({ preventScroll: true }); }
+    window.scrollTo(0, 0);
+    remaining = s.t * 1000;
+    schedule();
+  }
+
+  function schedule() {
+    clearTimeout(timer);
+    var fill = bars[index].querySelector('i');
+    if (!playing) {
+      var spent = 1 - remaining / (S[index].t * 1000);
+      fill.style.transition = 'none';
+      fill.style.transform = 'scaleX(' + spent + ')';
+      return;
+    }
+    started = Date.now();
+    void fill.offsetWidth;
+    fill.style.transition = 'transform ' + remaining + 'ms linear';
+    fill.style.transform = 'scaleX(1)';
+    timer = setTimeout(function () { go(index + 1 < S.length ? index + 1 : 0); }, remaining);
+  }
+
+  function go(i, focus) { index = (i + S.length) % S.length; render(focus); }
+
+  function setPlaying(on) {
+    if (on === playing) return;
+    if (!on) { remaining = Math.max(0, remaining - (Date.now() - started)); }
+    playing = on;
+    playBtn.setAttribute('aria-pressed', on ? 'true' : 'false');
+    playBtn.textContent = on ? '❚❚ Pause' : '▶ Play';
+    if (on && remaining < 1500) { remaining = 1500; }
+    schedule();
+  }
+
+  // Any interaction pauses the show; it resumes by itself after a quiet spell, for kiosks.
+  function interacted() {
+    setPlaying(false);
+    clearTimeout(idleTimer);
+    idleTimer = setTimeout(function () { setPlaying(true); }, IDLE_RESUME);
+  }
+
+  stage.addEventListener('click', function (e) {
+    var a = e.target.closest('a[href^="#"]');
+    if (!a) return;
+    e.preventDefault();
+    var i = find(a.getAttribute('href').slice(1));
+    if (i >= 0) { interacted(); go(i, true); }
+  });
+  document.querySelector('.brand').addEventListener('click', function (e) { e.preventDefault(); interacted(); go(0, true); });
+  chaptersEl.addEventListener('click', function (e) {
+    var b = e.target.closest('button'); if (!b) return;
+    for (var i = 0; i < S.length; i++) if (S[i].ch === b.dataset.ch) { interacted(); go(i, true); return; }
+  });
+  document.getElementById('prev').onclick = function () { interacted(); go(index - 1); };
+  document.getElementById('next').onclick = function () { interacted(); go(index + 1); };
+  playBtn.onclick = function () { clearTimeout(idleTimer); setPlaying(!playing); };
+  document.addEventListener('keydown', function (e) {
+    if (e.target.closest && e.target.closest('input, textarea')) return;
+    if (e.key === ' ' && !(e.target.closest && e.target.closest('a, button'))) { e.preventDefault(); clearTimeout(idleTimer); setPlaying(!playing); }
+    else if (e.key === 'ArrowRight') { interacted(); go(index + 1); }
+    else if (e.key === 'ArrowLeft') { interacted(); go(index - 1); }
+  });
+  window.addEventListener('hashchange', function () {
+    var i = find(location.hash.slice(1));
+    if (i >= 0 && i !== index) { go(i, true); }
+  });
+  document.addEventListener('visibilitychange', function () {
+    if (document.hidden && playing) { remaining = Math.max(0, remaining - (Date.now() - started)); clearTimeout(timer); }
+    else if (!document.hidden && playing) { schedule(); }
+  });
+
+  var start = find(location.hash.slice(1));
+  index = start >= 0 ? start : 0;
+  render(false);
+})();
+</script>
+</body>
+</html>
