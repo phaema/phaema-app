@@ -17,6 +17,16 @@
 
 ## Future work
 
+### How Microsoft 365 fits in: an optional module
+
+Single sign-on and the Teams and Microsoft 365 integration below are one optional module in the main repository, not a separate fork. Councils without Microsoft 365, or that do not want it, run exactly the same PHAEMA with it switched off.
+
+- **Off by default.** Nothing talks to Microsoft until the council's IT team has entered its Entra app details and an administrator switches the module on in Module settings.
+- **Each feature switches on separately**: sign-in, Teams notifications, Teams approvals, Outlook calendar, filing email, SharePoint documents and the Teams tab. A council can take calendars without SharePoint, for example.
+- **Nothing depends on it.** Email reminders, PHAEMA passwords and documents stored in PHAEMA remain the defaults and keep working when the module is off or Microsoft is unavailable.
+- **Self-contained code.** The integration lives in its own app (`apps/microsoft`) behind the existing module switches and access areas, and asks Microsoft only for the permissions of the features switched on.
+- **Tested both ways.** The automated tests run with the module on and off, so neither set-up breaks unnoticed. The same pattern can later add other providers, such as Google Workspace sign-in.
+
 ### Single sign-on
 
 Let staff sign in with their council Microsoft account (Microsoft Entra ID) instead of a separate PHAEMA password.
