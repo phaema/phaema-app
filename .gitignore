@@ -10,3 +10,4 @@ backups/
 .DS_Store
 *.sqlite3
 *.gfs
+website/artifact.html
