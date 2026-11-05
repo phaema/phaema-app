@@ -34,6 +34,8 @@ def phaema(request):
         "skin": request.COOKIES.get("phaema_skin") if request.COOKIES.get("phaema_skin") in SKINS else "classic",
         "skins": SKINS,
         "brand_colour": getattr(modules, "brand_colour", "") if modules else "",
+        "demo_site": settings.PHAEMA_DEMO_SITE,
+        "demo_reset_hours": settings.PHAEMA_DEMO_RESET_HOURS,
     }
 
 

@@ -262,3 +262,22 @@ class Cover(models.Model):
 
     def __str__(self):
         return f"{self.user} covering for {self.covered} until {self.ends_on:%d/%m/%Y}"
+
+
+class AccountRequest(models.Model):
+    """Someone asking for a sign-in to a public test site. Emailed to the site's contact and kept here."""
+
+    name = models.CharField(_("name"), max_length=120)
+    email = models.EmailField(_("email address"))
+    organisation = models.CharField(_("organisation"), max_length=150, blank=True)
+    reason = models.TextField(_("what they would like to try"), blank=True)
+    requested_at = models.DateTimeField(_("requested"), auto_now_add=True)
+    done = models.BooleanField(_("account set up"), default=False)
+
+    class Meta:
+        ordering = ["done", "-requested_at"]
+        verbose_name = _("test account request")
+        verbose_name_plural = _("test account requests")
+
+    def __str__(self):
+        return f"{self.name} <{self.email}>"

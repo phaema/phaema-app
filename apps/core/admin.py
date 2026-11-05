@@ -3,7 +3,7 @@ from django import forms
 from django.contrib import admin
 
 from .admin_users import PhaemaUserAdmin
-from .models import AccessArea, AuditEntry, Cover, ModuleSettings
+from .models import AccessArea, AccountRequest, AuditEntry, Cover, ModuleSettings
 
 
 @admin.register(ModuleSettings)
@@ -74,6 +74,15 @@ class AccessAreaAdmin(admin.ModelAdmin):
     @admin.display(description="People")
     def member_count(self, obj):
         return obj.members.count()
+
+
+@admin.register(AccountRequest)
+class AccountRequestAdmin(admin.ModelAdmin):
+    list_display = ("name", "email", "organisation", "requested_at", "done")
+    list_filter = ("done",)
+    list_editable = ("done",)
+    search_fields = ("name", "email", "organisation")
+    readonly_fields = ("requested_at",)
 
 
 @admin.register(Cover)

@@ -165,3 +165,8 @@ PHAEMA_BASE_URL = env("PHAEMA_BASE_URL", default="http://localhost:8000")
 
 # Name of the organisation shown in the header, e.g. "Example District Council".
 PHAEMA_ORGANISATION_NAME = env("PHAEMA_ORGANISATION_NAME", default="Demonstration Council")
+# A public test site holding only fictional data. Turns on the reset banner and allows ./phaema.sh reset-demo.
+PHAEMA_DEMO_SITE = env.bool("PHAEMA_DEMO_SITE", default=False)
+PHAEMA_DEMO_RESET_HOURS = env.int("PHAEMA_DEMO_RESET_HOURS", default=48)
+# Where requests for a test site sign-in are emailed (they are also listed under Manage data).
+PHAEMA_ACCOUNT_REQUEST_EMAIL = env("PHAEMA_ACCOUNT_REQUEST_EMAIL", default="")
