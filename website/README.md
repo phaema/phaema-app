@@ -11,6 +11,7 @@ roadmap, links to the test site, training, manuals, technical information and co
   so that anyone with the link can view it, or replace the link with a public copy.
 - Host it anywhere that serves static files, for example GitHub Pages (Settings, Pages, deploy the `/website`
   folder) or phaema.co.uk.
+- `tour.html` is the self-running, clickable tour; it uses the screenshots in `img/` and links back to `index.html`.
 - Screenshots in `img/` show the fictional demonstration data.
 - Fonts load from Google Fonts. For a site that makes no third-party requests, download Atkinson Hyperlegible
   and Bricolage Grotesque (both under the SIL Open Font License) into `website/fonts/` and replace the link.

@@ -32,6 +32,7 @@ LINKS = {
     "technical_manual": "https://claude.ai/artifact/8sTYq44xi5Ps3NuVFDrEm2",
     "test_programme": "https://claude.ai/artifact/7jMMkZAmCZMEgvEfYhhiK1",
     "integrations": "https://claude.ai/artifact/8nri1SACnG6YVXkp1HSJgU",
+    "tour": "tour.html",
 }
 
 CAPABILITIES = [
@@ -44,7 +45,7 @@ CAPABILITIES = [
     ("Projects", "Developments, acquisitions, disposals and programmes taken through four gateways, with milestones, a "
      "budget by financial year, risks and a checklist of the register changes completion needs."),
     ("Document library", "Thirty letter and notice templates, from consent letters to section 25 notice particulars, "
-     "filled in from the case and downloaded to Word."),
+     "filled in from the case and downloaded to Word. Councils can adapt them and add their own."),
     ("Rents and arrears", "Demand runs, VAT, credit notes, receipts imported from finance, aged arrears and an export "
      "file for the finance system."),
     ("Service charges", "Budgets, apportionment by floor area with caps, actual costs and year-end reconciliation on "
@@ -93,7 +94,7 @@ ROADMAP = [
         "A public test site, reset every 48 hours",
     ]),
     ("now", "Now: testing", [
-        "A 12-day test programme run by council staff",
+        "A major test programme run by council staff",
         "Feedback from testers on the public test site",
         "Fixing what testing finds",
     ]),
@@ -116,6 +117,8 @@ ROADMAP = [
 
 # (title, description, link key, link text)
 RESOURCES = [
+    ("Tour", "A self-running, clickable tour of every part of PHAEMA, for a first look or a screen at an event.",
+     "tour", "Watch the tour"),
     ("Test site", "Try PHAEMA with fictional data: a council estate, leases, cases and projects to explore. "
      "Request a sign-in on the site; the data is reset every 48 hours.",
      "test_site", "Open the test site"),
@@ -211,7 +214,8 @@ BODY = r'''<div class="top"><div class="wrap top__inner">
   <nav aria-label="Sections"><ul class="nav">
     <li><a href="#about">About</a></li>
     <li><a href="#capabilities">What it does</a></li>
-    <li><a href="#open-source">Why open source</a></li>
+    <li><a href="#open-source">Why Open Source</a></li>
+    <li><a href="tour.html">Tour</a></li>
     <li><a href="#roadmap">Roadmap</a></li>
     <li><a href="#resources">Resources</a></li>
     <li><a href="#take-part">Take part</a></li>
@@ -222,11 +226,12 @@ BODY = r'''<div class="top"><div class="wrap top__inner">
 <section class="view" id="about" aria-labelledby="h-about">
   <div class="wrap hero">
     <div class="hero__text">
-      <p class="kicker">Open-source property and estate management for councils in England and Wales</p>
+      <p class="kicker">Open-source Property Holdings and Estate Management Application for councils in England and Wales</p>
       <h1 id="h-about">Estate management software, built in the open.</h1>
       <p class="lede">PHAEMA (Property Holding and Estate Management Application) covers a council's property register, leases, casework, projects, rents, service charges, repairs, compliance and asset valuations in one system. It is free, open source and being developed in public. Councils, surveyors and developers are invited to try it and help shape it.</p>
       <div class="cta">
         __TEST_CTA__
+        <a class="button button--quiet" href="tour.html">Watch the tour</a>
         <a class="button button--quiet" href="#take-part">Take part</a>
       </div>
       <p class="status-line"><span class="pill">Alpha</span> In testing, __ASOF__. Not yet ready for live estate management.</p>
@@ -245,7 +250,7 @@ BODY = r'''<div class="top"><div class="wrap top__inner">
 
   <div class="wrap three">
     <div><h3>Free to use</h3><p>No licence fee, ever. Councils can run it themselves or have any supplier host it.</p></div>
-    <div><h3>Built by surveyors</h3><p>Heads of terms to the RICS leasing code, 1954 Act notice dates, service charges to the RICS 2nd edition, Red Book valuation records and Golden Thread building information.</p></div>
+    <div><h3>Built by surveyors</h3><p>Covering all day-to-day aspects of estate and asset management in the public sector, and ensuring compliance: heads of terms to the RICS leasing code, 1954 Act notice dates, service charges to the RICS 2nd edition, Red Book valuation records and Golden Thread building information.</p></div>
     <div><h3>Accessible by design</h3><p>Built on the GOV.UK Design System and aiming for WCAG 2.2 AA, with dark, high-contrast and large-text settings.</p></div>
   </div>
 </section>
@@ -348,6 +353,7 @@ __INVOLVE__
   }
   window.addEventListener('hashchange', function () { show(); window.scrollTo(0, 0); });
   show();
+  window.scrollTo(0, 0);
 })();
 </script>
 '''
@@ -398,7 +404,7 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 .nav a { color: var(--paper); font-weight: 700; font-size: 1rem; }
 .nav a[aria-current="page"] { text-decoration: none; border-bottom: 3px solid var(--edge); }
 
-.view { padding-block: 48px 64px; }
+.view { padding-block: 48px 64px; scroll-margin-top: 120px; }
 .hero { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); gap: 48px; align-items: center; }
 .hero__text { min-width: 0; }
 .kicker { color: var(--muted); font-size: 1rem; margin-bottom: .75em; }
