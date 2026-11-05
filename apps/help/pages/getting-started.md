@@ -26,12 +26,13 @@ The menu at the top of every page takes you to:
 | Leases | [Leases and licences](leases.md), with links to [parties](parties.md). |
 | Events | [Key dates](events.md) such as rent reviews, breaks and expiries. |
 | Cases | [Cases](cases.md): consents, requests and other work from start to outcome. |
+| Projects | [Projects](projects.md): developments, acquisitions, disposals and programmes, taken through gateways. |
 | Documents | The [document library](documents.md): letters and notices filled in from PHAEMA and downloaded to Word. |
 | Income | The [rent ledger](rent-ledger.md) (rents, arrears, receipts) and [service charges](service-charges.md). Shown when the council uses them and your [access areas](users-and-roles.md#access-areas) include them. |
 | Buildings | [Maintenance](maintenance.md), [compliance](compliance.md) and [asset valuation](valuations.md). Shown when the council uses them and your [access areas](users-and-roles.md#access-areas) include them. |
 | Reports | Ready-made and your own [reports](reports.md), to view or download. |
 | Changes | The [change log](change-log.md): who changed what, and when. |
-| Import | Administrators, and finance officers for receipts and service charge spending: [import from spreadsheets](import-export.md). |
+| Import | Administrators, and finance officers for receipts, service charge spending and project spending: [import from spreadsheets](import-export.md). |
 | Manage data | Administrators and surveyors: add and edit records. |
 | Hand over work | Administrators: move a leaver's or mover's properties, cases and tasks to colleagues ([how](users-and-roles.md#handing-over-work)). |
 | Help | This manual. |

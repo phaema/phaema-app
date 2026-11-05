@@ -34,6 +34,7 @@ A property's page lists its parts. Lettable parts are shown in bold.
 | Occupation | Occupied by the council, let, partly let, vacant, or not applicable. |
 | Managing surveyor | The surveyor responsible. Surveyors can change the properties they manage (see [roles](users-and-roles.md)). Events on the property's leases are assigned to them. |
 | Exclude from open data | Tick for sensitive properties so they are left out of any published asset list. |
+| Disposed of, disposal price | When the council sold or transferred it, and for how much. A disposed property is kept for its history but left out of open data. Usually recorded from a disposal project's [completion checklist](projects.md#completion-checklist). |
 | Site hazards | What anyone visiting should know first, such as fragile roofs, confined spaces, lone working or dogs. Shown on cases, jobs and valuations for the property and everything within it. |
 
 ![The property register filtered to Northfield](/static/help/property-list.jpg)
@@ -75,6 +76,11 @@ manage titles. See also [Land Registry boundaries](maps.md#land-registry-inspire
 ## Leases on a property
 
 The property page lists the leases and licences that include it. See [leases and licences](leases.md).
+
+## Projects on a property
+
+The property page lists the [projects](projects.md) it is part of, including those of the estate or building it
+belongs to. Confidential projects are listed only for their team and administrators.
 
 ## Worked example
 

@@ -33,6 +33,10 @@ GIA (gross internal area)
 :   Floor area measured to the inside of the external walls, including walls, stairs and plant rooms. Measured
     under the RICS Code of Measuring Practice.
 
+Gateway
+:   A decision point between a project's phases, such as approval to proceed by Cabinet. A project moves to its
+    next phase only when the gateway decision is recorded. See [projects](projects.md#phases-and-gateways).
+
 Golden Thread
 :   The accurate, up-to-date information about a building that the Building Safety Act 2022 requires for
     higher-risk buildings, and good practice for all. See [compliance and building information](compliance.md).
@@ -56,6 +60,10 @@ Option to tax
 
 Peppercorn rent
 :   A nominal rent, often nothing at all, used where a lease is granted for community benefit or a premium.
+
+Project
+:   A larger piece of work than a case, such as a development, an acquisition or a disposal, with a team,
+    gateways, milestones, a budget and risks. See [projects](projects.md).
 
 Quarter days
 :   The traditional English rent days: 25 March, 24 June, 29 September and 25 December.

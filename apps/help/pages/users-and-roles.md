@@ -109,14 +109,14 @@ in one step with **Hand over work** in the menu (also linked from each user reco
    building to hand over just that part of their patch.
 2. Select **Show their work**. PHAEMA counts what they hold: properties they manage, open cases they own, case
    tasks not yet done, case approvals waiting for them, open cases they contribute to, lease events assigned to
-   them, maintenance jobs they own, works orders waiting for their approval, valuation audit queries and the staff
-   they supervise.
+   them, maintenance jobs they own, works orders waiting for their approval, valuation audit queries, projects they lead, their places on
+   project teams, project tasks and risks they own, and the staff they supervise.
 3. For each kind of work, keep the person you chose, pick someone else, or choose **Leave with** to keep it where
    it is. Properties, cases and approvals can only go to surveyors and administrators, and maintenance jobs and valuation
    queries only to people whose access areas open those modules; contributors can also take
-   over case contributions.
+   over case contributions and project team places, tasks and risks.
 4. For a leaver, tick **Also stop them signing in**. Then select **Hand over work**.
 
-Closed cases, completed tasks and past approvals keep the original names, so the history stays true. Every record
+Closed cases, stopped or closed projects, completed tasks and past approvals keep the original names, so the history stays true. Every record
 moved is listed in the [change log](change-log.md) under your name. To undo a hand-over, hand the same work back.
 If the person is also an internal valuer, change the valuer record under **Manage data**, **Valuers**.
