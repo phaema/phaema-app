@@ -21,8 +21,9 @@ Import in this order, so each record can find the records it links to:
 4. [Land Registry boundaries](maps.md#land-registry-inspire-boundaries), if you use them
 
 Rent receipts from the finance system are imported the same way when the rent ledger is on. See
-[receipts](rent-ledger.md#receipts). So is [service charge spending](service-charges.md#spending), and, with
-maintenance on, [contractors and components](#contractors-and-components).
+[receipts](rent-ledger.md#receipts). So is [service charge spending](service-charges.md#spending), [project spending](projects.md#budget) (actual
+figures from the ledger, which finance officers can import), and, with maintenance on,
+[contractors and components](#contractors-and-components).
 
 ### How every import works
 

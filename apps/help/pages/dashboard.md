@@ -26,6 +26,8 @@ Your own work in one place:
 - **Open cases** you own, with how each is doing against its target.
 - **Properties managed**: the properties you are managing surveyor for, with their parts, live lettings and rent.
   A surveyor who manages an estate or building also manages everything within it.
+- **My projects**: projects you lead or are on the team of, with their phase and status. Your overdue
+  project tasks and missed project milestones appear under Needs attention now. See [projects](projects.md).
 - **Compliance**, **rent arrears** and **open repairs** on your properties, when those modules are on.
 
 Supervisors can choose someone they supervise under **Show the work of**, for example to cover absence or for

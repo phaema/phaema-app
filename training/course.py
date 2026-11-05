@@ -265,6 +265,8 @@ COURSES = [
              "why": "Only you and administrators can change it."},
             {"q": "What happens to a charge once exported to finance?", "options": ["It is locked", "It is deleted", "It is sent again next time"], "answer": 0,
              "why": "Each charge goes to finance once."},
+            {"q": "How do actual figures from the ledger reach a project's budget?", "options": ["Import, Project spending", "Typed into each project by the lead only", "They cannot be recorded"], "answer": 0,
+             "why": "Finance officers import spend by project reference, budget line and financial year; the Project budgets report lists them all."},
         ]}]},
     {"id": "buildings", "title": "Maintenance and compliance", "who": "Building surveyors, facilities and compliance officers (Maintenance and compliance access area).",
      "modules": [START, {
@@ -350,7 +352,7 @@ COURSES = [
              "Set the person's supervisor and approver. Their approval requests go to this person."),
             (T, "/people/hand-over/?from=248&to=249", "table.govuk-table", "Hand over work",
              "When someone leaves or changes job, Hand over work (linked from their user record) moves their properties, "
-             "open cases, tasks, lease events, jobs, approvals and supervised staff to colleagues in one step. "
+             "open cases, tasks, lease events, jobs, approvals, projects and supervised staff to colleagues in one step. "
              "Choose a person for each kind of work, or limit it to one estate or building, and tick the box to stop a "
              "leaver signing in."),
         ],

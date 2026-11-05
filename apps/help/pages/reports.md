@@ -131,7 +131,9 @@ Select **Make a new report** and choose what to report on:
 - **Properties**, **Leases and licences**, **Lease events**, **Tenants and other parties**, the **Rent schedule**
   (every rent, past and future), **Rent charges**, **Rent receipts** and **Rent accounts** (balances and arrears
   by agreement, from the [rent ledger](rent-ledger.md)),
-  **Titles** or the **Change log**.
+  **Titles**, **Projects**, **Project budgets** (each budget line's figures by financial year) or the
+  **Change log**. Confidential projects appear only for their team and administrators, and project budgets only
+  for people who can see them.
 
 Then choose:
 
