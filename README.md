@@ -46,6 +46,10 @@ PHAEMA helps a council's estates team manage its land and property: the property
 
 See the [roadmap](docs/roadmap.md) for what is coming next.
 
+## Contact
+
+Questions, offers of help and councils interested in trying PHAEMA: email stuart@phaema.co.uk, or [raise an issue](https://github.com/phaema/phaema-app/issues). See [contributing](CONTRIBUTING.md) to take part, and [security](SECURITY.md) to report a vulnerability.
+
 ## Try it on your computer
 
 You need Docker (or Colima) and Git. Mac users: follow the [Mac setup guide](docs/setup-mac.md).
