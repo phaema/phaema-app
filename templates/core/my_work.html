@@ -51,6 +51,10 @@
       {% if cases|length > 12 %}<p class="govuk-body-s"><a class="govuk-link" href="{% url 'cases:list' %}?owner={% if is_me %}me{% else %}{{ person.pk }}{% endif %}">{% blocktranslate count n=cases|length %}See all {{ n }} cases{% plural %}See all {{ n }} cases{% endblocktranslate %}</a></p>{% endif %}
       {% else %}<p class="govuk-body">{% translate "No open cases." %}</p>{% endif %}
     </div></section>
+    {% if projects %}<section class="phaema-panel" data-panel="mine-projects" data-area="cases"><h2 class="govuk-heading-m phaema-panel__title">{% translate "My projects" %}</h2><div class="phaema-panel__body">
+      <ul class="govuk-list">{% for p in projects %}{% with rag=p.rag %}<li><a class="govuk-link" href="{{ p.get_absolute_url }}">{{ p.display_reference }}</a> {{ p.name }}<br><span class="govuk-body-s">{{ p.phase_label }}</span> <strong class="govuk-tag govuk-tag--{{ rag.0 }}">{{ rag.1 }}</strong></li>{% endwith %}{% endfor %}</ul>
+      <p class="govuk-body-s"><a class="govuk-link" href="{% url 'projects:list' %}?lead=me">{% translate "All my projects" %}</a></p>
+    </div></section>{% endif %}
     {% if compliance %}<section class="phaema-panel" data-panel="mine-compliance" data-area="buildings"><h2 class="govuk-heading-m phaema-panel__title">{% translate "Compliance" %}</h2><div class="phaema-panel__body">
       {% if compliance.total %}<p class="govuk-body">{% blocktranslate with v=compliance.valid t=compliance.total %}{{ v }} of {{ t }} required certificates in date.{% endblocktranslate %}{% if compliance.problems %} {% blocktranslate count n=compliance.problems %}{{ n }} needs action.{% plural %}{{ n }} need action.{% endblocktranslate %}{% endif %}</p>
       <p class="govuk-body-s"><a class="govuk-link" href="{% url 'compliance:home' %}?surveyor={% if is_me %}me{% else %}{{ person.pk }}{% endif %}">{% translate "See the certificates" %}</a></p>

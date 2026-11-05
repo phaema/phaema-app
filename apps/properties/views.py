@@ -138,6 +138,11 @@ class PropertyDetailView(LoginRequiredMixin, DetailView):
         ctx = super().get_context_data(**kwargs)
         obj = self.object
         ctx["children"] = obj.children.all()
+        from apps.projects.rules import visible
+
+        ids = [obj.pk, *[a.pk for a in obj.ancestors()]]  # a unit shows its building's and estate's projects too
+        ctx["projects"] = visible(self.request.user).filter(property_links__property__in=ids).distinct() \
+            .select_related("project_type")
         ctx["titles"] = obj.titles.prefetch_related("documents")
         ctx["photos"] = list(obj.photos.all())
         ctx["breakdown"] = obj.area_breakdown()

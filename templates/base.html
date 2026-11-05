@@ -27,6 +27,7 @@
         <a href="{% url 'leases:list' %}">{% translate "Leases" %}</a>
         <a href="{% url 'leases:events' %}">{% translate "Events" %}</a>
         <a href="{% url 'cases:list' %}">{% translate "Cases" %}</a>
+        <a href="{% url 'projects:list' %}">{% translate "Projects" %}</a>
         <a href="{% url 'documents:library' %}">{% translate "Documents" %}</a>
         {% if modules.rent_ledger_enabled and modules.service_charges_enabled %}<details class="phaema-menu"><summary>{% translate "Income" %}</summary><div class="phaema-menu__panel">
           <a href="{% url 'ledger:home' %}">{% translate "Rents" %}</a>

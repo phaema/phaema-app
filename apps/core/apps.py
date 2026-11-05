@@ -14,7 +14,7 @@ class CoreConfig(AppConfig):
         from .roles import ensure_roles, sync_staff_status
 
         def create_roles(sender, **kwargs):
-            if sender.label == "leases":  # the last PHAEMA app to migrate, so all permissions exist
+            if sender.label == "projects":  # the last PHAEMA app in INSTALLED_APPS, so all permissions exist
                 ensure_roles()
 
         post_migrate.connect(create_roles, dispatch_uid="phaema_create_roles", weak=False)

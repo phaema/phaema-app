@@ -1,0 +1,15 @@
+{% extends "base.html" %}{% load i18n %}
+{% block title %}{% if project %}{% translate "Change project" %}{% else %}{% translate "Start a project" %}{% endif %}{% endblock %}
+{% block help_page %}projects{% endblock %}
+{% block content %}
+<h1 class="govuk-heading-l">{% if project %}{% blocktranslate with ref=project.display_reference %}Change {{ ref }}{% endblocktranslate %}{% else %}{% translate "Start a project" %}{% endif %}</h1>
+<div class="govuk-grid-row"><div class="govuk-grid-column-two-thirds">
+{% if not project %}<p class="govuk-body">{% translate "A project groups larger work: a development, an acquisition, a disposal, a programme or a review. Add properties, the team, milestones and the first gateway decision once it is started. Starter tasks for the type of project are added for you." %}</p>{% endif %}
+<form method="post" novalidate>{% csrf_token %}
+  {% include "core/_form_errors.html" %}
+  {% for field in form %}{% include "core/_field.html" %}{% endfor %}
+  <button class="govuk-button" data-module="govuk-button">{% if project %}{% translate "Save" %}{% else %}{% translate "Start the project" %}{% endif %}</button>
+  {% if project %}<a class="govuk-link govuk-!-margin-left-3" href="{{ project.get_absolute_url }}">{% translate "Cancel" %}</a>{% endif %}
+</form>
+</div></div>
+{% endblock %}
