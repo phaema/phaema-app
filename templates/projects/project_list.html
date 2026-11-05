@@ -30,6 +30,7 @@
   </div>
   <div class="govuk-grid-column-three-quarters">
     <p class="govuk-body">{% blocktranslate count n=paginator.count %}{{ n }} project{% plural %}{{ n }} projects{% endblocktranslate %}</p>
+    {% include "core/_downloads.html" %}
     <table class="govuk-table">
       {% include "core/_sortable_head.html" %}
       <tbody class="govuk-table__body">

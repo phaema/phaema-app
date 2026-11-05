@@ -123,6 +123,93 @@
   </form></div></details>{% endif %}
 </div></section>
 
+{% if budget %}
+<section class="phaema-panel" data-panel="project-budget"><h2 class="govuk-heading-m phaema-panel__title">{% translate "Budget" %}</h2><div class="phaema-panel__body">
+  {% if budget.lines %}
+  <dl class="govuk-summary-list">
+    <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Costs" %}</dt><dd class="govuk-summary-list__value">{% translate "Approved" %} £{{ budget.cost.approved|floatformat:0|intcomma }} · {% translate "Forecast" %} £{{ budget.cost.forecast|floatformat:0|intcomma }} · {% translate "Spent" %} £{{ budget.cost.actual|floatformat:0|intcomma }}
+      {% if budget.cost.variance > 0 %}<br><strong class="govuk-tag govuk-tag--red">£{{ budget.cost.variance|floatformat:0|intcomma }} {% translate "over budget" %}</strong>{% elif budget.cost.variance < 0 %}<br><span class="govuk-body-s">£{{ budget.cost.variance|floatformat:0|intcomma|cut:"-" }} {% translate "under budget" %}</span>{% endif %}</dd></div>
+    {% if budget.income.forecast or budget.income.actual %}<div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Income" %}</dt><dd class="govuk-summary-list__value">{% translate "Forecast" %} £{{ budget.income.forecast|floatformat:0|intcomma }} · {% translate "Received" %} £{{ budget.income.actual|floatformat:0|intcomma }}</dd></div>{% endif %}
+    <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Of which capital" %}</dt><dd class="govuk-summary-list__value">{% translate "Approved" %} £{{ budget.capital.approved|floatformat:0|intcomma }} · {% translate "Forecast" %} £{{ budget.capital.forecast|floatformat:0|intcomma }}</dd></div>
+  </dl>
+  {% if budget.years %}<h3 class="govuk-heading-s">{% translate "Costs by financial year" %}</h3>
+  <table class="govuk-table phaema-report"><caption class="govuk-table__caption govuk-visually-hidden">{% translate "Costs by financial year" %}</caption>
+    <thead class="govuk-table__head"><tr class="govuk-table__row"><th scope="col" class="govuk-table__header">{% translate "Year" %}</th><th scope="col" class="govuk-table__header govuk-table__header--numeric">{% translate "Approved" %}</th><th scope="col" class="govuk-table__header govuk-table__header--numeric">{% translate "Forecast" %}</th><th scope="col" class="govuk-table__header govuk-table__header--numeric">{% translate "Actual" %}</th></tr></thead>
+    <tbody class="govuk-table__body">{% for label, t in budget.years %}<tr class="govuk-table__row"><th scope="row" class="govuk-table__header">{{ label }}</th><td class="govuk-table__cell govuk-table__cell--numeric">£{{ t.approved|floatformat:0|intcomma }}</td><td class="govuk-table__cell govuk-table__cell--numeric">£{{ t.forecast|floatformat:0|intcomma }}</td><td class="govuk-table__cell govuk-table__cell--numeric">£{{ t.actual|floatformat:0|intcomma }}</td></tr>{% endfor %}</tbody>
+  </table>{% endif %}
+  <h3 class="govuk-heading-s">{% translate "Budget lines" %}</h3>
+  <table class="govuk-table phaema-report"><caption class="govuk-table__caption govuk-visually-hidden">{% translate "Budget lines" %}</caption>
+    <thead class="govuk-table__head"><tr class="govuk-table__row"><th scope="col" class="govuk-table__header">{% translate "Line" %}</th><th scope="col" class="govuk-table__header govuk-table__header--numeric">{% translate "Approved" %}</th><th scope="col" class="govuk-table__header govuk-table__header--numeric">{% translate "Forecast" %}</th><th scope="col" class="govuk-table__header govuk-table__header--numeric">{% translate "Actual" %}</th></tr></thead>
+    <tbody class="govuk-table__body">{% for item in budget.lines %}<tr class="govuk-table__row">
+      <th scope="row" class="govuk-table__header">{{ item.line.description }}<br><span class="govuk-body-s">{{ item.line.get_category_display }}, {{ item.line.get_funding_display|lower }}{% for y in item.years %}{% if forloop.first %}: {% endif %}{{ y.label }}{% if not forloop.last %}, {% endif %}{% endfor %}</span>
+        {% if can_budget and not item.totals.actual %}<form method="post" class="govuk-!-display-inline">{% csrf_token %}<input type="hidden" name="action" value="remove_budget_line"><input type="hidden" name="line" value="{{ item.line.pk }}"><button class="phaema-link-button govuk-body-s">{% translate "Remove" %}<span class="govuk-visually-hidden"> {{ item.line.description }}</span></button></form>{% endif %}</th>
+      <td class="govuk-table__cell govuk-table__cell--numeric">£{{ item.totals.approved|floatformat:0|intcomma }}</td><td class="govuk-table__cell govuk-table__cell--numeric">£{{ item.totals.forecast|floatformat:0|intcomma }}</td><td class="govuk-table__cell govuk-table__cell--numeric">£{{ item.totals.actual|floatformat:0|intcomma }}</td>
+    </tr>{% endfor %}</tbody>
+  </table>
+  {% else %}<p class="govuk-body">{% translate "No budget yet." %}</p>{% endif %}
+  {% if can_budget %}
+  {% if budget.lines %}<details class="govuk-details" data-module="govuk-details"><summary class="govuk-details__summary"><span class="govuk-details__summary-text">{% translate "Enter figures for a year" %}</span></summary><div class="govuk-details__text">
+    <p class="govuk-body-s">{% translate "Saving a line and year again replaces its figures. Actual spending can also be imported from the finance system (Import, Project spending)." %}</p>
+    <form method="post" class="phaema-inline-fields">{% csrf_token %}<input type="hidden" name="action" value="set_budget">
+      <div><label class="govuk-label" for="b-line">{% translate "Line" %}</label><select class="govuk-select" id="b-line" name="line">{% for item in budget.lines %}<option value="{{ item.line.pk }}">{{ item.line.description }}</option>{% endfor %}</select></div>
+      <div><label class="govuk-label" for="b-year">{% translate "Financial year" %}</label><select class="govuk-select" id="b-year" name="year">{% for y, label in budget_years %}<option value="{{ y }}">{{ label }}</option>{% endfor %}</select></div>
+      <div><label class="govuk-label" for="b-app">{% translate "Approved (£)" %}</label><input class="govuk-input govuk-input--width-10" id="b-app" name="approved" inputmode="decimal"></div>
+      <div><label class="govuk-label" for="b-fc">{% translate "Forecast (£)" %}</label><input class="govuk-input govuk-input--width-10" id="b-fc" name="forecast" inputmode="decimal"></div>
+      <div><label class="govuk-label" for="b-act">{% translate "Actual (£)" %}</label><input class="govuk-input govuk-input--width-10" id="b-act" name="actual" inputmode="decimal"></div>
+      <div><button class="govuk-button govuk-button--secondary govuk-!-margin-bottom-0" data-module="govuk-button">{% translate "Save" %}</button></div>
+    </form></div></details>{% endif %}
+  <details class="govuk-details" data-module="govuk-details"><summary class="govuk-details__summary"><span class="govuk-details__summary-text">{% translate "Add a budget line" %}</span></summary><div class="govuk-details__text">
+    <form method="post" class="phaema-inline-fields">{% csrf_token %}<input type="hidden" name="action" value="add_budget_line">
+      <div><label class="govuk-label" for="bl-cat">{% translate "Category" %}</label><select class="govuk-select" id="bl-cat" name="category">{% for value, label in categories %}<option value="{{ value }}">{{ label }}</option>{% endfor %}</select></div>
+      <div><label class="govuk-label" for="bl-desc">{% translate "Description" %}</label><input class="govuk-input govuk-input--width-20" id="bl-desc" name="description" maxlength="150"></div>
+      <div><label class="govuk-label" for="bl-fund">{% translate "Funding" %}</label><select class="govuk-select" id="bl-fund" name="funding">{% for value, label in fundings %}<option value="{{ value }}">{{ label }}</option>{% endfor %}</select></div>
+      <div><button class="govuk-button govuk-button--secondary govuk-!-margin-bottom-0" data-module="govuk-button">{% translate "Add" %}</button></div>
+    </form></div></details>
+  {% endif %}
+</div></section>
+{% endif %}
+
+<section class="phaema-panel" data-panel="project-risks"><h2 class="govuk-heading-m phaema-panel__title">{% translate "Risks and issues" %}</h2><div class="phaema-panel__body">
+  {% if risks %}<table class="govuk-table">
+    <thead class="govuk-table__head"><tr class="govuk-table__row"><th scope="col" class="govuk-table__header">{% translate "Risk" %}</th><th scope="col" class="govuk-table__header">{% translate "Rating" %}</th><th scope="col" class="govuk-table__header">{% translate "Owner" %}</th></tr></thead>
+    <tbody class="govuk-table__body">{% for r in risks %}{% with level=r.level %}<tr class="govuk-table__row">
+      <td class="govuk-table__cell">{% if r.status == "closed" %}<span class="phaema-done">{{ r.description }}</span> <strong class="govuk-tag govuk-tag--grey">{% translate "Closed" %}</strong>{% else %}{{ r.description }}{% endif %}{% if r.mitigation %}<br><span class="govuk-body-s">{{ r.mitigation|linebreaksbr }}</span>{% endif %}
+        {% if can_manage %}<form method="post">{% csrf_token %}<input type="hidden" name="action" value="update_risk"><input type="hidden" name="risk" value="{{ r.pk }}"><button class="phaema-link-button govuk-body-s">{% if r.status == "open" %}{% translate "Close" %}{% else %}{% translate "Reopen" %}{% endif %}<span class="govuk-visually-hidden"> {{ r.description }}</span></button></form>{% endif %}</td>
+      <td class="govuk-table__cell"><strong class="govuk-tag govuk-tag--{{ level.0 }}">{{ level.1 }}</strong><br><span class="govuk-body-s">{% blocktranslate with l=r.likelihood i=r.impact s=r.score %}{{ l }} × {{ i }} = {{ s }}{% endblocktranslate %}</span></td>
+      <td class="govuk-table__cell">{{ r.owner|person:"–" }}</td>
+    </tr>{% endwith %}{% endfor %}</tbody></table>
+  {% else %}<p class="govuk-body">{% translate "No risks recorded." %}</p>{% endif %}
+  {% if can_manage %}<details class="govuk-details" data-module="govuk-details"><summary class="govuk-details__summary"><span class="govuk-details__summary-text">{% translate "Add a risk or issue" %}</span></summary><div class="govuk-details__text">
+    <form method="post">{% csrf_token %}<input type="hidden" name="action" value="add_risk">
+      <div class="govuk-form-group"><label class="govuk-label" for="r-desc">{% translate "Risk or issue" %}</label><input class="govuk-input" id="r-desc" name="description" maxlength="300"></div>
+      <div class="phaema-inline-fields govuk-!-margin-bottom-4">
+        <div><label class="govuk-label" for="r-like">{% translate "Likelihood (1 to 5)" %}</label><select class="govuk-select" id="r-like" name="likelihood">{% for v, l in scale %}<option value="{{ v }}"{% if v == 3 %} selected{% endif %}>{{ l }}</option>{% endfor %}</select></div>
+        <div><label class="govuk-label" for="r-imp">{% translate "Impact (1 to 5)" %}</label><select class="govuk-select" id="r-imp" name="impact">{% for v, l in scale %}<option value="{{ v }}"{% if v == 3 %} selected{% endif %}>{{ l }}</option>{% endfor %}</select></div>
+        <div><label class="govuk-label" for="r-owner">{% translate "Owner" %}</label><select class="govuk-select" id="r-owner" name="owner"><option value="">{% translate "Nobody" %}</option>{% for u in people %}<option value="{{ u.pk }}">{{ u.get_full_name|default:u.username }}</option>{% endfor %}</select></div>
+      </div>
+      <div class="govuk-form-group"><label class="govuk-label" for="r-mit">{% translate "What is being done about it" %}</label><textarea class="govuk-textarea" id="r-mit" name="mitigation" rows="2"></textarea></div>
+      <button class="govuk-button govuk-button--secondary" data-module="govuk-button">{% translate "Add" %}</button>
+    </form></div></details>{% endif %}
+</div></section>
+
+<section class="phaema-panel" data-panel="project-linked"><h2 class="govuk-heading-m phaema-panel__title">{% translate "Linked cases, jobs and valuations" %}</h2><div class="phaema-panel__body">
+  {% if linked_cases %}<h3 class="govuk-heading-s">{% translate "Cases" %}</h3><ul class="govuk-list">{% for c in linked_cases %}<li><a class="govuk-link" href="{{ c.get_absolute_url }}">{{ c.display_reference }}</a> {{ c.title }} <span class="govuk-body-s">({{ c.get_stage_display|lower }}{% if c.status == "closed" %}, {% translate "closed" %}{% endif %})</span>{% if can_manage %} <form method="post" class="govuk-!-display-inline">{% csrf_token %}<input type="hidden" name="action" value="unlink"><input type="hidden" name="kind" value="case"><input type="hidden" name="id" value="{{ c.pk }}"><button class="phaema-link-button govuk-body-s">{% translate "Unlink" %}<span class="govuk-visually-hidden"> {{ c.display_reference }}</span></button></form>{% endif %}</li>{% endfor %}</ul>{% endif %}
+  {% if linked_jobs %}<h3 class="govuk-heading-s">{% translate "Maintenance jobs" %}</h3><ul class="govuk-list">{% for j in linked_jobs %}<li><a class="govuk-link" href="{{ j.get_absolute_url }}">{{ j.reference }}</a> {{ j.title }} <span class="govuk-body-s">({{ j.get_status_display|lower }})</span>{% if can_manage %} <form method="post" class="govuk-!-display-inline">{% csrf_token %}<input type="hidden" name="action" value="unlink"><input type="hidden" name="kind" value="job"><input type="hidden" name="id" value="{{ j.pk }}"><button class="phaema-link-button govuk-body-s">{% translate "Unlink" %}<span class="govuk-visually-hidden"> {{ j.reference }}</span></button></form>{% endif %}</li>{% endfor %}</ul>{% endif %}
+  {% if linked_valuations %}<h3 class="govuk-heading-s">{% translate "Valuations" %}</h3><ul class="govuk-list">{% for v in linked_valuations %}<li><a class="govuk-link" href="{{ v.get_absolute_url }}">{{ v }}</a> <span class="govuk-body-s">({{ v.get_status_display|lower }})</span>{% if can_manage %} <form method="post" class="govuk-!-display-inline">{% csrf_token %}<input type="hidden" name="action" value="unlink"><input type="hidden" name="kind" value="valuation"><input type="hidden" name="id" value="{{ v.pk }}"><button class="phaema-link-button govuk-body-s">{% translate "Unlink" %}<span class="govuk-visually-hidden"> {{ v }}</span></button></form>{% endif %}</li>{% endfor %}</ul>{% endif %}
+  {% if not linked_cases and not linked_jobs and not linked_valuations %}<p class="govuk-body">{% translate "Nothing linked yet." %}</p>{% endif %}
+  {% if can_manage %}<details class="govuk-details" data-module="govuk-details"><summary class="govuk-details__summary"><span class="govuk-details__summary-text">{% translate "Link a case, job or valuation" %}</span></summary><div class="govuk-details__text">
+    <form method="post" class="phaema-inline-fields govuk-!-margin-bottom-4">{% csrf_token %}<input type="hidden" name="action" value="link"><input type="hidden" name="kind" value="case">
+      <div><label class="govuk-label" for="l-case">{% translate "Case reference" %}</label><input class="govuk-input govuk-input--width-10" id="l-case" name="reference" placeholder="CAS-2026-0012"></div>
+      <div><button class="govuk-button govuk-button--secondary govuk-!-margin-bottom-0" data-module="govuk-button">{% translate "Link the case" %}</button></div></form>
+    {% if linked_jobs is not None %}<form method="post" class="phaema-inline-fields govuk-!-margin-bottom-4">{% csrf_token %}<input type="hidden" name="action" value="link"><input type="hidden" name="kind" value="job">
+      <div><label class="govuk-label" for="l-job">{% translate "Job reference" %}</label><input class="govuk-input govuk-input--width-10" id="l-job" name="reference" placeholder="JOB-2026-0007"></div>
+      <div><button class="govuk-button govuk-button--secondary govuk-!-margin-bottom-0" data-module="govuk-button">{% translate "Link the job" %}</button></div></form>{% endif %}
+    {% if valuation_choices %}<form method="post" class="phaema-inline-fields">{% csrf_token %}<input type="hidden" name="action" value="link"><input type="hidden" name="kind" value="valuation">
+      <div><label class="govuk-label" for="l-val">{% translate "Valuation of a project property" %}</label><select class="govuk-select" id="l-val" name="reference">{% for v in valuation_choices %}<option value="{{ v.pk }}">{{ v }}</option>{% endfor %}</select></div>
+      <div><button class="govuk-button govuk-button--secondary govuk-!-margin-bottom-0" data-module="govuk-button">{% translate "Link the valuation" %}</button></div></form>{% endif %}
+  </div></details>{% endif %}
+</div></section>
+
 <section class="phaema-panel" data-panel="project-notes"><h2 class="govuk-heading-m phaema-panel__title">{% translate "Notes and documents" %}</h2><div class="phaema-panel__body">
   {% if can_contribute %}
   <details class="govuk-details" data-module="govuk-details"><summary class="govuk-details__summary"><span class="govuk-details__summary-text">{% translate "Add a note" %}</span></summary><div class="govuk-details__text">
@@ -171,6 +258,10 @@
       <div class="govuk-form-group"><label class="govuk-label" for="op-party">{% translate "Party" %}</label><select class="govuk-select" id="op-party" name="party"><option value="">{% translate "Choose" %}</option>{% for p in parties %}<option value="{{ p.pk }}">{{ p.name }}</option>{% endfor %}</select></div>
       <div class="govuk-form-group"><label class="govuk-label" for="op-role">{% translate "Role" %}</label><input class="govuk-input" id="op-role" name="role" maxlength="60"></div>
       <button class="govuk-button govuk-button--secondary" data-module="govuk-button">{% translate "Add" %}</button></form></div></details>{% endif %}
+
+  {% if access_log is not None %}<h2 class="govuk-heading-m">{% translate "Who has opened it" %}</h2>
+  <p class="govuk-body-s">{% translate "Every opening of this confidential project and its papers is recorded." %}</p>
+  <ul class="govuk-list govuk-body-s">{% for a in access_log %}<li>{{ a.at|date:"j M Y H:i" }}, {{ a.user|person:"–" }}{% if a.what != "project page" %} ({{ a.what }}){% endif %}</li>{% empty %}<li>{% translate "Nobody yet." %}</li>{% endfor %}</ul>{% endif %}
 </div>
 </div>
 {% endblock %}

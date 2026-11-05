@@ -306,3 +306,119 @@ class ProjectDocument(TimeStampedModel):
 
     def __str__(self):
         return self.title
+
+
+def financial_year_label(start_year):
+    """2026 -> "2026/27" (April 2026 to March 2027)."""
+    return f"{start_year}/{(start_year + 1) % 100:02d}"
+
+
+def financial_year_of(day):
+    return day.year if day.month >= 4 else day.year - 1
+
+
+class BudgetLine(models.Model):
+    class Category(models.TextChoices):
+        LAND = "land", _("Land and property")
+        FEES = "fees", _("Fees")
+        WORKS = "works", _("Works")
+        CONTINGENCY = "contingency", _("Contingency")
+        INCOME = "income", _("Income")
+        OTHER = "other", _("Other")
+
+    class Funding(models.TextChoices):
+        CAPITAL = "capital", _("Capital")
+        REVENUE = "revenue", _("Revenue")
+
+    project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name="budget_lines")
+    category = models.CharField(_("category"), max_length=12, choices=Category.choices)
+    description = models.CharField(_("description"), max_length=150)
+    funding = models.CharField(_("capital or revenue"), max_length=8, choices=Funding.choices, default=Funding.CAPITAL)
+    order = models.PositiveSmallIntegerField(default=0)
+
+    class Meta:
+        ordering = ["order", "pk"]
+        verbose_name = _("budget line")
+        verbose_name_plural = _("budget lines")
+
+    def __str__(self):
+        return f"{self.project.display_reference}: {self.description}"
+
+    @property
+    def is_income(self):
+        return self.category == self.Category.INCOME
+
+
+class BudgetYear(models.Model):
+    """One budget line's figures for one financial year (April to March)."""
+
+    line = models.ForeignKey(BudgetLine, on_delete=models.CASCADE, related_name="years")
+    year = models.PositiveSmallIntegerField(_("financial year starting"), help_text=_("2026 means 2026/27."))
+    approved = models.DecimalField(_("approved (£)"), max_digits=14, decimal_places=2, default=0)
+    forecast = models.DecimalField(_("forecast (£)"), max_digits=14, decimal_places=2, default=0)
+    actual = models.DecimalField(_("actual (£)"), max_digits=14, decimal_places=2, default=0)
+
+    class Meta:
+        ordering = ["year"]
+        constraints = [models.UniqueConstraint(fields=["line", "year"], name="budget_year_once")]
+        verbose_name = _("budget year")
+        verbose_name_plural = _("budget years")
+
+    def __str__(self):
+        return f"{self.line} {financial_year_label(self.year)}"
+
+    @property
+    def label(self):
+        return financial_year_label(self.year)
+
+
+class Risk(TimeStampedModel):
+    class Status(models.TextChoices):
+        OPEN = "open", _("Open")
+        CLOSED = "closed", _("Closed")
+
+    SCALE = [(n, str(n)) for n in range(1, 6)]
+
+    project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name="risks")
+    description = models.CharField(_("risk or issue"), max_length=300)
+    likelihood = models.PositiveSmallIntegerField(_("likelihood (1 to 5)"), choices=SCALE, default=3)
+    impact = models.PositiveSmallIntegerField(_("impact (1 to 5)"), choices=SCALE, default=3)
+    owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True,
+                              related_name="project_risks", verbose_name=_("owner"))
+    mitigation = models.TextField(_("what is being done about it"), blank=True)
+    status = models.CharField(_("status"), max_length=6, choices=Status.choices, default=Status.OPEN)
+
+    class Meta:
+        ordering = ["status", "-likelihood", "-impact", "pk"]
+        verbose_name = _("risk")
+        verbose_name_plural = _("risks")
+
+    def __str__(self):
+        return self.description[:60]
+
+    @property
+    def score(self):
+        return self.likelihood * self.impact
+
+    @property
+    def level(self):
+        """(tag colour, words) on the usual 5 x 5 matrix."""
+        if self.score >= 15:
+            return "red", _("High")
+        if self.score >= 8:
+            return "yellow", _("Medium")
+        return "green", _("Low")
+
+
+class ProjectAccess(models.Model):
+    """Each time someone opens a confidential project or one of its papers, for audit and FOI."""
+
+    project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name="access_log")
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name="+")
+    at = models.DateTimeField(auto_now_add=True)
+    what = models.CharField(max_length=100, default="project page")
+
+    class Meta:
+        ordering = ["-at"]
+        verbose_name = _("confidential project access")
+        verbose_name_plural = _("confidential project access log")

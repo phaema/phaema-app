@@ -171,6 +171,8 @@ class Valuation(TimeStampedModel):
         EXTERNAL = "external", _("External only")
         DESKTOP = "desktop", _("Desktop (no inspection)")
 
+    project = models.ForeignKey("projects.Project", on_delete=models.SET_NULL, null=True, blank=True,
+                                related_name="valuations", verbose_name=_("project"))
     property = models.ForeignKey(Property, on_delete=models.PROTECT, related_name="valuations")
     asset_class = models.ForeignKey(AssetClass, on_delete=models.PROTECT, related_name="valuations",
                                     verbose_name=_("asset class"))

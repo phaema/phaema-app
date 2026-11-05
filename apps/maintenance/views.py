@@ -222,8 +222,10 @@ def job_detail(request, pk):
     from apps.servicecharges.models import CostHeading
 
     modules = ModuleSettings.load()
+    from apps.projects.rules import project_for
+
     return render(request, "maintenance/job_detail.html", {
-        "job": job, "can_work": work, "today": date.today(), "rag": job.rag(), "section": "jobs",
+        "job": job, "project": project_for(request.user, job), "can_work": work, "today": date.today(), "rag": job.rag(), "section": "jobs",
         "contractors": Contractor.objects.filter(active=True),
         "needs_approval": workflow.needs_order_approval(job), "limit": workflow.approval_limit(),
         "approver": supervisor_of(request.user), "can_approve": workflow.can_approve(request.user, job),

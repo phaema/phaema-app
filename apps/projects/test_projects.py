@@ -151,3 +151,122 @@ def test_project_files_stay_with_the_project(people):
     assert client.get(f"/projects/{project.pk}/files/document/{doc.pk}/").status_code == 200
     assert client.get(f"/files/{doc.file.name}").status_code == 404
     assert _client(people["other"]).get(f"/projects/{project.pk}/files/document/{doc.pk}/").status_code == 404
+
+
+# ------------------------------------------------------------------ part 2: budget, risks, linked work, reports
+
+def _areas(user, *codes):
+    from apps.core.models import AccessArea
+
+    user.access_areas.set(AccessArea.objects.filter(code__in=codes))
+    from django.contrib.auth.models import User
+
+    return User.objects.get(pk=user.pk)
+
+
+def test_budget_by_financial_year(people, make_user):
+    project = _project(people["lead"], start_date=date(2026, 5, 1), target_date=date(2028, 3, 31))
+    client = _client(people["lead"])
+    url = project.get_absolute_url()
+    client.post(url, {"action": "add_budget_line", "category": "works", "description": "Construction works",
+                      "funding": "capital"})
+    client.post(url, {"action": "add_budget_line", "category": "income", "description": "Sale of plot 3",
+                      "funding": "capital"})
+    works, income = project.budget_lines.order_by("pk")
+    client.post(url, {"action": "set_budget", "line": works.pk, "year": "2026", "approved": "400,000",
+                      "forecast": "450000", "actual": "120000"})
+    client.post(url, {"action": "set_budget", "line": works.pk, "year": "2027", "approved": "600000",
+                      "forecast": "600000"})
+    client.post(url, {"action": "set_budget", "line": income.pk, "year": "2027", "forecast": "250000"})
+    from apps.projects import budget
+
+    data = budget.summary(project)
+    assert data["cost"].approved == 1000000 and data["cost"].forecast == 1050000 and data["cost"].actual == 120000
+    assert data["income"].forecast == 250000
+    assert [label for label, _t in data["years"]] == ["2026/27", "2027/28"]
+    page = client.get(url).content.decode()
+    assert "£50,000 over budget" in page and "2026/27" in page
+    bad = client.post(url, {"action": "set_budget", "line": works.pk, "year": "2026", "approved": "lots"}, follow=True)
+    assert "Enter amounts in pounds" in bad.content.decode()
+
+    # Who sees and edits the budget
+    estates_only = _areas(make_user("budget.estates", "Surveyors"), "estates")
+    assert "Construction works" not in _client(estates_only).get(url).content.decode()
+    officer = _areas(make_user("budget.finance", "Surveyors"), "finance")
+    page = _client(officer).get(url).content.decode()
+    assert "Construction works" in page and "Enter figures for a year" in page
+    _client(officer).post(url, {"action": "set_budget", "line": works.pk, "year": "2026", "approved": "400000",
+                                "forecast": "450000", "actual": "130000"})
+    assert works.years.get(year=2026).actual == 130000
+
+
+def test_risks(people):
+    project = _project(people["lead"])
+    client = _client(people["lead"])
+    client.post(project.get_absolute_url(), {"action": "add_risk", "description": "Planning refused",
+                                             "likelihood": "4", "impact": "5", "owner": people["lead"].pk})
+    risk = project.risks.get()
+    assert risk.score == 20 and risk.level[0] == "red"
+    assert "High" in client.get(project.get_absolute_url()).content.decode()
+    client.post(project.get_absolute_url(), {"action": "update_risk", "risk": risk.pk})
+    risk.refresh_from_db()
+    assert risk.status == "closed"
+
+
+def test_linking_cases_and_who_sees_the_link(people):
+    from apps.cases.models import Case, CaseType
+
+    case = Case.objects.create(case_type=CaseType.objects.first(), title="Wayleave for new substation",
+                               owner=people["lead"])
+    project = _project(people["lead"], confidential=True)
+    client = _client(people["lead"])
+    client.post(project.get_absolute_url(), {"action": "link", "kind": "case", "reference": case.display_reference})
+    case.refresh_from_db()
+    assert case.project == project
+    assert project.display_reference in client.get(case.get_absolute_url()).content.decode()
+    assert project.display_reference not in _client(people["other"]).get(case.get_absolute_url()).content.decode()
+    client.post(project.get_absolute_url(), {"action": "unlink", "kind": "case", "id": case.pk})
+    case.refresh_from_db()
+    assert case.project is None
+
+
+def test_confidential_access_is_logged(people):
+    project = _project(people["lead"], confidential=True)
+    ProjectMember.objects.create(project=project, user=people["other"])
+    _client(people["other"]).get(project.get_absolute_url())
+    assert project.access_log.filter(user=people["other"]).exists()
+    page = _client(people["lead"]).get(project.get_absolute_url()).content.decode()
+    assert "Who has opened it" in page
+    assert "Who has opened it" not in _client(people["other"]).get(project.get_absolute_url()).content.decode()
+
+
+def test_spending_import(people):
+    from apps.projects.importing import SpendWorkbook
+
+    project = _project(people["lead"])
+    line = project.budget_lines.create(category="works", description="Construction works")
+    csv = (f"Project,Budget line,Financial year,Actual\n{project.display_reference},Construction works,2026/27,"
+           f"98765.43\n{project.display_reference},Nonsense,2026/27,1\n").encode()
+    result, _prepared = SpendWorkbook().validate(SimpleUploadedFile("spend.csv", csv))
+    assert not result.ok and "has no line called 'Nonsense'" in " ".join(e for r in result.rows for e in r.errors)
+    csv = f"Project,Budget line,Financial year,Actual\n{project.display_reference},Construction works,2026/27,98765.43\n"
+    workbook = SpendWorkbook()
+    result, prepared = workbook.validate(SimpleUploadedFile("spend.csv", csv.encode()))
+    assert result.ok
+    workbook.apply(prepared)
+    from decimal import Decimal
+
+    assert line.years.get(year=2026).actual == Decimal("98765.43")
+
+
+def test_project_reports_follow_visibility(people):
+    from apps.reports.models import Report
+    from apps.reports.views import _queryset
+
+    open_project = _project(people["lead"])
+    secret = _project(people["lead"], kind="acquisition", confidential=True)
+    report = Report(dataset="projects", columns=["reference"], owner=people["other"])
+    _ds, rows = _queryset(report, people["other"])
+    assert open_project in rows and secret not in rows
+    listing = _client(people["other"]).get("/projects/?format=csv").content.decode()
+    assert open_project.display_reference in listing and secret.display_reference not in listing

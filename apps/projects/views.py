@@ -2,6 +2,7 @@
 """Project pages: the list, starting and editing a project, and the project page where the work happens."""
 import mimetypes
 from datetime import date
+from decimal import Decimal, InvalidOperation
 
 from django import forms
 from django.contrib import messages
@@ -15,15 +16,18 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.utils.translation import gettext as _
 from django.views.generic import ListView
 
-from apps.core.roles import ADMINISTRATORS, CONTRIBUTORS, SURVEYORS
+from apps.core.access import can_use
+from apps.core.roles import ADMINISTRATORS, CONTRIBUTORS, SURVEYORS, is_administrator
 from apps.core.tables import sortable
 from apps.leases.forms import GovukMixin
 from apps.leases.models import Party
 from apps.properties.models import Property
+from apps.reports.mixins import ExportMixin
 
-from . import rules, workflow
-from .models import (GATEWAYS, PHASE_ORDER, GatewayDecision, Milestone, Phase, Project, ProjectDocument,
-                     ProjectMember, ProjectNote, ProjectParty, ProjectProperty, ProjectTask, ProjectType)
+from . import budget, rules, workflow
+from .models import (GATEWAYS, PHASE_ORDER, BudgetLine, BudgetYear, GatewayDecision, Milestone, Phase, Project,
+                     ProjectAccess, ProjectDocument, ProjectMember, ProjectNote, ProjectParty, ProjectProperty,
+                     ProjectTask, ProjectType, Risk, financial_year_label, financial_year_of)
 
 User = get_user_model()
 
@@ -48,8 +52,9 @@ def _date(text):
         return None
 
 
-class ProjectListView(LoginRequiredMixin, ListView):
+class ProjectListView(LoginRequiredMixin, ExportMixin, ListView):
     model = Project
+    export_dataset, export_title = "projects", "Projects"
     paginate_by = 50
     template_name = "projects/project_list.html"
 
@@ -179,20 +184,23 @@ def project_edit(request, pk):
     return _form_page(request, form, project)
 
 
-def _project(request, pk):
+def _project(request, pk, what=None):
     project = get_object_or_404(Project.objects.select_related("project_type", "lead", "parent", "vendor"), pk=pk)
     if not rules.can_see(request.user, project):
         raise Http404  # a confidential project's existence is not revealed
+    if project.confidential and what:
+        ProjectAccess.objects.create(project=project, user=request.user, what=what[:100])
     return project
 
 
 @login_required
 def project_detail(request, pk):
-    project = _project(request, pk)
+    project = _project(request, pk, what="project page" if request.method == "GET" else None)
     can_manage = rules.can_manage(request.user, project)
     can_contribute = rules.can_contribute(request.user, project)
+    can_budget = rules.can_edit_budget(request.user, project)
     if request.method == "POST":
-        return _act(request, project, can_manage, can_contribute)
+        return _act(request, project, can_manage, can_contribute, can_budget)
     today = date.today()
     tasks = list(project.tasks.select_related("owner", "done_by"))
     phases = [(p, project.phase_label(p), [t for t in tasks if t.phase == p]) for p in PHASE_ORDER]
@@ -218,21 +226,55 @@ def project_detail(request, pk):
         "children": rules.visible(request.user, project.phases.all()),
         "statuses": [(Project.Status.ACTIVE, _("Active")), (Project.Status.PAUSED, _("Paused")),
                      (Project.Status.STOPPED, _("Stopped"))],
+        "budget": budget.summary(project) if rules.can_see_budget(request.user, project) else None,
+        "can_budget": can_budget, "categories": BudgetLine.Category.choices, "fundings": BudgetLine.Funding.choices,
+        "budget_years": _year_choices(project),
+        "risks": sorted(project.risks.select_related("owner"), key=lambda r: (r.status != "open", -r.score, r.pk)),
+        "scale": Risk.SCALE,
+        "linked_cases": project.cases.select_related("case_type").order_by("-year", "-number"),
+        "linked_jobs": project.jobs.select_related("property").order_by("-pk") if can_use(request.user, "maintenance") else None,
+        "linked_valuations": project.valuations.select_related("property").order_by("-valuation_date")
+        if can_use(request.user, "valuations") else None,
+        "valuation_choices": _valuation_choices(project) if can_manage and can_use(request.user, "valuations") else [],
+        "access_log": project.access_log.select_related("user")[:20]
+        if project.confidential and (is_administrator(request.user) or project.lead_id == request.user.pk) else None,
     })
 
 
+def _valuation_choices(project):
+    from apps.valuations.models import Valuation
+
+    ids = set()
+    for link in project.property_links.select_related("property"):
+        ids.add(link.property_id)
+        ids.update(link.property._descendant_ids())
+    return Valuation.objects.filter(property__in=ids, project__isnull=True).select_related("property")[:100]
+
+
+def _year_choices(project):
+    """Financial years a budget can be entered for: from the project's start to five years after its target."""
+    start = financial_year_of(project.start_date or date.today())
+    end = financial_year_of(project.target_date) if project.target_date else start + 4
+    end = max(end, financial_year_of(date.today())) + 1
+    return [(y, financial_year_label(y)) for y in range(start, min(end, start + 15) + 1)]
+
+
 MANAGE = {"add_property", "remove_property", "add_member", "remove_member", "add_party", "remove_party",
-          "add_milestone", "update_milestone", "add_task", "task_done", "record_gateway", "set_status"}
+          "add_milestone", "update_milestone", "add_task", "task_done", "record_gateway", "set_status",
+          "add_risk", "update_risk", "link", "unlink"}
 CONTRIBUTE = {"add_note", "add_document"}
+BUDGET = {"add_budget_line", "set_budget", "remove_budget_line"}
 
 
-def _act(request, project, can_manage, can_contribute):
+def _act(request, project, can_manage, can_contribute, can_budget=False):
     post, action = request.POST, request.POST.get("action", "")
     if action in MANAGE and not can_manage:
         raise PermissionDenied
     if action in CONTRIBUTE and not can_contribute:
         raise PermissionDenied
-    if action not in MANAGE | CONTRIBUTE:
+    if action in BUDGET and not can_budget:
+        raise PermissionDenied
+    if action not in MANAGE | CONTRIBUTE | BUDGET:
         raise Http404
     try:
         message = _do(request, project, action, post)
@@ -319,6 +361,54 @@ def _do(request, project, action, post):
     if action == "set_status":
         workflow.set_status(project, post.get("status", ""), post.get("reason", ""))
         return _("Project %(status)s.") % {"status": project.get_status_display().lower()}
+    if action == "add_budget_line":
+        description = post.get("description", "").strip()
+        if not description or post.get("category") not in BudgetLine.Category.values:
+            raise ValueError(_("Choose a category and describe the budget line."))
+        BudgetLine.objects.create(project=project, category=post["category"], description=description[:150],
+                                  funding=post.get("funding") if post.get("funding") in BudgetLine.Funding.values
+                                  else BudgetLine.Funding.CAPITAL, order=project.budget_lines.count())
+        return _("Budget line added.")
+    if action == "remove_budget_line":
+        line = get_object_or_404(BudgetLine, project=project, pk=post.get("line"))
+        if line.years.exclude(actual=0).exists():
+            raise ValueError(_("This line has actual spending recorded, so it cannot be removed."))
+        line.delete()
+        return _("Budget line removed.")
+    if action == "set_budget":
+        line = get_object_or_404(BudgetLine, project=project, pk=post.get("line"))
+        year = int(post.get("year", "0") or 0)
+        if year not in dict(_year_choices(project)):
+            raise ValueError(_("Choose a financial year."))
+        values = {}
+        for name in ("approved", "forecast", "actual"):
+            raw = post.get(name, "").replace(",", "").replace("£", "").strip()
+            try:
+                values[name] = Decimal(raw) if raw else Decimal("0")
+            except InvalidOperation:
+                raise ValueError(_("Enter amounts in pounds, for example 125000."))
+        BudgetYear.objects.update_or_create(line=line, year=year, defaults=values)
+        return _("%(line)s, %(year)s saved.") % {"line": line.description, "year": financial_year_label(year)}
+    if action == "add_risk":
+        description = post.get("description", "").strip()
+        if not description:
+            raise ValueError(_("Describe the risk."))
+        def score(name):
+            value = post.get(name, "3")
+            return int(value) if value in "12345" and len(value) == 1 else 3
+        owner = _people(ADMINISTRATORS, SURVEYORS, CONTRIBUTORS).filter(pk=post.get("owner")).first()
+        Risk.objects.create(project=project, description=description[:300], likelihood=score("likelihood"),
+                            impact=score("impact"), owner=owner, mitigation=post.get("mitigation", "").strip())
+        return _("Risk added.")
+    if action == "update_risk":
+        risk = get_object_or_404(Risk, project=project, pk=post.get("risk"))
+        risk.status = Risk.Status.CLOSED if risk.status == Risk.Status.OPEN else Risk.Status.OPEN
+        risk.save()
+        return _("Risk closed.") if risk.status == Risk.Status.CLOSED else _("Risk reopened.")
+    if action == "link":
+        return _link(request, project, post.get("kind", ""), post.get("reference", "").strip(), True)
+    if action == "unlink":
+        return _link(request, project, post.get("kind", ""), post.get("id", ""), False)
     if action == "add_note":
         text = post.get("text", "").strip()
         if not text:
@@ -336,11 +426,56 @@ def _do(request, project, action, post):
     raise Http404
 
 
+def _link(request, project, kind, value, add):
+    """Link (or unlink) a case, maintenance job or valuation to the project, by its reference or number."""
+    from apps.cases.models import Case
+
+    if kind == "case":
+        model, label = Case, _("Case")
+        if add:
+            text = value.upper().replace("CAS-", "")
+            parts = text.split("-")
+            if len(parts) != 2 or not all(p.isdigit() for p in parts):
+                raise ValueError(_("Enter the case reference, for example CAS-2026-0012."))
+            item = Case.objects.filter(year=int(parts[0]), number=int(parts[1])).first()
+    elif kind in ("job", "valuation"):
+        module = "maintenance" if kind == "job" else "valuations"
+        if not can_use(request.user, module):
+            raise PermissionDenied
+        if kind == "job":
+            from apps.maintenance.models import Job as model
+
+            label = _("Job")
+        else:
+            from apps.valuations.models import Valuation as model
+
+            label = _("Valuation")
+        if add:
+            item = None
+            if kind == "job":
+                text = value.upper().replace("JOB-", "")
+                parts = text.split("-")
+                if len(parts) == 2 and all(p.isdigit() for p in parts):
+                    item = model.objects.filter(year=int(parts[0]), number=int(parts[1])).first()
+            elif value.isdigit():
+                item = model.objects.filter(pk=int(value)).first()
+    else:
+        raise Http404
+    if not add:
+        model.objects.filter(pk=value if str(value).isdigit() else 0, project=project).update(project=None)
+        return _("%(what)s unlinked.") % {"what": label}
+    if item is None:
+        raise ValueError(_("No %(what)s with that reference.") % {"what": str(label).lower()})
+    item.project = project
+    item.save(update_fields=["project"])
+    return _("%(what)s linked to the project.") % {"what": label}
+
+
 @login_required
 def project_file(request, pk, kind, item):
     """Serve a project document or gateway report to people who can see the project (not through /files/, so a
     confidential project's papers stay with its team)."""
-    project = _project(request, pk)
+    project = _project(request, pk, what=f"{kind} {item}")
     if kind == "document":
         field = get_object_or_404(ProjectDocument, project=project, pk=item).file
     elif kind == "report":

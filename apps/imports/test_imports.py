@@ -161,6 +161,10 @@ def test_upload_preview_and_confirm(client, admin, units):
 
 
 def test_import_is_for_administrators_only(client, make_user, db):
-    client.force_login(make_user("surv", "Surveyors"))
+    from apps.core.models import AccessArea
+
+    surveyor = make_user("surv", "Surveyors")
+    surveyor.access_areas.set(AccessArea.objects.filter(code="estates"))  # finance staff may import spending
+    client.force_login(surveyor)
     assert client.get("/import/").status_code == 403
     assert client.get("/import/leases/template.xlsx").status_code == 403

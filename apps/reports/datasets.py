@@ -850,6 +850,72 @@ def _audit_fields():
     ]
 
 
+# ------------------------------------------------------------------ projects
+
+def _projects():
+    from apps.projects.models import Project
+
+    return Project.objects.select_related("project_type", "lead").prefetch_related(
+        "property_links__property", "milestones", "budget_lines__years")
+
+
+def _budget_total(project, kind, income=False):
+    return sum((getattr(y, kind) for line in project.budget_lines.all() if line.is_income == income
+                for y in line.years.all()), Decimal("0"))
+
+
+def _project_fields():
+    from apps.projects.models import Phase, Project as P
+
+    return [
+        Field("reference", "Project", getter=lambda p: p.display_reference, default=True),
+        Field("name", "Name", path="name", default=True),
+        Field("type", "Type", path="project_type__name", default=True),
+        Field("phase", "Phase", "choice", "phase", choices=[(str(v), str(label)) for v, label in Phase.choices],
+              default=True),
+        Field("status", "Status", "choice", "status", choices=_choices(P, "status"), default=True),
+        Field("rag", "On track?", getter=lambda p: str(p.rag()[1]), default=True),
+        Field("lead", "Lead", "user", "lead", default=True),
+        Field("sponsor", "Sponsor", path="sponsor"),
+        Field("start_date", "Started", "date", "start_date"),
+        Field("target_date", "Target completion", "date", "target_date", default=True),
+        Field("confidential", "Confidential", "bool", "confidential"),
+        Field("properties", "Properties", getter=lambda p: "; ".join(
+            f"{link.property.reference} {link.property.name}" for link in p.property_links.all())),
+        Field("site_address", "Proposed site", path="site_address"),
+        Field("budget_approved", "Budget approved (costs)", "money", getter=lambda p: _budget_total(p, "approved"),
+              default=True),
+        Field("budget_forecast", "Forecast (costs)", "money", getter=lambda p: _budget_total(p, "forecast"),
+              default=True),
+        Field("budget_actual", "Spent", "money", getter=lambda p: _budget_total(p, "actual"), default=True),
+        Field("income_forecast", "Income forecast", "money", getter=lambda p: _budget_total(p, "forecast", True)),
+    ]
+
+
+def _project_budget():
+    from apps.projects.models import BudgetYear
+
+    return BudgetYear.objects.select_related("line", "line__project", "line__project__project_type")
+
+
+def _project_budget_fields():
+    from apps.projects.models import BudgetLine as B
+
+    return [
+        Field("project", "Project", getter=lambda y: y.line.project.display_reference, default=True),
+        Field("project_name", "Project name", path="line__project__name", default=True),
+        Field("line", "Budget line", path="line__description", default=True),
+        Field("category", "Category", "choice", "line__category", choices=_choices(B, "category"), default=True),
+        Field("funding", "Capital or revenue", "choice", "line__funding", choices=_choices(B, "funding"), default=True),
+        Field("year", "Financial year", getter=lambda y: y.label, default=True),
+        Field("year_start", "Financial year starting", "number", "year"),
+        Field("approved", "Approved", "money", "approved", default=True),
+        Field("forecast", "Forecast", "money", "forecast", default=True),
+        Field("actual", "Actual", "money", "actual", default=True),
+        Field("variance", "Forecast over approved", "money", getter=lambda y: y.forecast - y.approved),
+    ]
+
+
 _REGISTRY = None
 
 
@@ -900,6 +966,10 @@ def registry():
                     _expenditure, _expenditure_fields()),
             Dataset("titles", "Titles", "Registered and unregistered titles.", _titles, _title_fields()),
             Dataset("changes", "Change log", "Every change made in PHAEMA.", _audit, _audit_fields()),
+            Dataset("projects", "Projects", "Developments, acquisitions, disposals, programmes and reviews.",
+                    _projects, _project_fields()),
+            Dataset("project_budget", "Project budgets", "Each project budget line's approved, forecast and actual "
+                    "figures by financial year.", _project_budget, _project_budget_fields()),
         ]}
     return _REGISTRY
 

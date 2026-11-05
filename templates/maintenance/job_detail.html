@@ -6,6 +6,7 @@
 <span class="govuk-caption-l">{{ job.get_category_display }}</span>
 <h1 class="govuk-heading-l govuk-!-margin-bottom-2">{{ job.reference }}</h1>
 <p class="govuk-body-l govuk-!-margin-bottom-2">{{ job.title }}</p>
+{% if project %}<p class="govuk-body">{% translate "Part of project" %} <a class="govuk-link" href="{{ project.get_absolute_url }}">{{ project.display_reference }} {{ project.name }}</a></p>{% endif %}
 <p class="govuk-body"><strong class="govuk-tag govuk-tag--{{ rag.0 }}">{{ rag.1 }}</strong> · {{ job.get_status_display }}{% if job.target_date and job.is_open %} · {% translate "Target" %} {{ job.target_date|date:"j M Y" }}{% endif %}</p>
 
 <div class="govuk-grid-row"><div class="govuk-grid-column-two-thirds">

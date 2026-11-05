@@ -118,6 +118,8 @@ class Case(TimeStampedModel):
         EVENT = "event", _("PHAEMA lease event")
         OTHER = "other", _("Other")
 
+    project = models.ForeignKey("projects.Project", on_delete=models.SET_NULL, null=True, blank=True,
+                                related_name="cases", verbose_name=_("project"))
     year = models.PositiveSmallIntegerField(editable=False)
     number = models.PositiveIntegerField(editable=False)
     case_type = models.ForeignKey(CaseType, on_delete=models.PROTECT, related_name="cases", verbose_name=_("type"))
