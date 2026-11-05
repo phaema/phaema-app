@@ -50,6 +50,10 @@ See the [roadmap](docs/roadmap.md) for what is coming next.
 
 Questions, offers of help and councils interested in trying PHAEMA: email stuart@phaema.co.uk, or [raise an issue](https://github.com/phaema/phaema-app/issues). See [contributing](CONTRIBUTING.md) to take part, and [security](SECURITY.md) to report a vulnerability.
 
+## Try it online
+
+The test site at https://demo.phaema.co.uk holds fictional data and is reset every 48 hours. Select **Request a test account** there to get a sign-in.
+
 ## Try it on your computer
 
 You need Docker (or Colima) and Git. Mac users: follow the [Mac setup guide](docs/setup-mac.md).
