@@ -17,7 +17,9 @@ Usage: ./phaema.sh <command>
   reminders    Send any lease event reminders that are due now
   logs         Show live logs (press Ctrl+C to stop watching)
   status       Show whether PHAEMA is running
-  backup       Save a copy of the database to the backups folder
+  backup       Save a copy of the database and uploaded files to the backups folder
+  restore FILE Replace ALL data with a database backup (and its matching files backup, if any)
+  prune-backups N  Keep only the newest N backups
   reset-data   DELETE all data and start with an empty database
 EOF
 }
@@ -49,9 +51,30 @@ case "${1:-}" in
   status)  compose ps ;;
   backup)
     mkdir -p backups
-    file="backups/phaema-$(date +%Y%m%d-%H%M%S).sql.gz"
+    stamp="$(date +%Y%m%d-%H%M%S)"
+    file="backups/phaema-$stamp.sql.gz"
     compose exec -T db pg_dump -U phaema phaema | gzip > "$file"
-    echo "Saved $file" ;;
+    compose exec -T web tar -czf - -C /app media > "backups/media-$stamp.tar.gz"
+    echo "Saved $file and backups/media-$stamp.tar.gz" ;;
+  restore)
+    [ -f "${2:-}" ] || { echo "Usage: ./phaema.sh restore backups/phaema-YYYYMMDD-HHMMSS.sql.gz"; exit 1; }
+    read -r -p "This REPLACES ALL PHAEMA data with $2. Type RESTORE to confirm: " answer
+    [ "$answer" = "RESTORE" ] || { echo "Cancelled."; exit 1; }
+    compose stop web scheduler
+    compose exec -T db psql -U phaema -d postgres -q -c "DROP DATABASE IF EXISTS phaema WITH (FORCE);" -c "CREATE DATABASE phaema OWNER phaema;"
+    gunzip -c "$2" | compose exec -T db psql -U phaema -d phaema -q -v ON_ERROR_STOP=1 >/dev/null
+    compose start web scheduler
+    media="${2/phaema-/media-}"; media="${media%.sql.gz}.tar.gz"
+    if [ -f "$media" ]; then
+      compose exec -T -u root web sh -c 'rm -rf /app/media/* && tar -xzf - -C /app && chown -R phaema /app/media' < "$media"
+      echo "Restored $2 and $media"
+    else
+      echo "Restored $2 (no matching files backup found)"
+    fi ;;
+  prune-backups)
+    keep="${2:-14}"
+    ls -1t backups/phaema-*.sql.gz 2>/dev/null | tail -n +"$((keep + 1))" | xargs -r rm -f
+    ls -1t backups/media-*.tar.gz 2>/dev/null | tail -n +"$((keep + 1))" | xargs -r rm -f ;;
   reset-data)
     read -r -p "This deletes ALL PHAEMA data. Type DELETE to confirm: " answer
     [ "$answer" = "DELETE" ] || { echo "Cancelled."; exit 1; }
