@@ -88,7 +88,7 @@ if [ ! -f .env ]; then
 COMPOSE_FILE=docker-compose.yml:docker-compose.server.yml
 PHAEMA_DOMAIN=$DOMAIN
 PHAEMA_BASE_URL=https://$DOMAIN
-ALLOWED_HOSTS=$DOMAIN
+ALLOWED_HOSTS=$DOMAIN,localhost,127.0.0.1
 BEHIND_HTTPS_PROXY=True
 SECURE_COOKIES=True
 DEBUG=False

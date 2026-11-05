@@ -30,7 +30,8 @@ case "${1:-}" in
   start)
     compose up -d --build
     echo "Waiting for PHAEMA to start..."
-    for _ in $(seq 1 60); do
+    # The first start sets up the whole database, which takes a few minutes on a small server.
+    for _ in $(seq 1 150); do
       if curl -fs http://localhost:8000/health/ >/dev/null 2>&1; then
         echo "PHAEMA is running: open http://localhost:8000"
         exit 0
