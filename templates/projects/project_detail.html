@@ -60,6 +60,16 @@
   {% endif %}
 </div></section>
 
+{% if completion %}
+<section class="phaema-panel" data-panel="project-completion"><h2 class="govuk-heading-m phaema-panel__title">{% translate "Completion checklist" %}</h2><div class="phaema-panel__body">
+  <p class="govuk-body-s">{% translate "What the register needs when the project completes. PHAEMA opens each form filled in from the project; nothing in the register changes until you save it there." %}</p>
+  <ul class="govuk-list phaema-tasks">
+  {% for step in completion %}<li>{% if can_manage and not step.automatic %}<form method="post" class="govuk-!-display-inline">{% csrf_token %}<input type="hidden" name="action" value="complete_step"><input type="hidden" name="key" value="{{ step.key }}"><button class="phaema-tick{% if step.done %} done{% endif %}" aria-label="{% if step.done %}{% translate 'Mark as not done' %}{% else %}{% translate 'Mark as done' %}{% endif %}: {{ step.text }}">{% if step.done %}✓{% endif %}</button></form>{% else %}<span class="phaema-tick{% if step.done %} done{% endif %}">{% if step.done %}✓{% endif %}</span>{% endif %}
+    <span{% if step.done %} class="phaema-done"{% endif %}>{{ step.text }}</span>{% if step.url and can_manage and not step.done %} <a class="govuk-link govuk-body-s" href="{{ step.url }}">{{ step.link_text }}</a>{% endif %}{% if step.automatic %} <span class="govuk-body-s">({% translate "checked by PHAEMA" %})</span>{% endif %}</li>{% endfor %}
+  </ul>
+</div></section>
+{% endif %}
+
 <section class="phaema-panel" data-panel="project-milestones"><h2 class="govuk-heading-m phaema-panel__title">{% translate "Milestones" %}</h2><div class="phaema-panel__body">
   {% if milestones %}<table class="govuk-table">
     <thead class="govuk-table__head"><tr class="govuk-table__row"><th scope="col" class="govuk-table__header">{% translate "Milestone" %}</th><th scope="col" class="govuk-table__header">{% translate "Target" %}</th><th scope="col" class="govuk-table__header">{% translate "Forecast" %}</th><th scope="col" class="govuk-table__header">{% translate "Achieved" %}</th></tr></thead>
@@ -240,6 +250,14 @@
 </div>
 
 <div class="govuk-grid-column-one-third">
+  {% if has_map %}<h2 class="govuk-heading-m">{% translate "Map" %}</h2>
+  {% url 'projects:geojson' project.pk as features_url %}
+  {% include "properties/_map.html" with map_id="project-map" features_url=features_url height="300px" %}{% endif %}
+  {% if can_manage %}<details class="govuk-details" data-module="govuk-details"><summary class="govuk-details__summary"><span class="govuk-details__summary-text">{% if project.site_boundary %}{% translate "Redraw the proposed site" %}{% else %}{% translate "Draw the proposed site" %}{% endif %}</span></summary><div class="govuk-details__text">
+    <form method="post">{% csrf_token %}<input type="hidden" name="action" value="site_from_inspire">
+      <div class="govuk-form-group"><label class="govuk-label" for="site-parcels">{% translate "HM Land Registry INSPIRE parcel IDs" %}</label><div class="govuk-hint">{% translate "Separate several with commas. Find them on the Map with Land Registry boundaries switched on." %}</div><input class="govuk-input" id="site-parcels" name="parcels"></div>
+      <button class="govuk-button govuk-button--secondary" data-module="govuk-button">{% translate "Draw the site" %}</button></form></div></details>{% endif %}
+
   <h2 class="govuk-heading-m">{% translate "Team" %}</h2>
   <ul class="govuk-list">
     {% if project.lead %}<li>{{ project.lead|person }} <span class="govuk-body-s">({% translate "lead" %})</span></li>{% endif %}

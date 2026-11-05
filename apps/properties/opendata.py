@@ -43,7 +43,7 @@ def _without_excluded_parents():
     """Publishable properties: not excluded themselves, and not part of anything excluded."""
     everything = list(Property.objects.order_by("reference"))
     parent = {p.pk: p.parent_id for p in everything}
-    excluded = {p.pk for p in everything if p.exclude_from_publication}
+    excluded = {p.pk for p in everything if p.exclude_from_publication or p.disposed_on}
 
     def hidden(pk):
         while pk is not None:

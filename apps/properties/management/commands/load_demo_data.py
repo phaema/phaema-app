@@ -336,6 +336,9 @@ class Command(BaseCommand):
         demo_north.load_valuations(date.today())
 
         self.load_access_areas()
+        from apps.projects import demo as project_demo
+
+        project_demo.load(date.today())
 
         modules = ModuleSettings.load()
         if not modules.organisation_name:
