@@ -223,6 +223,8 @@ class Job(TimeStampedModel):
     PRIORITY_WORKING_DAYS = {"emergency": None, "urgent": 5, "routine": 20}
     OPEN = ("reported", "ordered")
 
+    project = models.ForeignKey("projects.Project", on_delete=models.SET_NULL, null=True, blank=True,
+                                related_name="jobs", verbose_name=_("project"))
     year = models.PositiveSmallIntegerField(editable=False)
     number = models.PositiveIntegerField(editable=False)
     property = models.ForeignKey(Property, on_delete=models.PROTECT, related_name="jobs", verbose_name=_("property"))

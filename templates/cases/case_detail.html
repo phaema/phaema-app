@@ -6,6 +6,7 @@
 <span class="govuk-caption-l">{{ case.case_type.name }}</span>
 <h1 class="govuk-heading-l govuk-!-margin-bottom-2">{{ case.display_reference }}</h1>
 <p class="govuk-body-l govuk-!-margin-bottom-2">{{ case.title }}</p>
+{% if project %}<p class="govuk-body">{% translate "Part of project" %} <a class="govuk-link" href="{{ project.get_absolute_url }}">{{ project.display_reference }} {{ project.name }}</a></p>{% endif %}
 <p class="govuk-body"><strong class="govuk-tag govuk-tag--{{ rag.0 }}">{{ rag.1 }}</strong>{% if case.status == "on_hold" %} {{ case.on_hold_reason }}{% endif %}
   {% if case.target_date and case.is_open and not case.decision_on %} · {% translate "Target" %} {{ case.target_date|date:"j M Y" }}{% endif %}</p>
 

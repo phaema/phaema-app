@@ -64,6 +64,21 @@ DATASET_MODULES = {
 }
 
 
+def _project_rows(key, qs, user):
+    """Projects the person may see; budgets only for projects whose budget they may see."""
+    from apps.core.roles import is_administrator
+    from apps.projects.rules import is_finance, visible
+
+    if user is None:
+        return qs.none()
+    projects = visible(user)
+    if key == "projects":
+        return qs.filter(pk__in=projects)
+    if not (is_administrator(user) or is_finance(user)):
+        projects = projects.filter(Q(lead=user) | Q(members__user=user))
+    return qs.filter(line__project__in=projects)
+
+
 def dataset_allowed(user, key):
     from apps.core.access import scope
 
@@ -91,6 +106,8 @@ def _queryset(report, user=None):
         from apps.core.access import audit_visible
 
         base = audit_visible(user, base)
+    if report.dataset in ("projects", "project_budget"):
+        base = _project_rows(report.dataset, base, user)
     qs = datasets.apply_filters(ds, base, report.filters)
     sort = ds.field(report.sort_by)
     if sort and sort.filterable:

@@ -15,7 +15,7 @@ class ProjectsConfig(AppConfig):
 
         for model in (models.Project, models.ProjectType, models.ProjectProperty, models.ProjectMember,
                       models.ProjectParty, models.GatewayDecision, models.Milestone, models.ProjectTask,
-                      models.ProjectNote, models.ProjectDocument):
+                      models.ProjectNote, models.ProjectDocument, models.BudgetLine, models.BudgetYear, models.Risk):
             audit.register(model)
 
         def seed(sender, **kwargs):

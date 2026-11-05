@@ -23,7 +23,7 @@ IMPORT_DIR = "imports"
 MAX_BYTES = 10 * 1024 * 1024
 
 
-FINANCE_IMPORTS = {"receipts": "ledger", "expenditure": "servicecharges"}
+FINANCE_IMPORTS = {"receipts": "ledger", "expenditure": "servicecharges", "project_spending": None}
 
 
 def _available(user):
@@ -38,8 +38,8 @@ def _available(user):
     if is_administrator(user):
         return found
     if can_do_finance(user):
-        return [wb for wb in found
-                if wb.key in FINANCE_IMPORTS and scope(user, FINANCE_IMPORTS[wb.key], settings) == "full"]
+        return [wb for wb in found if wb.key in FINANCE_IMPORTS and (
+            FINANCE_IMPORTS[wb.key] is None or scope(user, FINANCE_IMPORTS[wb.key], settings) == "full")]
     return []
 
 

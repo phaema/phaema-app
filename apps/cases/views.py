@@ -255,8 +255,10 @@ def case_detail(request, pk):
     timeline.sort(key=lambda item: (item[1], getattr(item[2], "created_at", None) or today), reverse=True)
     tasks = list(case.tasks.select_related("owner", "done_by"))
     stages = [(s, label, [t for t in tasks if t.stage == s]) for s, label in Stage.choices]
+    from apps.projects.rules import project_for
+
     return render(request, "cases/case_detail.html", {
-        "case": case, "can_work": can_work, "can_contribute": can_contribute, "today": today,
+        "case": case, "project": project_for(request.user, case), "can_work": can_work, "can_contribute": can_contribute, "today": today,
         "stages": stages, "stage_index": STAGE_ORDER.index(case.stage), "timeline": timeline,
         "rag": case.rag(today), "decisions": Case.Decision.choices,
         "people": _people(ADMINISTRATORS, SURVEYORS), "contributors": _people(CONTRIBUTORS),

@@ -45,3 +45,27 @@ def can_manage(user, project):
 
 def can_contribute(user, project):
     return can_manage(user, project) or (has_role(user) and is_member(user, project))
+
+
+def is_finance(user):
+    """Finance staff: in an access area that opens the rent ledger in full or allows finance actions (Finance)."""
+    from apps.core.access import areas
+
+    return has_role(user) and any(a.finance_actions or "ledger" in (a.modules or []) for a in areas(user))
+
+
+def can_see_budget(user, project):
+    """The budget: administrators, the lead and team, and finance staff."""
+    return can_see(user, project) and (is_administrator(user) or is_member(user, project) or is_finance(user))
+
+
+def can_edit_budget(user, project):
+    from apps.core.access import can_do_finance
+
+    return can_see(user, project) and (can_manage(user, project) or can_do_finance(user))
+
+
+def project_for(user, record):
+    """The project a case, job or valuation belongs to, if this person may see it (else None)."""
+    project = getattr(record, "project", None)
+    return project if project is not None and can_see(user, project) else None
