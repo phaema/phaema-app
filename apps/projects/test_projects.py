@@ -270,3 +270,116 @@ def test_project_reports_follow_visibility(people):
     assert open_project in rows and secret not in rows
     listing = _client(people["other"]).get("/projects/?format=csv").content.decode()
     assert open_project.display_reference in listing and secret.display_reference not in listing
+
+
+# ------------------------------------------------------------------ part 3: completion, disposal, map, hand over
+
+def _to_delivery(project):
+    workflow.record_gateway(project, 1, decision_maker="officer", decided_on=date.today(), outcome="approved")
+    workflow.record_gateway(project, 2, decision_maker="cabinet", decided_on=date.today(), outcome="approved")
+    project.refresh_from_db()
+    return project
+
+
+def test_completion_checklist_for_a_disposal(people):
+    from apps.projects import completion
+    from apps.properties.opendata import _without_excluded_parents
+
+    plot = Property.objects.create(reference="PJ-D1", name="Old depot", property_type="land")
+    project = _project(people["lead"], kind="disposal")
+    ProjectProperty.objects.create(project=project, property=plot, part=ProjectProperty.Part.DISPOSE)
+    assert not completion.shown(project)
+    assert "Completion checklist" not in _client(people["lead"]).get(project.get_absolute_url()).content.decode()
+    _to_delivery(project)
+    assert project.phase == Phase.DELIVERY and completion.shown(project)
+    page = _client(people["lead"]).get(project.get_absolute_url()).content.decode()
+    assert "Completion checklist" in page and "Record the disposal of PJ-D1" in page
+    steps = {s.key: s for s in completion.steps(project, people["lead"])}
+    assert not steps[f"dispose_{plot.pk}"].done and plot in _without_excluded_parents()
+
+    # The register changes only when someone records the disposal; the step then ticks itself.
+    plot.disposed_on, plot.disposal_price = date.today(), 250000
+    plot.save()
+    steps = {s.key: s for s in completion.steps(project, people["lead"])}
+    assert steps[f"dispose_{plot.pk}"].done and plot not in _without_excluded_parents()
+    assert "Disposed of" in _client(people["lead"]).get(plot.get_absolute_url()).content.decode()
+
+    # Manual steps are ticked by the team, and automatic ones cannot be.
+    client = _client(people["lead"])
+    client.post(project.get_absolute_url(), {"action": "complete_step", "key": "tell_finance"})
+    assert project.completion_steps.filter(key="tell_finance").exists()
+    assert client.post(project.get_absolute_url(), {"action": "complete_step",
+                                                    "key": f"dispose_{plot.pk}"}).status_code == 404
+    assert _client(people["other"]).post(project.get_absolute_url(), {
+        "action": "complete_step", "key": "final_budget"}).status_code in (403, 404)
+
+
+def test_acquisition_checklist_prefills_the_register(people):
+    from apps.projects import completion
+
+    project = _to_delivery(_project(people["lead"], kind="acquisition", confidential=True,
+                                    site_address="Land north of Mill Lane\nNorthfield", site_title_number="ZZ123"))
+    steps = {s.key: s for s in completion.steps(project, people["lead"])}
+    assert "address_line_1=Land+north+of+Mill+Lane" in steps["add_property"].url
+    assert "title_number=ZZ123" in steps["add_title"].url
+    assert not steps["link_property"].done
+
+
+def test_proposed_site_from_inspire_and_the_map(people):
+    from django.contrib.gis.geos import MultiPolygon, Polygon
+
+    from apps.properties.models import InspireParcel
+
+    for n, x in (("1001", 400000), ("1002", 400100)):
+        InspireParcel.objects.create(inspire_id=n, geometry=MultiPolygon(
+            Polygon(((x, 300000), (x + 100, 300000), (x + 100, 300100), (x, 300100), (x, 300000))), srid=27700))
+    project = _project(people["lead"], kind="acquisition", confidential=True)
+    client = _client(people["lead"])
+    bad = client.post(project.get_absolute_url(), {"action": "site_from_inspire", "parcels": "1001, 9999"},
+                      follow=True)
+    assert "9999" in bad.content.decode()
+    client.post(project.get_absolute_url(), {"action": "site_from_inspire", "parcels": "1001, 1002"})
+    project.refresh_from_db()
+    assert round(project.site_boundary.area) == 20000
+    data = client.get(f"/projects/{project.pk}/map.geojson").json()
+    assert data["features"][0]["properties"]["role"] == "self"
+    assert _client(people["other"]).get(f"/projects/{project.pk}/map.geojson").status_code == 404
+
+
+def test_hand_over_projects(people):
+    from apps.core import handover
+    from apps.projects.models import ProjectTask, Risk
+
+    project = _project(people["lead"])
+    ProjectMember.objects.create(project=project, user=people["legal"], role="legal")
+    task = project.tasks.first()
+    task.owner = people["lead"]
+    task.save()
+    Risk.objects.create(project=project, description="Planning refused", likelihood=3, impact=3,
+                        owner=people["lead"])
+    closed = _project(people["lead"])
+    workflow.set_status(closed, "stopped", "Funding withdrawn")
+    counts = {item.key: n for item, n, _r in handover.summary(people["lead"])}
+    assert counts["projects"] == 1 and counts["project_tasks"] >= 1 and counts["project_risks"] == 1
+    moved = handover.hand_over(people["lead"], {"projects": people["other"], "project_tasks": people["other"],
+                                                "project_risks": people["other"]})
+    project.refresh_from_db()
+    closed.refresh_from_db()
+    assert moved["projects"] == 1 and project.lead == people["other"] and closed.lead == people["lead"]  # stopped projects stay put
+    assert not ProjectTask.objects.filter(project=project, owner=people["lead"], done_on__isnull=True).exists()
+    # A team place passes on, or is dropped when the receiver is already on the team.
+    handover.hand_over(people["legal"], {"project_team": people["other"]})
+    assert list(project.members.values_list("user__username", flat=True)) == ["p.other"]
+
+
+def test_demo_projects_load(people, make_user):
+    from apps.projects import demo
+
+    for name in ("demo.lchen", "demo.rbaker", "demo.finance", "demo.legal"):
+        make_user(name, "Surveyors")
+    for ref, kind in (("DM-N01-B01", "building"), ("DM-S06", "land"), ("DM-S10", "land")):
+        Property.objects.create(reference=ref, name=ref, property_type=kind)
+    assert demo.load(date.today()) == 3
+    assert demo.load(date.today()) == 3  # loading again replaces them
+    acquisition = Project.objects.get(name__startswith="Depot site")
+    assert acquisition.confidential and acquisition.phase == Phase.DELIVERY

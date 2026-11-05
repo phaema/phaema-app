@@ -131,6 +131,12 @@ class Property(TimeStampedModel):
     area_source = models.CharField(_("source of areas"), max_length=10, choices=AreaSource.choices, blank=True)
     areas_measured_on = models.DateField(_("areas measured on"), null=True, blank=True)
 
+    # Disposal: once sold or let on a long lease, the property leaves the active register and open data.
+    disposed_on = models.DateField(_("disposed of on"), null=True, blank=True,
+                                   help_text=_("Completion date of the sale or long lease."))
+    disposal_price = models.DecimalField(_("disposal price (£)"), max_digits=14, decimal_places=2, null=True,
+                                         blank=True)
+
     # Location (British National Grid)
     easting = models.PositiveIntegerField(_("easting"), null=True, blank=True)
     northing = models.PositiveIntegerField(_("northing"), null=True, blank=True)

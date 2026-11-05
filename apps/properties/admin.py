@@ -37,6 +37,8 @@ class PropertyAdmin(AdministratorOnlyEditingMixin, RoleAdminMixin, admin.GISMode
         ("Areas", {"fields": ("gia_sqm", "nia_sqm", "gea_sqm", "site_area_ha", "area_standard", "area_source",
                               "areas_measured_on")}),
         ("Location", {"fields": ("easting", "northing", "boundary", "boundary_source")}),
+        ("Disposal", {"fields": ("disposed_on", "disposal_price"),
+                      "description": "When the property is sold or let on a long lease. It then leaves open data."}),
         ("Other", {"fields": ("site_hazards", "exclude_from_publication", "notes")}),
     )
 

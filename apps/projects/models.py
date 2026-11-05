@@ -422,3 +422,15 @@ class ProjectAccess(models.Model):
         ordering = ["-at"]
         verbose_name = _("confidential project access")
         verbose_name_plural = _("confidential project access log")
+
+
+class CompletionStep(models.Model):
+    """A completion checklist item someone has ticked (items PHAEMA can check for itself are not stored)."""
+
+    project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name="completion_steps")
+    key = models.CharField(max_length=40)
+    done_on = models.DateField(default=date.today)
+    done_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name="+")
+
+    class Meta:
+        constraints = [models.UniqueConstraint(fields=["project", "key"], name="completion_step_once")]

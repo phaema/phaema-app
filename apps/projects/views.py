@@ -22,11 +22,12 @@ from apps.core.tables import sortable
 from apps.leases.forms import GovukMixin
 from apps.leases.models import Party
 from apps.properties.models import Property
+from apps.properties.views import map_config
 from apps.reports.mixins import ExportMixin
 
-from . import budget, rules, workflow
-from .models import (GATEWAYS, PHASE_ORDER, BudgetLine, BudgetYear, GatewayDecision, Milestone, Phase, Project,
-                     ProjectAccess, ProjectDocument, ProjectMember, ProjectNote, ProjectParty, ProjectProperty,
+from . import budget, completion, rules, workflow
+from .models import (GATEWAYS, PHASE_ORDER, BudgetLine, BudgetYear, CompletionStep, GatewayDecision, Milestone,
+                     Phase, Project, ProjectAccess, ProjectDocument, ProjectMember, ProjectNote, ProjectParty, ProjectProperty,
                      ProjectTask, ProjectType, Risk, financial_year_label, financial_year_of)
 
 User = get_user_model()
@@ -236,6 +237,10 @@ def project_detail(request, pk):
         "linked_valuations": project.valuations.select_related("property").order_by("-valuation_date")
         if can_use(request.user, "valuations") else None,
         "valuation_choices": _valuation_choices(project) if can_manage and can_use(request.user, "valuations") else [],
+        "completion": completion.steps(project, request.user) if completion.shown(project) else None,
+        "has_map": bool(project.site_boundary) or project.property_links.filter(
+            Q(property__boundary__isnull=False) | Q(property__easting__isnull=False)).exists(),
+        "map_config": map_config(),
         "access_log": project.access_log.select_related("user")[:20]
         if project.confidential and (is_administrator(request.user) or project.lead_id == request.user.pk) else None,
     })
@@ -261,7 +266,7 @@ def _year_choices(project):
 
 MANAGE = {"add_property", "remove_property", "add_member", "remove_member", "add_party", "remove_party",
           "add_milestone", "update_milestone", "add_task", "task_done", "record_gateway", "set_status",
-          "add_risk", "update_risk", "link", "unlink"}
+          "add_risk", "update_risk", "link", "unlink", "complete_step", "site_from_inspire"}
 CONTRIBUTE = {"add_note", "add_document"}
 BUDGET = {"add_budget_line", "set_budget", "remove_budget_line"}
 
@@ -409,6 +414,34 @@ def _do(request, project, action, post):
         return _link(request, project, post.get("kind", ""), post.get("reference", "").strip(), True)
     if action == "unlink":
         return _link(request, project, post.get("kind", ""), post.get("id", ""), False)
+    if action == "complete_step":
+        key = post.get("key", "")
+        if key not in {s.key for s in completion.steps(project, request.user) if not s.automatic}:
+            raise Http404
+        done = CompletionStep.objects.filter(project=project, key=key)
+        if done.exists():
+            done.delete()
+        else:
+            CompletionStep.objects.create(project=project, key=key, done_by=request.user)
+        return None
+    if action == "site_from_inspire":
+        from django.contrib.gis.geos import MultiPolygon
+
+        from apps.properties.models import InspireParcel
+
+        ids = [i.strip() for i in post.get("parcels", "").replace(";", ",").split(",") if i.strip()]
+        parcels = list(InspireParcel.objects.filter(inspire_id__in=ids))
+        missing = sorted(set(ids) - {p.inspire_id for p in parcels})
+        if not ids:
+            raise ValueError(_("Enter one or more INSPIRE parcel IDs."))
+        if missing:
+            raise ValueError(_("These INSPIRE parcels are not in PHAEMA: %(ids)s.") % {"ids": ", ".join(missing)})
+        union = parcels[0].geometry
+        for parcel in parcels[1:]:
+            union = union.union(parcel.geometry)
+        project.site_boundary = union if union.geom_type == "MultiPolygon" else MultiPolygon(union, srid=27700)
+        project.save()
+        return _("Proposed site drawn from %(n)s INSPIRE parcel(s).") % {"n": len(parcels)}
     if action == "add_note":
         text = post.get("text", "").strip()
         if not text:
@@ -469,6 +502,28 @@ def _link(request, project, kind, value, add):
     item.project = project
     item.save(update_fields=["project"])
     return _("%(what)s linked to the project.") % {"what": label}
+
+
+@login_required
+def project_geojson(request, pk):
+    """The project's properties and proposed site, for its map (WGS 84). Only for people who can see the project."""
+    import json
+
+    from django.contrib.gis.db.models.functions import AsGeoJSON, Transform
+    from django.http import JsonResponse
+
+    from apps.properties.views import _features
+
+    project = _project(request, pk)
+    parts = {link.property_id: link.get_part_display() for link in project.property_links.all()}
+    data = _features(Property.objects.filter(pk__in=parts), lambda p: "part")
+    if project.site_boundary:
+        gj = Project.objects.filter(pk=project.pk).annotate(
+            gj=AsGeoJSON(Transform("site_boundary", 4326), precision=7)).values_list("gj", flat=True).first()
+        data["features"].insert(0, {"type": "Feature", "geometry": json.loads(gj), "properties": {
+            "reference": project.display_reference, "name": _("Proposed site"), "type": project.project_type.name,
+            "occupation": "", "occupationLabel": "", "url": project.get_absolute_url(), "role": "self"}})
+    return JsonResponse(data)
 
 
 @login_required

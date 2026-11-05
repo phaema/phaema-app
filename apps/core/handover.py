@@ -67,6 +67,16 @@ def _supervisee(profile, old, new):
     profile.save()
 
 
+def _swap_team_place(member, old, new):
+    from apps.projects.models import ProjectMember
+
+    if ProjectMember.objects.filter(project=member.project, user=new).exists():
+        member.delete()  # already on the team: keep their own place
+    else:
+        member.user = new
+        member.save()
+
+
 def items():
     from apps.cases.models import Approval, Case, CaseTask
     from apps.leases.models import LeaseEvent
@@ -108,10 +118,47 @@ def items():
         Item("audit_reviews", _("Audit queries they are answering"), _("Valuation audit queries still open."),
              lambda u: AuditReview.objects.filter(assigned_to=u, status=AuditReview.Status.OPEN),
              ("valuation__property",), field_name="assigned_to", module="valuations"),
+        Item("projects", _("Projects they lead"), _("Active and paused projects. They become the project lead."),
+             lambda u: _projects().filter(lead=u, status__in=("active", "paused")), ("property_links__property",),
+             field_name="lead"),
+        Item("project_team", _("Project teams they are on"), _("Their place on the team passes to the new person."),
+             lambda u: _members().filter(user=u, project__status__in=("active", "paused")),
+             ("project__property_links__property",), roles=STAFF + (CONTRIBUTORS,), move=_swap_team_place),
+        Item("project_tasks", _("Project tasks not yet done"), "",
+             lambda u: _project_tasks().filter(owner=u, done_on__isnull=True,
+                                               project__status__in=("active", "paused")),
+             ("project__property_links__property",), roles=STAFF + (CONTRIBUTORS,), field_name="owner"),
+        Item("project_risks", _("Project risks they own"), _("Open risks on active projects."),
+             lambda u: _risks().filter(owner=u, status="open", project__status__in=("active", "paused")),
+             ("project__property_links__property",), roles=STAFF + (CONTRIBUTORS,), field_name="owner"),
         Item("supervisees", _("Staff they supervise and approve for"),
              _("Not limited by building: moves everyone they supervise."),
              lambda u: StaffProfile.objects.filter(supervisor=u), (), move=_supervisee),
     ]
+
+
+def _projects():
+    from apps.projects.models import Project
+
+    return Project.objects.all()
+
+
+def _members():
+    from apps.projects.models import ProjectMember
+
+    return ProjectMember.objects.select_related("project")
+
+
+def _project_tasks():
+    from apps.projects.models import ProjectTask
+
+    return ProjectTask.objects.all()
+
+
+def _risks():
+    from apps.projects.models import Risk
+
+    return Risk.objects.all()
 
 
 def candidates(roles, exclude=None):

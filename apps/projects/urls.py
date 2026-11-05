@@ -10,5 +10,6 @@ urlpatterns = [
     path("new/", views.project_new, name="new"),
     path("<int:pk>/", views.project_detail, name="detail"),
     path("<int:pk>/edit/", views.project_edit, name="edit"),
+    path("<int:pk>/map.geojson", views.project_geojson, name="geojson"),
     path("<int:pk>/files/<str:kind>/<int:item>/", views.project_file, name="file"),
 ]
