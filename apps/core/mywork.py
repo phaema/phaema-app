@@ -86,6 +86,26 @@ def build(user, today=None, viewer=None):
                     t.case.display_reference)
         (now if t.due_date < today else ahead).append(item)
 
+    # Projects: tasks they own, and the projects they lead or are on (only those the viewer may see).
+    from apps.projects import rules as project_rules
+    from apps.projects.models import ProjectTask
+
+    seen = project_rules.visible(viewer or user)
+    for t in ProjectTask.objects.filter(owner=user, done_on__isnull=True, due_date__isnull=False, due_date__lte=horizon,
+                                        project__status__in=("active", "paused"), project__in=seen
+                                        ).select_related("project"):
+        item = Item(t.due_date, _("Project task"), "cases", t.description, t.project.get_absolute_url(),
+                    t.project.display_reference)
+        (now if t.due_date < today else ahead).append(item)
+    data_projects = list(seen.filter(Q(lead=user) | Q(members__user=user), status__in=("active", "paused"))
+                         .distinct().select_related("project_type").prefetch_related("milestones"))
+    for p in data_projects:
+        for m in p.milestones.all():
+            if m.actual_date is None and m.target_date and m.target_date <= horizon:
+                item = Item(m.target_date, _("Milestone"), "cases", f"{p.display_reference} {m.name}",
+                            p.get_absolute_url())
+                (now if m.target_date < today else ahead).append(item)
+
     approvals = list(Case.objects.filter(approvals__status="pending", approvals__approver=user).distinct())
     for c in approvals:
         now.append(Item(None, _("Approve"), "cases", f"{c.display_reference} {c.title}", c.get_absolute_url(),
@@ -151,6 +171,7 @@ def build(user, today=None, viewer=None):
     key = lambda i: (i.when is not None, i.when or today)  # noqa: E731 - undated items (approvals) first
     data["now"], data["ahead"] = sorted(now, key=key), sorted(ahead, key=key)
     data["properties"] = _properties(user)
+    data["projects"] = data_projects
     return data
 
 

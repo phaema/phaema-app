@@ -141,6 +141,8 @@
   <h2 class="govuk-heading-m">{% translate "Cases" %}</h2>
   {% include "cases/_case_rows.html" with cases=object.cases.all %}
   {% if user|can_edit:object %}<p class="govuk-body-s"><a class="govuk-link" href="{% url 'cases:new' %}?property={{ object.pk }}">{% translate "Start a case" %}</a></p>{% endif %}
+  {% if projects %}<h2 class="govuk-heading-m">{% translate "Projects" %}</h2>
+  <ul class="govuk-list">{% for p in projects %}<li><a class="govuk-link" href="{{ p.get_absolute_url }}">{{ p.display_reference }}</a> {{ p.name }} <span class="govuk-body-s">({{ p.project_type.name }}, {{ p.phase_label|lower }}{% if not p.is_open %}, {{ p.get_status_display|lower }}{% endif %})</span></li>{% endfor %}</ul>{% endif %}
   {% if modules.maintenance_enabled or modules.compliance_enabled or modules.valuation_enabled %}<h2 class="govuk-heading-m">{% translate "Building management" %}</h2>
   <ul class="govuk-list">
     {% if modules.maintenance_enabled %}<li><a class="govuk-link" href="{% url 'maintenance:property' object.pk %}">{% translate "Maintenance: components, planned maintenance, jobs and who pays for repairs" %}</a></li>{% endif %}

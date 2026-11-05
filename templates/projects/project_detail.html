@@ -1,0 +1,176 @@
+{% extends "base.html" %}{% load i18n humanize phaema %}
+{% block title %}{{ project.display_reference }}{% endblock %}
+{% block help_page %}projects{% endblock %}
+{% block breadcrumbs %}<nav class="govuk-breadcrumbs" aria-label="Breadcrumb"><ol class="govuk-breadcrumbs__list"><li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="{% url 'projects:list' %}">{% translate "Projects" %}</a></li><li class="govuk-breadcrumbs__list-item">{{ project.display_reference }}</li></ol></nav>{% endblock %}
+{% block content %}
+<span class="govuk-caption-l">{{ project.project_type.name }}</span>
+<h1 class="govuk-heading-l govuk-!-margin-bottom-2">{{ project.display_reference }}</h1>
+<p class="govuk-body-l govuk-!-margin-bottom-2">{{ project.name }}</p>
+<p class="govuk-body"><strong class="govuk-tag govuk-tag--{{ rag.0 }}">{{ rag.1 }}</strong>
+  {% if project.confidential %} <strong class="govuk-tag govuk-tag--purple">{% translate "Confidential" %}</strong>{% endif %}
+  {% if project.status_reason %} {{ project.status_reason }}{% endif %}
+  {% if project.target_date and project.is_open %} · {% translate "Target completion" %} {{ project.target_date|date:"j M Y" }}{% endif %}</p>
+
+<ol class="phaema-stages" aria-label="{% translate 'Phases' %}">
+  {% for p, label, tasks in phases %}<li class="{% if forloop.counter0 < project.phase_index %}done{% elif forloop.counter0 == project.phase_index %}current{% endif %}"{% if forloop.counter0 == project.phase_index %} aria-current="step"{% endif %}>{{ label }}</li>{% endfor %}
+</ol>
+
+<div class="govuk-grid-row">
+<div class="govuk-grid-column-two-thirds">
+
+{% if project.confidential %}<div class="govuk-inset-text">{% translate "Confidential: only the project team and administrators can see this project, its site and its papers." %}</div>{% endif %}
+
+<dl class="govuk-summary-list">
+  <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Lead" %}</dt><dd class="govuk-summary-list__value">{{ project.lead|person:"–" }}</dd></div>
+  <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Sponsor" %}</dt><dd class="govuk-summary-list__value">{{ project.sponsor|default:"–" }}</dd></div>
+  <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Started" %}</dt><dd class="govuk-summary-list__value">{{ project.start_date|date:"j M Y" }}</dd></div>
+  {% if project.parent %}<div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Part of" %}</dt><dd class="govuk-summary-list__value"><a class="govuk-link" href="{{ project.parent.get_absolute_url }}">{{ project.parent }}</a></dd></div>{% endif %}
+  {% if children %}<div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Later phases" %}</dt><dd class="govuk-summary-list__value">{% for c in children %}<a class="govuk-link" href="{{ c.get_absolute_url }}">{{ c }}</a>{% if not forloop.last %}<br>{% endif %}{% endfor %}</dd></div>{% endif %}
+  {% if project.description %}<div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Description" %}</dt><dd class="govuk-summary-list__value">{{ project.description|linebreaksbr }}</dd></div>{% endif %}
+</dl>
+{% if can_manage %}<p class="govuk-body"><a class="govuk-link" href="{% url 'projects:edit' project.pk %}">{% translate "Change the project details" %}</a></p>{% endif %}
+
+<section class="phaema-panel" data-panel="project-gateways"><h2 class="govuk-heading-m phaema-panel__title">{% translate "Gateways" %}</h2><div class="phaema-panel__body">
+  <p class="govuk-body-s">{% translate "A project moves to its next phase only when the gateway decision is recorded." %}</p>
+  <table class="govuk-table">
+    <thead class="govuk-table__head"><tr class="govuk-table__row"><th scope="col" class="govuk-table__header">{% translate "Gateway" %}</th><th scope="col" class="govuk-table__header">{% translate "Decision" %}</th></tr></thead>
+    <tbody class="govuk-table__body">
+    {% for n, label in gateways %}<tr class="govuk-table__row">
+      <th scope="row" class="govuk-table__header">{{ n }}. {{ label }}</th>
+      <td class="govuk-table__cell">{% for d in decisions %}{% if d.number == n %}<div class="govuk-!-margin-bottom-2"><strong class="govuk-tag govuk-tag--{% if d.outcome == 'approved' %}green{% elif d.outcome == 'deferred' %}yellow{% else %}red{% endif %}">{% if d.outcome == 'approved' %}{% translate "Approved" %}{% elif d.outcome == 'deferred' %}{% translate "Deferred" %}{% else %}{% translate "Rejected" %}{% endif %}</strong> {{ d.decided_on|date:"j M Y" }}, {{ d.get_decision_maker_display|lower }}{% if d.reference %} ({{ d.reference }}){% endif %}{% if d.report %}<br><a class="govuk-link govuk-body-s" href="{% url 'projects:file' project.pk 'report' d.pk %}">{% translate "Report" %}</a>{% endif %}{% if d.notes %}<br><span class="govuk-body-s">{{ d.notes|linebreaksbr }}</span>{% endif %}</div>{% endif %}{% endfor %}
+        {% if next_gateway and next_gateway.0 == n %}<span class="govuk-body-s">{% translate "Next decision" %}</span>{% endif %}</td>
+    </tr>{% endfor %}
+    </tbody>
+  </table>
+  {% if can_manage and next_gateway %}
+  <details class="govuk-details" data-module="govuk-details"><summary class="govuk-details__summary"><span class="govuk-details__summary-text">{% blocktranslate with n=next_gateway.0 label=next_gateway.1 %}Record gateway {{ n }}: {{ label }}{% endblocktranslate %}</span></summary><div class="govuk-details__text">
+    <form method="post" enctype="multipart/form-data">{% csrf_token %}<input type="hidden" name="action" value="record_gateway"><input type="hidden" name="number" value="{{ next_gateway.0 }}">
+      <div class="govuk-form-group"><fieldset class="govuk-fieldset"><legend class="govuk-fieldset__legend govuk-fieldset__legend--s">{% translate "Decided by" %}</legend><div class="govuk-radios govuk-radios--small">
+        {% for value, label in makers %}<div class="govuk-radios__item"><input class="govuk-radios__input" id="gm-{{ value }}" name="decision_maker" type="radio" value="{{ value }}"{% if value == next_gateway.2 %} checked{% endif %}><label class="govuk-label govuk-radios__label" for="gm-{{ value }}">{{ label }}</label></div>{% endfor %}
+      </div></fieldset></div>
+      <div class="govuk-form-group"><fieldset class="govuk-fieldset"><legend class="govuk-fieldset__legend govuk-fieldset__legend--s">{% translate "Outcome" %}</legend><div class="govuk-radios govuk-radios--small">
+        {% for value, label in outcomes %}<div class="govuk-radios__item"><input class="govuk-radios__input" id="go-{{ value }}" name="outcome" type="radio" value="{{ value }}"><label class="govuk-label govuk-radios__label" for="go-{{ value }}">{{ label }}</label></div>{% endfor %}
+      </div></fieldset></div>
+      <div class="govuk-form-group"><label class="govuk-label govuk-label--s" for="g-date">{% translate "Date of the decision" %}</label><input class="govuk-input govuk-input--width-10" type="date" id="g-date" name="decided_on" value="{{ today|date:'Y-m-d' }}"></div>
+      <div class="govuk-form-group"><label class="govuk-label govuk-label--s" for="g-ref">{% translate "Decision reference" %} <span class="govuk-body-s">({% translate "optional" %})</span></label><div class="govuk-hint">{% translate "For example the Cabinet minute or delegated decision number." %}</div><input class="govuk-input govuk-input--width-20" id="g-ref" name="reference" maxlength="100"></div>
+      <div class="govuk-form-group"><label class="govuk-label govuk-label--s" for="g-report">{% translate "Report" %} <span class="govuk-body-s">({% translate "optional" %})</span></label><input class="govuk-file-upload" type="file" id="g-report" name="report"></div>
+      <div class="govuk-form-group"><label class="govuk-label govuk-label--s" for="g-notes">{% translate "Notes" %} <span class="govuk-body-s">({% translate "optional" %})</span></label><textarea class="govuk-textarea" id="g-notes" name="notes" rows="3"></textarea></div>
+      <button class="govuk-button" data-module="govuk-button">{% translate "Record the decision" %}</button>
+    </form></div></details>
+  {% endif %}
+</div></section>
+
+<section class="phaema-panel" data-panel="project-milestones"><h2 class="govuk-heading-m phaema-panel__title">{% translate "Milestones" %}</h2><div class="phaema-panel__body">
+  {% if milestones %}<table class="govuk-table">
+    <thead class="govuk-table__head"><tr class="govuk-table__row"><th scope="col" class="govuk-table__header">{% translate "Milestone" %}</th><th scope="col" class="govuk-table__header">{% translate "Target" %}</th><th scope="col" class="govuk-table__header">{% translate "Forecast" %}</th><th scope="col" class="govuk-table__header">{% translate "Achieved" %}</th></tr></thead>
+    <tbody class="govuk-table__body">
+    {% for m in milestones %}<tr class="govuk-table__row">
+      <td class="govuk-table__cell">{{ m.name }}{% if not m.actual_date and m.target_date and m.target_date < today %} <strong class="govuk-tag govuk-tag--red">{% translate "Missed" %}</strong>{% elif not m.actual_date and m.forecast_date and m.target_date and m.forecast_date > m.target_date %} <strong class="govuk-tag govuk-tag--yellow">{% translate "Slipping" %}</strong>{% endif %}</td>
+      <td class="govuk-table__cell">{{ m.target_date|date:"j M Y"|default:"–" }}</td>
+      {% if can_manage %}<td class="govuk-table__cell" colspan="2"><form method="post" class="phaema-inline-fields">{% csrf_token %}<input type="hidden" name="action" value="update_milestone"><input type="hidden" name="milestone" value="{{ m.pk }}">
+        <div><label class="govuk-label govuk-body-s" for="mf-{{ m.pk }}">{% translate "Forecast" %}</label><input class="govuk-input govuk-input--width-10" type="date" id="mf-{{ m.pk }}" name="forecast" value="{{ m.forecast_date|date:'Y-m-d' }}"></div>
+        <div><label class="govuk-label govuk-body-s" for="ma-{{ m.pk }}">{% translate "Achieved" %}</label><input class="govuk-input govuk-input--width-10" type="date" id="ma-{{ m.pk }}" name="actual" value="{{ m.actual_date|date:'Y-m-d' }}"></div>
+        <div><button class="govuk-button govuk-button--secondary govuk-!-margin-bottom-0" data-module="govuk-button">{% translate "Save" %}<span class="govuk-visually-hidden"> {{ m.name }}</span></button></div></form></td>
+      {% else %}<td class="govuk-table__cell">{{ m.forecast_date|date:"j M Y"|default:"–" }}</td><td class="govuk-table__cell">{{ m.actual_date|date:"j M Y"|default:"–" }}</td>{% endif %}
+    </tr>{% endfor %}
+    </tbody></table>{% else %}<p class="govuk-body">{% translate "No milestones yet." %}</p>{% endif %}
+  {% if can_manage %}<details class="govuk-details" data-module="govuk-details"><summary class="govuk-details__summary"><span class="govuk-details__summary-text">{% translate "Add a milestone" %}</span></summary><div class="govuk-details__text">
+    <form method="post" class="phaema-inline-fields">{% csrf_token %}<input type="hidden" name="action" value="add_milestone">
+      <div><label class="govuk-label" for="m-name">{% translate "Milestone" %}</label><input class="govuk-input govuk-input--width-20" id="m-name" name="name" maxlength="150"></div>
+      <div><label class="govuk-label" for="m-target">{% translate "Target" %}</label><input class="govuk-input govuk-input--width-10" type="date" id="m-target" name="target"></div>
+      <div><button class="govuk-button govuk-button--secondary govuk-!-margin-bottom-0" data-module="govuk-button">{% translate "Add" %}</button></div>
+    </form></div></details>{% endif %}
+</div></section>
+
+<section class="phaema-panel" data-panel="project-properties"><h2 class="govuk-heading-m phaema-panel__title">{% translate "Properties and site" %}</h2><div class="phaema-panel__body">
+  {% if project.site_address or project.site_title_number or project.vendor %}
+  <h3 class="govuk-heading-s">{% translate "Proposed site" %}</h3>
+  <p class="govuk-body">{% if project.site_address %}{{ project.site_address|linebreaksbr }}{% endif %}{% if project.site_title_number %}<br>{% translate "Title" %} {{ project.site_title_number }}{% endif %}{% if project.vendor %}<br>{% translate "Vendor or other party" %}: <a class="govuk-link" href="{{ project.vendor.get_absolute_url }}">{{ project.vendor.name }}</a>{% endif %}</p>
+  {% endif %}
+  {% if property_links %}<table class="govuk-table">
+    <thead class="govuk-table__head"><tr class="govuk-table__row"><th scope="col" class="govuk-table__header">{% translate "Property" %}</th><th scope="col" class="govuk-table__header">{% translate "Part in the project" %}</th>{% if can_manage %}<th scope="col" class="govuk-table__header"><span class="govuk-visually-hidden">{% translate "Action" %}</span></th>{% endif %}</tr></thead>
+    <tbody class="govuk-table__body">
+    {% for link in property_links %}<tr class="govuk-table__row">
+      <td class="govuk-table__cell"><a class="govuk-link" href="{{ link.property.get_absolute_url }}">{{ link.property.reference }}</a> {{ link.property.name }}{% if link.notes %}<br><span class="govuk-body-s">{{ link.notes }}</span>{% endif %}</td>
+      <td class="govuk-table__cell">{{ link.get_part_display }}</td>
+      {% if can_manage %}<td class="govuk-table__cell"><form method="post">{% csrf_token %}<input type="hidden" name="action" value="remove_property"><input type="hidden" name="link" value="{{ link.pk }}"><button class="phaema-link-button govuk-body-s">{% translate "Remove" %}<span class="govuk-visually-hidden"> {{ link.property.reference }}</span></button></form></td>{% endif %}
+    </tr>{% endfor %}
+    </tbody></table>{% elif not project.site_address %}<p class="govuk-body">{% translate "No properties yet. An acquisition can start with just a proposed site." %}</p>{% endif %}
+  {% if can_manage %}<details class="govuk-details" data-module="govuk-details"><summary class="govuk-details__summary"><span class="govuk-details__summary-text">{% translate "Add a property" %}</span></summary><div class="govuk-details__text">
+    <form method="post" class="phaema-inline-fields">{% csrf_token %}<input type="hidden" name="action" value="add_property">
+      <div><label class="govuk-label" for="p-prop">{% translate "Property" %}</label><select class="govuk-select" id="p-prop" name="property"><option value="">{% translate "Choose" %}</option>{% for p in properties %}<option value="{{ p.pk }}">{{ p.reference }} {{ p.name }}</option>{% endfor %}</select></div>
+      <div><label class="govuk-label" for="p-part">{% translate "Part" %}</label><select class="govuk-select" id="p-part" name="part">{% for value, label in parts %}<option value="{{ value }}">{{ label }}</option>{% endfor %}</select></div>
+      <div><label class="govuk-label" for="p-notes">{% translate "Notes" %}</label><input class="govuk-input govuk-input--width-20" id="p-notes" name="notes" maxlength="200"></div>
+      <div><button class="govuk-button govuk-button--secondary govuk-!-margin-bottom-0" data-module="govuk-button">{% translate "Add" %}</button></div>
+    </form>
+    <p class="govuk-body-s">{% translate "For a proposed site, use" %} <a class="govuk-link" href="{% url 'projects:edit' project.pk %}">{% translate "Change the project details" %}</a>.</p></div></details>{% endif %}
+</div></section>
+
+<section class="phaema-panel" data-panel="project-tasks"><h2 class="govuk-heading-m phaema-panel__title">{% translate "Tasks" %}</h2><div class="phaema-panel__body">
+{% for p, label, tasks in phases %}{% if tasks %}
+<h3 class="govuk-heading-s govuk-!-margin-bottom-1">{{ label }}</h3>
+<ul class="govuk-list phaema-tasks">
+  {% for t in tasks %}<li>{% if can_manage %}<form method="post" class="govuk-!-display-inline">{% csrf_token %}<input type="hidden" name="action" value="task_done"><input type="hidden" name="task" value="{{ t.pk }}"><button class="phaema-tick{% if t.done_on %} done{% endif %}" aria-label="{% if t.done_on %}{% translate 'Mark as not done' %}{% else %}{% translate 'Mark as done' %}{% endif %}: {{ t.description }}">{% if t.done_on %}✓{% endif %}</button></form>{% else %}<span class="phaema-tick{% if t.done_on %} done{% endif %}">{% if t.done_on %}✓{% endif %}</span>{% endif %}
+    <span{% if t.done_on %} class="phaema-done"{% endif %}>{{ t.description }}</span>{% if t.owner and not t.done_on %} <span class="govuk-body-s">{{ t.owner|person }}</span>{% endif %}{% if t.due_date and not t.done_on %} <span class="govuk-body-s">{% translate "due" %} {{ t.due_date|date:"j M Y" }}</span>{% if t.due_date < today %} <strong class="govuk-tag govuk-tag--red">{% translate "Overdue" %}</strong>{% endif %}{% endif %}{% if t.done_on %} <span class="govuk-body-s">{{ t.done_on|date:"j M" }}{% if t.done_by %}, {{ t.done_by|person }}{% endif %}</span>{% endif %}</li>{% endfor %}
+</ul>{% endif %}{% endfor %}
+{% if can_manage %}<details class="govuk-details" data-module="govuk-details"><summary class="govuk-details__summary"><span class="govuk-details__summary-text">{% translate "Add a task" %}</span></summary><div class="govuk-details__text">
+  <form method="post" class="phaema-inline-fields">{% csrf_token %}<input type="hidden" name="action" value="add_task">
+    <div><label class="govuk-label" for="t-d">{% translate "Task" %}</label><input class="govuk-input govuk-input--width-20" id="t-d" name="description" maxlength="200"></div>
+    <div><label class="govuk-label" for="t-p">{% translate "Phase" %}</label><select class="govuk-select" id="t-p" name="phase">{% for value, label in phase_choices %}<option value="{{ value }}"{% if value == project.phase %} selected{% endif %}>{{ label }}</option>{% endfor %}</select></div>
+    <div><label class="govuk-label" for="t-o">{% translate "Owner" %}</label><select class="govuk-select" id="t-o" name="owner"><option value="">{% translate "Nobody" %}</option>{% for u in people %}<option value="{{ u.pk }}">{{ u.get_full_name|default:u.username }}</option>{% endfor %}</select></div>
+    <div><label class="govuk-label" for="t-due">{% translate "Due" %}</label><input class="govuk-input govuk-input--width-10" type="date" id="t-due" name="due"></div>
+    <div><button class="govuk-button govuk-button--secondary govuk-!-margin-bottom-0" data-module="govuk-button">{% translate "Add" %}</button></div>
+  </form></div></details>{% endif %}
+</div></section>
+
+<section class="phaema-panel" data-panel="project-notes"><h2 class="govuk-heading-m phaema-panel__title">{% translate "Notes and documents" %}</h2><div class="phaema-panel__body">
+  {% if can_contribute %}
+  <details class="govuk-details" data-module="govuk-details"><summary class="govuk-details__summary"><span class="govuk-details__summary-text">{% translate "Add a note" %}</span></summary><div class="govuk-details__text">
+    <form method="post">{% csrf_token %}<input type="hidden" name="action" value="add_note"><div class="govuk-form-group"><label class="govuk-label" for="n-text">{% translate "Note" %}</label><textarea class="govuk-textarea" id="n-text" name="text" rows="3"></textarea></div><button class="govuk-button govuk-button--secondary" data-module="govuk-button">{% translate "Add the note" %}</button></form></div></details>
+  <details class="govuk-details" data-module="govuk-details"><summary class="govuk-details__summary"><span class="govuk-details__summary-text">{% translate "Add a document" %}</span></summary><div class="govuk-details__text">
+    <form method="post" enctype="multipart/form-data">{% csrf_token %}<input type="hidden" name="action" value="add_document">
+      <div class="govuk-form-group"><label class="govuk-label" for="d-title">{% translate "Title" %}</label><input class="govuk-input" id="d-title" name="title" maxlength="200"></div>
+      <div class="govuk-form-group"><label class="govuk-label" for="d-file">{% translate "File" %}</label><div class="govuk-hint">{% translate "PDF, image, email, Word, Excel, text or CSV, up to 25 MB." %}</div><input class="govuk-file-upload" type="file" id="d-file" name="file"></div>
+      <button class="govuk-button govuk-button--secondary" data-module="govuk-button">{% translate "Add the document" %}</button></form></div></details>
+  {% endif %}
+  {% if documents %}<h3 class="govuk-heading-s">{% translate "Documents" %}</h3>
+  <ul class="govuk-list">{% for d in documents %}<li><a class="govuk-link" href="{% url 'projects:file' project.pk 'document' d.pk %}">{{ d.title }}</a> <span class="govuk-body-s">{{ d.created_at|date:"j M Y" }}{% if d.created_by %}, {{ d.created_by|person }}{% endif %}</span></li>{% endfor %}</ul>{% endif %}
+  {% if notes %}<h3 class="govuk-heading-s">{% translate "Notes" %}</h3>
+  {% for n in notes %}<div class="govuk-!-margin-bottom-3"><p class="govuk-body-s govuk-!-margin-bottom-1">{{ n.created_at|date:"j M Y H:i" }}{% if n.created_by %}, {{ n.created_by|person }}{% endif %}</p><p class="govuk-body govuk-!-margin-bottom-0">{{ n.text|linebreaksbr }}</p></div>{% endfor %}{% endif %}
+  {% if not notes and not documents %}<p class="govuk-body">{% translate "No notes or documents yet." %}</p>{% endif %}
+</div></section>
+
+{% if can_manage and project.is_open %}
+<details class="govuk-details govuk-!-margin-top-6" data-module="govuk-details"><summary class="govuk-details__summary"><span class="govuk-details__summary-text">{% translate "Pause, restart or stop the project" %}</span></summary><div class="govuk-details__text">
+  <form method="post">{% csrf_token %}<input type="hidden" name="action" value="set_status">
+    <div class="govuk-form-group"><fieldset class="govuk-fieldset"><legend class="govuk-fieldset__legend govuk-fieldset__legend--s">{% translate "Status" %}</legend><div class="govuk-radios govuk-radios--small">
+      {% for value, label in statuses %}<div class="govuk-radios__item"><input class="govuk-radios__input" id="st-{{ value }}" name="status" type="radio" value="{{ value }}"{% if value == project.status %} checked{% endif %}><label class="govuk-label govuk-radios__label" for="st-{{ value }}">{{ label }}</label></div>{% endfor %}
+    </div></fieldset></div>
+    <div class="govuk-form-group"><label class="govuk-label" for="st-reason">{% translate "Reason (needed to pause or stop)" %}</label><input class="govuk-input" id="st-reason" name="reason" maxlength="300"></div>
+    <button class="govuk-button govuk-button--secondary" data-module="govuk-button">{% translate "Save" %}</button>
+  </form></div></details>
+{% endif %}
+</div>
+
+<div class="govuk-grid-column-one-third">
+  <h2 class="govuk-heading-m">{% translate "Team" %}</h2>
+  <ul class="govuk-list">
+    {% if project.lead %}<li>{{ project.lead|person }} <span class="govuk-body-s">({% translate "lead" %})</span></li>{% endif %}
+    {% for m in members %}<li>{{ m.user|person }} <span class="govuk-body-s">({{ m.get_role_display|lower }})</span>{% if can_manage %} <form method="post" class="govuk-!-display-inline">{% csrf_token %}<input type="hidden" name="action" value="remove_member"><input type="hidden" name="member" value="{{ m.pk }}"><button class="phaema-link-button govuk-body-s">{% translate "Remove" %}<span class="govuk-visually-hidden"> {{ m.user|person }}</span></button></form>{% endif %}</li>{% endfor %}
+  </ul>
+  {% if can_manage %}<details class="govuk-details" data-module="govuk-details"><summary class="govuk-details__summary"><span class="govuk-details__summary-text">{% translate "Add to the team" %}</span></summary><div class="govuk-details__text">
+    <form method="post">{% csrf_token %}<input type="hidden" name="action" value="add_member">
+      <div class="govuk-form-group"><label class="govuk-label" for="tm-user">{% translate "Person" %}</label><select class="govuk-select" id="tm-user" name="user"><option value="">{% translate "Choose" %}</option>{% for u in people %}<option value="{{ u.pk }}">{{ u.get_full_name|default:u.username }}</option>{% endfor %}</select></div>
+      <div class="govuk-form-group"><label class="govuk-label" for="tm-role">{% translate "Role on the project" %}</label><select class="govuk-select" id="tm-role" name="role">{% for value, label in member_roles %}<option value="{{ value }}">{{ label }}</option>{% endfor %}</select></div>
+      <button class="govuk-button govuk-button--secondary" data-module="govuk-button">{% translate "Add" %}</button></form></div></details>{% endif %}
+
+  <h2 class="govuk-heading-m">{% translate "Outside parties" %}</h2>
+  {% if party_links %}<ul class="govuk-list">{% for link in party_links %}<li><a class="govuk-link" href="{{ link.party.get_absolute_url }}">{{ link.party.name }}</a> <span class="govuk-body-s">({{ link.role }})</span>{% if can_manage %} <form method="post" class="govuk-!-display-inline">{% csrf_token %}<input type="hidden" name="action" value="remove_party"><input type="hidden" name="link" value="{{ link.pk }}"><button class="phaema-link-button govuk-body-s">{% translate "Remove" %}<span class="govuk-visually-hidden"> {{ link.party.name }}</span></button></form>{% endif %}</li>{% endfor %}</ul>{% else %}<p class="govuk-body">{% translate "None yet." %}</p>{% endif %}
+  {% if can_manage %}<details class="govuk-details" data-module="govuk-details"><summary class="govuk-details__summary"><span class="govuk-details__summary-text">{% translate "Add an outside party" %}</span></summary><div class="govuk-details__text">
+    <form method="post">{% csrf_token %}<input type="hidden" name="action" value="add_party">
+      <div class="govuk-form-group"><label class="govuk-label" for="op-party">{% translate "Party" %}</label><select class="govuk-select" id="op-party" name="party"><option value="">{% translate "Choose" %}</option>{% for p in parties %}<option value="{{ p.pk }}">{{ p.name }}</option>{% endfor %}</select></div>
+      <div class="govuk-form-group"><label class="govuk-label" for="op-role">{% translate "Role" %}</label><input class="govuk-input" id="op-role" name="role" maxlength="60"></div>
+      <button class="govuk-button govuk-button--secondary" data-module="govuk-button">{% translate "Add" %}</button></form></div></details>{% endif %}
+</div>
+</div>
+{% endblock %}

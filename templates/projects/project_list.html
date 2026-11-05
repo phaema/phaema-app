@@ -1,0 +1,52 @@
+{% extends "base.html" %}{% load i18n phaema %}
+{% block title %}{% translate "Projects" %}{% endblock %}
+{% block help_page %}projects{% endblock %}
+{% block content %}
+<h1 class="govuk-heading-xl">{% translate "Projects" %}</h1>
+{% include "core/_hint.html" with summary=_("What is a project?") text=_("A project is a larger piece of work than a case: a development over several properties, an acquisition of land the council does not own yet, a disposal, a programme of works or a strategic review. It passes four gateways and groups the cases, jobs and valuations that serve it.") page="projects" %}
+<p class="govuk-body"><a class="govuk-link" href="?lead=me">{% translate "My projects" %}</a>
+  {% if can_create %} · <a class="govuk-link" href="{% url 'projects:new' %}">{% translate "Start a project" %}</a>{% endif %}</p>
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-one-quarter">
+    <form method="get" class="phaema-filters">
+      <div class="govuk-form-group">
+        <label class="govuk-label govuk-label--s" for="q">{% translate "Search" %}</label>
+        <div class="govuk-hint" id="q-hint">{% translate "Project number, name or site" %}</div>
+        <input class="govuk-input" id="q" name="q" type="search" value="{{ q }}" aria-describedby="q-hint">
+      </div>
+      {% for name, label, choices, current, any in filters %}
+      <div class="govuk-form-group">
+        <label class="govuk-label govuk-label--s" for="f-{{ name }}">{{ label }}</label>
+        <select class="govuk-select" id="f-{{ name }}" name="{{ name }}">
+          {% if any %}<option value="">{% translate "Any" %}</option>{% endif %}
+          {% for value, text in choices %}<option value="{{ value }}"{% if value == current %} selected{% endif %}>{{ text }}</option>{% endfor %}
+        </select>
+      </div>
+      {% endfor %}
+      {% if request.GET.sort %}<input type="hidden" name="sort" value="{{ request.GET.sort }}">{% endif %}
+      <button class="govuk-button govuk-!-margin-bottom-2" data-module="govuk-button">{% translate "Apply" %}</button>
+      <p class="govuk-body-s govuk-!-margin-bottom-0"><a class="govuk-link" href="{% url 'projects:list' %}">{% translate "Clear filters" %}</a></p>
+    </form>
+  </div>
+  <div class="govuk-grid-column-three-quarters">
+    <p class="govuk-body">{% blocktranslate count n=paginator.count %}{{ n }} project{% plural %}{{ n }} projects{% endblocktranslate %}</p>
+    <table class="govuk-table">
+      {% include "core/_sortable_head.html" %}
+      <tbody class="govuk-table__body">
+      {% for p in page_obj %}{% with rag=p.rag %}
+        <tr class="govuk-table__row">
+          <td class="govuk-table__cell"><a class="govuk-link" href="{{ p.get_absolute_url }}">{{ p.display_reference }}</a>{% if p.confidential %} <strong class="govuk-tag govuk-tag--purple">{% translate "Confidential" %}</strong>{% endif %}<br><span class="govuk-body-s">{{ p.name }}</span></td>
+          <td class="govuk-table__cell">{{ p.project_type.name }}</td>
+          <td class="govuk-table__cell">{{ p.phase_label }}</td>
+          <td class="govuk-table__cell">{{ p.lead|person:"–" }}</td>
+          <td class="govuk-table__cell">{% if p.target_date %}{{ p.target_date|date:"j M Y" }}<br>{% endif %}<strong class="govuk-tag govuk-tag--{{ rag.0 }}">{{ rag.1 }}</strong></td>
+        </tr>
+      {% endwith %}{% empty %}
+        <tr class="govuk-table__row"><td class="govuk-table__cell" colspan="5">{% translate "No projects match." %}</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+    {% include "core/_pagination.html" %}
+  </div>
+</div>
+{% endblock %}

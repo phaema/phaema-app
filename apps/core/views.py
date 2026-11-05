@@ -221,7 +221,10 @@ def _display(field, value):
 
 @login_required
 def protected_file(request, path):
-    """Serve uploaded photos and documents to signed-in users only."""
+    """Serve uploaded photos and documents to signed-in users only. Project papers are served by the project pages,
+    which check that the person can see the project."""
+    if path.startswith("projects/"):
+        raise Http404
     try:
         if not default_storage.exists(path):
             raise Http404

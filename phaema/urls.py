@@ -48,6 +48,7 @@ urlpatterns = [
     path("open-data/", opendata.index, name="open-data"),
     path("open-data/<slug:slug>.<str:fmt>", opendata.dataset, name="open-data-file"),
     path("cases/", include("apps.cases.urls")),
+    path("projects/", include("apps.projects.urls")),
     path("calendar/<str:token>.ics", event_views.calendar_feed, name="calendar-feed"),
     path("admin/", admin.site.urls),
     path("api/", include(router.urls)),
