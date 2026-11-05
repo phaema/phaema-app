@@ -140,7 +140,7 @@ var COURSES = [{"id": "surveyor", "title": "Estates surveyor", "who": "Surveyors
     }).join('');
     app.innerHTML = '<h1>Learn PHAEMA for your job</h1><p class="lede">Choose your role. Each course walks you through the real screens, then you try it on the demonstration data and check what you have learnt with a short quiz.</p>' +
       '<div class="roles">' + cards + '</div>' +
-      '<h2 style="margin-top:40px">Before you start</h2><ol><li>Ask your administrator for a sign-in to the training copy of PHAEMA, loaded with the demonstration data.</li><li>Open it in another window beside this one, so you can follow along.</li><li>Every course starts with Getting around PHAEMA. If you have done it in another course, it is already ticked.</li></ol>';
+      '<h2 style="margin-top:40px">Before you start</h2><ol><li>Get a sign-in to a copy of PHAEMA with the demonstration data: your council&#8217;s training copy, from your administrator, or the public test site at <a href="https://demo.phaema.co.uk">demo.phaema.co.uk</a> (select Request a test account there). The test site is reset every 48 hours.</li><li>Open it in another window beside this one, so you can follow along.</li><li>Every course starts with Getting around PHAEMA. If you have done it in another course, it is already ticked.</li></ol>';
   }
 
   function courseView(c) {
@@ -204,7 +204,7 @@ var COURSES = [{"id": "surveyor", "title": "Estates surveyor", "who": "Surveyors
     }
     function exercise() {
       var e = m.exercise;
-      app.innerHTML = '<h1>' + esc(m.title) + '</h1><div class="trythis"><h3>Try it yourself</h3><p>Open the training copy of PHAEMA and find the answer in the demonstration data.</p></div>' +
+      app.innerHTML = '<h1>' + esc(m.title) + '</h1><div class="trythis"><h3>Try it yourself</h3><p>Open your training copy of PHAEMA, or the test site at <a href="https://demo.phaema.co.uk">demo.phaema.co.uk</a>, and find the answer in the demonstration data.</p></div>' +
         '<div class="panel" style="position:static">' + mcq('ex', e) +
         '<p class="hint" id="hintp"><button class="linkbtn" id="hint">Show a hint</button></p><div id="fb" aria-live="polite"></div>' +
         '<div class="nav"><button class="btn btn--plain" id="back">Back to the steps</button><button class="btn btn--go" id="check">Check my answer</button></div></div>';
