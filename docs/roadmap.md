@@ -17,38 +17,25 @@
 
 ## Future work
 
-### How Microsoft 365 fits in: an optional module
+### Connectors: an optional module
 
-Single sign-on and the Teams and Microsoft 365 integration below are one optional module in the main repository, not a separate fork. Councils without Microsoft 365, or that do not want it, run exactly the same PHAEMA with it switched off.
+Integrations with other systems are one optional module in the main repository, not a fork. PHAEMA connects through open standards rather than particular products, so the same module serves councils on Microsoft 365, Nextcloud, openDesk, Google Workspace or their own systems. Full review: "PHAEMA integrations: market review and plan" (November 2026).
 
-- **Off by default.** Nothing talks to Microsoft until the council's IT team has entered its Entra app details and an administrator switches the module on in Module settings.
-- **Each feature switches on separately**: sign-in, Teams notifications, Teams approvals, Outlook calendar, filing email, SharePoint documents and the Teams tab. A council can take calendars without SharePoint, for example.
-- **Nothing depends on it.** Email reminders, PHAEMA passwords and documents stored in PHAEMA remain the defaults and keep working when the module is off or Microsoft is unavailable.
-- **Self-contained code.** The integration lives in its own app (`apps/microsoft`) behind the existing module switches and access areas, and asks Microsoft only for the permissions of the features switched on.
-- **Tested both ways.** The automated tests run with the module on and off, so neither set-up breaks unnoticed. The same pattern can later add other providers, such as Google Workspace sign-in.
+- **Off by default.** Nothing connects to an outside service until an administrator enters its details and switches it on in Module settings.
+- **Each connector switches on separately**, and providers are configurations: sign-in is written once for OpenID Connect, with Microsoft Entra, Keycloak or Google as settings; chat works with Teams, Matrix or Nextcloud Talk; documents with SharePoint or Nextcloud.
+- **Nothing depends on it.** Email, PHAEMA passwords and documents stored in PHAEMA stay the defaults and keep working when a connector is off or the outside service is down.
+- **Security.** Keys and secrets are set by the installer, never stored in the database; each connector asks only for the permissions it needs; actions through a connector go in the change log. PHAEMA stays on UK hosting.
+- **Self-contained code** in its own app (`apps/connectors`), tested with each connector on and off.
 
-### Single sign-on
+### Planned connectors, in priority order
 
-Let staff sign in with their council Microsoft account (Microsoft Entra ID) instead of a separate PHAEMA password.
-
-- OpenID Connect sign-in with Entra ID. The council's IT team registers PHAEMA as an app in their Entra tenant; PHAEMA stores only the tenant ID, client ID and secret, set by the installer, never in the database.
-- Two-factor sign-in, password rules and lock-outs come from the council's Entra policies (Conditional Access), so PHAEMA does not need its own.
-- Entra security groups map to PHAEMA roles (Administrators, Surveyors, Contributors, Viewers) and access areas, set under Manage data. People are created on first sign-in and their groups refreshed at each sign-in.
-- Leavers: someone disabled in Entra can no longer sign in. Hand over work is still needed to move their work.
-- One local administrator account is kept as a break-glass sign-in if Entra is unavailable. Councils without Microsoft 365 keep PHAEMA passwords.
-- Other OpenID Connect providers (for example Google Workspace) can follow the same route.
-
-### Microsoft Teams and Microsoft 365 integration
-
-Connect PHAEMA to the tools council staff already work in, through Microsoft Graph, using the same Entra app registration as single sign-on.
-
-- **Teams notifications**: reminders, approvals waiting, overdue tasks and missed project milestones sent to the person in Teams (and to a team channel for a project or a case type), each linking back to the record. Email stays as the fallback.
-- **Approvals from Teams**: approve or return a case or works order from an actionable message; the decision is recorded in PHAEMA and its change log as if made there.
-- **Outlook calendar**: key dates (rent reviews, breaks, expiries, gateway dates, inspections) added to a person's or a shared calendar and kept up to date as they change.
-- **Filing email**: file an Outlook message to a case or project from Outlook itself, instead of saving and uploading it.
-- **SharePoint and OneDrive**: option to keep case and project documents in a SharePoint library the council controls, with PHAEMA holding the link, and to open generated letters straight into Word online.
-- **PHAEMA in Teams**: a Teams tab showing a project, case or property page, so a project team can work from its channel.
-- Implications: the council's IT team grants Graph permissions with administrator consent; PHAEMA asks only for the permissions each switched-on feature needs; each feature is switched on in Module settings; data stays in the council's own Microsoft 365 tenant and the UK hosting of PHAEMA itself is unchanged.
+1. **Single sign-on (OpenID Connect).** Staff sign in with their council account (Microsoft Entra ID, Keycloak, openDesk, Google). Groups map to roles and access areas; two-factor and password rules come from the provider; people disabled there can no longer sign in; one local administrator is kept as a backup sign-in.
+2. **Ordnance Survey and EPC lookups.** OS Places address search and UPRN when adding a property (free to councils under the Public Sector Geospatial Agreement), OS NGD building footprints, vector map tiles; energy ratings and certificate expiry from the EPC register by UPRN.
+3. **Map layers for GIS.** OGC API Features and WFS layers of properties, leases, projects and proposed sites, following access areas and confidentiality, for QGIS, ArcGIS, Cadcorp, MapInfo, GeoServer and Lizmap; read-only PostGIS views for internal GIS teams.
+4. **GOV.UK Notify.** Rent demands, arrears reminders and key-date letters to tenants by text, email or post.
+5. **Chat notifications and approvals.** Reminders, approvals waiting and missed milestones sent to Teams, Matrix (Element, Tchap) or Nextcloud Talk; approve cases and works orders from Teams.
+6. **Documents.** Case and project documents kept in the council's SharePoint or Nextcloud, with PHAEMA holding the link; letters edited in the browser with Word online or Collabora; OpenDocument (.odt) output alongside Word.
+7. **As councils ask:** filing email to a case or project from any mailbox (IMAP); calendar entries added directly (CalDAV or Outlook), beyond the existing calendar feed; planning constraints on maps; Companies House checks on tenant companies; FixMyStreet Pro reports into maintenance; links to Open Digital Planning (BOPS) applications.
 
 ### Other later releases
 
