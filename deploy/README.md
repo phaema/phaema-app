@@ -52,10 +52,20 @@ All commands are run in `/opt/phaema`:
 | Back up now | `./phaema.sh backup` |
 | Restore a backup | `./phaema.sh restore backups/phaema-YYYYMMDD-HHMMSS.sql.gz` |
 | Reload the demonstration data | `./phaema.sh demo-data --reset` |
+| Reset a test site now | `./phaema.sh reset-demo` |
 
 Backups are in `/opt/phaema/backups`: a database file and a matching files archive for each night. Copy them
 off the server regularly, for example with `scp root@YOUR-SERVER-IP:/opt/phaema/backups/* .` from your own
 computer. To move to a new server, install there, copy a backup across, and restore it.
+
+## Test sites: resetting every 48 hours
+
+Installing with `--demo` marks the server as a public test site (`PHAEMA_DEMO_SITE=True` in `.env`). Every
+page then tells testers that the data is fictional and reset every 48 hours, and a nightly job at 03:00 resets
+it once 48 hours have passed. A reset backs up first, wipes everything (including anything testers added),
+reloads the demonstration data with today's dates, and puts back every sign-in that is not a demonstration
+person, with its password, role and access areas. Change the interval with `PHAEMA_DEMO_RESET_HOURS` in `.env`.
+The log is in `/var/log/phaema-demo-reset.log`. Never set `PHAEMA_DEMO_SITE` on a server with real data.
 
 ## Email (optional)
 

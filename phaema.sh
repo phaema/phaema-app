@@ -20,24 +20,30 @@ Usage: ./phaema.sh <command>
   backup       Save a copy of the database and uploaded files to the backups folder
   restore FILE Replace ALL data with a database backup (and its matching files backup, if any)
   prune-backups N  Keep only the newest N backups
+  reset-demo   Test sites only: wipe everything, reload the demo data and keep the sign-ins
+               (--if-due: only if PHAEMA_DEMO_RESET_HOURS have passed since the last reset)
   reset-data   DELETE all data and start with an empty database
 EOF
 }
 
 compose() { docker compose "$@"; }
 
+wait_ready() {
+  for _ in $(seq 1 150); do
+    curl -fs http://localhost:8000/health/ >/dev/null 2>&1 && return 0
+    sleep 2
+  done
+  return 1
+}
+
+env_value() { grep -E "^$1=" .env 2>/dev/null | tail -n 1 | cut -d= -f2-; }
+
 case "${1:-}" in
   start)
     compose up -d --build
     echo "Waiting for PHAEMA to start..."
     # The first start sets up the whole database, which takes a few minutes on a small server.
-    for _ in $(seq 1 150); do
-      if curl -fs http://localhost:8000/health/ >/dev/null 2>&1; then
-        echo "PHAEMA is running: open http://localhost:8000"
-        exit 0
-      fi
-      sleep 2
-    done
+    if wait_ready; then echo "PHAEMA is running: open http://localhost:8000"; exit 0; fi
     echo "PHAEMA has not started yet. Check './phaema.sh logs'." ; exit 1 ;;
   stop)    compose down ;;
   update)  git pull --ff-only && "$0" start ;;
@@ -72,6 +78,29 @@ case "${1:-}" in
     else
       echo "Restored $2 (no matching files backup found)"
     fi ;;
+  reset-demo)
+    case "$(env_value PHAEMA_DEMO_SITE)" in
+      [Tt]rue|1|[Yy]es) ;;
+      *) echo "reset-demo only runs on a test site (PHAEMA_DEMO_SITE=True in .env)."; exit 1 ;;
+    esac
+    mkdir -p backups
+    stamp=backups/.last-demo-reset
+    if [ "${2:-}" = "--if-due" ]; then
+      hours="$(env_value PHAEMA_DEMO_RESET_HOURS)"; hours="${hours:-48}"
+      [ -n "$(find "$stamp" -mmin -$((hours * 60 - 30)) 2>/dev/null)" ] && exit 0
+    fi
+    echo "$(date '+%F %T') Resetting the test site"
+    "$0" backup
+    compose exec -T web python manage.py demo_accounts export > backups/demo-accounts.json
+    compose stop web scheduler
+    compose exec -T db psql -U phaema -d postgres -q -c "DROP DATABASE IF EXISTS phaema WITH (FORCE);" -c "CREATE DATABASE phaema OWNER phaema;"
+    compose run --rm --no-deps -T -u root web sh -c 'rm -rf /app/media/* && chown phaema /app/media'
+    compose start web scheduler
+    wait_ready || { echo "PHAEMA did not come back. Check './phaema.sh logs'."; exit 1; }
+    compose exec -T web python manage.py load_demo_data
+    compose exec -T web python manage.py demo_accounts import < backups/demo-accounts.json
+    touch "$stamp"
+    echo "$(date '+%F %T') Test site reset" ;;
   prune-backups)
     keep="${2:-14}"
     ls -1t backups/phaema-*.sql.gz 2>/dev/null | tail -n +"$((keep + 1))" | xargs -r rm -f

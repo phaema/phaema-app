@@ -107,13 +107,23 @@ EOF
 else
   echo "  Keeping the existing .env settings."
 fi
+if [ "$DEMO" -eq 1 ] && ! grep -q '^PHAEMA_DEMO_SITE=' .env; then
+  printf '%s\n' "# A public test site with fictional data, reset every PHAEMA_DEMO_RESET_HOURS hours." \
+    "PHAEMA_DEMO_SITE=True" "PHAEMA_DEMO_RESET_HOURS=48" >> .env
+fi
 
 step "Building and starting PHAEMA (the first build takes a few minutes)"
 ./phaema.sh start
 
 if [ "$DEMO" -eq 1 ]; then
-  step "Loading the fictional demonstration data"
-  ./phaema.sh demo-data
+  step "Loading the fictional demonstration data, and resetting it every 48 hours"
+  if [ ! -f backups/.last-demo-reset ]; then
+    ./phaema.sh demo-data
+    mkdir -p backups && touch backups/.last-demo-reset
+  fi
+  echo "# Checks at 03:00 each night; resets once PHAEMA_DEMO_RESET_HOURS (in .env) have passed." > /etc/cron.d/phaema-demo-reset
+  echo "0 3 * * * root cd $APP_DIR && ./phaema.sh reset-demo --if-due >> /var/log/phaema-demo-reset.log 2>&1" >> /etc/cron.d/phaema-demo-reset
+  chmod 644 /etc/cron.d/phaema-demo-reset
 fi
 
 step "Daily backups at 02:30, keeping the last 14"
