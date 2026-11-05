@@ -16,7 +16,7 @@ AS_OF = "November 2026"
 
 # Where things live. An empty string shows "coming soon" instead of a link.
 LINKS = {
-    "test_site": "",  # e.g. https://demo.phaema.co.uk once the IONOS test site is running
+    "test_site": "https://demo.phaema.co.uk",
     "contact": "stuart@phaema.co.uk",  # an email address for enquiries; leave empty to point people to GitHub
     "repo": "https://github.com/phaema/phaema-app",
     "issues": "https://github.com/phaema/phaema-app/issues",
@@ -89,11 +89,13 @@ ROADMAP = [
         "Access areas, cover and hand-over of work",
         "Reports, imports, open data and API",
         "Help, user and technical manuals, and e-learning for five roles",
+        "One-step server installation with HTTPS and nightly backups",
+        "A public test site, reset every 48 hours",
     ]),
     ("now", "Now: testing", [
         "A 12-day test programme run by council staff",
-        "A public test site with fictional demonstration data",
-        "Installation guide and hosting scripts",
+        "Feedback from testers on the public test site",
+        "Fixing what testing finds",
     ]),
     ("next", "Next: connectors", [
         "Single sign-on with the council's own accounts",
@@ -114,7 +116,8 @@ ROADMAP = [
 
 # (title, description, link key, link text)
 RESOURCES = [
-    ("Test site", "Try PHAEMA with fictional data: a council estate, leases, cases and projects to explore.",
+    ("Test site", "Try PHAEMA with fictional data: a council estate, leases, cases and projects to explore. "
+     "Request a sign-in on the site; the data is reset every 48 hours.",
      "test_site", "Open the test site"),
     ("Training", "Interactive courses for surveyors, finance, maintenance, administrators and viewers, using the "
      "real screens.", "training", "Start the training"),
