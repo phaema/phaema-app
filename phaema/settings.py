@@ -168,3 +168,5 @@ PHAEMA_ORGANISATION_NAME = env("PHAEMA_ORGANISATION_NAME", default="Demonstratio
 # A public test site holding only fictional data. Turns on the reset banner and allows ./phaema.sh reset-demo.
 PHAEMA_DEMO_SITE = env.bool("PHAEMA_DEMO_SITE", default=False)
 PHAEMA_DEMO_RESET_HOURS = env.int("PHAEMA_DEMO_RESET_HOURS", default=48)
+# Where requests for a test site sign-in are emailed (they are also listed under Manage data).
+PHAEMA_ACCOUNT_REQUEST_EMAIL = env("PHAEMA_ACCOUNT_REQUEST_EMAIL", default="")

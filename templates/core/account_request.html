@@ -1,0 +1,20 @@
+{% extends "base.html" %}{% load i18n %}
+{% block title %}{% translate "Request a test account" %}{% endblock %}
+{% block content %}
+<div class="govuk-grid-row"><div class="govuk-grid-column-two-thirds">
+  <h1 class="govuk-heading-l">{% translate "Request a test account" %}</h1>
+  <p class="govuk-body">{% blocktranslate %}This test site holds a fictional council's estate. Ask for a sign-in and we will set one up for you, usually within two working days, and email you the details.{% endblocktranslate %}</p>
+  {% include "core/_form_errors.html" %}
+  <form method="post" novalidate>
+    {% csrf_token %}
+    {% include "core/_field.html" with field=form.name %}
+    {% include "core/_field.html" with field=form.email %}
+    {% include "core/_field.html" with field=form.organisation %}
+    {% include "core/_field.html" with field=form.reason %}
+    <div class="phaema-trap" aria-hidden="true">{{ form.website }}</div>
+    <p class="govuk-body-s">{% blocktranslate %}We use your name and email address only to set up your test account and contact you about PHAEMA. They are not shared, and we delete them when the test account is no longer needed.{% endblocktranslate %}</p>
+    <button type="submit" class="govuk-button" data-module="govuk-button">{% translate "Send request" %}</button>
+  </form>
+</div></div>
+<style>.phaema-trap { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }</style>
+{% endblock %}

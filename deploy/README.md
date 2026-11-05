@@ -67,6 +67,16 @@ reloads the demonstration data with today's dates, and puts back every sign-in t
 person, with its password, role and access areas. Change the interval with `PHAEMA_DEMO_RESET_HOURS` in `.env`.
 The log is in `/var/log/phaema-demo-reset.log`. Never set `PHAEMA_DEMO_SITE` on a server with real data.
 
+Visitors can ask for a sign-in with **Request a test account**, linked from the banner and the sign-in page.
+Requests are listed under **Manage data**, **Test account requests** (tick each one when you have set up the
+account), and emailed to the address in `PHAEMA_ACCOUNT_REQUEST_EMAIL`, for example:
+
+```
+PHAEMA_ACCOUNT_REQUEST_EMAIL=stuart@phaema.co.uk
+```
+
+The email needs the `EMAIL_` settings below. Open requests are kept through each reset.
+
 ## Email (optional)
 
 To send reminders, fill in the `EMAIL_` settings in `/opt/phaema/.env` with the council's mail server or a

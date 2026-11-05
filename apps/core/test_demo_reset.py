@@ -32,7 +32,7 @@ def test_accounts_survive_a_reset(settings, make_user):
     out = io.StringIO()
     call_command("demo_accounts", "export", stdout=out)
     saved = json.loads(out.getvalue())
-    assert {row["username"] for row in saved} == {"t.boss", "t.tester"}
+    assert {row["username"] for row in saved["accounts"]} == {"t.boss", "t.tester"}
     assert "tester-pass-2026" not in out.getvalue()  # only the password hash is kept
 
     get_user_model().objects.all().delete()
@@ -55,3 +55,55 @@ def test_test_site_banner(settings, make_user):
     settings.PHAEMA_DEMO_SITE = True
     page = client.get("/").content.decode()
     assert "public test site with fictional data" in page and "reset every 48 hours" in page
+
+
+def test_request_a_test_account(settings, make_user):
+    from django.core import mail
+    from django.core.cache import cache
+
+    from apps.core.models import AccountRequest
+
+    cache.clear()
+    settings.PHAEMA_ACCOUNT_REQUEST_EMAIL = "owner@example.org"
+    client = Client()
+    settings.PHAEMA_DEMO_SITE = False
+    assert client.get("/request-account/").status_code == 404
+    settings.PHAEMA_DEMO_SITE = True
+    assert "Request a test account" in client.get("/login/").content.decode()
+    assert "Request a test account" in client.get("/request-account/").content.decode()
+
+    bad = client.post("/request-account/", {"name": "", "email": "not-an-email"})
+    assert "There is a problem" in bad.content.decode() and not AccountRequest.objects.exists()
+
+    sent = client.post("/request-account/", {"name": "Pat Example", "email": "pat@example.org",
+                                             "organisation": "Exampleton Council", "reason": "Rent reviews"})
+    assert "Request sent" in sent.content.decode()
+    req = AccountRequest.objects.get()
+    assert (req.name, req.email, req.done) == ("Pat Example", "pat@example.org", False)
+    assert len(mail.outbox) == 1 and mail.outbox[0].to == ["owner@example.org"]
+    assert "pat@example.org" in mail.outbox[0].body and "Exampleton Council" in mail.outbox[0].body
+
+    # A bot filling the hidden box gets the thank-you page, but nothing is kept or sent.
+    client.post("/request-account/", {"name": "Bot", "email": "bot@example.org", "website": "http://spam"})
+    assert AccountRequest.objects.count() == 1 and len(mail.outbox) == 1
+
+    # Open requests survive a reset; finished ones do not need to.
+    out = io.StringIO()
+    call_command("demo_accounts", "export", stdout=out)
+    data = json.loads(out.getvalue())
+    AccountRequest.objects.all().delete()
+    call_command("demo_accounts", "import", stdin=io.StringIO(json.dumps(data)), stderr=io.StringIO())
+    assert AccountRequest.objects.get().email == "pat@example.org"
+
+
+def test_too_many_requests(settings, db):
+    from django.core.cache import cache
+
+    from apps.core.models import AccountRequest
+
+    cache.clear()
+    settings.PHAEMA_DEMO_SITE = True
+    client = Client()
+    for i in range(6):
+        page = client.post("/request-account/", {"name": f"Person {i}", "email": f"p{i}@example.org"})
+    assert AccountRequest.objects.count() == 5 and "Too many requests" in page.content.decode()

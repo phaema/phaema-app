@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
-"""Save and restore the real sign-ins on a public test site, so its data can be reset without losing them.
+"""Save and restore the real sign-ins (and open test account requests) on a public test site, so its data can be
+reset without losing them.
 
     python manage.py demo_accounts export > accounts.json
     python manage.py demo_accounts import < accounts.json
@@ -16,7 +17,7 @@ from django.contrib.auth.models import Group
 from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
 
-from apps.core.models import AccessArea, StaffProfile
+from apps.core.models import AccessArea, AccountRequest, StaffProfile
 
 FIELDS = ("username", "first_name", "last_name", "email", "password", "is_active", "is_staff", "is_superuser")
 
@@ -32,10 +33,13 @@ class Command(BaseCommand):
         if not settings.PHAEMA_DEMO_SITE:
             raise CommandError("Only for a test site: set PHAEMA_DEMO_SITE=True first.")
         if action == "export":
-            self.stdout.write(json.dumps(export_accounts(), indent=1))
+            data = {"accounts": export_accounts(), "requests": export_requests()}
+            self.stdout.write(json.dumps(data, indent=1))
         else:
-            count = import_accounts(json.load(options.get("stdin") or sys.stdin))
-            self.stderr.write(f"Restored {count} accounts.")
+            data = json.load(options.get("stdin") or sys.stdin)
+            count = import_accounts(data["accounts"])
+            requests = import_requests(data.get("requests", []))
+            self.stderr.write(f"Restored {count} accounts and {requests} account requests.")
 
 
 def export_accounts():
@@ -66,4 +70,22 @@ def import_accounts(rows):
                 "job_title": row["job_title"],
                 "supervisor": User.objects.filter(username=row["supervisor"]).first() if row["supervisor"] else None,
             })
+    return len(rows)
+
+
+REQUEST_FIELDS = ("name", "email", "organisation", "reason", "done")
+
+
+def export_requests():
+    return [{**{f: getattr(r, f) for f in REQUEST_FIELDS}, "requested_at": r.requested_at.isoformat()}
+            for r in AccountRequest.objects.filter(done=False)]
+
+
+@transaction.atomic
+def import_requests(rows):
+    from django.utils.dateparse import parse_datetime
+
+    for row in rows:
+        req = AccountRequest.objects.create(**{f: row[f] for f in REQUEST_FIELDS})
+        AccountRequest.objects.filter(pk=req.pk).update(requested_at=parse_datetime(row["requested_at"]))
     return len(rows)

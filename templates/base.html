@@ -64,7 +64,7 @@
     <div class="govuk-phase-banner">
       <p class="govuk-phase-banner__content">
         <strong class="govuk-tag govuk-phase-banner__content__tag">{% translate "Alpha" %}</strong>
-        <span class="govuk-phase-banner__text">{% if demo_site %}{% blocktranslate with hours=demo_reset_hours %}This is a public test site with fictional data. Everything is reset every {{ hours }} hours, so do not enter real or personal information.{% endblocktranslate %}{% else %}{% translate "This is a development version. Do not rely on it for live estate management." %}{% endif %}</span>
+        <span class="govuk-phase-banner__text">{% if demo_site %}{% blocktranslate with hours=demo_reset_hours %}This is a public test site with fictional data. Everything is reset every {{ hours }} hours, so do not enter real or personal information.{% endblocktranslate %}{% if not user.is_authenticated %} <a class="govuk-link" href="{% url 'request-account' %}">{% translate "Request a test account" %}</a>{% endif %}{% else %}{% translate "This is a development version. Do not rely on it for live estate management." %}{% endif %}</span>
       </p>
     </div>
     <div class="phaema-settings-bar">

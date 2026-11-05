@@ -1,0 +1,11 @@
+{% extends "base.html" %}{% load i18n %}
+{% block title %}{% translate "Request sent" %}{% endblock %}
+{% block content %}
+<div class="govuk-grid-row"><div class="govuk-grid-column-two-thirds">
+  <div class="govuk-panel govuk-panel--confirmation">
+    <h1 class="govuk-panel__title">{% translate "Request sent" %}</h1>
+  </div>
+  <p class="govuk-body">{% blocktranslate %}Thank you. We will set up your test account and email you the sign-in details, usually within two working days.{% endblocktranslate %}</p>
+  <p class="govuk-body"><a class="govuk-link" href="{% url 'login' %}">{% translate "Back to sign in" %}</a></p>
+</div></div>
+{% endblock %}
