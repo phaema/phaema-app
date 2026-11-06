@@ -50,6 +50,7 @@
         {% if user.is_staff %}<a href="{% url 'admin:index' %}">{% translate "Manage data" %}</a>{% endif %}
         {% if is_administrator %}<a href="{% url 'hand-over' %}">{% translate "Hand over work" %}</a>{% endif %}
         <span class="phaema-header__user">{{ user.get_full_name|default:user.get_username }} ({{ role|lower|slice:":-1" }})</span>
+        <a href="{% url 'two-step' %}">{% translate "Two-step sign-in" %}</a>
         <form method="post" action="{% url 'logout' %}" class="phaema-header__logout">
           {% csrf_token %}<button type="submit">{% translate "Sign out" %}</button>
         </form>

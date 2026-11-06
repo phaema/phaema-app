@@ -69,6 +69,7 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "apps.core.middleware.CurrentUserMiddleware",
     "apps.core.middleware.RoleRequiredMiddleware",
+    "apps.core.middleware.TwoStepRequiredMiddleware",
 ]
 
 ROOT_URLCONF = "phaema.urls"
@@ -130,6 +131,12 @@ LOGIN_REDIRECT_URL = "dashboard"
 LOGOUT_REDIRECT_URL = "login"
 
 REST_FRAMEWORK = {
+    # Basic authentication (username and password) is refused for anyone with two-step sign-in, which a password
+    # alone must not get round. They use the API from a signed-in browser session.
+    "DEFAULT_AUTHENTICATION_CLASSES": [
+        "rest_framework.authentication.SessionAuthentication",
+        "apps.core.api_auth.PasswordOnlyBasicAuthentication",
+    ],
     "DEFAULT_PERMISSION_CLASSES": ["apps.core.api_permissions.PhaemaPermission"],
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
@@ -167,6 +174,9 @@ PHAEMA_BASE_URL = env("PHAEMA_BASE_URL", default="http://localhost:8000")
 PHAEMA_ORGANISATION_NAME = env("PHAEMA_ORGANISATION_NAME", default="Demonstration Council")
 # A public test site holding only fictional data. Turns on the reset banner and allows ./phaema.sh reset-demo.
 PHAEMA_DEMO_SITE = env.bool("PHAEMA_DEMO_SITE", default=False)
+# Whether the council's "two-step sign-in required" setting is enforced. Leave on; the automated tests turn it off
+# except where they test it.
+PHAEMA_ENFORCE_TWO_STEP = env.bool("PHAEMA_ENFORCE_TWO_STEP", default=True)
 PHAEMA_DEMO_RESET_HOURS = env.int("PHAEMA_DEMO_RESET_HOURS", default=48)
 # Where requests for a test site sign-in are emailed (they are also listed under Manage data).
 PHAEMA_ACCOUNT_REQUEST_EMAIL = env("PHAEMA_ACCOUNT_REQUEST_EMAIL", default="")

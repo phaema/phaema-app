@@ -5,7 +5,7 @@ from django.urls import include, path
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 from rest_framework.routers import DefaultRouter
 
-from apps.core import account_requests, cover_views, handover_views
+from apps.core import account_requests, cover_views, handover_views, two_step_views
 from apps.core import views as core_views
 from apps.leases import event_views
 from apps.leases.api import LeaseViewSet, PartyViewSet
@@ -23,7 +23,9 @@ admin.site.site_title = "PHAEMA"
 
 urlpatterns = [
     path("", core_views.dashboard, name="dashboard"),
-    path("login/", auth_views.LoginView.as_view(), name="login"),
+    path("login/", two_step_views.PhaemaLoginView.as_view(), name="login"),
+    path("login/code/", two_step_views.login_code, name="login-code"),
+    path("account/two-step/", two_step_views.security, name="two-step"),
     path("logout/", auth_views.LogoutView.as_view(), name="logout"),
     path("health/", core_views.health, name="health"),
     path("request-account/", account_requests.request_account, name="request-account"),
@@ -51,6 +53,7 @@ urlpatterns = [
     path("cases/", include("apps.cases.urls")),
     path("projects/", include("apps.projects.urls")),
     path("calendar/<str:token>.ics", event_views.calendar_feed, name="calendar-feed"),
+    path("admin/login/", two_step_views.admin_login_redirect),
     path("admin/", admin.site.urls),
     path("api/", include(router.urls)),
     path("api/schema/", SpectacularAPIView.as_view(), name="api-schema"),
