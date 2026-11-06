@@ -33,7 +33,67 @@ LINKS = {
     "test_programme": "https://claude.ai/artifact/7jMMkZAmCZMEgvEfYhhiK1",
     "integrations": "https://claude.ai/artifact/8nri1SACnG6YVXkp1HSJgU",
     "tour": "tour.html",
+    "security": "https://github.com/phaema/phaema-app/blob/main/SECURITY.md",
 }
+
+PILOT_SUBJECT = "PHAEMA pilot council"
+
+# What PHAEMA brings together (title, description)
+BRINGS_TOGETHER = [
+    ("Property terrier", "The register of land and buildings, mapped from Land Registry boundaries, with UPRNs, floor "
+     "areas and titles."),
+    ("Lease and key-date records", "Leases, licences and wayleaves, with rent reviews, breaks, expiries and notice "
+     "deadlines that remind the right people."),
+    ("Compliance and the Golden Thread", "Certificates, remedial actions and building information for every "
+     "building."),
+    ("Asset valuation", "The rolling programme, Red Book records and the year-end schedule for finance."),
+    ("Projects, acquisitions and disposals", "Gateways, budgets, risks and the register changes completion needs."),
+    ("Rents and service charges, if wanted", "Optional ledgers that feed the council's finance system, or leave this "
+     "to the systems it already has."),
+]
+
+WHO_FOR = [
+    ("District and borough councils", "With a small estates team and an ageing terrier or spreadsheets."),
+    ("Smaller unitary authorities", "That want one system without enterprise licence costs."),
+    ("Councils merging under local government reorganisation", "Which must combine two or more estates systems. "
+     "PHAEMA gives the new council one system it owns, with spreadsheet imports to bring each council's records "
+     "across."),
+    ("Combined authorities and development bodies", "Running acquisitions, disposals and regeneration programmes."),
+]
+
+WAYS = [
+    ("Run it yourselves", "The council's IT team installs PHAEMA with one command on its own servers or on UK or EU "
+     "cloud hosting."),
+    ("Have a supplier host it", "Any IT supplier can host and support PHAEMA under the open licence, so the council "
+     "can change supplier without changing system."),
+    ("Become a pilot council", "Pilot councils run the test programme with their own staff and their own data, and "
+     "decide which connectors come first. The project helps with setting up, bringing data across and training."),
+]
+
+SECURE_NOW = [
+    ("Two-step sign-in", "A code from an authenticator app after the password, required for administrators by "
+     "default and for everyone if the council chooses. Single-use recovery codes, and administrators can reset a "
+     "lost phone."),
+    ("Access by role and area", "Roles decide what people can change and access areas decide what they can open, "
+     "checked on the server for every page, download, report and API call."),
+    ("A log of every change", "Who changed what and when, across properties, leases, cases, finance, access and "
+     "sign-in."),
+    ("Your data, your hosting", "PHAEMA runs on the council's own servers or UK or EU hosting, and sends nothing to "
+     "the project."),
+    ("Secure servers by default", "The installer sets up HTTPS, a firewall, automatic security updates and nightly "
+     "backups."),
+    ("Open to inspection", "Every line of code, every automated test and the security policy are public."),
+]
+
+BEFORE_LIVE = [
+    "An independent penetration test by a CREST or CHECK accredited tester, with a summary of the results published",
+    "Single sign-on with the council's own accounts, such as Microsoft Entra ID, so the council's own sign-in rules "
+    "apply",
+    "An independent accessibility audit against WCAG 2.2 AA",
+    "Templates for a data protection impact assessment and record of processing, and answers to common security "
+    "questionnaires",
+    "Numbered releases, with release notes and a security support period for each",
+]
 
 CAPABILITIES = [
     ("Property register", "Estates, sites, buildings and units in a tree, with UPRN and USRN, floor areas to the RICS "
@@ -92,11 +152,12 @@ ROADMAP = [
         "Help, user and technical manuals, and e-learning for five roles",
         "One-step server installation with HTTPS and nightly backups",
         "A public test site, reset every 48 hours",
+        "Two-step sign-in (multi-factor authentication) and a published security policy",
     ]),
     ("now", "Now: testing", [
         "A major test programme run by council staff",
         "Feedback from testers on the public test site",
-        "Fixing what testing finds",
+        "Fixing what testing finds, and preparing for an independent penetration test and accessibility audit",
     ]),
     ("next", "Next: connectors", [
         "Single sign-on with the council's own accounts",
@@ -117,6 +178,8 @@ ROADMAP = [
 
 # (title, description, link key, link text)
 RESOURCES = [
+    ("Security policy", "What protects PHAEMA today, the known gaps, and how to report a security problem.",
+     "security", "Read the security policy"),
     ("Tour", "A self-running, clickable tour of every part of PHAEMA, for a first look or a screen at an event.",
      "tour", "Watch the tour"),
     ("Test site", "Try PHAEMA with fictional data: a council estate, leases, cases and projects to explore. "
@@ -142,7 +205,8 @@ RESOURCES = [
 # (who, what they can do)
 INVOLVE = [
     ("Councils", "Try the test site, run parts of the test programme with your own staff, and tell us what your "
-     "estates team needs. Councils that pilot PHAEMA shape what is built next."),
+     "estates team needs. Pilot councils run PHAEMA with their own data, get help setting it up, and shape what is "
+     "built next."),
     ("Surveyors and estates staff", "Check that the processes match how you work: rent reviews, the 1954 Act, "
      "service charges, valuations and casework. Practical corrections from practitioners are the most valuable "
      "contribution of all."),
@@ -191,6 +255,22 @@ def resource_list():
     return "\n".join(rows)
 
 
+def titled_list(items, tag="div"):
+    return "\n".join(f'      <{tag}><h3>{esc(t)}</h3><p>{esc(d)}</p></{tag}>' for t, d in items)
+
+
+def plain_list(items):
+    return "".join(f"<li>{esc(i)}</li>" for i in items)
+
+
+def pilot_href():
+    from urllib.parse import quote
+
+    if LINKS["contact"]:
+        return esc(f"mailto:{LINKS['contact']}?subject={quote(PILOT_SUBJECT)}")
+    return esc(LINKS["new_issue"])
+
+
 def involve_list():
     return "\n".join(f'      <div><h3>{esc(w)}</h3><p>{esc(d)}</p></div>' for w, d in INVOLVE)
 
@@ -205,7 +285,8 @@ def contact_line():
     if LINKS["contact"]:
         e = esc(LINKS["contact"])
         return (f'<p>Email <a class="copy" href="mailto:{e}">{e}</a> with questions, ideas or offers of help, '
-                f'or raise an issue on GitHub. Councils interested in a pilot are especially welcome to get in touch.</p>')
+                f'or raise an issue on GitHub. Councils interested in becoming a pilot council, and suppliers interested in hosting PHAEMA, are '
+                f'especially welcome.</p>')
     return '<p>The quickest way to reach the project is to raise an issue on GitHub: questions, ideas and offers of help are all welcome there.</p>'
 
 
@@ -213,7 +294,9 @@ BODY = r'''<div class="top"><div class="wrap top__inner">
   <a class="brand" href="#about" aria-label="PHAEMA home"><span class="brand__mark" aria-hidden="true"></span>PHAEMA</a>
   <nav aria-label="Sections"><ul class="nav">
     <li><a href="#about">About</a></li>
+    <li><a href="#councils">For councils</a></li>
     <li><a href="#capabilities">What it does</a></li>
+    <li><a href="#security">Security</a></li>
     <li><a href="#open-source">Why Open Source</a></li>
     <li><a href="tour.html">Tour</a></li>
     <li><a href="#roadmap">Roadmap</a></li>
@@ -226,13 +309,13 @@ BODY = r'''<div class="top"><div class="wrap top__inner">
 <section class="view" id="about" aria-labelledby="h-about">
   <div class="wrap hero">
     <div class="hero__text">
-      <p class="kicker">Open-source Property Holdings and Estate Management Application for councils in England and Wales</p>
-      <h1 id="h-about">Estate management software, built in the open.</h1>
-      <p class="lede">PHAEMA (Property Holding and Estate Management Application) covers a council's property register, leases, casework, projects, rents, service charges, repairs, compliance and asset valuations in one system. It is free, open source and being developed in public. Councils, surveyors and developers are invited to try it and help shape it.</p>
+      <p class="kicker">Open-source Property Holding and Estate Management Application for councils in England and Wales</p>
+      <h1 id="h-about">One open system for council estates.</h1>
+      <p class="lede">Many councils run their estate across a terrier, a lease database, compliance spreadsheets, a valuation workbook and separate project trackers. PHAEMA (Property Holding and Estate Management Application) brings the property register, leases, casework, projects, rents, service charges, repairs, compliance and asset valuations into one system, built around the property and the lease. There is no licence fee, the code is open, and councils are invited to pilot it.</p>
       <div class="cta">
+        <a class="button" href="__PILOT__">Become a pilot council</a>
         __TEST_CTA__
         <a class="button button--quiet" href="tour.html">Watch the tour</a>
-        <a class="button button--quiet" href="#take-part">Take part</a>
       </div>
       <p class="status-line"><span class="pill">Alpha</span> In testing, __ASOF__. Not yet ready for live estate management.</p>
     </div>
@@ -244,14 +327,42 @@ BODY = r'''<div class="top"><div class="wrap top__inner">
 
   <div class="wrap band">
     <h2>Where the project is</h2>
-    <p class="band__lead">All twelve modules are built and documented, with about 240 automated tests, a user manual, a technical manual and e-learning for five roles. The next step is testing by council staff and a public test site. After that come connectors to the systems councils already use.</p>
+    <p class="band__lead">All twelve modules are built and documented, with about 240 automated tests, a user manual, a technical manual and e-learning for five roles. A public test site is running. Next come testing by pilot councils, independent security and accessibility checks, and connectors to the systems councils already use.</p>
     <p><a href="#roadmap">See the roadmap</a></p>
   </div>
 
-  <div class="wrap three">
-    <div><h3>Free to use</h3><p>No licence fee, ever. Councils can run it themselves or have any supplier host it.</p></div>
-    <div><h3>Built by surveyors</h3><p>Covering all day-to-day aspects of estate and asset management in the public sector, and ensuring compliance: heads of terms to the RICS leasing code, 1954 Act notice dates, service charges to the RICS 2nd edition, Red Book valuation records and Golden Thread building information.</p></div>
+  <div class="wrap four">
+    <div><h3>Free to use</h3><p>No licence fee, ever. Councils pay only for hosting and any support they choose, and can run it themselves or have any supplier host it.</p></div>
+    <div><h3>Built by surveyors</h3><p>Covers the day-to-day work of public sector estate and asset management, to the professional standards: heads of terms to the RICS leasing code, 1954 Act notice dates, service charges to the RICS 2nd edition, Red Book valuation records and Golden Thread building information.</p></div>
     <div><h3>Accessible by design</h3><p>Built on the GOV.UK Design System and aiming for WCAG 2.2 AA, with dark, high-contrast and large-text settings.</p></div>
+    <div><h3>Secure by design</h3><p>Two-step sign-in, access by role and area, a log of every change, and hosting in the UK or EU. <a href="#security">What is done, and what comes before live use</a>.</p></div>
+  </div>
+</section>
+
+<section class="view" id="councils" aria-labelledby="h-councils">
+  <div class="wrap">
+    <h2 id="h-councils">PHAEMA for councils</h2>
+    <p class="lede">Estates teams often work across several systems and a lot of spreadsheets, each bought, supported and kept up to date separately. PHAEMA puts the estate in one place, with no licence fee, so the money goes on hosting, support and improvements that every council shares.</p>
+    <h3 class="sub">What it brings together</h3>
+    <div class="benefits">
+__BRINGS__
+    </div>
+    <h3 class="sub">Who it is for</h3>
+    <div class="involve two">
+__WHO_FOR__
+    </div>
+    <h3 class="sub">Ways to use PHAEMA</h3>
+    <div class="involve">
+__WAYS__
+    </div>
+    <div class="band">
+      <h3>What it costs</h3>
+      <p>No licence fee, now or later. The costs are a modest server, the staff time to bring records across and train people, and any support the council chooses to buy.</p>
+      <div class="cta">
+        <a class="button" href="__PILOT__">Become a pilot council</a>
+        <a class="button button--quiet" href="#security">Read about security</a>
+      </div>
+    </div>
   </div>
 </section>
 
@@ -269,6 +380,28 @@ __CAPABILITIES__
       <figure><img src="img/estate.jpg" width="1920" height="1230" loading="lazy" alt="The whole estate dashboard with vacancy, rent roll and lease event figures."><figcaption>The whole estate at a glance.</figcaption></figure>
     </div>
     <p class="fine">Screenshots show fictional demonstration data.</p>
+  </div>
+</section>
+
+<section class="view" id="security" aria-labelledby="h-security">
+  <div class="wrap">
+    <h2 id="h-security">Security and assurance</h2>
+    <p class="lede">What protects PHAEMA today, what will be done before councils use it for live work, and how a council can check it for itself.</p>
+    <h3 class="sub">In place now</h3>
+    <div class="benefits">
+__SECURE_NOW__
+    </div>
+    <div class="band split">
+      <div>
+        <h3>Before live use</h3>
+        <ul class="ticks">__BEFORE_LIVE__</ul>
+      </div>
+      <div>
+        <h3>Check it yourself</h3>
+        <p>Councils and their suppliers are welcome to review the code or test their own installation. Please report security problems privately to __EMAIL_LINK__.</p>
+        <p>__SECURITY_LINK__ · __TECH_LINK__</p>
+      </div>
+    </div>
   </div>
 </section>
 
@@ -426,6 +559,13 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 
 .band { margin-top: 48px; padding-block: 28px; border-top: 3px solid var(--ink); border-bottom: 1px solid var(--line); }
 .band__lead { font-size: 1.25rem; }
+.four { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 28px; margin-top: 32px; }
+.four p { font-size: 1rem; }
+.involve.two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+h3.sub { margin-top: 40px; font-size: 1.45rem; font-weight: 800; }
+.split { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 40px; }
+.ticks { margin: 0; padding-left: 1.1em; }
+.ticks li { margin-bottom: .5em; }
 .three, .benefits, .involve { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 32px; margin-top: 32px; }
 .three p, .benefits p, .involve p { font-size: 1rem; }
 .benefits > div, .involve > div { border-top: 1px solid var(--line); padding-top: 16px; min-width: 0; }
@@ -467,9 +607,10 @@ pre { font: .95rem/1.5 var(--mono); background: var(--sheet); border: 1px solid 
   .stages { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .resources, .benefits, .involve { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .three { grid-template-columns: minmax(0, 1fr); gap: 8px; }
+  .four { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 @media (max-width: 600px) {
-  .modules, .shots, .stages, .resources, .benefits, .involve { grid-template-columns: minmax(0, 1fr); }
+  .modules, .shots, .stages, .resources, .benefits, .involve, .involve.two, .four, .split { grid-template-columns: minmax(0, 1fr); }
   .view { padding-block: 28px 40px; }
 }
 @media (prefers-reduced-motion: no-preference) { html { scroll-behavior: smooth; } }
@@ -483,6 +624,16 @@ def build(artifact=False):
             .replace("__ROADMAP__", roadmap_columns())
             .replace("__RESOURCES__", resource_list())
             .replace("__INVOLVE__", involve_list())
+            .replace("__BRINGS__", titled_list(BRINGS_TOGETHER))
+            .replace("__WHO_FOR__", titled_list(WHO_FOR))
+            .replace("__WAYS__", titled_list(WAYS))
+            .replace("__SECURE_NOW__", titled_list(SECURE_NOW))
+            .replace("__BEFORE_LIVE__", plain_list(BEFORE_LIVE))
+            .replace("__PILOT__", pilot_href())
+            .replace("__SECURITY_LINK__", link("security", "Security policy"))
+            .replace("__TECH_LINK__", link("technical_manual", "Technical manual"))
+            .replace("__EMAIL_LINK__", f'<a href="mailto:{esc(LINKS["contact"])}">{esc(LINKS["contact"])}</a>'
+                     if LINKS["contact"] else link("new_issue", "the project"))
             .replace("__TEST_CTA__", test_site_cta())
             .replace("__CONTACT__", contact_line())
             .replace("__LICENCE_LINK__", link("licence", "Read the licence"))
@@ -498,8 +649,9 @@ def build(artifact=False):
         return STYLE + body
     return ('<!doctype html>\n<html lang="en-GB">\n<head>\n<meta charset="utf-8">\n'
             '<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">\n'
-            '<meta name="description" content="PHAEMA: free, open-source property and estate management software for '
-            'councils in England and Wales, developed in the open. Try it, read the roadmap and take part.">\n'
+            '<meta name="description" content="PHAEMA: one open system for council estates in England and Wales, '
+            'covering the property register, leases, compliance, valuation and projects, with no licence fee. Try it, '
+            'check its security and become a pilot council.">\n'
             + STYLE + '</head>\n<body>\n<a class="skip" href="#main">Skip to content</a>\n'
             + body + '\n</body>\n</html>\n')
 
