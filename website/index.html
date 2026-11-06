@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="description" content="PHAEMA: free, open-source property and estate management software for councils in England and Wales, developed in the open. Try it, read the roadmap and take part.">
+<meta name="description" content="PHAEMA: one open system for council estates in England and Wales, covering the property register, leases, compliance, valuation and projects, with no licence fee. Try it, check its security and become a pilot council.">
 <title>PHAEMA</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -72,6 +72,13 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 
 .band { margin-top: 48px; padding-block: 28px; border-top: 3px solid var(--ink); border-bottom: 1px solid var(--line); }
 .band__lead { font-size: 1.25rem; }
+.four { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 28px; margin-top: 32px; }
+.four p { font-size: 1rem; }
+.involve.two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+h3.sub { margin-top: 40px; font-size: 1.45rem; font-weight: 800; }
+.split { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 40px; }
+.ticks { margin: 0; padding-left: 1.1em; }
+.ticks li { margin-bottom: .5em; }
 .three, .benefits, .involve { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 32px; margin-top: 32px; }
 .three p, .benefits p, .involve p { font-size: 1rem; }
 .benefits > div, .involve > div { border-top: 1px solid var(--line); padding-top: 16px; min-width: 0; }
@@ -113,9 +120,10 @@ pre { font: .95rem/1.5 var(--mono); background: var(--sheet); border: 1px solid 
   .stages { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .resources, .benefits, .involve { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .three { grid-template-columns: minmax(0, 1fr); gap: 8px; }
+  .four { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 @media (max-width: 600px) {
-  .modules, .shots, .stages, .resources, .benefits, .involve { grid-template-columns: minmax(0, 1fr); }
+  .modules, .shots, .stages, .resources, .benefits, .involve, .involve.two, .four, .split { grid-template-columns: minmax(0, 1fr); }
   .view { padding-block: 28px 40px; }
 }
 @media (prefers-reduced-motion: no-preference) { html { scroll-behavior: smooth; } }
@@ -127,7 +135,9 @@ pre { font: .95rem/1.5 var(--mono); background: var(--sheet); border: 1px solid 
   <a class="brand" href="#about" aria-label="PHAEMA home"><span class="brand__mark" aria-hidden="true"></span>PHAEMA</a>
   <nav aria-label="Sections"><ul class="nav">
     <li><a href="#about">About</a></li>
+    <li><a href="#councils">For councils</a></li>
     <li><a href="#capabilities">What it does</a></li>
+    <li><a href="#security">Security</a></li>
     <li><a href="#open-source">Why Open Source</a></li>
     <li><a href="tour.html">Tour</a></li>
     <li><a href="#roadmap">Roadmap</a></li>
@@ -141,12 +151,12 @@ pre { font: .95rem/1.5 var(--mono); background: var(--sheet); border: 1px solid 
   <div class="wrap hero">
     <div class="hero__text">
       <p class="kicker">Open-source Property Holdings and Estate Management Application for councils in England and Wales</p>
-      <h1 id="h-about">Estate management software, built in the open.</h1>
-      <p class="lede">PHAEMA (Property Holding and Estate Management Application) covers a council's property register, leases, casework, projects, rents, service charges, repairs, compliance and asset valuations in one system. It is free, open source and being developed in public. Councils, surveyors and developers are invited to try it and help shape it.</p>
+      <h1 id="h-about">One open system for council estates.</h1>
+      <p class="lede">Many councils run their estate across a terrier, a lease database, compliance spreadsheets, a valuation workbook and separate project trackers. PHAEMA (Property Holding and Estate Management Application) brings the property register, leases, casework, projects, rents, service charges, repairs, compliance and asset valuations into one system, built around the property and the lease. There is no licence fee, the code is open, and councils are invited to pilot it.</p>
       <div class="cta">
+        <a class="button" href="mailto:stuart@phaema.co.uk?subject=PHAEMA%20pilot%20council">Become a pilot council</a>
         <a class="button" href="https://demo.phaema.co.uk">Try the test site</a>
         <a class="button button--quiet" href="tour.html">Watch the tour</a>
-        <a class="button button--quiet" href="#take-part">Take part</a>
       </div>
       <p class="status-line"><span class="pill">Alpha</span> In testing, November 2026. Not yet ready for live estate management.</p>
     </div>
@@ -158,14 +168,52 @@ pre { font: .95rem/1.5 var(--mono); background: var(--sheet); border: 1px solid 
 
   <div class="wrap band">
     <h2>Where the project is</h2>
-    <p class="band__lead">All twelve modules are built and documented, with about 240 automated tests, a user manual, a technical manual and e-learning for five roles. The next step is testing by council staff and a public test site. After that come connectors to the systems councils already use.</p>
+    <p class="band__lead">All twelve modules are built and documented, with about 240 automated tests, a user manual, a technical manual and e-learning for five roles. A public test site is running. Next come testing by pilot councils, independent security and accessibility checks, and connectors to the systems councils already use.</p>
     <p><a href="#roadmap">See the roadmap</a></p>
   </div>
 
-  <div class="wrap three">
-    <div><h3>Free to use</h3><p>No licence fee, ever. Councils can run it themselves or have any supplier host it.</p></div>
-    <div><h3>Built by surveyors</h3><p>Covering all day-to-day aspects of estate and asset management in the public sector, and ensuring compliance: heads of terms to the RICS leasing code, 1954 Act notice dates, service charges to the RICS 2nd edition, Red Book valuation records and Golden Thread building information.</p></div>
+  <div class="wrap four">
+    <div><h3>Free to use</h3><p>No licence fee, ever. Councils pay only for hosting and any support they choose, and can run it themselves or have any supplier host it.</p></div>
+    <div><h3>Built by surveyors</h3><p>Covers the day-to-day work of public sector estate and asset management, to the professional standards: heads of terms to the RICS leasing code, 1954 Act notice dates, service charges to the RICS 2nd edition, Red Book valuation records and Golden Thread building information.</p></div>
     <div><h3>Accessible by design</h3><p>Built on the GOV.UK Design System and aiming for WCAG 2.2 AA, with dark, high-contrast and large-text settings.</p></div>
+    <div><h3>Secure by design</h3><p>Two-step sign-in, access by role and area, a log of every change, and hosting in the UK or EU. <a href="#security">What is done, and what comes before live use</a>.</p></div>
+  </div>
+</section>
+
+<section class="view" id="councils" aria-labelledby="h-councils">
+  <div class="wrap">
+    <h2 id="h-councils">PHAEMA for councils</h2>
+    <p class="lede">Estates teams often work across several systems and a lot of spreadsheets, each bought, supported and kept up to date separately. PHAEMA puts the estate in one place, with no licence fee, so the money goes on hosting, support and improvements that every council shares.</p>
+    <h3 class="sub">What it brings together</h3>
+    <div class="benefits">
+      <div><h3>Property terrier</h3><p>The register of land and buildings, mapped from Land Registry boundaries, with UPRNs, floor areas and titles.</p></div>
+      <div><h3>Lease and key-date records</h3><p>Leases, licences and wayleaves, with rent reviews, breaks, expiries and notice deadlines that remind the right people.</p></div>
+      <div><h3>Compliance and the Golden Thread</h3><p>Certificates, remedial actions and building information for every building.</p></div>
+      <div><h3>Asset valuation</h3><p>The rolling programme, Red Book records and the year-end schedule for finance.</p></div>
+      <div><h3>Projects, acquisitions and disposals</h3><p>Gateways, budgets, risks and the register changes completion needs.</p></div>
+      <div><h3>Rents and service charges, if wanted</h3><p>Optional ledgers that feed the council&#x27;s finance system, or leave this to the systems it already has.</p></div>
+    </div>
+    <h3 class="sub">Who it is for</h3>
+    <div class="involve two">
+      <div><h3>District and borough councils</h3><p>With a small estates team and an ageing terrier or spreadsheets.</p></div>
+      <div><h3>Smaller unitary authorities</h3><p>That want one system without enterprise licence costs.</p></div>
+      <div><h3>Councils merging under local government reorganisation</h3><p>Which must combine two or more estates systems. PHAEMA gives the new council one system it owns, with spreadsheet imports to bring each council&#x27;s records across.</p></div>
+      <div><h3>Combined authorities and development bodies</h3><p>Running acquisitions, disposals and regeneration programmes.</p></div>
+    </div>
+    <h3 class="sub">Ways to use PHAEMA</h3>
+    <div class="involve">
+      <div><h3>Run it yourselves</h3><p>The council&#x27;s IT team installs PHAEMA with one command on its own servers or on UK or EU cloud hosting.</p></div>
+      <div><h3>Have a supplier host it</h3><p>Any IT supplier can host and support PHAEMA under the open licence, so the council can change supplier without changing system.</p></div>
+      <div><h3>Become a pilot council</h3><p>Pilot councils run the test programme with their own staff and their own data, and decide which connectors come first. The project helps with setting up, bringing data across and training.</p></div>
+    </div>
+    <div class="band">
+      <h3>What it costs</h3>
+      <p>No licence fee, now or later. The costs are a modest server, the staff time to bring records across and train people, and any support the council chooses to buy.</p>
+      <div class="cta">
+        <a class="button" href="mailto:stuart@phaema.co.uk?subject=PHAEMA%20pilot%20council">Become a pilot council</a>
+        <a class="button button--quiet" href="#security">Read about security</a>
+      </div>
+    </div>
   </div>
 </section>
 
@@ -197,6 +245,33 @@ pre { font: .95rem/1.5 var(--mono); background: var(--sheet); border: 1px solid 
   </div>
 </section>
 
+<section class="view" id="security" aria-labelledby="h-security">
+  <div class="wrap">
+    <h2 id="h-security">Security and assurance</h2>
+    <p class="lede">What protects PHAEMA today, what will be done before councils use it for live work, and how a council can check it for itself.</p>
+    <h3 class="sub">In place now</h3>
+    <div class="benefits">
+      <div><h3>Two-step sign-in</h3><p>A code from an authenticator app after the password, required for administrators by default and for everyone if the council chooses. Single-use recovery codes, and administrators can reset a lost phone.</p></div>
+      <div><h3>Access by role and area</h3><p>Roles decide what people can change and access areas decide what they can open, checked on the server for every page, download, report and API call.</p></div>
+      <div><h3>A log of every change</h3><p>Who changed what and when, across properties, leases, cases, finance, access and sign-in.</p></div>
+      <div><h3>Your data, your hosting</h3><p>PHAEMA runs on the council&#x27;s own servers or UK or EU hosting, and sends nothing to the project.</p></div>
+      <div><h3>Secure servers by default</h3><p>The installer sets up HTTPS, a firewall, automatic security updates and nightly backups.</p></div>
+      <div><h3>Open to inspection</h3><p>Every line of code, every automated test and the security policy are public.</p></div>
+    </div>
+    <div class="band split">
+      <div>
+        <h3>Before live use</h3>
+        <ul class="ticks"><li>An independent penetration test by a CREST or CHECK accredited tester, with a summary of the results published</li><li>Single sign-on with the council&#x27;s own accounts, such as Microsoft Entra ID, so the council&#x27;s own sign-in rules apply</li><li>An independent accessibility audit against WCAG 2.2 AA</li><li>Templates for a data protection impact assessment and record of processing, and answers to common security questionnaires</li><li>Numbered releases, with release notes and a security support period for each</li></ul>
+      </div>
+      <div>
+        <h3>Check it yourself</h3>
+        <p>Councils and their suppliers are welcome to review the code or test their own installation. Please report security problems privately to <a href="mailto:stuart@phaema.co.uk">stuart@phaema.co.uk</a>.</p>
+        <p><a href="https://github.com/phaema/phaema-app/blob/main/SECURITY.md">Security policy</a> · <a href="https://claude.ai/artifact/8sTYq44xi5Ps3NuVFDrEm2">Technical manual</a></p>
+      </div>
+    </div>
+  </div>
+</section>
+
 <section class="view" id="open-source" aria-labelledby="h-open-source">
   <div class="wrap">
     <h2 id="h-open-source">Why open source</h2>
@@ -222,8 +297,8 @@ pre { font: .95rem/1.5 var(--mono); background: var(--sheet); border: 1px solid 
     <h2 id="h-roadmap">Roadmap</h2>
     <p class="lede">What is built, what is being tested now, and what comes next. Councils taking part help decide the order.</p>
     <div class="stages">
-      <section class="stage stage--done" aria-label="Built"><h3><span class="stage__mark" aria-hidden="true"></span>Built</h3><ul><li>Property register, map and Land Registry boundaries</li><li>Leases, key dates, reminders and calendar feed</li><li>Cases, approvals and the document library</li><li>Rent ledger and service charges</li><li>Maintenance, compliance and the Golden Thread</li><li>Asset valuation</li><li>Projects with gateways, budgets, risks and completion</li><li>Access areas, cover and hand-over of work</li><li>Reports, imports, open data and API</li><li>Help, user and technical manuals, and e-learning for five roles</li><li>One-step server installation with HTTPS and nightly backups</li><li>A public test site, reset every 48 hours</li></ul></section>
-      <section class="stage stage--now" aria-label="Now: testing"><h3><span class="stage__mark" aria-hidden="true"></span>Now: testing</h3><ul><li>A major test programme run by council staff</li><li>Feedback from testers on the public test site</li><li>Fixing what testing finds</li></ul></section>
+      <section class="stage stage--done" aria-label="Built"><h3><span class="stage__mark" aria-hidden="true"></span>Built</h3><ul><li>Property register, map and Land Registry boundaries</li><li>Leases, key dates, reminders and calendar feed</li><li>Cases, approvals and the document library</li><li>Rent ledger and service charges</li><li>Maintenance, compliance and the Golden Thread</li><li>Asset valuation</li><li>Projects with gateways, budgets, risks and completion</li><li>Access areas, cover and hand-over of work</li><li>Reports, imports, open data and API</li><li>Help, user and technical manuals, and e-learning for five roles</li><li>One-step server installation with HTTPS and nightly backups</li><li>A public test site, reset every 48 hours</li><li>Two-step sign-in (multi-factor authentication) and a published security policy</li></ul></section>
+      <section class="stage stage--now" aria-label="Now: testing"><h3><span class="stage__mark" aria-hidden="true"></span>Now: testing</h3><ul><li>A major test programme run by council staff</li><li>Feedback from testers on the public test site</li><li>Fixing what testing finds, and preparing for an independent penetration test and accessibility audit</li></ul></section>
       <section class="stage stage--next" aria-label="Next: connectors"><h3><span class="stage__mark" aria-hidden="true"></span>Next: connectors</h3><ul><li>Single sign-on with the council&#x27;s own accounts</li><li>Ordnance Survey address, UPRN and EPC lookups</li><li>Map layers for QGIS, ArcGIS and other GIS</li><li>Texts and letters to tenants through GOV.UK Notify</li><li>Notifications in Teams, Matrix or Nextcloud Talk</li><li>Documents kept in SharePoint or Nextcloud</li></ul></section>
       <section class="stage stage--later" aria-label="Later"><h3><span class="stage__mark" aria-hidden="true"></span>Later</h3><ul><li>Tenant and contractor portals</li><li>Condition surveys and lifecycle planning</li><li>Full Golden Thread information management</li><li>Live finance, legal and CRM connectors</li><li>Welsh translation</li></ul></section>
     </div>
@@ -237,6 +312,7 @@ pre { font: .95rem/1.5 var(--mono); background: var(--sheet); border: 1px solid 
     <h2 id="h-resources">Resources</h2>
     <p class="lede">Everything you need to try PHAEMA, learn it, test it or run it.</p>
     <ul class="resources">
+      <li><h3>Security policy</h3><p>What protects PHAEMA today, the known gaps, and how to report a security problem.</p><p class="go"><a href="https://github.com/phaema/phaema-app/blob/main/SECURITY.md">Read the security policy</a></p></li>
       <li><h3>Tour</h3><p>A self-running, clickable tour of every part of PHAEMA, for a first look or a screen at an event.</p><p class="go"><a href="tour.html">Watch the tour</a></p></li>
       <li><h3>Test site</h3><p>Try PHAEMA with fictional data: a council estate, leases, cases and projects to explore. Request a sign-in on the site; the data is reset every 48 hours.</p><p class="go"><a href="https://demo.phaema.co.uk">Open the test site</a></p></li>
       <li><h3>Training</h3><p>Interactive courses for surveyors, finance, maintenance, administrators and viewers, using the real screens.</p><p class="go"><a href="https://claude.ai/artifact/7wkjDTdrtqLZwuf3zo79VE">Start the training</a></p></li>
@@ -264,7 +340,7 @@ cd phaema-app
     <h2 id="h-take-part">Take part</h2>
     <p class="lede">PHAEMA is built by a chartered surveyor with a very small team. Every tester, reviewer and contributor makes it better for every council.</p>
     <div class="involve">
-      <div><h3>Councils</h3><p>Try the test site, run parts of the test programme with your own staff, and tell us what your estates team needs. Councils that pilot PHAEMA shape what is built next.</p></div>
+      <div><h3>Councils</h3><p>Try the test site, run parts of the test programme with your own staff, and tell us what your estates team needs. Pilot councils run PHAEMA with their own data, get help setting it up, and shape what is built next.</p></div>
       <div><h3>Surveyors and estates staff</h3><p>Check that the processes match how you work: rent reviews, the 1954 Act, service charges, valuations and casework. Practical corrections from practitioners are the most valuable contribution of all.</p></div>
       <div><h3>Developers</h3><p>Pick up an issue, fix a bug or build a connector. PHAEMA is Django and PostGIS with an automated test suite; contributions are signed off under the Developer Certificate of Origin.</p></div>
       <div><h3>GIS and data teams</h3><p>Help shape the map layers, OS and EPC lookups and open data output so PHAEMA fits the systems you already run.</p></div>
@@ -272,7 +348,7 @@ cd phaema-app
     </div>
     <div class="band">
       <h3>Get in touch</h3>
-      <p>Email <a class="copy" href="mailto:stuart@phaema.co.uk">stuart@phaema.co.uk</a> with questions, ideas or offers of help, or raise an issue on GitHub. Councils interested in a pilot are especially welcome to get in touch.</p>
+      <p>Email <a class="copy" href="mailto:stuart@phaema.co.uk">stuart@phaema.co.uk</a> with questions, ideas or offers of help, or raise an issue on GitHub. Councils interested in becoming a pilot council, and suppliers interested in hosting PHAEMA, are especially welcome.</p>
       <div class="cta">
         <a class="button" href="https://github.com/phaema/phaema-app/issues/new">Raise an issue</a>
         <a class="button button--quiet" href="https://github.com/phaema/phaema-app/blob/main/CONTRIBUTING.md">How to contribute</a>

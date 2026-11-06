@@ -154,7 +154,7 @@ p { margin: 0 0 .9em; max-width: 60ch; }
 (function () {
   var CHAPTERS = [
     ["intro", "Introduction"], ["work", "Day to day"], ["money", "Money"], ["buildings", "Buildings"],
-    ["control", "Control"], ["open", "Open source"]
+    ["control", "Control"], ["assurance", "Security"], ["open", "Open source"], ["councils", "For councils"]
   ];
   function rel(items) {
     return '<div class="related"><span>See also</span>' + items.map(function (x) {
@@ -181,9 +181,9 @@ p { margin: 0 0 .9em; max-width: 60ch; }
   var S = [
     {id: "welcome", ch: "intro", t: 9, html:
       '<div class="scene"><div class="scene__text"><p class="eyebrow">Open-source estate management for councils</p>' +
-      '<h1>PHAEMA</h1><p class="lede">Property Holding and Estate Management Application: one system for a council&#8217;s property, leases, casework, projects, rents, repairs, compliance and valuations.</p>' +
-      '<p>Free to use, built in the open, and designed by a chartered surveyor around how estates teams actually work.</p>' +
-      '<div class="cta"><a class="button" href="#hub">Explore the modules</a><a class="button button--quiet" href="#try">Try it yourself</a></div></div>' +
+      '<h1>PHAEMA</h1><p class="lede">Property Holding and Estate Management Application: one open system for a council&#8217;s property, leases, casework, projects, rents, repairs, compliance and valuations.</p>' +
+      '<p>No licence fee, built in the open, and designed by a chartered surveyor around how estates teams actually work.</p>' +
+      '<div class="cta"><a class="button" href="#hub">Explore the modules</a><a class="button button--quiet" href="#for-councils">For councils</a></div></div>' +
       shot("my-work", "A surveyor&#8217;s My work page: overdue items, events in the next 90 days, open cases and managed properties.", "My work: each surveyor&#8217;s day on one page.") + '</div>'},
     {id: "problem", ch: "intro", t: 10, html:
       '<div class="scene scene--text"><div class="scene__text"><p class="eyebrow">Why it exists</p><h2>Most council estates are run from separate systems and spreadsheets.</h2>' +
@@ -272,8 +272,14 @@ p { margin: 0 0 .9em; max-width: 60ch; }
     {id: "people", ch: "control", t: 10, html:
       '<div class="scene"><div class="scene__text"><p class="eyebrow">People and access</p><h2>The right people see the right things</h2>' +
       '<p>Four roles decide what people can change; access areas decide which modules they open. Supervision chains, cover for absence, and handing a leaver&#8217;s work to colleagues in one step.</p>' +
-      rel([["cases", "Supervisor approval"], ["reports", "The change log"]]) + '</div>' +
+      rel([["security", "Security and assurance"], ["cases", "Supervisor approval"], ["reports", "The change log"]]) + '</div>' +
       shot("users-4", "Hand over work: one person&#8217;s properties, cases and tasks ready to pass to a colleague.", "Hand over work.") + '</div>'},
+    {id: "security", ch: "assurance", t: 13, html:
+      '<div class="scene"><div class="scene__text"><p class="eyebrow">Security and assurance</p><h2>Secure by design, and open to check</h2>' +
+      '<p><strong>In place now:</strong> two-step sign-in with an authenticator app, required for administrators by default; access by role and area, checked on the server; a log of every change; hosting in the UK or EU, with HTTPS, a firewall, security updates and nightly backups set up by the installer.</p>' +
+      '<p><strong>Before live use:</strong> an independent penetration test, single sign-on with council accounts such as Microsoft Entra ID, an accessibility audit, and DPIA templates. All published in the security policy.</p>' +
+      rel([["people", "Who sees what"], ["why-open", "Open to inspection"], ["roadmap", "The roadmap"]]) + '</div>' +
+      shot("tour-two-step", "Setting up two-step sign-in: a QR code to scan with an authenticator app.", "Two-step sign-in: scan, then enter a code.") + '</div>'},
     {id: "why-open", ch: "open", t: 11, html:
       '<div class="scene scene--text"><div class="scene__text"><p class="eyebrow">Why open source</p><h2>Pay once, together, and own the result</h2>' +
       '<div class="big"><div><strong>&pound;0</strong><span>licence fee</span></div><div><strong>AGPL</strong><span>improvements stay shared</span></div><div><strong>UK / EU</strong><span>hosting of your choice</span></div></div>' +
@@ -283,16 +289,30 @@ p { margin: 0 0 .9em; max-width: 60ch; }
       rel([["roadmap", "What comes next"], ["try", "Try it"]]) + '</div></div>'},
     {id: "roadmap", ch: "open", t: 11, html:
       '<div class="scene scene--text"><div class="scene__text"><p class="eyebrow">Where it is going</p><h2>Built, in testing, then connectors</h2>' +
-      '<div class="cols"><div><h3>Now: testing</h3><ul><li>Council staff run the test programme</li><li>Public test site, reset every 48 hours</li><li>Fixing what testing finds</li></ul></div>' +
+      '<div class="cols"><div><h3>Now: testing</h3><ul><li>Pilot councils run the test programme</li><li>Public test site, reset every 48 hours</li><li>Independent penetration test and accessibility audit</li></ul></div>' +
       '<div><h3>Next: connectors</h3><ul><li>Single sign-on</li><li>Ordnance Survey, UPRN and EPC lookups</li><li>Map layers for QGIS and other GIS</li><li>GOV.UK Notify for tenants</li></ul></div>' +
       '<div><h3>Later</h3><ul><li>Tenant and contractor portals</li><li>Condition surveys</li><li>Welsh translation</li></ul></div></div>' +
       '<p>Connectors use open standards, so they work with Microsoft 365 or with open-source alternatives such as Nextcloud.</p>' +
-      rel([["try", "Take part"], ["hub", "Back to the modules"]]) + '</div></div>'},
-    {id: "try", ch: "open", t: 13, html:
+      rel([["for-councils", "For councils"], ["hub", "Back to the modules"]]) + '</div></div>'},
+    {id: "for-councils", ch: "councils", t: 13, html:
+      '<div class="scene scene--text"><div class="scene__text"><p class="eyebrow">For councils</p><h2>One system instead of several, with no licence fee</h2>' +
+      '<p>Terrier, lease records, compliance, valuations and projects in one place, built around the property and the lease. Rents and service charges too, if the council wants them.</p>' +
+      '<div class="cols"><div><h3>District and borough councils</h3><p>A small estates team with an ageing terrier or spreadsheets.</p></div>' +
+      '<div><h3>Councils merging</h3><p>Local government reorganisation means combining estates systems. PHAEMA gives the new council one system it owns.</p></div>' +
+      '<div><h3>Smaller unitaries and combined authorities</h3><p>One system for the estate, acquisitions, disposals and regeneration, without enterprise licence costs.</p></div></div>' +
+      rel([["ways", "Ways to use PHAEMA"], ["security", "Security"]]) + '</div></div>'},
+    {id: "ways", ch: "councils", t: 12, html:
+      '<div class="scene scene--text"><div class="scene__text"><p class="eyebrow">For councils</p><h2>Three ways to use PHAEMA</h2>' +
+      '<div class="cols"><div><h3>Run it yourselves</h3><p>Your IT team installs it with one command, on your own servers or UK or EU cloud hosting.</p></div>' +
+      '<div><h3>Have a supplier host it</h3><p>Any supplier can host and support it, so changing supplier never means changing system.</p></div>' +
+      '<div><h3>Become a pilot council</h3><p>Run the test programme with your own staff and data, get help setting up, and decide what comes next.</p></div></div>' +
+      '<div class="cta"><a class="button" href="mailto:stuart@phaema.co.uk?subject=PHAEMA%20pilot%20council">Become a pilot council</a><a class="button button--quiet" href="#try">Try it first</a></div>' +
+      rel([["for-councils", "Who it is for"], ["why-open", "Why open source"]]) + '</div></div>'},
+    {id: "try", ch: "councils", t: 13, html:
       '<div class="scene"><div class="scene__text"><p class="eyebrow">Try it and take part</p><h2>Try PHAEMA today</h2>' +
       '<p>The test site holds a fictional council&#8217;s estate. Select <strong>Request a test account</strong> there to get a sign-in; the data resets every 48 hours.</p>' +
       '<div class="cta"><a class="button" href="https://demo.phaema.co.uk">Open the test site</a><a class="button button--quiet" href="https://github.com/phaema/phaema-app">The code on GitHub</a></div>' +
-      '<p>Councils interested in a pilot, surveyors who can check the processes, and developers: email <span class="copy">stuart@phaema.co.uk</span>.</p>' +
+      '<p>Councils interested in becoming a pilot council, suppliers interested in hosting, surveyors who can check the processes, and developers: email <span class="copy">stuart@phaema.co.uk</span>.</p>' +
       rel([["welcome", "Watch again"], ["hub", "Explore the modules"]]) + '</div>' +
       shot("estate", "The whole estate dashboard with vacancy, rent roll and lease event figures.", "The whole estate at a glance.") + '</div>'}
   ];
