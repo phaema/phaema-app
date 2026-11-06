@@ -95,6 +95,17 @@ class ModuleSettings(models.Model):
     os_map_style = models.CharField(_("OS map style"), max_length=20, choices=OsMapStyle.choices,
                                     default=OsMapStyle.ROAD)
 
+    class TwoStep(models.TextChoices):
+        OPTIONAL = "optional", _("Optional for everyone")
+        ADMINISTRATORS = "administrators", _("Required for administrators")
+        EVERYONE = "everyone", _("Required for everyone")
+
+    two_step_required = models.CharField(
+        _("two-step sign-in"), max_length=20, choices=TwoStep.choices, default=TwoStep.ADMINISTRATORS,
+        help_text=_("Two-step sign-in (multi-factor authentication) asks for a code from an authenticator app "
+                    "after the password. People it is required for must set it up the next time they sign in. "
+                    "It is never required on a public test site."))
+
     brand_colour = models.CharField(
         _("header colour"), max_length=7, blank=True,
         validators=[RegexValidator(r"^#[0-9A-Fa-f]{6}$", _("Enter a colour like #1d3557."))],
@@ -281,3 +292,31 @@ class AccountRequest(models.Model):
 
     def __str__(self):
         return f"{self.name} <{self.email}>"
+
+
+class TwoStepDevice(models.Model):
+    """A person's authenticator app for two-step sign-in (TOTP, RFC 6238). Not in the change log, which would copy
+    the secret; turning two-step sign-in on and off is logged against the user instead."""
+
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="two_step")
+    secret = models.CharField(max_length=64)
+    confirmed_at = models.DateTimeField(auto_now_add=True)
+    last_step = models.BigIntegerField(default=0, help_text="The last time step used, so a code works only once.")
+
+    class Meta:
+        verbose_name = _("two-step sign-in")
+        verbose_name_plural = _("two-step sign-in")
+
+    def __str__(self):
+        return f"Two-step sign-in for {self.user}"
+
+
+class RecoveryCode(models.Model):
+    """One-time codes for signing in without the authenticator app. Only a hash is kept."""
+
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="recovery_codes")
+    code_hash = models.CharField(max_length=128)
+    used_at = models.DateTimeField(null=True, blank=True)
+
+    def __str__(self):
+        return f"Recovery code for {self.user}"

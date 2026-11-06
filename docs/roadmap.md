@@ -17,6 +17,14 @@
 
 ## Future work
 
+### Assurance before live use
+
+What councils' procurement and IT security teams will ask for before the first live use. See [SECURITY.md](../SECURITY.md).
+
+- **Done:** two-step sign-in (authenticator app, recovery codes, required for administrators by default); security policy and reporting route.
+- **Next:** independent penetration test (CREST or CHECK); limits on repeated failed passwords; scoped API tokens; dependency and code scanning on every pull request; numbered releases with release notes.
+- **With pilot councils:** independent WCAG 2.2 AA accessibility audit; DPIA and record-of-processing templates; answers to common security questionnaires; published case studies.
+
 ### Connectors: an optional module
 
 Integrations with other systems are one optional module in the main repository, not a fork. PHAEMA connects through open standards rather than particular products, so the same module serves councils on Microsoft 365, Nextcloud, openDesk, Google Workspace or their own systems. Full review: "PHAEMA integrations: market review and plan" (November 2026).

@@ -1,0 +1,73 @@
+{% extends "base.html" %}{% load i18n %}
+{% block title %}{% if errors %}{% translate "Error:" %} {% endif %}{% translate "Two-step sign-in" %}{% endblock %}
+{% block help_page %}users-and-roles#two-step-sign-in{% endblock %}
+{% block content %}
+{% if errors %}
+<div class="govuk-error-summary" data-module="govuk-error-summary"><div role="alert">
+  <h2 class="govuk-error-summary__title">{% translate "There is a problem" %}</h2>
+  <div class="govuk-error-summary__body"><ul class="govuk-list govuk-error-summary__list">
+    {% for field, message in errors %}<li><a href="#{{ field }}">{{ message }}</a></li>{% endfor %}
+  </ul></div>
+</div></div>
+{% endif %}
+<div class="govuk-grid-row"><div class="govuk-grid-column-two-thirds">
+<h1 class="govuk-heading-xl">{% translate "Two-step sign-in" %}</h1>
+<p class="govuk-body">{% translate "Two-step sign-in (multi-factor authentication) protects your account if someone learns your password. After your password, PHAEMA asks for a 6-digit code from an authenticator app on your phone, such as Microsoft Authenticator, Google Authenticator, FreeOTP or Aegis." %}</p>
+
+{% if codes %}
+<div class="govuk-panel govuk-panel--confirmation"><h2 class="govuk-panel__title">{% translate "Save your recovery codes" %}</h2></div>
+<p class="govuk-body">{% translate "Each code signs you in once if you do not have your phone. Keep them somewhere safe, such as a password manager. They will not be shown again." %}</p>
+<ul class="govuk-list phaema-recovery-codes">{% for code in codes %}<li><code>{{ code }}</code></li>{% endfor %}</ul>
+<p class="govuk-body"><a class="govuk-link" href="{% url 'dashboard' %}">{% translate "I have saved my codes: continue to PHAEMA" %}</a></p>
+
+{% elif has %}
+<p class="govuk-body"><strong class="govuk-tag govuk-tag--green">{% translate "On" %}</strong>
+  {% blocktranslate count left=codes_left %}You have {{ left }} unused recovery code.{% plural %}You have {{ left }} unused recovery codes.{% endblocktranslate %}</p>
+<h2 class="govuk-heading-m">{% translate "Make new recovery codes, or turn it off" %}</h2>
+<p class="govuk-body">{% translate "Making new codes cancels your old ones." %}{% if required %} {% translate "Your council requires two-step sign-in for you, so it cannot be turned off. To move to a new phone, ask an administrator to reset it, then set it up again." %}{% endif %}</p>
+<form method="post" novalidate>
+  {% csrf_token %}
+  <div class="govuk-form-group">
+    <label class="govuk-label" for="password">{% translate "Your password" %}</label>
+    <input class="govuk-input govuk-input--width-20" id="password" name="password" type="password" autocomplete="current-password">
+  </div>
+  <div class="govuk-form-group">
+    <label class="govuk-label" for="code">{% translate "Code from your authenticator app" %}</label>
+    <input class="govuk-input govuk-input--width-10" id="code" name="code" type="text" inputmode="numeric" autocomplete="one-time-code" spellcheck="false">
+  </div>
+  <div class="govuk-button-group">
+    <button type="submit" name="action" value="new-codes" class="govuk-button" data-module="govuk-button">{% translate "Make new recovery codes" %}</button>
+    {% if not required %}<button type="submit" name="action" value="turn-off" class="govuk-button govuk-button--warning" data-module="govuk-button">{% translate "Turn off two-step sign-in" %}</button>{% endif %}
+  </div>
+</form>
+
+{% elif qr %}
+<h2 class="govuk-heading-m">{% translate "1. Add PHAEMA to your app" %}</h2>
+<p class="govuk-body">{% translate "In your authenticator app, choose to add an account and scan this QR code." %}</p>
+<div class="phaema-qr" role="img" aria-label="{% translate 'QR code for setting up two-step sign-in' %}">{{ qr|safe }}</div>
+<p class="govuk-body">{% translate "If you cannot scan it, enter this key instead:" %}</p>
+<p class="govuk-body"><code class="phaema-setup-key">{{ secret }}</code></p>
+<h2 class="govuk-heading-m">{% translate "2. Enter the code it shows" %}</h2>
+<form method="post" novalidate>
+  {% csrf_token %}
+  <div class="govuk-form-group{% if errors %} govuk-form-group--error{% endif %}">
+    <label class="govuk-label" for="code">{% translate "6-digit code" %}</label>
+    {% for field, message in errors %}<p class="govuk-error-message"><span class="govuk-visually-hidden">{% translate "Error:" %}</span> {{ message }}</p>{% endfor %}
+    <input class="govuk-input govuk-input--width-5{% if errors %} govuk-input--error{% endif %}" id="code" name="code" type="text" inputmode="numeric" autocomplete="one-time-code" spellcheck="false">
+  </div>
+  <div class="govuk-button-group">
+    <button type="submit" name="action" value="confirm" class="govuk-button" data-module="govuk-button">{% translate "Turn on two-step sign-in" %}</button>
+    <button type="submit" name="action" value="cancel" class="govuk-button govuk-button--secondary" data-module="govuk-button">{% translate "Cancel" %}</button>
+  </div>
+</form>
+
+{% else %}
+{% if required %}<div class="govuk-warning-text"><span class="govuk-warning-text__icon" aria-hidden="true">!</span><strong class="govuk-warning-text__text"><span class="govuk-visually-hidden">{% translate "Warning" %}</span>{% translate "Your council requires two-step sign-in for your account. Set it up to continue using PHAEMA." %}</strong></div>
+{% else %}<p class="govuk-body"><strong class="govuk-tag govuk-tag--grey">{% translate "Off" %}</strong></p>{% endif %}
+<p class="govuk-body">{% translate "You will need your phone with an authenticator app installed. It takes about two minutes." %}</p>
+<form method="post">{% csrf_token %}
+  <button type="submit" name="action" value="start" class="govuk-button" data-module="govuk-button">{% translate "Set up two-step sign-in" %}</button>
+</form>
+{% endif %}
+</div></div>
+{% endblock %}

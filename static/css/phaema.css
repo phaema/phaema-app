@@ -119,3 +119,9 @@ html.phaema-text-largest { font-size: 150%; }
 .phaema-header__nav > a, .phaema-header__nav > .phaema-menu > summary, .phaema-header__nav button,
 .phaema-settings-bar a { display: inline-block; min-height: 24px; line-height: 24px; }
 .phaema-header__nav { row-gap: 8px; }
+
+/* Two-step sign-in */
+.phaema-qr { display: inline-block; padding: 10px; background: #fff; border: 1px solid #b1b4b6; margin-bottom: 20px; }
+.phaema-qr svg { display: block; }
+.phaema-setup-key, .phaema-recovery-codes code { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 1.1rem; letter-spacing: .05em; }
+.phaema-recovery-codes { columns: 2; max-width: 24em; }

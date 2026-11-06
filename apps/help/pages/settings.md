@@ -18,6 +18,7 @@ Administrators: select **Manage data**, then **Module settings**. There is one s
 | Works orders needing approval | Works orders estimated above this need the supervisor's approval. See [maintenance](maintenance.md#works-orders-and-approval). |
 | OS Maps API key and style | Turns on Ordnance Survey base maps. See [maps](maps.md#base-maps). |
 | Brand colour | The colour of the header, as a hex code such as #003078. Choose a dark colour so the white text stays readable. Leave blank for the PHAEMA blue. |
+| Two-step sign-in | Who must use an authenticator app code after their password: administrators (the default), everyone, or nobody. See [two-step sign-in](users-and-roles.md#two-step-sign-in). |
 | Reminder timings | See [reminders](#reminders). |
 
 ### Rent ledger settings
