@@ -20,6 +20,7 @@ class ModuleSettingsAdmin(admin.ModelAdmin):
                                             "website"]}),
         ("Maintenance", {"fields": ["order_approval_limit"]}),
         ("Maps", {"fields": ["os_maps_api_key", "os_map_style"]}),
+        ("Security", {"fields": ["two_step_required"]}),
         ("Reminders", {"fields": ["reminder_days_review", "reminder_days_notice", "reminder_days_break",
                                   "reminder_days_expiry", "reminder_days_other", "overdue_reminders"]}),
     ]

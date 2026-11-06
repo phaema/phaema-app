@@ -43,3 +43,28 @@ class RoleRequiredMiddleware:
                 and not request.path.startswith(self.OPEN_PREFIXES)):
             return render(request, "core/no_access.html", status=403)
         return self.get_response(request)
+
+
+class TwoStepRequiredMiddleware:
+    """People the council requires to use two-step sign-in must set it up before they can do anything else."""
+
+    OPEN_PREFIXES = ("/account/two-step/", "/login/", "/logout/", "/health/", "/static/", "/text-size/", "/theme/",
+                     "/style/", "/help/", "/open-data/", "/no-access/")
+
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        user = getattr(request, "user", None)
+        if (user is not None and user.is_authenticated and not request.path.startswith(self.OPEN_PREFIXES)):
+            from django.shortcuts import redirect
+
+            from . import two_step
+
+            if two_step.is_required(user) and not two_step.has_two_step(user):
+                if request.path.startswith("/api/"):
+                    from django.http import JsonResponse
+
+                    return JsonResponse({"detail": "Set up two-step sign-in before using the API."}, status=403)
+                return redirect("two-step")
+        return self.get_response(request)

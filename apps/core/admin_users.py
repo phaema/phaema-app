@@ -56,7 +56,9 @@ class PhaemaUserAdmin(UserAdmin):
     add_form = PhaemaUserCreationForm
     inlines = [StaffProfileInline]
     search_fields = ("username", "first_name", "last_name", "email")
-    list_display = ("username", "first_name", "last_name", "email", "role", "supervisor", "is_active", "last_login")
+    list_display = ("username", "first_name", "last_name", "email", "role", "supervisor", "two_step", "is_active",
+                    "last_login")
+    actions = ["reset_two_step"]
     list_filter = ("groups", "is_active", "is_superuser")
     fieldsets = (
         (None, {"fields": ("username", "password")}),
@@ -79,6 +81,29 @@ class PhaemaUserAdmin(UserAdmin):
     def supervisor(self, obj):
         boss = supervisor_of(obj)
         return (boss.get_full_name() or boss.username) if boss else "–"
+
+    @admin.display(description="Two-step sign-in", boolean=True)
+    def two_step(self, obj):
+        from . import two_step
+
+        return two_step.has_two_step(obj)
+
+    @admin.action(description="Reset two-step sign-in (lost phone)")
+    def reset_two_step(self, request, queryset):
+        from django.contrib import messages
+
+        from . import two_step
+
+        done = 0
+        for user in queryset:
+            if user.is_superuser and not request.user.is_superuser:
+                continue  # only superusers manage superuser accounts
+            if two_step.has_two_step(user):
+                two_step.turn_off(user, by=request.user)
+                done += 1
+        self.message_user(request, f"Two-step sign-in reset for {done} {'person' if done == 1 else 'people'}. "
+                                   "They set it up again at their next sign-in, or from Two-step sign-in.",
+                          messages.SUCCESS)
 
     @admin.display(description="Role")
     def role(self, obj):

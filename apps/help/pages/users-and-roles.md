@@ -77,6 +77,34 @@ and **Cancel** removes cover that has not started. Cover is recorded in the chan
 
 Cover adds what someone can see; it does not move work. To move properties, cases and tasks, use Hand over work.
 
+## Two-step sign-in
+
+Two-step sign-in (multi-factor authentication) protects an account if someone learns its password. After the
+password, PHAEMA asks for a 6-digit code from an authenticator app on the person's phone, such as Microsoft
+Authenticator, Google Authenticator, FreeOTP or Aegis. Codes change every 30 seconds and each works only once.
+
+**To set it up**, select **Two-step sign-in** at the top of any page, then **Set up two-step sign-in**. Scan the QR
+code with the app (or type the key it shows) and enter the code the app gives. PHAEMA then shows ten **recovery
+codes**. Each one signs you in once without your phone. Save them somewhere safe, such as a password manager:
+they are not shown again. From the same page you can make new recovery codes, which cancels the old ones.
+
+**Who must use it** is a council setting under **Manage data**, **Module settings**, **Security**:
+
+- **Required for administrators** (the default): administrators and superusers must set it up the next time they
+  sign in, before they can do anything else.
+- **Required for everyone**: every user must set it up.
+- **Optional for everyone**: anyone may turn it on for themselves.
+
+It is never required on a public test site. People it is required for cannot turn it off themselves.
+
+**Lost phone.** An administrator opens **Manage data**, **Users**, ticks the person, and chooses **Reset two-step
+sign-in (lost phone)** from the actions list. The person then sets it up again. Only superusers can reset a
+superuser. Turning two-step sign-in on, off and resetting it are recorded in the [change log](change-log.md).
+
+**The API.** People with two-step sign-in cannot use the API with only their username and password; they use it
+from a signed-in browser. Single sign-on with the council's own accounts (Microsoft Entra ID and others) is planned
+and will let councils apply their own sign-in rules instead.
+
 ## Adding a user
 
 Administrators: select **Manage data**, then **Users**, then **Add user**. Set a username and a starting password,

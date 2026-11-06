@@ -4,6 +4,13 @@ import pytest
 
 def pytest_configure(config):
     config.addinivalue_line("markers", "own_areas: users start with no access areas (tests of access areas)")
+    config.addinivalue_line("markers", "two_step: the council's two-step sign-in rule is enforced")
+
+
+@pytest.fixture(autouse=True)
+def _two_step_rule(request, settings):
+    """Most tests sign people in without two-step sign-in. Tests marked two_step enforce the council's rule."""
+    settings.PHAEMA_ENFORCE_TWO_STEP = bool(request.node.get_closest_marker("two_step"))
 
 
 @pytest.fixture(autouse=True)
