@@ -71,8 +71,12 @@ def test_change_detail_shows_who_when_and_readable_values(client_in, officer, de
 
 def test_register_sort_and_surveyor_filter(client_in, demo, officer):
     url = reverse("properties:list")
-    names = [p.name for p in client_in.get(url, {"sort": "-name"}).context["page_obj"]]
-    assert names == sorted(names, reverse=True)
+    page = list(client_in.get(url, {"sort": "-name"}).context["page_obj"])
+    names = [p.name for p in page]
+    # Compare with the database's own order: its collation may ignore punctuation ("Unit 1," before "Unit 10").
+    in_db_order = list(Property.objects.filter(pk__in=[p.pk for p in page]).order_by("-name", "-reference")
+                       .values_list("name", flat=True))
+    assert names == in_db_order and names[0] > names[-1]
     priya = User.objects.get(username="demo.pshah")
     listed = client_in.get(url, {"surveyor": priya.pk}).context["page_obj"].paginator.count
     assert listed == Property.objects.filter(managing_surveyor=priya).count() > 0
