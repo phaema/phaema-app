@@ -26,6 +26,16 @@ urlpatterns = [
     path("login/", two_step_views.PhaemaLoginView.as_view(), name="login"),
     path("login/code/", two_step_views.login_code, name="login-code"),
     path("account/two-step/", two_step_views.security, name="two-step"),
+    path("account/set-password/<uidb64>/<token>/", auth_views.PasswordResetConfirmView.as_view(
+        template_name="registration/set_password.html", success_url="/account/set-password/done/",
+        post_reset_login=False), name="set-password"),
+    path("account/set-password/done/", auth_views.PasswordResetCompleteView.as_view(
+        template_name="registration/set_password_done.html"), name="set-password-done"),
+    path("account/password/", auth_views.PasswordChangeView.as_view(
+        template_name="registration/change_password.html", success_url="/account/password/done/"),
+        name="change-password"),
+    path("account/password/done/", auth_views.PasswordChangeDoneView.as_view(
+        template_name="registration/change_password_done.html"), name="change-password-done"),
     path("logout/", auth_views.LogoutView.as_view(), name="logout"),
     path("health/", core_views.health, name="health"),
     path("request-account/", account_requests.request_account, name="request-account"),

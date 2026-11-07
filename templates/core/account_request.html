@@ -3,7 +3,7 @@
 {% block content %}
 <div class="govuk-grid-row"><div class="govuk-grid-column-two-thirds">
   <h1 class="govuk-heading-l">{% translate "Request a test account" %}</h1>
-  <p class="govuk-body">{% blocktranslate %}This test site holds a fictional council's estate. Ask for a sign-in and we will set one up for you, usually within two working days, and email you the details.{% endblocktranslate %}</p>
+  <p class="govuk-body">{% blocktranslate %}This test site holds a fictional council's estate. Ask for a sign-in and, once it is approved (usually within two working days), you will be emailed your username and a link to choose your password.{% endblocktranslate %}</p>
   {% include "core/_form_errors.html" %}
   <form method="post" novalidate>
     {% csrf_token %}

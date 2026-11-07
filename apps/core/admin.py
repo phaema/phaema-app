@@ -84,6 +84,41 @@ class AccountRequestAdmin(admin.ModelAdmin):
     list_editable = ("done",)
     search_fields = ("name", "email", "organisation")
     readonly_fields = ("requested_at",)
+    actions = ["approve_surveyor", "approve_administrator", "approve_viewer"]
+
+    def _approve(self, request, queryset, role):
+        from django.contrib import messages
+
+        from .account_requests import approve
+
+        for req in queryset:
+            user, created, link, emailed = approve(req, role)
+            what = "Created" if created else "Updated"
+            if emailed:
+                self.message_user(request, f"{what} {user.username} for {req.name} and emailed {req.email} a link "
+                                           "to choose a password.", messages.SUCCESS)
+            else:
+                self.message_user(request, f"{what} {user.username} for {req.name}, but the email to {req.email} "
+                                           f"could not be sent. Send them this link to choose a password: {link}",
+                                  messages.WARNING)
+
+    @admin.action(description="Approve as surveyor: create the sign-in and email them")
+    def approve_surveyor(self, request, queryset):
+        from .roles import SURVEYORS
+
+        self._approve(request, queryset, SURVEYORS)
+
+    @admin.action(description="Approve as administrator: create the sign-in and email them")
+    def approve_administrator(self, request, queryset):
+        from .roles import ADMINISTRATORS
+
+        self._approve(request, queryset, ADMINISTRATORS)
+
+    @admin.action(description="Approve as viewer: create the sign-in and email them")
+    def approve_viewer(self, request, queryset):
+        from .roles import VIEWERS
+
+        self._approve(request, queryset, VIEWERS)
 
 
 @admin.register(Cover)
