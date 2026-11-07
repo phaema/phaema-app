@@ -23,6 +23,27 @@ title_number_validator = RegexValidator(
 )
 
 
+class Portfolio(models.Model):
+    """The service or portfolio a property belongs to, such as Investment, Leisure or Adult Social Care.
+    Each council keeps its own list under Manage data, Portfolios."""
+
+    name = models.CharField(_("name"), max_length=100, unique=True)
+    description = models.CharField(_("description"), max_length=250, blank=True,
+                                   help_text=_("What belongs in this portfolio, as a guide for people choosing it."))
+    active = models.BooleanField(_("in use"), default=True,
+                                 help_text=_("Untick to stop it being offered for new properties; properties already "
+                                             "in it keep it."))
+    order = models.PositiveSmallIntegerField(_("order"), default=100, help_text=_("Lower numbers come first in lists."))
+
+    class Meta:
+        ordering = ["order", "name"]
+        verbose_name = _("portfolio")
+        verbose_name_plural = _("portfolios")
+
+    def __str__(self):
+        return self.name
+
+
 class Property(TimeStampedModel):
     """Any holding in the register: an estate, site, building, lettable unit or land parcel.
 
@@ -81,6 +102,10 @@ class Property(TimeStampedModel):
     # Classification
     holding_purpose = models.CharField(
         _("holding purpose"), max_length=20, choices=HoldingPurpose.choices, blank=True
+    )
+    portfolio = models.ForeignKey(
+        Portfolio, verbose_name=_("portfolio"), null=True, blank=True, on_delete=models.PROTECT,
+        related_name="properties", help_text=_("The service or portfolio the property belongs to."),
     )
     tenure = models.CharField(_("tenure"), max_length=20, choices=Tenure.choices, blank=True)
     occupation = models.CharField(

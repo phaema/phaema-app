@@ -31,6 +31,11 @@ class Field:
     def filterable(self):
         return self.path is not None
 
+    @property
+    def options(self):
+        """The choices, worked out when needed (a council's own lists, such as portfolios, can change)."""
+        return list(self.choices()) if callable(self.choices) else self.choices
+
     def value(self, obj):
         if self.getter:
             return self.getter(obj)
@@ -38,7 +43,7 @@ class Field:
         for part in self.path.split("__"):
             value = getattr(value, part, None) if value is not None else None
         if self.type == "choice" and value not in (None, ""):
-            return dict(self.choices).get(value, value)
+            return dict(self.options).get(value, value)
         if self.type == "user":
             return (value.get_full_name() or value.username) if value else ""
         return value
@@ -73,12 +78,19 @@ def _user_name(user):
 def _properties():
     from apps.properties.models import Property
 
-    return Property.objects.select_related("parent", "managing_surveyor").prefetch_related("titles", "leases")
+    return Property.objects.select_related("parent", "managing_surveyor", "portfolio").prefetch_related(
+        "titles", "leases")
 
 
 def _property_rent(p):
     return sum((lease.annual_rent for lease in p.leases.all()
                 if lease.status in ("current", "holding_over") and lease.direction == "out"), Decimal("0"))
+
+
+def _portfolio_choices():
+    from apps.properties.models import Portfolio
+
+    return [(str(p.pk), p.name) for p in Portfolio.objects.all()]
 
 
 def _property_fields():
@@ -98,6 +110,8 @@ def _property_fields():
         Field("postcode", "Postcode", path="postcode", default=True),
         Field("holding_purpose", "Holding purpose", "choice", "holding_purpose",
               choices=_choices(P, "holding_purpose"), default=True),
+        Field("portfolio", "Portfolio", "choice", "portfolio", choices=_portfolio_choices, default=True,
+              getter=lambda p: p.portfolio.name if p.portfolio else ""),
         Field("tenure", "Tenure", "choice", "tenure", choices=_choices(P, "tenure"), default=True),
         Field("occupation", "Occupation", "choice", "occupation", choices=_choices(P, "occupation"), default=True),
         Field("use_description", "Use", path="use_description", default=True),

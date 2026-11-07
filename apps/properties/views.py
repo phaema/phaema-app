@@ -35,13 +35,14 @@ COLUMNS = {
     "name": (_("Name"), ["name", "reference"], False),
     "type": (_("Type"), ["property_type", "reference"], False),
     "purpose": (_("Purpose"), ["holding_purpose", "reference"], False),
+    "portfolio": (_("Portfolio"), ["portfolio__order", "portfolio__name", "reference"], False),
     "occupation": (_("Occupation"), ["occupation", "reference"], False),
     "postcode": (_("Postcode"), ["postcode", "reference"], False),
     "nia": (_("NIA m²"), ["nia_sqm", "reference"], True),
     "surveyor": (_("Managed by"), ["managing_surveyor__first_name", "managing_surveyor__last_name",
                                    "managing_surveyor__username", "reference"], False),
 }
-FILTERS = ("property_type", "holding_purpose", "occupation", "tenure")
+FILTERS = ("property_type", "holding_purpose", "portfolio", "occupation", "tenure")
 
 
 def display_name(user):
@@ -59,8 +60,14 @@ def filter_properties(request, qs):
             | Q(postcode__icontains=q) | Q(titles__title_number__iexact=q.replace(" ", ""))
         ).distinct()
     for f in FILTERS:
-        if get.get(f):
-            qs = qs.filter(**{f: get[f]})
+        value = get.get(f, "")
+        if f == "portfolio":
+            if value == "none":
+                qs = qs.filter(portfolio__isnull=True)
+            elif value.isdigit():
+                qs = qs.filter(portfolio_id=int(value))
+        elif value:
+            qs = qs.filter(**{f: value})
     surveyor = get.get("surveyor", "")
     if surveyor == "me":
         qs = qs.filter(managing_surveyor=request.user)
@@ -69,6 +76,14 @@ def filter_properties(request, qs):
     elif surveyor.isdigit():
         qs = qs.filter(managing_surveyor_id=int(surveyor))
     return qs
+
+
+def _filter_choices(name):
+    if name == "portfolio":
+        from .models import Portfolio
+
+        return [("none", _("Not set"))] + [(str(p.pk), p.name) for p in Portfolio.objects.all()]
+    return Property._meta.get_field(name).choices
 
 
 def filter_context(request):
@@ -80,8 +95,7 @@ def filter_context(request):
     params.pop("page", None)
     return {
         "q": get.get("q", ""),
-        "filters": [(f, Property._meta.get_field(f).verbose_name, Property._meta.get_field(f).choices, get.get(f, ""))
-                    for f in FILTERS],
+        "filters": [(f, Property._meta.get_field(f).verbose_name, _filter_choices(f), get.get(f, "")) for f in FILTERS],
         "surveyor_options": [("me", _("My properties")), ("none", _("Unassigned"))]
         + [(str(u.pk), display_name(u)) for u in surveyors],
         "surveyor_selected": get.get("surveyor", ""),
@@ -107,7 +121,8 @@ class PropertyListView(LoginRequiredMixin, ExportMixin, ListView):
     template_name = "properties/property_list.html"
 
     def get_queryset(self):
-        qs = filter_properties(self.request, Property.objects.select_related("parent", "managing_surveyor"))
+        qs = filter_properties(self.request, Property.objects.select_related("parent", "managing_surveyor",
+                                                                              "portfolio"))
         ordering, self.headings = sortable(self.request, COLUMNS, "reference")
         return qs.order_by(*ordering)
 
@@ -132,7 +147,7 @@ class PropertyDetailView(LoginRequiredMixin, DetailView):
     template_name = "properties/property_detail.html"
 
     def get_queryset(self):
-        return Property.objects.select_related("parent", "managing_surveyor").prefetch_related("photos")
+        return Property.objects.select_related("parent", "managing_surveyor", "portfolio").prefetch_related("photos")
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)

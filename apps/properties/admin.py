@@ -5,7 +5,7 @@ from django.core.exceptions import ValidationError
 from apps.core.admin_roles import AdministratorOnlyEditingMixin, RoleAdminMixin, RoleInlineMixin
 from apps.core.roles import is_administrator
 
-from .models import InspireParcel, Property, PropertyPhoto, Title, TitleDocument
+from .models import InspireParcel, Portfolio, Property, PropertyPhoto, Title, TitleDocument
 
 
 class TitleInline(admin.TabularInline):
@@ -21,11 +21,33 @@ class PhotoInline(RoleInlineMixin, admin.TabularInline):
     fields = ("image", "caption", "taken_on", "is_main", "order")
 
 
+@admin.register(Portfolio)
+class PortfolioAdmin(admin.ModelAdmin):
+    """Each council's own list of portfolios (Investment, Leisure, Adult social care and so on)."""
+
+    list_display = ("name", "description", "active", "order", "property_count")
+    list_editable = ("active", "order")
+    search_fields = ("name", "description")
+
+    def get_queryset(self, request):
+        from django.db.models import Count
+
+        return super().get_queryset(request).annotate(_count=Count("properties"))
+
+    @admin.display(description="Properties", ordering="_count")
+    def property_count(self, obj):
+        return obj._count
+
+    def has_delete_permission(self, request, obj=None):
+        # A portfolio with properties in it cannot be deleted (untick "in use" instead).
+        return super().has_delete_permission(request, obj) and (obj is None or not obj.properties.exists())
+
+
 @admin.register(Property)
 class PropertyAdmin(AdministratorOnlyEditingMixin, RoleAdminMixin, admin.GISModelAdmin):
     list_display = ("reference", "name", "property_type", "holding_purpose", "occupation", "managing_surveyor", "postcode")
     list_editable = ("managing_surveyor",)  # assign surveyors to many properties at once
-    list_filter = ("property_type", "holding_purpose", "tenure", "occupation", "managing_surveyor")
+    list_filter = ("property_type", "holding_purpose", "portfolio", "tenure", "occupation", "managing_surveyor")
     search_fields = ("reference", "name", "uprn", "address_line_1", "town", "postcode")
     autocomplete_fields = ("parent",)
     inlines = [PhotoInline, TitleInline]
@@ -33,7 +55,8 @@ class PropertyAdmin(AdministratorOnlyEditingMixin, RoleAdminMixin, admin.GISMode
     fieldsets = (
         (None, {"fields": ("reference", "name", "property_type", "parent", "managing_surveyor")}),
         ("Identifiers and address", {"fields": ("uprn", "usrn", "address_line_1", "address_line_2", "town", "postcode")}),
-        ("Classification", {"fields": ("holding_purpose", "tenure", "occupation", "use_description", "use_class")}),
+        ("Classification", {"fields": ("holding_purpose", "portfolio", "tenure", "occupation", "use_description",
+                                       "use_class")}),
         ("Areas", {"fields": ("gia_sqm", "nia_sqm", "gea_sqm", "site_area_ha", "area_standard", "area_source",
                               "areas_measured_on")}),
         ("Location", {"fields": ("easting", "northing", "boundary", "boundary_source")}),
@@ -41,6 +64,15 @@ class PropertyAdmin(AdministratorOnlyEditingMixin, RoleAdminMixin, admin.GISMode
                       "description": "When the property is sold or let on a long lease. It then leaves open data."}),
         ("Other", {"fields": ("site_hazards", "exclude_from_publication", "notes")}),
     )
+
+    def get_form(self, request, obj=None, **kwargs):
+        form = super().get_form(request, obj, **kwargs)
+        field = form.base_fields.get("portfolio")
+        if field is not None:
+            from django.db.models import Q
+
+            field.queryset = Portfolio.objects.filter(Q(active=True) | Q(pk=getattr(obj, "portfolio_id", None)))
+        return form
 
     def get_readonly_fields(self, request, obj=None):
         # Only administrators assign surveyors; a surveyor's new properties are their own.

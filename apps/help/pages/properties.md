@@ -30,6 +30,7 @@ A property's page lists its parts. Lettable parts are shown in bold.
 | Reference | The council's unique asset reference. |
 | UPRN / USRN | The national Unique Property and Unique Street Reference Numbers. They link PHAEMA to GIS, council tax, business rates and other systems. |
 | Holding purpose | Why the council holds it: operational, investment, community, surplus, or held for disposal. |
+| Portfolio | The service or portfolio the property belongs to, such as Investment, Leisure, Children's services or Adult social care. See [portfolios](#portfolios). |
 | Tenure | Freehold, leasehold, other, or none (managed but not owned). |
 | Occupation | Occupied by the council, let, partly let, vacant, or not applicable. |
 | Managing surveyor | The surveyor responsible. Surveyors can change the properties they manage (see [roles](users-and-roles.md)). Events on the property's leases are assigned to them. |
@@ -40,6 +41,22 @@ A property's page lists its parts. Lettable parts are shown in bold.
 ![The property register filtered to Northfield](/static/help/property-list.jpg)
 *The register, searched for Northfield.*
 
+
+## Portfolios
+
+A portfolio groups properties by the service or purpose they belong to, alongside the holding purpose. Each
+council keeps its own list: an administrator opens **Manage data**, **Portfolios** to add, rename or reorder them.
+PHAEMA starts with a list typical of a large council (Investment, Corporate estate, Leisure, Libraries,
+Children's services, Education, Adult social care, Highways and transport, Bereavement services and others).
+
+- Choose a property's portfolio in **Edit this property**, under Classification, or in the
+  **Portfolio** column of a [spreadsheet import](import-export.md).
+- Filter the register by portfolio, sort it by the **Portfolio** column, or select a portfolio on a property's
+  page to see everything in it.
+- In the [report builder](reports.md), Portfolio is a column and a filter in the Properties dataset, so you can
+  total floor areas, rents or values by portfolio.
+- A portfolio with properties in it cannot be deleted. Untick **In use** to stop offering it for new
+  properties; properties already in it keep it.
 
 ## Floor areas
 
