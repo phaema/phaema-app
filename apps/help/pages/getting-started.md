@@ -7,7 +7,8 @@ summary: Signing in, the menu, finding records and changing how PHAEMA looks.
 
 ## Signing in
 
-Use the username and password your PHAEMA administrator gave you. If you can sign in but see a page saying you
+Use the username and password your PHAEMA administrator gave you. You can type your email address in place of
+the username. If you can sign in but see a page saying you
 do not have access, you have not been given a [role](users-and-roles.md) yet. Ask an administrator.
 
 ## The menu

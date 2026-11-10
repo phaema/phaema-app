@@ -111,6 +111,9 @@ Administrators: select **Manage data**, then **Users**, then **Add user**. Set a
 then on the next page add their name and email address and choose one group: **Administrators**, **Surveyors**,
 **Contributors** or **Viewers**. Their email address is used for [reminders](reminders.md).
 
+People can **sign in with their email address or their username**. Give each person their own email address: if
+two accounts share one address, neither can sign in with it and both must use their usernames.
+
 ![Manage data](/static/help/admin.jpg)
 *Manage data, where administrators add users and change settings.*
 
