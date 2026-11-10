@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Integrations review · PHAEMA</title>
+<meta name="description" content="The market review behind the connectors plan, including Microsoft 365 and open-source alternatives.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&display=swap">
+<style>
+:root { --paper:#f6f8f7; --sheet:#fff; --ink:#13233a; --muted:#4a5864; --line:#cfd6d8; --edge:#c1272d;
+  --survey:#2c6a3e; --link:#1b5c89; --tint:#e8efec; --focus:#ffdd00;
+  --display:"Bricolage Grotesque","Arial Narrow",Arial,sans-serif; --body:"Atkinson Hyperlegible",Verdana,Arial,sans-serif; }
+@media (prefers-color-scheme: dark) { :root { --paper:#0e151d; --sheet:#15202b; --ink:#e6ecef; --muted:#a9b5be;
+  --line:#2d3b48; --edge:#ff6f69; --survey:#7fc78f; --link:#86bfe9; --tint:#1a2732; } }
+* { box-sizing:border-box; }
+body { margin:0; background:var(--paper); color:var(--ink); font:1.0625rem/1.6 var(--body); }
+a { color:var(--link); text-underline-offset:.15em; }
+a:focus-visible { outline:3px solid var(--focus); background:var(--focus); color:#0b0c0c; }
+.skip { position:absolute; left:-9999px; } .skip:focus { left:16px; top:8px; background:var(--focus); color:#0b0c0c; padding:8px 12px; }
+.top { background:#13233a; color:#f6f8f7; }
+.top__inner { max-width:1180px; margin:0 auto; padding:12px 16px; display:flex; flex-wrap:wrap; gap:6px 24px; align-items:center; }
+.brand { color:#f6f8f7; text-decoration:none; font:800 1.3rem var(--display); letter-spacing:.14em; display:inline-flex; gap:10px; align-items:center; }
+.brand__mark { width:18px; height:14px; border:2.5px solid #c1272d; display:inline-block; }
+.top nav a { color:#f6f8f7; font-weight:700; margin-right:18px; }
+.layout { max-width:1180px; margin:0 auto; padding:32px 16px 64px; display:grid; grid-template-columns:260px minmax(0,1fr); gap:48px; }
+.toc { position:sticky; top:16px; align-self:start; max-height:calc(100vh - 32px); overflow:auto; font-size:.95rem; }
+.toc h2 { font:800 1rem var(--display); text-transform:uppercase; letter-spacing:.08em; color:var(--muted); }
+.toc ul { list-style:none; padding:0; margin:0; } .toc li { margin:.45em 0; }
+article { background:var(--sheet); border:1px solid var(--line); border-top:4px solid var(--edge); padding:32px clamp(18px,4vw,48px); min-width:0; }
+h1, h2, h3 { font-family:var(--display); line-height:1.15; margin:1.6em 0 .5em; }
+h1 { font-size:clamp(2rem,4.5vw,3rem); margin-top:0; } h2 { font-size:1.7rem; border-top:1px solid var(--line); padding-top:1em; }
+h3 { font-size:1.25rem; }
+.meta { color:var(--muted); display:flex; flex-wrap:wrap; gap:8px 20px; align-items:center; }
+.button { display:inline-block; background:var(--survey); color:#fff; font-weight:700; text-decoration:none; padding:8px 16px; border-radius:3px; }
+@media (prefers-color-scheme: dark) { .button { color:#0e151d; } }
+p, li { max-width:75ch; }
+code { font-family:ui-monospace,Menlo,Consolas,monospace; font-size:.9em; background:var(--tint); padding:0 .25em; }
+pre { background:var(--tint); padding:12px; overflow:auto; } pre code { background:none; padding:0; }
+.table { overflow-x:auto; margin:1em 0; }
+table { border-collapse:collapse; width:100%; font-size:.95rem; }
+th, td { border:1px solid var(--line); padding:6px 10px; text-align:left; vertical-align:top; }
+th { background:var(--tint); }
+figure { margin:1.5em 0; } img { max-width:100%; height:auto; border:1px solid var(--line); }
+figcaption { color:var(--muted); font-size:.92rem; margin-top:.4em; }
+article > img { display:block; margin:1em 0; }
+.foot { color:var(--muted); font-size:.92rem; margin-top:3em; border-top:1px solid var(--line); padding-top:1em; }
+@media (max-width:900px) { .layout { grid-template-columns:minmax(0,1fr); } .toc { position:static; max-height:none; } }
+@media print { .top, .toc, .meta .button { display:none; } .layout { display:block; padding:0; } article { border:0; } }
+</style>
+</head>
+<body>
+<a class="skip" href="#doc">Skip to the document</a>
+<header class="top"><div class="top__inner">
+  <a class="brand" href="../index.html"><span class="brand__mark" aria-hidden="true"></span>PHAEMA</a>
+  <nav aria-label="Website"><a href="../index.html">Website</a><a href="../index.html#resources">All resources</a><a href="../tour.html">Tour</a></nav>
+</div></header>
+<div class="layout">
+  <nav class="toc" aria-label="Contents"><h2>Contents</h2><ul>
+<li><a href="#summary">Summary</a></li>
+<li><a href="#the-market">The market</a></li>
+<li><a href="#what-phaema-already-supports">What PHAEMA already supports</a></li>
+<li><a href="#collaboration-integrations">Collaboration integrations</a></li>
+<li><a href="#gis">GIS</a></li>
+<li><a href="#uk-public-data-and-services">UK public data and services</a></li>
+<li><a href="#design-one-connectors-module">Design: one connectors module</a></li>
+<li><a href="#priorities">Priorities</a></li>
+<li><a href="#sources">Sources</a></li>
+  </ul></nav>
+  <article id="doc">
+    <h1>Integrations review</h1>
+    <p class="meta"><span>Updated 5 November 2026</span><a class="button" href="integrations-review.pdf" download>Download PDF</a></p>
+<h2 id="summary">Summary</h2>
+<p>Some councils, almost all in mainland Europe, are leaving Microsoft 365 for open-source and European alternatives. In England and Wales, Microsoft 365 will remain the norm for some years. The alternatives councils are moving to are built on <strong>open standards</strong>: OpenID Connect for sign-in, IMAP and SMTP for email, iCalendar and CalDAV for calendars, WebDAV and WOPI for documents, Matrix for chat, and OGC web services for maps.</p>
+<p>So PHAEMA should connect through those standards, not to particular products. One <strong>connectors module</strong> in the main repository, off by default, would serve councils on Microsoft 365, Nextcloud, openDesk or Google Workspace alike, with each provider just a configuration. The same approach makes PHAEMA&#39;s register visible in any GIS, including the open-source QGIS.</p>
+<p>Suggested order: standard sign-in; Ordnance Survey address and UPRN lookup with EPC lookup; map layers for GIS; GOV.UK Notify for tenant messages; chat notifications; document storage and editing.</p>
+<h2 id="the-market">The market</h2>
+<div class="table"><table><thead><tr><th>Where</th><th>What is happening</th></tr></thead><tbody>
+<tr><td>Schleswig-Holstein (Germany)</td><td>Replacing Windows and Office on about 30,000 machines with Linux, LibreOffice, Thunderbird and Nextcloud</td></tr>
+<tr><td>Mecklenburg-Vorpommern (Germany)</td><td>Replacing SharePoint with Nextcloud for over 50,000 staff; piloting Nextcloud Office (Collabora); using OpenProject</td></tr>
+<tr><td>Germany and Switzerland</td><td>The openDesk suite is being taken up in Germany and evaluated by Swiss bodies, including the City of Zurich</td></tr>
+<tr><td>Aarhus (Denmark)</td><td>Stopped buying systems that need Microsoft; moved 60 systems to a European host, cutting hosting cost by about 70%</td></tr>
+<tr><td>Copenhagen (Denmark)</td><td>Looking for European open-source alternatives</td></tr>
+<tr><td>France</td><td>La Suite numérique has over 500,000 monthly users: Matrix-based chat (Tchap), video, documents, files and mail</td></tr>
+<tr><td>Austria</td><td>The Ministry of Economy has moved to Nextcloud</td></tr>
+</tbody></table></div>
+<p><strong>UK position.</strong> There is very little movement. The government has a large strategic agreement with Microsoft, and the councils mentioned in reporting have only explored open source on a small scale; this review found no UK council migrating. PHAEMA&#39;s customers in England and Wales will mostly keep Microsoft 365 for some years, so it must work well with Microsoft. An open-standards approach also makes PHAEMA attractive to councils considering a move, and to councils elsewhere in Europe.</p>
+<h2 id="what-phaema-already-supports">What PHAEMA already supports</h2>
+<ul>
+<li><p><strong>Email</strong> goes out through any standard mail server (SMTP), whether Microsoft 365, Open-Xchange or the council&#39;s own relay.</p></li>
+<li><p><strong>Calendar feed</strong>: key dates are published as an iCalendar feed that Outlook, Thunderbird, Nextcloud or any calendar can subscribe to.</p></li>
+<li><p><strong>Open API</strong>: a documented REST API (OpenAPI) for properties, titles, leases and parties.</p></li>
+<li><p><strong>Maps</strong>: OpenLayers with Ordnance Survey map tiles, falling back to OpenStreetMap; HM Land Registry INSPIRE boundaries can be imported.</p></li>
+<li><p><strong>Spatial database</strong>: data is held in PostGIS, which QGIS reads natively.</p></li>
+<li><p><strong>Documents</strong>: letters and notices are produced as Word files, which LibreOffice and Collabora also open.</p></li>
+</ul>
+<h2 id="collaboration-integrations">Collaboration integrations</h2>
+<div class="table"><table><thead><tr><th>Need</th><th>Open standard</th><th>Works with</th><th>Proposal</th></tr></thead><tbody>
+<tr><td>Sign-in</td><td>OpenID Connect</td><td>Microsoft Entra ID, Keycloak, openDesk, Nextcloud, Google Workspace</td><td>One standard sign-in; groups map to PHAEMA roles and access areas; two-factor and password rules come from the provider; a local administrator kept as a backup sign-in</td></tr>
+<tr><td>Notifications</td><td>Webhooks, Matrix</td><td>Teams, Element and Matrix (including Tchap), Nextcloud Talk, Slack</td><td>Reminders, approvals waiting and missed milestones sent to a person or a channel, linking back to the record; email stays the default</td></tr>
+<tr><td>Approvals in chat</td><td>Actionable messages</td><td>Teams first; Matrix bots later</td><td>Approve or return a case or works order from the message, recorded in the change log</td></tr>
+<tr><td>Filing email</td><td>IMAP</td><td>Any mail server</td><td>A mailbox such as cases@ that files each message to the case or project named in its subject</td></tr>
+<tr><td>Calendars</td><td>iCalendar, CalDAV</td><td>Outlook, Nextcloud, Thunderbird, Google</td><td>The existing feed covers most needs; optionally add events directly to a person&#39;s or a shared calendar</td></tr>
+<tr><td>Documents</td><td>WebDAV, WOPI</td><td>Nextcloud, SharePoint, OneDrive, Collabora Online</td><td>Keep case and project documents in the council&#39;s own file store, with PHAEMA holding the link; edit generated letters in the browser</td></tr>
+<tr><td>Office formats</td><td>OpenDocument</td><td>LibreOffice, Collabora, Microsoft Office</td><td>Offer .odt alongside Word for letters and notices</td></tr>
+<tr><td>Tenant messages</td><td>GOV.UK Notify</td><td>Free to councils, with 10,000 free texts a year for each service</td><td>Rent demands, arrears reminders and key-date letters to tenants by text, email or post</td></tr>
+</tbody></table></div>
+<h2 id="gis">GIS</h2>
+<p>Councils usually run several GIS products at once. Lincolnshire, for example, lists QGIS (free) alongside ArcGIS, MapInfo and Cadcorp. PHAEMA should not become a GIS; it should make its register appear in whatever GIS the council uses.</p>
+<ul>
+<li><p><strong>Publish the register as map layers.</strong> Offer OGC API Features and WFS layers for properties, leases, projects and proposed sites. QGIS, ArcGIS, Cadcorp and MapInfo all read these. Each layer follows access areas and project confidentiality, and needs a personal access key.</p></li>
+<li><p><strong>Read-only database views.</strong> A council&#39;s GIS team can connect QGIS straight to PostGIS views for analysis. This is the cheapest option, but it bypasses PHAEMA&#39;s permission checks, so it is for internal GIS teams only, never confidential projects.</p></li>
+<li><p><strong>Ordnance Survey APIs</strong>, available to councils through the Public Sector Geospatial Agreement:</p><ul><li><p>OS Places: address search and finding the UPRN when adding a property;</p></li><li><p>OS NGD: building footprints and areas to check floor areas and boundaries;</p></li><li><p>vector map tiles for clearer base maps.</p></li></ul></li>
+<li><p><strong>Planning data.</strong> Show constraints such as conservation areas and listed buildings on property and project maps, from the national planning data service. Its terms need checking before this is built.</p></li>
+<li><p><strong>Open-source web mapping.</strong> Councils running GeoServer, QGIS Server or Lizmap can show PHAEMA&#39;s layers on their own public or internal map sites.</p></li>
+</ul>
+<h2 id="uk-public-data-and-services">UK public data and services</h2>
+<div class="table"><table><thead><tr><th>Service</th><th>Use in PHAEMA</th></tr></thead><tbody>
+<tr><td>EPC register</td><td>Look up a property&#39;s energy rating and certificate expiry by UPRN, to support the minimum energy efficiency standards warning on lettings</td></tr>
+<tr><td>Companies House</td><td>Check a tenant company&#39;s status and officers when adding a party, and flag dissolved or insolvent tenants. Terms to be checked</td></tr>
+<tr><td>FixMyStreet Pro (open source, used by councils)</td><td>Pass public reports about council property, such as damage or fly-tipping on council land, into maintenance jobs</td></tr>
+<tr><td>Open Digital Planning (BOPS, open source)</td><td>Link a project to its planning applications and show their status</td></tr>
+<tr><td>HM Land Registry</td><td>Already used for INSPIRE boundaries; title register downloads could follow</td></tr>
+</tbody></table></div>
+<h2 id="design-one-connectors-module">Design: one connectors module</h2>
+<p>The integrations live in the main repository as one optional module, not in a fork.</p>
+<ul>
+<li><p><strong>Off by default.</strong> Nothing connects to an outside service until an administrator enters its details and switches it on in Module settings.</p></li>
+<li><p><strong>Each connector switches on separately</strong>: sign-in, chat notifications, email filing, calendars, document storage, GOV.UK Notify, Ordnance Survey, EPC and the rest.</p></li>
+<li><p><strong>Providers are configurations.</strong> Sign-in is written once for OpenID Connect; Microsoft Entra, Keycloak and Google are settings. The same goes for chat (Teams, Matrix, Nextcloud Talk) and file stores (SharePoint, Nextcloud).</p></li>
+<li><p><strong>Nothing depends on it.</strong> Email, PHAEMA passwords and documents stored in PHAEMA stay the defaults, and keep working when a connector is off or the outside service is down.</p></li>
+<li><p><strong>Security.</strong> Keys and secrets are set by the installer, never stored in the database. Each connector asks only for the permissions it needs, and every action through a connector appears in the change log.</p></li>
+<li><p><strong>Data stays where it is.</strong> PHAEMA stays on UK hosting; documents kept in a council&#39;s own file store stay in the council&#39;s tenancy.</p></li>
+<li><p><strong>Tested both ways.</strong> The automated tests run with each connector on and off.</p></li>
+</ul>
+<h2 id="priorities">Priorities</h2>
+<ol>
+<li><p><strong>Standard sign-in (OpenID Connect).</strong> Most requested by IT teams, and it removes PHAEMA passwords.</p></li>
+<li><p><strong>OS Places address and UPRN lookup, and EPC lookup.</strong> Better data at entry, with free public sources.</p></li>
+<li><p><strong>Map layers for GIS (OGC API Features and WFS).</strong> PHAEMA&#39;s register in QGIS, ArcGIS and the rest.</p></li>
+<li><p><strong>GOV.UK Notify.</strong> Texts and letters to tenants at little or no cost.</p></li>
+<li><p><strong>Chat notifications and approvals.</strong> Teams first, then Matrix and Nextcloud Talk.</p></li>
+<li><p><strong>Document storage and browser editing.</strong> SharePoint or Nextcloud, with Collabora or Word online.</p></li>
+<li><p><strong>Email filing by IMAP, planning data, Companies House, FixMyStreet and BOPS</strong> as councils ask for them.</p></li>
+</ol>
+<h2 id="sources">Sources</h2>
+<ul>
+<li><p><a href="https://www.irishtimes.com/world/europe/2026/02/14/a-small-german-states-quiet-revolt-against-microsoft-and-what-it-means-for-europe/">Irish Times: Schleswig-Holstein&#39;s move away from Microsoft</a></p></li>
+<li><p><a href="https://caithness-business.co.uk/article/31002">Caithness Business: Europe and the UK reconsider Microsoft</a></p></li>
+<li><p><a href="https://borncity.com/blog/2026/07/10/mecklenburg-vorpommern-ersetzt-auch-microsoft-office/">Born City: Mecklenburg-Vorpommern replaces Microsoft Office</a></p></li>
+<li><p><a href="https://interoperable-europe.ec.europa.eu/collection/open-source-observatory-osor/news/aarhus-and-copenhagen-choose-open-source">Interoperable Europe: Aarhus and Copenhagen choose open source</a></p></li>
+<li><p><a href="https://tech-insider.org/fr/la-suite-numerique-600000-agents-microsoft-teams-souverainete-2026/">Tech Insider: La Suite numérique</a></p></li>
+<li><p><a href="https://www.bfh.ch/business/en/research/research-projects/2025-867-514-540/">BFH: openDesk evaluation for the City of Zurich</a></p></li>
+<li><p><a href="https://gigazine.net/gsc_news/en/20251031-austria-bmwet-nextcloud">Gigazine: Austrian ministry adopts Nextcloud</a></p></li>
+<li><p><a href="https://www.lincolnshire.gov.uk/directory-record/80284/information-on-gis-software">Lincolnshire County Council: GIS software</a></p></li>
+<li><p><a href="https://www.ordnancesurvey.co.uk/customers/public-sector/os-data-hub-public-sector">Ordnance Survey: OS Data Hub for the public sector</a></p></li>
+<li><p><a href="https://www.notifications.service.gov.uk/pricing/free-text-message-allowance">GOV.UK Notify: free text message allowance</a></p></li>
+<li><p><a href="https://get-energy-performance-data.communities.gov.uk/">Get energy performance of buildings data</a></p></li>
+<li><p><a href="https://ndx.digital.cabinet-office.gov.uk/catalogue/aws/bops-planning">NDX: Back Office Planning System (BOPS)</a></p></li>
+<li><p><a href="https://www.mysociety.org/tag/integration/">mySociety: FixMyStreet Pro integration</a></p></li>
+</ul>
+
+    <p class="foot">PHAEMA is free software under the GNU Affero General Public License v3.0. Screenshots show fictional
+    demonstration data. Questions or corrections: <a href="mailto:stuart@phaema.co.uk">stuart@phaema.co.uk</a>.</p>
+  </article>
+</div>
+</body>
+</html>

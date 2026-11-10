@@ -84,5 +84,5 @@ These are known gaps, listed so councils can judge the risk. They are on the [ro
 
 ## For councils assessing PHAEMA
 
-The [technical manual](https://claude.ai/artifact/8sTYq44xi5Ps3NuVFDrEm2) describes the architecture, data model,
+The [technical manual](https://phaema.co.uk/docs/technical-manual.html) describes the architecture, data model,
 hosting and security in more detail. To arrange a security review or pilot, email stuart@phaema.co.uk.
