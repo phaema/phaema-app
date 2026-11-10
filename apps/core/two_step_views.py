@@ -25,6 +25,14 @@ PENDING_SECONDS = 5 * 60
 class PhaemaLoginView(LoginView):
     """The password step. People with two-step sign-in go on to the code step before they are signed in."""
 
+    def get_context_data(self, **kwargs):
+        from apps.connectors import sso
+
+        context = super().get_context_data(**kwargs)
+        if sso.enabled():
+            context["sso_name"] = sso.name()
+        return context
+
     def form_valid(self, form):
         user = form.get_user()
         if not two_step.has_two_step(user):

@@ -59,9 +59,13 @@ class TwoStepRequiredMiddleware:
         if (user is not None and user.is_authenticated and not request.path.startswith(self.OPEN_PREFIXES)):
             from django.shortcuts import redirect
 
+            from apps.connectors import sso
+
             from . import two_step
 
-            if two_step.is_required(user) and not two_step.has_two_step(user):
+            # People signed in with the council's own account have met the council's own sign-in rules.
+            if (not sso.signed_in_with_sso(request) and two_step.is_required(user)
+                    and not two_step.has_two_step(user)):
                 if request.path.startswith("/api/"):
                     from django.http import JsonResponse
 

@@ -106,6 +106,29 @@ class ModuleSettings(models.Model):
                     "after the password. People it is required for must set it up the next time they sign in. "
                     "It is never required on a public test site."))
 
+    sso_enabled = models.BooleanField(
+        _("sign in with the council's own accounts"), default=False,
+        help_text=_("Single sign-on with Microsoft 365 (Entra ID) or another OpenID Connect service. The installer "
+                    "must first put the service's details in the server settings file; until then this does "
+                    "nothing. People are matched to their PHAEMA account by email address."))
+
+    class SsoPasswords(models.TextChoices):
+        UNLINKED = "unlinked", _("Only people without a council account (such as outside consultants), "
+                                 "and administrators as a fallback")
+        EVERYONE = "everyone", _("Anyone, as well as their council account")
+
+    sso_passwords = models.CharField(
+        _("who can still sign in with a PHAEMA password"), max_length=20, choices=SsoPasswords.choices,
+        default=SsoPasswords.UNLINKED,
+        help_text=_("Applies once single sign-on is on. A person counts as having a council account from the "
+                    "first time they sign in with it."))
+    sso_create_accounts = models.BooleanField(
+        _("create a PHAEMA account at first council sign-in"), default=False,
+        help_text=_("Off: only people an administrator has already added can sign in. On: anyone the sign-in "
+                    "service lets through gets an account, with the roles and access areas from the sign-in "
+                    "group mappings. Without a mapped group they see nothing until an administrator gives them "
+                    "a role."))
+
     brand_colour = models.CharField(
         _("header colour"), max_length=7, blank=True,
         validators=[RegexValidator(r"^#[0-9A-Fa-f]{6}$", _("Enter a colour like #1d3557."))],

@@ -21,6 +21,10 @@ class ModuleSettingsAdmin(admin.ModelAdmin):
         ("Maintenance", {"fields": ["order_approval_limit"]}),
         ("Maps", {"fields": ["os_maps_api_key", "os_map_style"]}),
         ("Security", {"fields": ["two_step_required"]}),
+        ("Single sign-on", {"fields": ["sso_enabled", "sso_passwords", "sso_create_accounts"],
+                            "description": "Sign in with Microsoft 365 or another sign-in service. See Help, "
+                                           "Users and roles. Roles and access areas can follow the service's "
+                                           "groups: add them under Sign-in group mappings."}),
         ("Reminders", {"fields": ["reminder_days_review", "reminder_days_notice", "reminder_days_break",
                                   "reminder_days_expiry", "reminder_days_other", "overdue_reminders"]}),
     ]

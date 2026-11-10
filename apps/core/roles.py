@@ -20,7 +20,7 @@ CONTRIBUTORS = "Contributors"
 VIEWERS = "Viewers"
 ROLES = (ADMINISTRATORS, SURVEYORS, CONTRIBUTORS, VIEWERS)
 
-PHAEMA_APPS = ("core", "properties", "leases", "ledger", "servicecharges", "cases", "maintenance", "compliance", "valuations", "documents", "projects")
+PHAEMA_APPS = ("core", "connectors", "properties", "leases", "ledger", "servicecharges", "cases", "maintenance", "compliance", "valuations", "documents", "projects")
 
 # Permissions held by each role, as "app_label.codename". Object-level rules (only your
 # own properties) are applied on top of these by can_edit().
