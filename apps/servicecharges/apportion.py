@@ -137,6 +137,8 @@ def proposed_service_charges(due_from, due_to, issue_date, vat_rate):
             lease = s.member.lease
             if lease.direction != Lease.Direction.OUT or lease.status not in ("current", "holding_over"):
                 continue
+            if lease.demands_on_hold:  # nothing is demanded while the agreement is on hold
+                continue
             for start, end, due, full in rent_periods(lease, due_from, due_to):
                 for year in years_overlapping(schedule, start, end):
                     part_start, part_end = max(start, year.start), min(end, year.end)

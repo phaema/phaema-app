@@ -16,6 +16,9 @@
     <option value="service"{% if include == "service" %} selected{% endif %}>{% translate "Service charges only" %}</option></select></div>{% endif %}
   <div class="govuk-form-group"><button class="govuk-button govuk-button--secondary govuk-!-margin-bottom-0" data-module="govuk-button">{% translate "Preview the charges" %}</button></div>
 </form>
+{% if on_hold %}<div class="govuk-inset-text"><strong>{% blocktranslate count n=on_hold|length %}{{ n }} agreement has its rent demands on hold and will not be charged:{% plural %}{{ n }} agreements have their rent demands on hold and will not be charged:{% endblocktranslate %}</strong>
+  {% for l in on_hold %}<a class="govuk-link" href="{{ l.get_absolute_url }}">{{ l.reference }}</a> {{ l.counterparty.name }}{% if l.demands_on_hold_reason %} ({{ l.demands_on_hold_reason }}){% endif %}{% if not forloop.last %}; {% endif %}{% endfor %}.
+  <span class="govuk-body-s">{% translate "When a hold is taken off, run the dates again to raise what was missed." %}</span></div>{% endif %}
 {% if charges is not None %}
   {% if charges %}
   <h2 class="govuk-heading-m">{% blocktranslate count n=charges|length %}{{ n }} charge to raise{% plural %}{{ n }} charges to raise{% endblocktranslate %}</h2>

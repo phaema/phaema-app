@@ -30,6 +30,8 @@ A property's page lists its parts. Lettable parts are shown in bold.
 | Reference | The council's unique asset reference. |
 | UPRN / USRN | The national Unique Property and Unique Street Reference Numbers. They link PHAEMA to GIS, council tax, business rates and other systems. |
 | Holding purpose | Why the council holds it: operational, investment, community, surplus, or held for disposal. |
+| Estate strategy section | The section of the council's estate strategy or asset management plan that covers the property. Blank until the council fills it in. |
+| Holding purpose review date | When the reason for holding the property is next due for review. The register can be filtered to reviews that are overdue or due in the next 12 months. |
 | Portfolio | The service or portfolio the property belongs to, such as Investment, Leisure, Children's services or Adult social care. See [portfolios](#portfolios). |
 | Tenure | Freehold, leasehold, other, or none (managed but not owned). |
 | Occupation | Occupied by the council, let, partly let, vacant, or not applicable. |

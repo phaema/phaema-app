@@ -26,14 +26,15 @@ class RentScheduleInline(RoleInlineMixin, admin.TabularInline):
 class DocumentInline(RoleInlineMixin, admin.TabularInline):
     model = LeaseDocument
     extra = 1
-    fields = ("document_type", "file", "description", "document_date")
+    fields = ("document_type", "file", "description", "document_date", "review_date")
 
 
 @admin.register(Lease)
 class LeaseAdmin(RoleAdminMixin, admin.ModelAdmin):
     list_display = ("reference", "counterparty", "agreement_type", "status", "term_start", "term_end",
                     "next_review_date", "annual_rent")
-    list_filter = ("direction", "agreement_type", "status", "security_of_tenure", "review_basis")
+    list_filter = ("direction", "agreement_type", "status", "security_of_tenure", "review_basis", "time_of_essence",
+                   "demands_on_hold", "arrears_referral")
     search_fields = ("reference", "counterparty__name", "properties__reference", "properties__name")
     autocomplete_fields = ("counterparty", "guarantor", "properties")
     date_hierarchy = "term_end"
@@ -44,7 +45,16 @@ class LeaseAdmin(RoleAdminMixin, admin.ModelAdmin):
         ("Term", {"fields": ("lease_date", "term_start", "term_end", "actual_end", "security_of_tenure")}),
         ("Rent", {"fields": ("annual_rent", "rent_frequency", "vat_chargeable", "rates_excluded", "incentives",
                              "deposit", "deposit_held", "deposit_interest")}),
-        ("Rent review", {"fields": ("review_basis", "review_interval_years", "next_review_date")}),
+        ("Rent review", {"fields": ("review_basis", "review_interval_years", "next_review_date", "time_of_essence")}),
+        ("Rent demands and arrears", {
+            "fields": ("demands_on_hold", "demands_on_hold_reason", "arrears_referral", "arrears_referred_on",
+                       "arrears_referral_reference"),
+            "description": "Put demands on hold while a dispute or negotiation is sorted out, and record when the "
+                           "debt has been passed to debt collectors or legal."}),
+        ("Billing contact", {
+            "fields": ("billing_contact_name", "billing_email", "billing_phone", "billing_address"),
+            "description": "Who rent demands go to. Leave blank to use the tenant's main contact; fill in only "
+                           "the details that differ."}),
         ("Terms", {"fields": ("repairing", "insurance", "service_charge_payable", "permitted_use", "alienation",
                               "alterations", "special_rights")}),
         ("Notes", {"fields": ("notes",)}),
@@ -128,7 +138,7 @@ class PartyAdmin(RoleAdminMixin, admin.ModelAdmin):
 
 @admin.register(LeaseEvent)
 class LeaseEventAdmin(RoleAdminMixin, admin.ModelAdmin):
-    list_display = ("due_date", "event_type", "title", "lease", "assigned_to", "status")
+    list_display = ("due_date", "event_type", "title", "lease", "assigned_to", "status", "estimated_rental_value")
     list_filter = ("event_type", "status", "assigned_to")
     search_fields = ("lease__reference", "lease__counterparty__name", "title")
     date_hierarchy = "due_date"

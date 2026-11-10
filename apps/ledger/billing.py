@@ -70,10 +70,20 @@ def period_rent(lease, start, end, full):
     return (annual * days / 365).quantize(PENNY)
 
 
-def billable_leases():
+def _chargeable():
     return (Lease.objects.filter(direction=Lease.Direction.OUT, status__in=workflow.LIVE)
             .exclude(rent_frequency=Lease.RentFrequency.PEPPERCORN)
             .select_related("counterparty").prefetch_related("rent_schedule", "properties"))
+
+
+def billable_leases():
+    """Agreements a demand run charges: live, let out, rent-paying and not on hold."""
+    return _chargeable().filter(demands_on_hold=False)
+
+
+def held_leases():
+    """Agreements a demand run leaves alone because their demands are on hold."""
+    return _chargeable().filter(demands_on_hold=True).order_by("reference")
 
 
 def proposed_charges(due_from, due_to, issue_date=None, rent=True, service=None):

@@ -51,10 +51,14 @@ COLUMNS = [
                                             "fragile roofs, dogs, confined spaces."),
     ("Portfolio", "portfolio", False, "One of the council's portfolios, as listed under Manage data, Portfolios, "
                                       "e.g. Investment, Leisure, Adult social care."),
+    ("Estate strategy section", "strategy_section", False, "The section of the estate strategy that covers the "
+                                                           "property, e.g. 4.2 Investment estate."),
+    ("Holding purpose review date", "purpose_review_date", False, "When the holding purpose is next due for "
+                                                                  "review, dd/mm/yyyy."),
 ]
 CHOICE_FIELDS = {"property_type", "holding_purpose", "tenure", "occupation", "area_standard", "area_source"}
 DECIMAL_FIELDS = {"gia_sqm", "nia_sqm", "site_area_ha", "gea_sqm"}
-DATE_FIELDS = {"areas_measured_on"}
+DATE_FIELDS = {"areas_measured_on", "purpose_review_date"}
 INTEGER_FIELDS = {"easting", "northing"}
 
 

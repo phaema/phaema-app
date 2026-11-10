@@ -112,6 +112,17 @@ class LeaseSheet(Sheet):
         Column("Special rights", "special_rights", example="Two parking spaces"),
         Column("Deposit held", "deposit_held"),
         Column("Deposit interest", "deposit_interest"),
+        Column("Time is of the essence", "time_of_essence", "bool",
+               guidance="Yes if the lease makes time of the essence for the rent review."),
+        Column("Rent demands on hold", "demands_on_hold", "bool"),
+        Column("On hold because", "demands_on_hold_reason"),
+        Column("Billing contact name", "billing_contact_name",
+               guidance="Leave the billing columns blank to use the tenant's main contact."),
+        Column("Billing email", "billing_email"),
+        Column("Billing phone", "billing_phone"),
+        Column("Billing address", "billing_address"),
+        Column("Arrears passed to", "arrears_referral", "choice", guidance="External debt collectors or Legal."),
+        Column("Date arrears passed over", "arrears_referred_on", "date"),
     ]
 
     def find(self, values):

@@ -11,6 +11,7 @@
 {% block content %}
 <span class="govuk-caption-l">{{ event.lease.reference }} · {{ event.lease.counterparty.name }}</span>
 <h1 class="govuk-heading-xl">{{ event.display_title }}</h1>
+{% if event.time_of_essence and event.is_open %}<div class="govuk-warning-text"><span class="govuk-warning-text__icon" aria-hidden="true">!</span><strong class="govuk-warning-text__text"><span class="govuk-visually-hidden">{% translate "Warning" %}</span>{% translate "Time is of the essence for this rent review. Check the lease's timetable: a missed date can lose the review." %}</strong></div>{% endif %}
 <div class="govuk-grid-row">
 <div class="govuk-grid-column-two-thirds">
   <dl class="govuk-summary-list">
@@ -18,6 +19,7 @@
     <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Assigned to" %}</dt><dd class="govuk-summary-list__value">{{ event.assigned_to|person:"Nobody" }}</dd></div>
     <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Status" %}</dt><dd class="govuk-summary-list__value">{{ event.get_status_display }}{% if event.completed_on %} – {{ event.completed_on|date:"j M Y" }}{% if event.completed_by %} {% translate "by" %} {{ event.completed_by.get_full_name|default:event.completed_by.username }}{% endif %}{% endif %}</dd></div>
     <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Agreement" %}</dt><dd class="govuk-summary-list__value"><a class="govuk-link" href="{{ event.lease.get_absolute_url }}">{{ event.lease.reference }} {{ event.lease.get_agreement_type_display }}</a><br><span class="govuk-body-s">{% translate "Current rent" %} £{{ event.lease.annual_rent|floatformat:2|intcomma }} {% translate "a year" %} · {{ event.lease.get_review_basis_display }}</span></dd></div>
+    {% if event.takes_erv %}<div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Estimated rental value" %}</dt><dd class="govuk-summary-list__value">{% if event.estimated_rental_value is not None %}£{{ event.estimated_rental_value|floatformat:2|intcomma }} {% translate "a year" %}{% with diff=event.erv_uplift %}{% if diff %}<br><span class="govuk-body-s">{% if diff > 0 %}£{{ diff|floatformat:0|intcomma }} {% translate "above the current rent" %}{% else %}£{{ diff|floatformat:0|cut:"-"|intcomma }} {% translate "below the current rent" %}{% endif %}</span>{% endif %}{% endwith %}{% else %}<span class="govuk-body-s">{% translate "Not yet estimated" %}</span>{% endif %}</dd></div>{% endif %}
     {% if event.outcome %}<div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Notes and outcome" %}</dt><dd class="govuk-summary-list__value">{{ event.outcome|linebreaksbr }}</dd></div>{% endif %}
   </dl>
   {% with ev_cases=event.cases.all %}{% if ev_cases %}<div class="govuk-inset-text">{% translate "Case:" %} {% for c in ev_cases %}<a class="govuk-link" href="{{ c.get_absolute_url }}">{{ c.display_reference }}</a> ({% if c.is_open %}{{ c.get_stage_display|lower }}{% else %}{% translate "closed" %}{% endif %}){% if not forloop.last %}, {% endif %}{% endfor %}

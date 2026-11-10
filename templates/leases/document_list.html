@@ -1,0 +1,56 @@
+{% extends "base.html" %}{% load i18n phaema %}
+{% block title %}{% translate "Lease documents" %}{% endblock %}
+{% block help_page %}leases{% endblock %}
+{% block breadcrumbs %}
+<nav class="govuk-breadcrumbs" aria-label="Breadcrumb"><ol class="govuk-breadcrumbs__list">
+  <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="{% url 'leases:list' %}">{% translate "Leases and licences" %}</a></li>
+  <li class="govuk-breadcrumbs__list-item">{% translate "Documents" %}</li>
+</ol></nav>
+{% endblock %}
+{% block content %}
+<h1 class="govuk-heading-xl">{% translate "Lease documents" %}</h1>
+  {% include "core/_hint.html" with summary=_("What is the date for review?") text=_("Any lease document can carry a date when it should next be looked at: an insurance certificate's expiry, a schedule of condition to re-inspect, a side letter that runs out. Set it when you add the document to the agreement.") page="leases" anchor="documents" %}
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-one-quarter">
+    <form method="get" class="phaema-filters">
+      <div class="govuk-form-group">
+        <label class="govuk-label govuk-label--s" for="q">{% translate "Search" %}</label>
+        <div class="govuk-hint" id="q-hint">{% translate "Agreement, tenant or description" %}</div>
+        <input class="govuk-input" id="q" name="q" type="search" value="{{ q }}" aria-describedby="q-hint">
+      </div>
+      {% for name, label, choices, current, any in filters %}
+      <div class="govuk-form-group">
+        <label class="govuk-label govuk-label--s" for="f-{{ name }}">{{ label }}</label>
+        <select class="govuk-select" id="f-{{ name }}" name="{{ name }}">
+          {% if any %}<option value="">{% translate "Any" %}</option>{% endif %}
+          {% for value, text in choices %}<option value="{{ value }}"{% if value == current %} selected{% endif %}>{{ text }}</option>{% endfor %}
+        </select>
+      </div>
+      {% endfor %}
+      {% if request.GET.sort %}<input type="hidden" name="sort" value="{{ request.GET.sort }}">{% endif %}
+      <button class="govuk-button govuk-!-margin-bottom-2" data-module="govuk-button">{% translate "Apply" %}</button>
+      <p class="govuk-body-s govuk-!-margin-bottom-0"><a class="govuk-link" href="{% url 'leases:documents' %}">{% translate "Clear filters" %}</a></p>
+    </form>
+  </div>
+  <div class="govuk-grid-column-three-quarters">
+    <p class="govuk-body">{% blocktranslate count n=paginator.count %}{{ n }} document{% plural %}{{ n }} documents{% endblocktranslate %}</p>
+    {% include "core/_downloads.html" %}
+    <table class="govuk-table">
+      {% include "core/_sortable_head.html" %}
+      <tbody class="govuk-table__body">
+      {% for d in page_obj %}{% with rag=d.review_rag %}
+        <tr class="govuk-table__row">
+          <td class="govuk-table__cell">{% if d.review_date %}{{ d.review_date|date:"j M Y" }}<br><strong class="govuk-tag govuk-tag--{{ rag.0 }}">{{ rag.1 }}</strong>{% else %}–{% endif %}</td>
+          <td class="govuk-table__cell"><a class="govuk-link" href="{{ d.file.url }}" target="_blank" rel="noopener">{{ d.description|default:d.get_document_type_display }}</a><br><span class="govuk-body-s">{{ d.get_document_type_display }}</span></td>
+          <td class="govuk-table__cell"><a class="govuk-link" href="{{ d.lease.get_absolute_url }}">{{ d.lease.reference }}</a><br><span class="govuk-body-s">{{ d.lease.counterparty.name }}</span></td>
+          <td class="govuk-table__cell">{{ d.document_date|date:"j M Y"|default:"–" }}</td>
+        </tr>
+      {% endwith %}{% empty %}
+        <tr class="govuk-table__row"><td class="govuk-table__cell" colspan="4">{% translate "No documents match." %}</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+    {% include "core/_pagination.html" %}
+  </div>
+</div>
+{% endblock %}

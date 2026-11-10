@@ -150,6 +150,9 @@ def case_new(request):
             messages.success(request, _("Case %(ref)s opened.") % {"ref": case.display_reference})
         return redirect(case)
     initial = {k: request.GET[k] for k in ("lease", "property") if request.GET.get(k)}
+    wanted = CaseType.objects.filter(code=request.GET.get("type", ""), active=True).first()
+    if wanted:  # e.g. the lease page's "get the tenant's insurance certificate" link
+        initial.update({"case_type": wanted.pk, "title": wanted.name})
     form = NewCaseForm(request.POST or None, initial=initial)
     if request.method == "POST" and form.is_valid():
         d = form.cleaned_data

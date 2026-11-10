@@ -26,6 +26,10 @@ COLUMNS = {
     "rent": (_("Rent £ a year"), ["annual_rent", "reference"], True),
 }
 
+FLAGS = [("essence", _("Time is of the essence (rent review)")), ("on_hold", _("Rent demands on hold")),
+         ("referred", _("Arrears passed to debt collectors or legal")), ("billing", _("Has its own billing contact"))]
+FLAG_FILTERS = {"essence": {"time_of_essence": True}, "on_hold": {"demands_on_hold": True}}
+
 EXPIRY_WINDOWS = [("6", _("Within 6 months")), ("12", _("Within 12 months")), ("24", _("Within 2 years")),
                   ("past", _("Already passed (holding over or ended)"))]
 
@@ -58,6 +62,15 @@ class LeaseListView(LoginRequiredMixin, ExportMixin, ListView):
             qs = qs.filter(term_end__gte=today, term_end__lte=today + timedelta(days=int(window) * 30.44))
         if get.get("property"):
             qs = qs.filter(properties__pk=get["property"])
+        if get.get("live"):  # current or holding over: used by the dashboard's links
+            qs = qs.filter(status__in=events.LIVE)
+        flag = get.get("flag", "")
+        if flag in FLAG_FILTERS:
+            qs = qs.filter(**FLAG_FILTERS[flag])
+        elif flag == "referred":
+            qs = qs.exclude(arrears_referral="")
+        elif flag == "billing":
+            qs = qs.exclude(billing_contact_name="", billing_email="", billing_phone="", billing_address="")
         qs = places.apply(qs, get, self.request.user, "properties")
         if get.get("event") in events.FILTERS:
             qs = events.filter_leases(qs, get["event"])
@@ -72,7 +85,9 @@ class LeaseListView(LoginRequiredMixin, ExportMixin, ListView):
             (f, Lease._meta.get_field(f).verbose_name, Lease._meta.get_field(f).choices, get.get(f, ""))
             for f in self.FILTERS
         ] + [("expiring", _("Expiry"), EXPIRY_WINDOWS, get.get("expiring", "")),
-             ("event", _("Lease events"), list(events.FILTERS.items()), get.get("event", ""))] + [row[:4] for row in places.filters(get)]
+             ("event", _("Lease events"), list(events.FILTERS.items()), get.get("event", "")),
+             ("flag", _("Flags"), FLAGS, get.get("flag", ""))] + [row[:4] for row in places.filters(get)]
+        ctx["live_only"] = bool(get.get("live"))
         ctx["event_label"] = events.FILTERS.get(get.get("event", ""))
         ctx["headings"] = self.headings
         ctx["rent_total"] = self.object_list.order_by().aggregate(t=Sum("annual_rent"))["t"]
@@ -109,6 +124,79 @@ class LeaseDetailView(LoginRequiredMixin, DetailView):
         from apps.documents.views import _can_create, for_lease
 
         ctx["doc_templates"] = for_lease() if _can_create(self.request.user) else []
+        ctx["today"] = today
+        ctx["documents"] = list(lease.documents.all())
+        if lease.insurance == Lease.Insurance.TENANT and lease.is_let_out:
+            ctx["tenant_insures"] = True
+            ctx["insurance_certificate"] = lease.insurance_certificate()
+            ctx["insurance_case"] = next((c for c in lease.cases.all()
+                                          if c.case_type.code == "insurance_certificate" and c.is_open), None)
+        return ctx
+
+
+DOCUMENT_COLUMNS = {
+    "review": (_("Review"), ["review_date", "pk"], False),
+    "document": (_("Document"), ["document_type", "description"], False),
+    "lease": (_("Agreement"), ["lease__reference", "review_date"], False),
+    "dated": (_("Document date"), ["document_date", "pk"], False),
+}
+DOCUMENT_WINDOWS = [("overdue", _("Review overdue")), ("90", _("Review within 3 months")),
+                    ("183", _("Review within 6 months")), ("365", _("Review within 12 months")),
+                    ("dated", _("Any review date")), ("none", _("No review date"))]
+
+
+class DocumentListView(LoginRequiredMixin, ExportMixin, ListView):
+    """Lease documents, by default those with a date for review, soonest first."""
+    export_dataset, export_title = "lease_documents", "Lease documents"
+    paginate_by = 50
+    template_name = "leases/document_list.html"
+
+    def get_queryset(self):
+        from .models import LeaseDocument
+
+        get = self.request.GET
+        qs = LeaseDocument.objects.select_related("lease", "lease__counterparty")
+        if get.get("status", "live") == "live":
+            qs = qs.filter(lease__status__in=events.LIVE)
+        window, today = get.get("window", "dated"), date.today()
+        if window == "overdue":
+            qs = qs.filter(review_date__lt=today)
+        elif window.isdigit():
+            qs = qs.filter(review_date__gte=today, review_date__lte=today + timedelta(days=int(window)))
+        elif window == "none":
+            qs = qs.filter(review_date__isnull=True)
+        elif window == "dated":
+            qs = qs.filter(review_date__isnull=False)
+        if get.get("type"):
+            qs = qs.filter(document_type=get["type"])
+        q = get.get("q", "").strip()
+        if q:
+            qs = qs.filter(Q(lease__reference__icontains=q) | Q(lease__counterparty__name__icontains=q)
+                           | Q(description__icontains=q))
+        qs = places.apply(qs, get, self.request.user, "lease__properties")
+        ordering, self.headings = sortable(self.request, DOCUMENT_COLUMNS, "review")
+        return qs.order_by(*ordering)
+
+    def get_context_data(self, **kwargs):
+        from .models import LeaseDocument
+
+        ctx = super().get_context_data(**kwargs)
+        get = self.request.GET
+        ctx.update({
+            "q": get.get("q", ""),
+            "filters": [
+                ("window", _("Date for review"), DOCUMENT_WINDOWS + [("all", _("All documents"))],
+                 get.get("window", "dated"), False),
+                ("type", _("Type"), LeaseDocument.DocumentType.choices, get.get("type", ""), True),
+                ("status", _("Agreements"), [("live", _("Current and holding over")), ("all", _("All, including ended"))],
+                 get.get("status", "live"), False),
+                *places.filters(get),
+            ],
+            "headings": self.headings, "today": date.today(),
+        })
+        params = get.copy()
+        params.pop("page", None)
+        ctx["querystring"] = params.urlencode()
         return ctx
 
 

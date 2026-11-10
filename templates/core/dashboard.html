@@ -80,6 +80,10 @@
     {% if compliance and compliance.total %}<section class="phaema-panel" data-panel="estate-compliance" data-area="buildings"><h2 class="govuk-heading-m phaema-panel__title">{% translate "Compliance" %}</h2><div class="phaema-panel__body">
     <p class="govuk-body"><a class="govuk-link" href="{% url 'compliance:home' %}">{% blocktranslate with p=compliance.compliant_pct %}{{ p }}% of required certificates in date{% endblocktranslate %}</a>{% if compliance.expired or compliance.missing %} · <a class="govuk-link phaema-overdue" href="{% url 'compliance:home' %}">{% blocktranslate with e=compliance.expired m=compliance.missing %}{{ e }} expired, {{ m }} missing{% endblocktranslate %}</a>{% endif %}{% if compliance.actions_overdue %} · {{ compliance.actions_overdue }} {% translate "remedial actions overdue" %}{% endif %}</p></div></section>{% endif %}
     <section class="phaema-panel" data-panel="estate-events" data-area="leases"><h2 class="govuk-heading-m phaema-panel__title">{% translate "Lease events" %}</h2><div class="phaema-panel__body">
+    <div class="phaema-stat phaema-stat--alert">
+      <span class="phaema-stat__value">{{ tenancies_at_will }}</span>
+      <a class="govuk-link govuk-body" href="{% url 'leases:list' %}?agreement_type=taw&amp;live=1">{% blocktranslate count n=tenancies_at_will %}tenancy at will in place{% plural %}tenancies at will in place{% endblocktranslate %}</a>
+    </div>
   {% include "core/_hint.html" with summary=_("What counts as overdue?") text=_("An event is overdue when its date has passed and nobody has recorded the outcome. Break dates and notice deadlines lapse on their own once passed.") page="events" anchor="status-and-colours" %}
     <table class="govuk-table">
       <thead class="govuk-table__head"><tr class="govuk-table__row">
@@ -89,14 +93,21 @@
       </tr></thead>
       <tbody class="govuk-table__body">
       {% for ev in lease_events %}
-        <tr class="govuk-table__row">
+        <tr class="govuk-table__row{% if ev.sub %} phaema-subrow{% endif %}">
           <th scope="row" class="govuk-table__header">{{ ev.label }}</th>
-          <td class="govuk-table__cell govuk-table__cell--numeric">{% if ev.overdue is None %}<span class="govuk-body-s">–</span>{% elif ev.overdue %}{% if ev.type == "holding_over" %}<a class="govuk-link phaema-overdue" href="{% url 'leases:list' %}?status=holding_over">{{ ev.overdue }}</a>{% else %}<a class="govuk-link phaema-overdue" href="{% url 'leases:events' %}?type={{ ev.type }}&amp;window=overdue">{{ ev.overdue }}</a>{% endif %}{% else %}0{% endif %}</td>
-          <td class="govuk-table__cell govuk-table__cell--numeric">{% if ev.due is None %}<span class="govuk-body-s">–</span>{% elif ev.due %}<a class="govuk-link" href="{% url 'leases:events' %}?type={{ ev.type }}&amp;window=183">{{ ev.due }}</a>{% else %}0{% endif %}</td>
+          <td class="govuk-table__cell govuk-table__cell--numeric">{% if ev.overdue is None %}<span class="govuk-body-s">–</span>{% elif ev.overdue %}{% if ev.type == "holding_over" %}<a class="govuk-link phaema-overdue" href="{% url 'leases:list' %}?status=holding_over">{{ ev.overdue }}</a>{% else %}<a class="govuk-link phaema-overdue" href="{% url 'leases:events' %}?{{ ev.query }}&amp;window=overdue">{{ ev.overdue }}</a>{% endif %}{% else %}0{% endif %}</td>
+          <td class="govuk-table__cell govuk-table__cell--numeric">{% if ev.due is None %}<span class="govuk-body-s">–</span>{% elif ev.due %}<a class="govuk-link" href="{% url 'leases:events' %}?{{ ev.query }}&amp;window=183">{{ ev.due }}</a>{% else %}0{% endif %}</td>
         </tr>
       {% endfor %}
+      <tr class="govuk-table__row">
+        <th scope="row" class="govuk-table__header">{% translate "Lease documents to review" %}</th>
+        <td class="govuk-table__cell govuk-table__cell--numeric">{% if documents_review.overdue %}<a class="govuk-link phaema-overdue" href="{% url 'leases:documents' %}?window=overdue">{{ documents_review.overdue }}</a>{% else %}0{% endif %}</td>
+        <td class="govuk-table__cell govuk-table__cell--numeric">{% if documents_review.due %}<a class="govuk-link" href="{% url 'leases:documents' %}?window=183">{{ documents_review.due }}</a>{% else %}0{% endif %}</td>
+      </tr>
       </tbody>
     </table>
+    {% if essence.open %}<div class="govuk-inset-text phaema-essence govuk-!-margin-top-0"><strong class="govuk-tag govuk-tag--red">{% translate "Time is of the essence" %}</strong><br>
+      <a class="govuk-link" href="{% url 'leases:events' %}?type=review&amp;essence=1"><strong>{% blocktranslate count n=essence.open %}{{ n }} open rent review{% plural %}{{ n }} open rent reviews{% endblocktranslate %}</strong></a>{% if essence.overdue %} · <a class="govuk-link phaema-overdue" href="{% url 'leases:events' %}?type=review&amp;essence=1&amp;window=overdue">{{ essence.overdue }} {% translate "past the review date" %}</a>{% endif %}{% if essence.due %} · <a class="govuk-link" href="{% url 'leases:events' %}?type=review&amp;essence=1&amp;window=183">{{ essence.due }} {% translate "in the next 6 months" %}</a>{% endif %}</div>{% endif %}
     <p class="govuk-body-s">{% translate "Overdue: the date has passed and no outcome has been recorded. Breaks and notice deadlines simply lapse once passed, so only upcoming ones are shown." %}
       <a class="govuk-link" href="{% url 'leases:events' %}">{% translate "All events" %}</a></p>
     {% if my_events %}<p class="govuk-body"><a class="govuk-link" href="{% url 'leases:events' %}?assigned=me">{% blocktranslate count n=my_events %}You have {{ n }} open event{% plural %}You have {{ n }} open events{% endblocktranslate %}</a>{% if my_overdue %}, <a class="govuk-link phaema-overdue" href="{% url 'leases:events' %}?assigned=me&amp;window=overdue">{{ my_overdue }} {% translate "overdue" %}</a>{% endif %}</p>{% endif %}

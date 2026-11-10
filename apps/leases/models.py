@@ -136,6 +136,10 @@ class Lease(TimeStampedModel):
         LANDLORD = "landlord", _("Landlord insures, not recharged")
         TENANT = "tenant", _("Tenant insures")
 
+    class ArrearsReferral(models.TextChoices):
+        DEBT_COLLECTORS = "debt", _("External debt collectors")
+        LEGAL = "legal", _("Legal")
+
     reference = models.CharField(_("reference"), max_length=30, unique=True)
     direction = models.CharField(_("direction"), max_length=3, choices=Direction.choices, default=Direction.OUT)
     agreement_type = models.CharField(_("agreement type"), max_length=20, choices=AgreementType.choices)
@@ -186,6 +190,27 @@ class Lease(TimeStampedModel):
                                     default=ReviewBasis.NONE)
     review_interval_years = models.PositiveSmallIntegerField(_("review every (years)"), null=True, blank=True)
     next_review_date = models.DateField(_("next rent review"), null=True, blank=True)
+    time_of_essence = models.BooleanField(
+        _("time is of the essence"), default=False,
+        help_text=_("Tick if the lease makes time of the essence for the rent review, so that a missed date in "
+                    "the review timetable can lose the review. These reviews are highlighted on the dashboard."))
+
+    # Rent account
+    demands_on_hold = models.BooleanField(
+        _("rent demands on hold"), default=False,
+        help_text=_("While ticked, demand runs raise no rent or service charge on this agreement."))
+    demands_on_hold_reason = models.CharField(_("on hold because"), max_length=200, blank=True)
+    billing_contact_name = models.CharField(
+        _("billing contact name"), max_length=200, blank=True,
+        help_text=_("Leave the billing contact blank to use the tenant's main contact."))
+    billing_email = models.EmailField(_("billing email"), blank=True)
+    billing_phone = models.CharField(_("billing phone"), max_length=30, blank=True)
+    billing_address = models.TextField(_("billing address"), blank=True)
+    arrears_referral = models.CharField(
+        _("arrears passed to"), max_length=10, choices=ArrearsReferral.choices, blank=True,
+        help_text=_("Set when the debt has been passed to external debt collectors or to legal."))
+    arrears_referred_on = models.DateField(_("date passed over"), null=True, blank=True)
+    arrears_referral_reference = models.CharField(_("their reference"), max_length=60, blank=True)
 
     # Terms
     repairing = models.CharField(_("repairing obligation"), max_length=20, choices=Repairing.choices, blank=True)
@@ -217,6 +242,30 @@ class Lease(TimeStampedModel):
             raise ValidationError({"guarantor": _("The guarantor cannot be the same party as the tenant.")})
         if self.next_review_date and self.review_basis == self.ReviewBasis.NONE:
             raise ValidationError({"review_basis": _("Choose a review basis, or remove the next review date.")})
+        if self.arrears_referred_on and not self.arrears_referral:
+            raise ValidationError({"arrears_referral": _("Choose who the arrears were passed to, or remove the date.")})
+
+    @property
+    def has_billing_contact(self):
+        """True when the surveyor has set a billing contact different from the tenant's main contact."""
+        return any((self.billing_contact_name, self.billing_email, self.billing_phone, self.billing_address))
+
+    @property
+    def billing(self):
+        """Who rent demands go to: the billing contact where set, otherwise the tenant's main contact.
+        Each detail falls back on its own, so a billing email alone keeps the tenant's address."""
+        party = self.counterparty
+        return {
+            "name": self.billing_contact_name or party.contact_name,
+            "email": self.billing_email or party.email,
+            "phone": self.billing_phone or party.phone,
+            "address": self.billing_address or party.address,
+        }
+
+    def insurance_certificate(self):
+        """The latest insurance certificate held with the documents, if any."""
+        docs = [d for d in self.documents.all() if d.document_type == LeaseDocument.DocumentType.INSURANCE]
+        return max(docs, key=lambda d: (d.document_date or date.min, d.pk), default=None)
 
     @property
     def is_let_out(self):
@@ -310,6 +359,7 @@ class LeaseDocument(TimeStampedModel):
         SCHEDULE = "schedule", _("Schedule of condition")
         NOTICE = "notice", _("Notice (e.g. section 25 or 26, break)")
         HEADS_OF_TERMS = "heads", _("Heads of terms")
+        INSURANCE = "insurance", _("Insurance certificate")
         OTHER = "other", _("Other document")
 
     lease = models.ForeignKey(Lease, on_delete=models.CASCADE, related_name="documents")
@@ -319,6 +369,10 @@ class LeaseDocument(TimeStampedModel):
     original_filename = models.CharField(_("original file name"), max_length=255, blank=True, editable=False)
     description = models.CharField(_("description"), max_length=200, blank=True)
     document_date = models.DateField(_("document date"), null=True, blank=True)
+    review_date = models.DateField(
+        _("date for review"), null=True, blank=True, db_index=True,
+        help_text=_("When the document should next be looked at, for example when an insurance certificate "
+                    "runs out. Shown on the dashboard as it comes due."))
 
     class Meta:
         ordering = ["document_type", "-document_date"]
@@ -335,6 +389,19 @@ class LeaseDocument(TimeStampedModel):
         if self.file and not getattr(self.file, "_committed", True):
             self.original_filename = self.file.name.rsplit("/", 1)[-1][:255]
         super().save(*args, **kwargs)
+
+    def review_rag(self, today=None):
+        """(colour, label) for the review date, or None if there is none."""
+        if not self.review_date:
+            return None
+        days = (self.review_date - (today or date.today())).days
+        if days < 0:
+            return ("red", _("Review overdue"))
+        if days <= 90:
+            return ("orange", _("Review within 3 months"))
+        if days <= 183:
+            return ("yellow", _("Review within 6 months"))
+        return ("green", _("Review later"))
 
 
 class RentScheduleEntry(TimeStampedModel):
@@ -403,6 +470,10 @@ class LeaseEvent(TimeStampedModel):
     completed_by = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True, editable=False,
                                      on_delete=models.SET_NULL, related_name="+")
     outcome = models.TextField(_("outcome and notes"), blank=True)
+    estimated_rental_value = models.DecimalField(
+        _("estimated rental value (£ a year)"), max_digits=12, decimal_places=2, null=True, blank=True,
+        validators=[MinValueValidator(0)],
+        help_text=_("The surveyor's estimate of the market rent, for a rent review or a lease renewal."))
 
     class Meta:
         ordering = ["due_date", "pk"]
@@ -422,6 +493,22 @@ class LeaseEvent(TimeStampedModel):
     @property
     def is_open(self):
         return self.status in (self.Status.OPEN, self.Status.IN_PROGRESS)
+
+    @property
+    def takes_erv(self):
+        """Rent reviews and expiries (renewals) carry an estimated rental value."""
+        return self.event_type in (self.EventType.REVIEW, self.EventType.EXPIRY)
+
+    @property
+    def time_of_essence(self):
+        return self.event_type == self.EventType.REVIEW and self.lease.time_of_essence
+
+    @property
+    def erv_uplift(self):
+        """The estimated rental value less the current rent, or None."""
+        if self.estimated_rental_value is None:
+            return None
+        return self.estimated_rental_value - self.lease.annual_rent
 
     def days_to_go(self, today=None):
         return (self.due_date - (today or date.today())).days

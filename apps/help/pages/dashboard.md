@@ -53,6 +53,19 @@ events), split into **overdue**, **next 6 months** and **future**. Select a numb
 Overdue means the date has passed and nobody has recorded the outcome. Break dates and notice deadlines lapse
 automatically once passed, so they never stay overdue.
 
+The panel also shows:
+
+- **Tenancies at will in place**: the number of current tenancies at will. They are meant to be short-term, so
+  the figure is highlighted. Select it to list them.
+- **Lease expiries** split into **contracted in** (the tenant has 1954 Act protection, so a section 25 notice or
+  a renewal is needed) and **contracted out**. Agreements where the Act does not apply or the status is not
+  known get their own line when there are any.
+- **Lease documents to review**: [documents](leases.md#documents) whose date for review has passed or falls in
+  the next 6 months.
+- **Time is of the essence**: open rent reviews on agreements [flagged](leases.md#terms) as time of the
+  essence, with how many are already past the review date. These also show in red on the events list and in
+  My work.
+
 ## Rent roll
 
 The total rent of current agreements, split into rent the council receives (let out) and rent it pays (held).

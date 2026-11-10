@@ -55,8 +55,8 @@ class PropertyAdmin(AdministratorOnlyEditingMixin, RoleAdminMixin, admin.GISMode
     fieldsets = (
         (None, {"fields": ("reference", "name", "property_type", "parent", "managing_surveyor")}),
         ("Identifiers and address", {"fields": ("uprn", "usrn", "address_line_1", "address_line_2", "town", "postcode")}),
-        ("Classification", {"fields": ("holding_purpose", "portfolio", "tenure", "occupation", "use_description",
-                                       "use_class")}),
+        ("Classification", {"fields": ("holding_purpose", "strategy_section", "purpose_review_date", "portfolio",
+                                       "tenure", "occupation", "use_description", "use_class")}),
         ("Areas", {"fields": ("gia_sqm", "nia_sqm", "gea_sqm", "site_area_ha", "area_standard", "area_source",
                               "areas_measured_on")}),
         ("Location", {"fields": ("easting", "northing", "boundary", "boundary_source")}),

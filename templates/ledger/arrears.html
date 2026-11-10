@@ -5,7 +5,12 @@
 <h1 class="govuk-heading-xl">{% translate "Rent arrears" %}</h1>
 {% include "ledger/_nav.html" with section="arrears" %}
 <p class="govuk-body">{% blocktranslate count n=summary.count with total=summary.total|floatformat:2|intcomma %}£{{ total }} overdue on {{ n }} agreement.{% plural %}£{{ total }} overdue on {{ n }} agreements.{% endblocktranslate %}
-  {% translate "Download:" %} <a class="govuk-link" href="?format=xlsx">Excel</a> · <a class="govuk-link" href="?format=csv">CSV</a></p>
+  {% translate "Download:" %} <a class="govuk-link" href="?format=xlsx{% if referred %}&amp;referred={{ referred }}{% endif %}">Excel</a> · <a class="govuk-link" href="?format=csv{% if referred %}&amp;referred={{ referred }}{% endif %}">CSV</a></p>
+<form method="get" class="phaema-filters phaema-inline-fields">
+  <div class="govuk-form-group"><label class="govuk-label govuk-label--s" for="referred">{% translate "Debt recovery" %}</label>
+    <select class="govuk-select" id="referred" name="referred"><option value="">{% translate "All arrears" %}</option>{% for value, text in referral_choices %}<option value="{{ value }}"{% if value == referred %} selected{% endif %}>{{ text }}</option>{% endfor %}</select></div>
+  <div class="govuk-form-group"><button class="govuk-button govuk-button--secondary govuk-!-margin-bottom-0" data-module="govuk-button">{% translate "Apply" %}</button></div>
+</form>
 <div class="phaema-table-scroll"><table class="govuk-table phaema-report">
   <thead class="govuk-table__head"><tr class="govuk-table__row">
     <th scope="col" class="govuk-table__header">{% translate "Agreement" %}</th>
@@ -14,7 +19,7 @@
   </tr></thead>
   <tbody class="govuk-table__body">
   {% for a in summary.accounts %}<tr class="govuk-table__row">
-    <td class="govuk-table__cell"><a class="govuk-link" href="{% url 'ledger:account' a.lease.pk %}">{{ a.lease.reference }}</a><br><span class="govuk-body-s">{{ a.lease.counterparty.name }}</span></td>
+    <td class="govuk-table__cell"><a class="govuk-link" href="{% url 'ledger:account' a.lease.pk %}">{{ a.lease.reference }}</a><br><span class="govuk-body-s">{{ a.lease.counterparty.name }}</span>{% if a.lease.arrears_referral %}<br><strong class="govuk-tag govuk-tag--purple">{{ a.lease.get_arrears_referral_display }}</strong>{% if a.lease.arrears_referred_on %} <span class="govuk-body-s">{{ a.lease.arrears_referred_on|date:"j M Y" }}</span>{% endif %}{% endif %}{% if a.lease.demands_on_hold %}<br><strong class="govuk-tag govuk-tag--yellow">{% translate "Demands on hold" %}</strong>{% endif %}</td>
     <td class="govuk-table__cell govuk-table__cell--numeric">£{{ a.balance|floatformat:2|intcomma }}</td><td class="govuk-table__cell govuk-table__cell--numeric"><strong>£{{ a.overdue|floatformat:2|intcomma }}</strong></td>
     {% for label, amount in a.aged %}<td class="govuk-table__cell govuk-table__cell--numeric">{% if amount %}£{{ amount|floatformat:2|intcomma }}{% endif %}</td>{% endfor %}
   </tr>{% empty %}<tr class="govuk-table__row"><td class="govuk-table__cell" colspan="7">{% translate "No arrears." %}</td></tr>{% endfor %}

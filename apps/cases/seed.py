@@ -61,6 +61,11 @@ TYPES = [
     ("breach", "Breach of covenant", "management", None, False, None, "", None, [
         (R, "Inspect and record the breach"), (A, "Notify the tenant with a time to remedy"),
         (D, "Remedied, or pass to legal"), (C, "Record the outcome")]),
+    ("insurance_certificate", "Tenant's insurance certificate", "management", 28, False, None, "", None, [
+        (R, "Check the lease's insurance clause: what the tenant must insure and show"),
+        (I, "Ask the tenant for a copy of the current insurance certificate or schedule"),
+        (A, "Check the cover: risks, sum insured, the council's interest noted and the expiry date"),
+        (C, "Add the certificate to the agreement's documents, with its expiry as the date for review")]),
     ("arrears", "Rent arrears recovery", "income", None, False, None, "", None, [
         (R, "Reminder letter"), (A, "Final notice"), (D, "Payment plan, or legal action"), (C, "Record the outcome")]),
     ("sc_dispute", "Service charge query or dispute", "income", 28, False, None, "", None, [
@@ -102,7 +107,7 @@ TYPES = [
 # council (consents, settlements, disposals, lettings). Administrators change this per case type.
 APPROVAL_GROUPS = {"consent", "event", "management", "valuation"}
 APPROVAL_CODES = {"new_letting", "wayleave", "land_purchase", "other_activity"}
-NO_APPROVAL = {"other_event", "deposit_return"}
+NO_APPROVAL = {"other_event", "deposit_return", "insurance_certificate"}
 
 
 HEADS_OF_TERMS = {"new_letting", "renewal"}

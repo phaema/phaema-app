@@ -77,27 +77,75 @@ def filter_leases(qs, key, today=None):
     return qs
 
 
+# Lease expiries are shown by 1954 Act status, because the work differs: a protected tenant needs a
+# section 25 notice or a renewal; a contracted-out tenant simply has to leave or take a new lease.
+EXPIRY_SPLIT = [
+    ("inside", _("Contracted in (1954 Act protection)"), (Lease.Security.INSIDE,)),
+    ("out", _("Contracted out"), (Lease.Security.CONTRACTED_OUT,)),
+    ("other", _("Not applicable or not known"), (Lease.Security.NOT_APPLICABLE, Lease.Security.UNKNOWN)),
+]
+SECURITY_GROUPS = {key: values for key, _label, values in EXPIRY_SPLIT}
+
+
 def event_summary(today=None):
-    """Rows for the dashboard from the event records: overdue and due in the next 6 months, by type."""
+    """Rows for the dashboard from the event records: overdue and due in the next 6 months, by type.
+
+    Lease expiries get a total row and then a row for each 1954 Act status ("query" is what to add
+    to the events list address to see them).
+    """
     from .models import LeaseEvent
 
     today = today or date.today()
     end = add_months(today, WINDOW_MONTHS)
     open_events = LeaseEvent.objects.filter(status__in=("open", "in_progress"), lease__status__in=LIVE)
+
+    def counts(qs, lapses=False):
+        return {"overdue": None if lapses else qs.filter(due_date__lt=today).count(),
+                "due": qs.filter(due_date__gte=today, due_date__lte=end).count()}
+
     rows = []
     for etype, label in LeaseEvent.EventType.choices:
         mine = open_events.filter(event_type=etype)
         if etype == LeaseEvent.EventType.EXPIRY:
             mine = mine.exclude(lease__status=Lease.Status.HOLDING_OVER)  # counted under holding over
         lapses = etype in (LeaseEvent.EventType.BREAK, LeaseEvent.EventType.BREAK_NOTICE)
-        rows.append({
-            "label": label, "type": etype,
-            "overdue": None if lapses else mine.filter(due_date__lt=today).count(),
-            "due": mine.filter(due_date__gte=today, due_date__lte=end).count(),
-        })
-    rows.append({"label": EVENTS["holding_over"], "type": "holding_over",
+        rows.append({"label": label, "type": etype, "query": f"type={etype}", **counts(mine, lapses)})
+        if etype == LeaseEvent.EventType.EXPIRY:
+            for key, sub_label, values in EXPIRY_SPLIT:
+                sub = counts(mine.filter(lease__security_of_tenure__in=values))
+                if key == "other" and not (sub["overdue"] or sub["due"]):
+                    continue
+                rows.append({"label": sub_label, "type": f"expiry_{key}", "sub": True,
+                             "query": f"type=expiry&security={key}", **sub})
+    rows.append({"label": EVENTS["holding_over"], "type": "holding_over", "query": "",
                  "overdue": Lease.objects.filter(status=Lease.Status.HOLDING_OVER).count(), "due": None})
     return rows
+
+
+def tenancies_at_will():
+    """Live tenancies at will: meant to be short-term, so the dashboard keeps them in view."""
+    return live().filter(agreement_type=Lease.AgreementType.TENANCY_AT_WILL).count()
+
+
+def essence_summary(today=None):
+    """Open rent reviews where time is of the essence: how many, and how many are already past their date."""
+    from .models import LeaseEvent
+
+    today = today or date.today()
+    qs = LeaseEvent.objects.filter(status__in=("open", "in_progress"), lease__status__in=LIVE,
+                                   event_type=LeaseEvent.EventType.REVIEW, lease__time_of_essence=True)
+    return {"open": qs.count(), "overdue": qs.filter(due_date__lt=today).count(),
+            "due": qs.filter(due_date__gte=today, due_date__lte=add_months(today, WINDOW_MONTHS)).count()}
+
+
+def documents_for_review(today=None):
+    """Lease documents on live agreements with a date for review: overdue and due in the next 6 months."""
+    from .models import LeaseDocument
+
+    today = today or date.today()
+    qs = LeaseDocument.objects.filter(review_date__isnull=False, lease__status__in=LIVE)
+    return {"overdue": qs.filter(review_date__lt=today).count(),
+            "due": qs.filter(review_date__gte=today, review_date__lte=add_months(today, WINDOW_MONTHS)).count()}
 
 
 def _years(start, end):

@@ -51,6 +51,14 @@ class EventListView(LoginRequiredMixin, ExportMixin, ListView):
             qs = qs.filter(status=status)
         if get.get("type"):
             qs = qs.filter(event_type=get["type"])
+        from . import events as summary
+
+        if get.get("security") in summary.SECURITY_GROUPS:  # the dashboard's split of lease expiries
+            qs = qs.filter(lease__security_of_tenure__in=summary.SECURITY_GROUPS[get["security"]])
+            if get.get("type") == LeaseEvent.EventType.EXPIRY and get.get("status", "open") == "open":
+                qs = qs.exclude(lease__status=Lease.Status.HOLDING_OVER)  # as the dashboard counts them
+        if get.get("essence"):
+            qs = qs.filter(event_type=LeaseEvent.EventType.REVIEW, lease__time_of_essence=True)
         who = get.get("assigned", "")
         if who == "me":
             qs = qs.filter(assigned_to=self.request.user)
@@ -75,12 +83,17 @@ class EventListView(LoginRequiredMixin, ExportMixin, ListView):
         ctx = super().get_context_data(**kwargs)
         get = self.request.GET
         officers = f.officer_choices()
+        from . import events as summary
+
         ctx.update({
             "q": get.get("q", ""),
             "filters": [
                 ("status", _("Status"), STATUS_FILTERS, get.get("status", "open"), False),
                 ("type", _("Event"), LeaseEvent.EventType.choices, get.get("type", ""), True),
                 ("window", _("When"), WINDOWS, get.get("window", ""), True),
+                ("security", _("1954 Act"), [(k, label) for k, label, _v in summary.EXPIRY_SPLIT],
+                 get.get("security", ""), True),
+                ("essence", _("Time is of the essence"), [("1", _("Yes"))], get.get("essence", ""), True),
                 ("assigned", _("Assigned to"), [("me", _("Me")), ("none", _("Nobody"))]
                  + [(str(u.pk), u.get_full_name() or u.username) for u in officers], get.get("assigned", ""), True),
                 *places.filters(get),

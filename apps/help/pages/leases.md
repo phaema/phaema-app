@@ -30,7 +30,11 @@ To add many agreements at once, see [importing leases](import-export.md#leases-a
 | Security of tenure | Whether the lease is inside the Landlord and Tenant Act 1954, Part II, or contracted out. |
 | Rent and frequency | The current rent comes from the [rent schedule](rent-schedule.md). |
 | Review basis and interval | How and how often the rent is reviewed. The next review date creates a [rent review event](events.md#rent-reviews). |
-| Repairing and insurance | Who repairs and insures. |
+| Time is of the essence | Tick if the lease makes time of the essence for the rent review, so that missing a date in the review timetable can lose the review. The review is then flagged in red on the [dashboard](dashboard.md#lease-events), the events list and My work. |
+| Repairing and insurance | Who repairs and insures. Where the **tenant insures**, the agreement page shows whether an insurance certificate is held and offers a case to get one (see [documents](#documents)). |
+| Rent demands on hold | Stops [demand runs](rent-ledger.md#raising-rent) charging the agreement, with the reason. |
+| Arrears passed to | Record when the debt has gone to external debt collectors or to legal, the date and their reference. Shown on the [arrears list](rent-ledger.md#arrears). |
+| Billing contact | Who rent demands go to. Leave blank to use the tenant's main contact; fill in only what differs (for example an accounts email). |
 | Service charge payable | Whether a service charge is due. |
 | Rent excludes business rates | Ticked unless the rent includes rates. |
 | Incentives | Any rent-free period or other incentive. |
@@ -58,6 +62,18 @@ landlord or either) and the notice period in months. PHAEMA works out the **last
 
 Store PDFs of the lease, licence, deeds of variation and other documents in **Edit this agreement**, under
 Documents. Only signed-in users can open them.
+
+Any document can have a **date for review**: when it should next be looked at. Use it for an insurance
+certificate's expiry, a schedule of condition to re-inspect or a side letter that runs out. Documents coming up
+for review are counted on the [dashboard](dashboard.md#lease-events), and **Lease events**, then **Documents to
+review** lists them. The list can be downloaded, and **Lease documents** is a record type in
+[reports](reports.md).
+
+### Tenant's insurance certificate
+
+Where the tenant insures, the agreement page shows the latest **insurance certificate** held, or a warning that
+there is none. Select **Start a case to get the tenant's insurance certificate**: the case has tasks to ask for
+the certificate, check the cover and add it to the agreement's documents with its expiry as the date for review.
 
 ## Ending an agreement
 

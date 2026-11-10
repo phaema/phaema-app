@@ -95,6 +95,7 @@ def run_new(request):
     return render(request, "ledger/run_new.html", {
         "due_from": due_from or today, "due_to": due_to or today, "issue_date": issue_date or today,
         "errors": errors, "charges": charges, "totals": totals, "settings": settings, "include": include,
+        "on_hold": list(billing.held_leases()),
     })
 
 
@@ -181,20 +182,36 @@ def credit(request, charge_pk):
 
 ARREARS_COLUMNS = [Col("Lease", "text"), Col("Tenant", "text"), Col("Customer reference", "text"),
                    Col("Balance", "money"), Col("Overdue", "money")] + \
-                  [Col(label, "money") for _l, label in billing.AGE_BANDS]
+                  [Col(label, "money") for _l, label in billing.AGE_BANDS] + \
+                  [Col("Passed to", "text"), Col("Date passed over", "date"), Col("Demands on hold", "text")]
 
 
 @ledger_view
 def arrears(request):
     summary = billing.arrears_summary(leases=_patch(request))
+    referred = request.GET.get("referred", "")
+    if referred:  # "any", "none", or one of the referral kinds
+        keep = {"any": lambda r: bool(r), "none": lambda r: not r}.get(referred, lambda r: r == referred)
+        from decimal import Decimal as D
+
+        summary["accounts"] = [a for a in summary["accounts"] if keep(a.lease.arrears_referral)]
+        summary["total"] = sum((a.overdue for a in summary["accounts"]), D("0"))
+        summary["count"] = len(summary["accounts"])
+        summary["bands"] = [(label, sum((dict(a.aged)[label] for a in summary["accounts"]), D("0")))
+                            for _l, label in billing.AGE_BANDS]
     rows = ([a.lease.reference, a.lease.counterparty.name, a.lease.counterparty.finance_customer_ref, a.balance,
-             a.overdue] + [amount for _label, amount in a.aged] for a in summary["accounts"])
+             a.overdue] + [amount for _label, amount in a.aged]
+            + [a.lease.get_arrears_referral_display(), a.lease.arrears_referred_on,
+               "Yes" if a.lease.demands_on_hold else ""] for a in summary["accounts"])
     fmt = request.GET.get("format")
     if fmt == "xlsx":
         return xlsx_response("Rent arrears", ARREARS_COLUMNS, rows, totals=True)
     if fmt == "csv":
         return csv_response("Rent arrears", ARREARS_COLUMNS, rows)
-    return render(request, "ledger/arrears.html", {"summary": summary, "bands": billing.AGE_BANDS})
+    return render(request, "ledger/arrears.html", {
+        "summary": summary, "bands": billing.AGE_BANDS, "referred": referred,
+        "referral_choices": [("any", _("Passed to debt collectors or legal")), ("none", _("Not passed over"))]
+        + list(Lease.ArrearsReferral.choices)})
 
 
 RECEIPT_COLUMNS = [Col("Received", "date"), Col("Payment reference", "text"), Col("Lease", "text"),
