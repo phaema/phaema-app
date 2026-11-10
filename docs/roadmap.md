@@ -37,7 +37,7 @@ Integrations with other systems are one optional module in the main repository, 
 
 ### Planned connectors, in priority order
 
-1. **Single sign-on (OpenID Connect).** Staff sign in with their council account (Microsoft Entra ID, Keycloak, openDesk, Google). Groups map to roles and access areas; two-factor and password rules come from the provider; people disabled there can no longer sign in; one local administrator is kept as a backup sign-in.
+1. **Single sign-on (OpenID Connect): built**, see [the set-up guide](single-sign-on.md); still to be proved against a council's live tenant. Staff sign in with their council account (Microsoft Entra ID, Keycloak, openDesk, Google). Groups map to roles and access areas; two-factor and password rules come from the provider; people disabled there can no longer sign in; one local administrator is kept as a backup sign-in.
 2. **Ordnance Survey and EPC lookups.** OS Places address search and UPRN when adding a property (free to councils under the Public Sector Geospatial Agreement), OS NGD building footprints, vector map tiles; energy ratings and certificate expiry from the EPC register by UPRN.
 3. **Map layers for GIS.** OGC API Features and WFS layers of properties, leases, projects and proposed sites, following access areas and confidentiality, for QGIS, ArcGIS, Cadcorp, MapInfo, GeoServer and Lizmap; read-only PostGIS views for internal GIS teams.
 4. **GOV.UK Notify.** Rent demands, arrears reminders and key-date letters to tenants by text, email or post.

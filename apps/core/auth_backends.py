@@ -23,5 +23,8 @@ class UsernameOrEmailBackend(ModelBackend):
             User().set_password(password)  # do the same work as a real check, so timing gives nothing away
             return None
         if user.check_password(password) and self.user_can_authenticate(user):
-            return user
+            from apps.connectors import sso
+
+            # Where the council requires its own sign-in, a correct password is refused like a wrong one.
+            return user if sso.password_allowed(user) else None
         return None

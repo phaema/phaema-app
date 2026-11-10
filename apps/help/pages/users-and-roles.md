@@ -102,8 +102,37 @@ sign-in (lost phone)** from the actions list. The person then sets it up again. 
 superuser. Turning two-step sign-in on, off and resetting it are recorded in the [change log](change-log.md).
 
 **The API.** People with two-step sign-in cannot use the API with only their username and password; they use it
-from a signed-in browser. Single sign-on with the council's own accounts (Microsoft Entra ID and others) is planned
-and will let councils apply their own sign-in rules instead.
+from a signed-in browser.
+
+## Signing in with your council account
+
+If your council has turned on single sign-on, the sign-in page has a **Sign in with Microsoft** button (the name
+may differ). Select it and sign in as you do for email: your council's own password and security checks apply, so
+PHAEMA does not ask for a two-step code as well. People outside the council, such as consultants, valuers and
+solicitors, either sign in below the button with a PHAEMA password, or use the button if the council has given
+them a guest account.
+
+**For administrators.** Single sign-on works with Microsoft 365 (Entra ID) and other OpenID Connect services. Your
+IT team and the installer set it up first: see `docs/single-sign-on.md` in the PHAEMA code. Then, in **Manage
+data**, **Module settings**, **Single sign-on**:
+
+| Setting | What it does |
+|---|---|
+| Sign in with the council's own accounts | Shows the button. People are matched to their PHAEMA account by email address the first time they use it, so check each account has the person's work email address. |
+| Who can still sign in with a PHAEMA password | *Only people without a council account, and administrators as a fallback* (the default): once someone has used the button, their PHAEMA password stops working. *Anyone*: both work. Administrators and the superuser can always use a PHAEMA password, in case the council's sign-in service is unavailable. |
+| Create a PHAEMA account at first council sign-in | Off: only people you have added can sign in. On: anyone the council's service lets through gets an account, but sees nothing until they have a role. |
+
+**Roles from groups.** Under **Manage data**, **Sign-in group mappings**, you can give everyone in one of the
+council's groups a role, an access area or both. PHAEMA applies this each time a person signs in: they gain what
+their groups give and lose what groups they have left gave. Roles and access areas that no mapping mentions stay
+as you set them. Changes are in the [change log](change-log.md).
+
+**Leavers.** When IT closes a person's council account they can no longer sign in. Someone already signed in stays
+so until their session ends, so still use [Hand over work](#handing-over-work) to stop access at
+once and move their work. Close outside consultants' accounts in PHAEMA yourself when their work ends.
+
+**Unlinking.** To connect a person to a different council account, open them in **Manage data**, **Users**, tick
+**Delete** in the **Council sign-in** box and save.
 
 ## Adding a user
 

@@ -49,6 +49,12 @@ releases with release notes and a security support period for each will start be
   hour (`PHAEMA_PASSWORD_RESET_MINUTES`), the page gives the same answer whether or not an account was found, and
   requests are limited per connection and per account. Resetting a password does not sign the person in or bypass
   two-step sign-in, and it signs out their other sessions.
+- Optional single sign-on with the council's own accounts (OpenID Connect: Microsoft Entra ID, Keycloak and
+  others), off by default ([set-up guide](docs/single-sign-on.md)). PHAEMA uses the authorisation code flow with
+  PKCE and checks the signature, issuer, audience, expiry and nonce of every ID token. It asks only for name, email
+  address and groups, and stores no tokens. The client secret is kept in the server's environment file. Councils
+  can stop PHAEMA passwords for people with a council account; administrators keep a password and two-step
+  sign-in as a fallback, and the installation superuser is never linked to a council account.
 - Access is by role (administrator, surveyor, contributor, viewer) and access area, enforced on the server for every
   page, download, report and API call. Surveyors see finance information only for their own patch.
 - Hand over work stops a leaver signing in and moves their work in one step.
@@ -78,8 +84,8 @@ These are known gaps, listed so councils can judge the risk. They are on the [ro
 
 - **Independent penetration test** by a CREST or CHECK accredited tester, before the first live use. Results and
   fixes will be summarised here.
-- **Single sign-on** with the council's own accounts (OpenID Connect: Microsoft Entra ID, Keycloak, Google), so
-  councils can apply their own conditional access and password rules. This is the first planned connector.
+- **Single sign-on tested against a live council tenant.** The code is tested against a stand-in sign-in service;
+  it has not yet been proved against a council's Microsoft Entra conditional access rules.
 - **Limits on repeated failed passwords** across sessions. Fail2ban on the installer's servers and two-step sign-in
   reduce the risk today.
 - **API tokens** with limited scope, for systems that read PHAEMA's API.

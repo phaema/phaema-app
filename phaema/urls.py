@@ -5,6 +5,7 @@ from django.urls import include, path
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 from rest_framework.routers import DefaultRouter
 
+from apps.connectors import views as connector_views
 from apps.core import account_requests, cover_views, handover_views, password_reset, two_step_views
 from apps.core import views as core_views
 from apps.leases import event_views
@@ -25,6 +26,8 @@ urlpatterns = [
     path("", core_views.dashboard, name="dashboard"),
     path("login/", two_step_views.PhaemaLoginView.as_view(), name="login"),
     path("login/code/", two_step_views.login_code, name="login-code"),
+    path("login/sso/", connector_views.sso_login, name="sso-login"),
+    path("login/sso/callback/", connector_views.sso_callback, name="sso-callback"),
     path("account/two-step/", two_step_views.security, name="two-step"),
     path("account/set-password/<uidb64>/<token>/", auth_views.PasswordResetConfirmView.as_view(
         template_name="registration/set_password.html", success_url="/account/set-password/done/",

@@ -63,7 +63,9 @@ def accounts_for(identifier):
     found = list(users.filter(username=identifier)[:1])
     if not found and "@" in identifier:
         found = list(users.filter(email__iexact=identifier)[:5])
-    return found
+    from apps.connectors import sso
+
+    return [user for user in found if sso.password_allowed(user)]  # no use to people who must use the council sign-in
 
 
 def reset_link(user):

@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     "rest_framework",
     "drf_spectacular",
     "apps.core",
+    "apps.connectors",
     "apps.properties",
     "apps.leases",
     "apps.reports",
@@ -100,7 +101,7 @@ DATABASES = {
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # Sign in with a username or an email address.
-AUTHENTICATION_BACKENDS = ["apps.core.auth_backends.UsernameOrEmailBackend"]
+AUTHENTICATION_BACKENDS = ["apps.core.auth_backends.UsernameOrEmailBackend", "apps.connectors.sso.SsoBackend"]
 
 AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
@@ -189,3 +190,12 @@ PHAEMA_ENFORCE_TWO_STEP = env.bool("PHAEMA_ENFORCE_TWO_STEP", default=True)
 PHAEMA_DEMO_RESET_HOURS = env.int("PHAEMA_DEMO_RESET_HOURS", default=48)
 # Where requests for a test site sign-in are emailed (they are also listed under Manage data).
 PHAEMA_ACCOUNT_REQUEST_EMAIL = env("PHAEMA_ACCOUNT_REQUEST_EMAIL", default="")
+
+# Single sign-on with the council's own accounts (OpenID Connect): Microsoft Entra ID, Keycloak and others.
+# Set by the installer; an administrator then turns it on in Module settings. Blank means off.
+# For Microsoft 365 the issuer is https://login.microsoftonline.com/<tenant ID>/v2.0
+PHAEMA_SSO_ISSUER = env("PHAEMA_SSO_ISSUER", default="")
+PHAEMA_SSO_CLIENT_ID = env("PHAEMA_SSO_CLIENT_ID", default="")
+PHAEMA_SSO_CLIENT_SECRET = env("PHAEMA_SSO_CLIENT_SECRET", default="")
+# The name on the sign-in button: "Sign in with Microsoft".
+PHAEMA_SSO_NAME = env("PHAEMA_SSO_NAME", default="Microsoft")
