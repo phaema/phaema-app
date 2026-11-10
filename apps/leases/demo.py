@@ -179,9 +179,54 @@ def load(today=None):
           annual_rent=Decimal("250"), rent_frequency="annually", review_basis="none",
           premises_description="Underground cable route beneath the estate roads",
           notes="Terminable wayleave, 12 months' notice.")
+    # A tenancy at will while a new lease is agreed, so the dashboard has one to show.
+    start = add_months(q, -4)
+    lease("DL-0040", ["DM-S11"], "Exampleton Riverside Refreshments", agreement_type="taw", lease_date=start,
+          term_start=start, term_end=None, security_of_tenure="na", annual_rent=Decimal("1800"),
+          rent_frequency="monthly", review_basis="none", repairing="landlord",
+          premises_description="Seasonal seating area next to the kiosk",
+          notes="Tenancy at will while the licence for the seating area is agreed.")
     _documents()
     _rent_histories(q)
+    _management_flags(today)
     return Lease.objects.filter(reference__startswith="DL-").count()
+
+
+def _management_flags(today):
+    """Examples of the lease management flags: time of the essence, an estimated rental value, demands on
+    hold, a billing contact, arrears passed to debt collectors and an insurance certificate to review."""
+    from .models import LeaseEvent
+    from .workflow import sync_events
+
+    def get(ref):
+        return Lease.objects.filter(reference=ref).first()
+
+    lease = get("DL-0001")  # rent review due in about three months
+    if lease:
+        lease.time_of_essence = True
+        lease.billing_contact_name = "Accounts payable"
+        lease.billing_email = "accounts.payable@example.org"
+        lease.billing_address = "Finance Department, Exampleton Precision Engineering Ltd, PO Box 1, Exampleton ZZ99 9ZZ"
+        lease.save()
+        sync_events(lease, today)
+        LeaseEvent.objects.filter(lease=lease, event_type="review", status__in=("open", "in_progress")).update(
+            estimated_rental_value=Decimal("32500"))
+    lease = get("DL-0004")  # expiring: a renewal to value
+    if lease:
+        sync_events(lease, today)
+        LeaseEvent.objects.filter(lease=lease, event_type="expiry", status__in=("open", "in_progress")).update(
+            estimated_rental_value=(lease.annual_rent * Decimal("1.1")).quantize(Decimal("100")))
+    lease = get("DL-0031")
+    if lease:
+        lease.demands_on_hold = True
+        lease.demands_on_hold_reason = "Rent query with the tenant: on hold until the meeting"
+        lease.save()
+    lease = get("DL-0024")
+    if lease:
+        lease.arrears_referral = "debt"
+        lease.arrears_referred_on = today - timedelta(days=21)
+        lease.arrears_referral_reference = "DEMO-DCA-0042"
+        lease.save()
 
 
 def _schedule(lease, entries):
@@ -247,6 +292,15 @@ def _documents():
                     "Landlord and Tenant Act 1954, section 25 (demonstration only).",
                     f"Tenant: {lease.counterparty.name}", "The landlord does not oppose a new tenancy."], banner),
                     name="s25.pdf"))
+    lease = Lease.objects.filter(reference="DL-0021").first()  # the tenant insures: a certificate about to run out
+    if lease and not lease.documents.filter(document_type="insurance").exists():
+        today = date.today()
+        LeaseDocument.objects.create(
+            lease=lease, document_type="insurance", description="Tenant's buildings insurance certificate",
+            document_date=today - timedelta(days=330), review_date=today + timedelta(days=35),
+            file=ContentFile(placeholder_pdf("Certificate of insurance", [
+                f"Insured: {lease.counterparty.name}", "Buildings insurance, reinstatement value basis.",
+                "Interest noted: Demonstration District Council (landlord)."], banner), name="insurance.pdf"))
 
 
 def remove():

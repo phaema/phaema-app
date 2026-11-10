@@ -67,7 +67,10 @@ def build(user, today=None, viewer=None):
               .exclude(due_date__lt=today, event_type__in=("break", "notice"))
               .select_related("lease").distinct())
     for e in events:
-        item = Item(e.due_date, _("Lease event"), "leases", e.display_title, e.get_absolute_url(), e.lease.reference)
+        title = e.display_title
+        if e.time_of_essence:
+            title = _("%(title)s (time is of the essence)") % {"title": title}
+        item = Item(e.due_date, _("Lease event"), "leases", title, e.get_absolute_url(), e.lease.reference)
         (now if e.due_date < today else ahead).append(item)
 
     cases = list(Case.objects.filter(owner=user).exclude(status=Case.Status.CLOSED)

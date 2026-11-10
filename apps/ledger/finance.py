@@ -21,6 +21,8 @@ COLUMNS = [
     Col("UPRN", "text"), Col("Description", "text"), Col("Period from", "date"), Col("Period to", "date"),
     Col("Issue date", "date"), Col("Due date", "date"), Col("Net", "money"), Col("VAT code", "text"),
     Col("VAT rate", "number"), Col("VAT", "money"), Col("Gross", "money"), Col("Income code", "text"),
+    # Added at the end, so a finance system's existing column mapping is not disturbed.
+    Col("Billing contact", "text"), Col("Billing email", "text"),
 ]
 
 
@@ -43,13 +45,14 @@ def _rows(charges, settings):
     for c in charges:
         lease, party = c.lease, c.lease.counterparty
         props = list(lease.properties.all())
+        billing = lease.billing
         yield [
             "Credit note" if c.gross < 0 else "Invoice", f"PHC{c.pk:06d}", c.invoice_number,
             c.credit_for.reference if c.credit_for_id else "", party.finance_customer_ref, party.name,
-            party.address.replace("\n", ", "), lease.reference, "; ".join(p.name for p in props),
+            billing["address"].replace("\r", "").replace("\n", ", "), lease.reference, "; ".join(p.name for p in props),
             "; ".join(p.uprn for p in props if p.uprn), c.description, c.period_start, c.period_end,
             c.issue_date, c.due_date, c.net, settings.vat_code_standard if c.vat_rate else settings.vat_code_exempt,
-            c.vat_rate, c.vat, c.gross, _income_code(c, settings),
+            c.vat_rate, c.vat, c.gross, _income_code(c, settings), billing["name"], billing["email"],
         ]
 
 

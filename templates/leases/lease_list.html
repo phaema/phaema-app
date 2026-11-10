@@ -3,6 +3,7 @@
 {% block help_page %}leases{% endblock %}
 {% block content %}
 <h1 class="govuk-heading-xl">{% translate "Leases and licences" %}</h1>
+{% if live_only %}<p class="govuk-body"><strong class="govuk-tag govuk-tag--blue">{% translate "Current and holding over only" %}</strong> <a class="govuk-link govuk-body-s" href="{% url 'leases:list' %}">{% translate "Show all" %}</a></p>{% endif %}
 {% if event_label %}<p class="govuk-body"><strong class="govuk-tag govuk-tag--orange">{{ event_label }}</strong> <a class="govuk-link govuk-body-s" href="{% url 'leases:list' %}">{% translate "Show all" %}</a></p>{% endif %}
 <div class="govuk-grid-row">
   <div class="govuk-grid-column-one-quarter">
@@ -21,6 +22,7 @@
         </select>
       </div>
       {% endfor %}
+      {% if live_only %}<input type="hidden" name="live" value="1">{% endif %}
       {% if request.GET.sort %}<input type="hidden" name="sort" value="{{ request.GET.sort }}">{% endif %}
       <button class="govuk-button govuk-!-margin-bottom-2" data-module="govuk-button">{% translate "Apply" %}</button>
       <p class="govuk-body-s govuk-!-margin-bottom-0"><a class="govuk-link" href="{% url 'leases:list' %}">{% translate "Clear filters" %}</a></p>
@@ -37,13 +39,13 @@
       <tbody class="govuk-table__body">
       {% for l in page_obj %}
         <tr class="govuk-table__row">
-          <td class="govuk-table__cell"><a class="govuk-link" href="{{ l.get_absolute_url }}">{{ l.reference }}</a>{% if l.direction == "in" %}<br><strong class="govuk-tag govuk-tag--purple">{% translate "Held" %}</strong>{% endif %}</td>
+          <td class="govuk-table__cell"><a class="govuk-link" href="{{ l.get_absolute_url }}">{{ l.reference }}</a>{% if l.direction == "in" %}<br><strong class="govuk-tag govuk-tag--purple">{% translate "Held" %}</strong>{% endif %}{% if l.demands_on_hold %}<br><strong class="govuk-tag govuk-tag--yellow">{% translate "Demands on hold" %}</strong>{% endif %}{% if l.arrears_referral %}<br><strong class="govuk-tag govuk-tag--purple">{{ l.get_arrears_referral_display }}</strong>{% endif %}</td>
           <td class="govuk-table__cell">{{ l.counterparty.name }}<br><span class="govuk-body-s">{% for p in l.properties.all %}{{ p.name }}{% if not forloop.last %}; {% endif %}{% endfor %}</span></td>
           <td class="govuk-table__cell">{{ l.get_agreement_type_display }}</td>
           <td class="govuk-table__cell">{{ l.get_status_display }}</td>
           <td class="govuk-table__cell">{{ l.term_start|date:"j M Y" }}</td>
           <td class="govuk-table__cell">{% if l.term_end %}{{ l.term_end|date:"j M Y" }}{% if l.term_end < today and l.status != "ended" %}<br><strong class="govuk-tag govuk-tag--red">{% translate "Passed" %}</strong>{% endif %}{% else %}–{% endif %}</td>
-          <td class="govuk-table__cell">{{ l.next_review_date|date:"j M Y"|default:"–" }}</td>
+          <td class="govuk-table__cell">{{ l.next_review_date|date:"j M Y"|default:"–" }}{% if l.time_of_essence and l.next_review_date %}<br><strong class="govuk-tag govuk-tag--red">{% translate "Time of the essence" %}</strong>{% endif %}</td>
           <td class="govuk-table__cell govuk-table__cell--numeric">{{ l.annual_rent|floatformat:0|intcomma }}</td>
         </tr>
       {% empty %}

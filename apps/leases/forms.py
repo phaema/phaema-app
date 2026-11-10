@@ -78,7 +78,7 @@ class EventEditForm(GovukMixin, forms.ModelForm):
 
     class Meta:
         model = LeaseEvent
-        fields = ["title", "due_date", "assigned_to", "status", "outcome"]
+        fields = ["title", "due_date", "assigned_to", "status", "estimated_rental_value", "outcome"]
         widgets = {"due_date": DateInput(), "outcome": forms.Textarea}
         labels = {"outcome": _("Notes")}
 
@@ -93,6 +93,8 @@ class EventEditForm(GovukMixin, forms.ModelForm):
             # Generated events follow the lease: change the lease to move them.
             del self.fields["title"]
             del self.fields["due_date"]
+        if not self.instance.takes_erv:  # only rent reviews and expiries (renewals) carry an ERV
+            del self.fields["estimated_rental_value"]
 
 
 class NewEventForm(GovukMixin, forms.ModelForm):

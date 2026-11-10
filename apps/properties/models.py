@@ -103,6 +103,13 @@ class Property(TimeStampedModel):
     holding_purpose = models.CharField(
         _("holding purpose"), max_length=20, choices=HoldingPurpose.choices, blank=True
     )
+    strategy_section = models.CharField(
+        _("estate strategy section"), max_length=100, blank=True,
+        help_text=_("The section of the council's estate strategy or asset management plan that covers this "
+                    "property, for example \"4.2 Investment estate\"."))
+    purpose_review_date = models.DateField(
+        _("holding purpose review date"), null=True, blank=True,
+        help_text=_("When the reason for holding the property is next due to be reviewed."))
     portfolio = models.ForeignKey(
         Portfolio, verbose_name=_("portfolio"), null=True, blank=True, on_delete=models.PROTECT,
         related_name="properties", help_text=_("The service or portfolio the property belongs to."),

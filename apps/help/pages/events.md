@@ -46,6 +46,12 @@ Open the event and select **Record the outcome**. What PHAEMA asks for depends o
 *A rent review ready for its outcome.*
 
 
+### Estimated rental value
+
+Rent reviews and lease expiries (renewals) have an **estimated rental value**: the surveyor's view of the market
+rent. Enter it under **Assign or update** on the event. The event shows how far it is above or below the current
+rent, and it is a column in the events and leases reports.
+
 ### Rent reviews
 
 Enter the new rent, the date it takes effect and the next review date. The new rent is added to the

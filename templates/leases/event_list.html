@@ -1,4 +1,4 @@
-{% extends "base.html" %}{% load i18n %}
+{% extends "base.html" %}{% load i18n humanize %}
 {% block title %}{% translate "Lease events" %}{% endblock %}
 {% block help_page %}events{% endblock %}
 {% block content %}
@@ -6,6 +6,7 @@
   {% include "core/_hint.html" with summary=_("Where do these events come from?") text=_("PHAEMA creates rent reviews, break notice deadlines, breaks and expiries from each agreement's terms and keeps them up to date. You can add other events on an agreement's page.") page="events" %}
 <p class="govuk-body"><a class="govuk-link" href="{% url 'leases:events' %}?assigned=me">{% translate "My events" %}</a> ·
   <a class="govuk-link" href="{% url 'leases:events' %}?window=overdue">{% translate "Overdue" %}</a> ·
+  <a class="govuk-link" href="{% url 'leases:documents' %}">{% translate "Documents to review" %}</a> ·
   <a class="govuk-link" href="{% url 'leases:calendar' %}">{% translate "Add to Outlook or another calendar" %}</a></p>
 <div class="govuk-grid-row">
   <div class="govuk-grid-column-one-quarter">
@@ -38,7 +39,7 @@
       {% for e in page_obj %}{% with rag=e.rag %}
         <tr class="govuk-table__row">
           <td class="govuk-table__cell">{{ e.due_date|date:"j M Y" }}<br><strong class="govuk-tag govuk-tag--{{ rag.0 }}">{{ rag.1 }}</strong></td>
-          <td class="govuk-table__cell"><a class="govuk-link" href="{{ e.get_absolute_url }}">{{ e.display_title }}</a></td>
+          <td class="govuk-table__cell"><a class="govuk-link" href="{{ e.get_absolute_url }}">{{ e.display_title }}</a>{% if e.time_of_essence %}<br><strong class="govuk-tag govuk-tag--red">{% translate "Time is of the essence" %}</strong>{% endif %}{% if e.estimated_rental_value is not None %}<br><span class="govuk-body-s">{% translate "ERV" %} £{{ e.estimated_rental_value|floatformat:0|intcomma }}</span>{% endif %}</td>
           <td class="govuk-table__cell"><a class="govuk-link" href="{{ e.lease.get_absolute_url }}">{{ e.lease.reference }}</a><br><span class="govuk-body-s">{{ e.lease.counterparty.name }}</span></td>
           <td class="govuk-table__cell">{% if e.assigned_to %}{{ e.assigned_to.get_full_name|default:e.assigned_to.username }}{% else %}<span class="govuk-body-s">{% translate "Nobody" %}</span>{% endif %}</td>
           <td class="govuk-table__cell">{{ e.get_status_display }}</td>

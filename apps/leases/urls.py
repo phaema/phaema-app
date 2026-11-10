@@ -13,6 +13,7 @@ urlpatterns = [
     path("<int:lease_pk>/events/add/", event_views.event_add, name="event-add"),
     path("<int:lease_pk>/rent/add/", event_views.rent_step_add, name="rent-add"),
     path("rent/<int:pk>/delete/", event_views.rent_step_delete, name="rent-delete"),
+    path("documents/", views.DocumentListView.as_view(), name="documents"),
     path("calendar/", event_views.calendar_settings, name="calendar"),
     path("parties/", views.PartyListView.as_view(), name="parties"),
     path("parties/<int:pk>/", views.PartyDetailView.as_view(), name="party"),

@@ -110,6 +110,8 @@ def _property_fields():
         Field("postcode", "Postcode", path="postcode", default=True),
         Field("holding_purpose", "Holding purpose", "choice", "holding_purpose",
               choices=_choices(P, "holding_purpose"), default=True),
+        Field("strategy_section", "Estate strategy section", path="strategy_section"),
+        Field("purpose_review_date", "Holding purpose review date", "date", "purpose_review_date"),
         Field("portfolio", "Portfolio", "choice", "portfolio", choices=_portfolio_choices, default=True,
               getter=lambda p: p.portfolio.name if p.portfolio else ""),
         Field("tenure", "Tenure", "choice", "tenure", choices=_choices(P, "tenure"), default=True),
@@ -141,7 +143,14 @@ def _leases():
     from apps.leases.models import Lease
 
     return Lease.objects.select_related("counterparty", "guarantor").prefetch_related(
-        "properties", "properties__managing_surveyor")
+        "properties", "properties__managing_surveyor", "events", "documents")
+
+
+def _lease_erv(lease):
+    """The estimated rental value on the agreement's open rent review, or failing that its expiry."""
+    events = [e for e in lease.events.all() if e.is_open and e.estimated_rental_value is not None]
+    events.sort(key=lambda e: (e.event_type != "review", e.due_date))
+    return events[0].estimated_rental_value if events else None
 
 
 def _lease_fields():
@@ -175,6 +184,21 @@ def _lease_fields():
         Field("review_basis", "Review basis", "choice", "review_basis", choices=_choices(L, "review_basis")),
         Field("review_interval_years", "Review every (years)", "number", "review_interval_years"),
         Field("next_review_date", "Next rent review", "date", "next_review_date", default=True),
+        Field("time_of_essence", "Time is of the essence", "bool", "time_of_essence"),
+        Field("erv", "Estimated rental value £ a year", "money", getter=_lease_erv),
+        Field("demands_on_hold", "Rent demands on hold", "bool", "demands_on_hold"),
+        Field("demands_on_hold_reason", "On hold because", path="demands_on_hold_reason"),
+        Field("arrears_referral", "Arrears passed to", "choice", "arrears_referral",
+              choices=_choices(L, "arrears_referral")),
+        Field("arrears_referred_on", "Date arrears passed over", "date", "arrears_referred_on"),
+        Field("billing_contact", "Billing contact", getter=lambda lease: lease.billing["name"]),
+        Field("billing_email", "Billing email", getter=lambda lease: lease.billing["email"]),
+        Field("billing_phone", "Billing phone", getter=lambda lease: lease.billing["phone"]),
+        Field("billing_address", "Billing address", getter=lambda lease: lease.billing["address"]),
+        Field("own_billing_contact", "Has its own billing contact", "bool",
+              getter=lambda lease: lease.has_billing_contact),
+        Field("insurance_certificate", "Insurance certificate held", "bool",
+              getter=lambda lease: lease.insurance_certificate() is not None),
         Field("repairing", "Repairing", "choice", "repairing", choices=_choices(L, "repairing")),
         Field("insurance", "Insurance", "choice", "insurance", choices=_choices(L, "insurance")),
         Field("service_charge_payable", "Service charge payable", "bool", "service_charge_payable"),
@@ -197,7 +221,7 @@ def _events():
 
 
 def _event_fields():
-    from apps.leases.models import LeaseEvent as E
+    from apps.leases.models import Lease, LeaseEvent as E
 
     return [
         Field("due_date", "Due", "date", "due_date", default=True),
@@ -211,6 +235,40 @@ def _event_fields():
         Field("completed_on", "Completed on", "date", "completed_on"),
         Field("outcome", "Outcome and notes", path="outcome"),
         Field("current_rent", "Current rent £ a year", "money", "lease__annual_rent"),
+        Field("erv", "Estimated rental value £ a year", "money", "estimated_rental_value"),
+        Field("erv_uplift", "ERV above current rent £", "money", getter=lambda e: e.erv_uplift),
+        Field("time_of_essence", "Time is of the essence", "bool", "lease__time_of_essence",
+              getter=lambda e: e.time_of_essence),
+        Field("security", "Security of tenure", "choice", "lease__security_of_tenure",
+              choices=_choices(Lease, "security_of_tenure")),
+    ]
+
+
+# ------------------------------------------------------------------ lease documents
+
+def _lease_documents():
+    from apps.leases.models import LeaseDocument
+
+    return LeaseDocument.objects.select_related("lease", "lease__counterparty").prefetch_related(
+        "lease__properties", "lease__properties__managing_surveyor")
+
+
+def _lease_document_fields():
+    from apps.leases.models import Lease, LeaseDocument as D
+
+    return [
+        Field("lease", "Agreement", path="lease__reference", default=True),
+        Field("tenant", "Tenant or landlord", path="lease__counterparty__name", default=True),
+        Field("premises", "Premises", getter=lambda d: "; ".join(p.name for p in d.lease.properties.all()), default=True),
+        Field("document_type", "Type", "choice", "document_type", choices=_choices(D, "document_type"), default=True),
+        Field("description", "Description", path="description", default=True),
+        Field("document_date", "Document date", "date", "document_date", default=True),
+        Field("review_date", "Date for review", "date", "review_date", default=True),
+        Field("file_name", "File name", path="original_filename"),
+        Field("lease_status", "Agreement status", "choice", "lease__status", choices=_choices(Lease, "status")),
+        Field("surveyor", "Managing surveyor", getter=lambda d: next(
+            (_user_name(p.managing_surveyor) for p in d.lease.properties.all() if p.managing_surveyor), "")),
+        Field("added", "Added", "date", "created_at"),
     ]
 
 
@@ -328,6 +386,12 @@ def _rent_account_fields():
         Field("reference", "Agreement", path="reference", default=True),
         Field("tenant", "Tenant", path="counterparty__name", default=True),
         Field("customer_ref", "Customer reference", path="counterparty__finance_customer_ref"),
+        Field("billing_contact", "Billing contact", getter=lambda lease: lease.billing["name"]),
+        Field("billing_email", "Billing email", getter=lambda lease: lease.billing["email"]),
+        Field("arrears_referral", "Arrears passed to", "choice", "arrears_referral",
+              choices=[("debt", "External debt collectors"), ("legal", "Legal")]),
+        Field("arrears_referred_on", "Date arrears passed over", "date", "arrears_referred_on"),
+        Field("demands_on_hold", "Rent demands on hold", "bool", "demands_on_hold"),
         Field("contact_name", "Contact", path="counterparty__contact_name"),
         Field("phone", "Phone", path="counterparty__phone"),
         Field("email", "Email", path="counterparty__email"),
@@ -941,6 +1005,8 @@ def registry():
                     _properties, _property_fields()),
             Dataset("leases", "Leases and licences", "Agreements let out and held by the council.", _leases, _lease_fields()),
             Dataset("events", "Lease events", "Rent reviews, breaks, expiries and other events.", _events, _event_fields()),
+            Dataset("lease_documents", "Lease documents", "Leases, licences, certificates and other documents held "
+                    "against agreements, with their dates for review.", _lease_documents, _lease_document_fields()),
             Dataset("parties", "Tenants and other parties", "Tenants, landlords, guarantors and other contacts.",
                     _parties, _party_fields()),
             Dataset("rents", "Rent schedule", "Every rent: initial rents, reviews, steps and concessions.",

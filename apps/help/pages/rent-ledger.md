@@ -51,6 +51,9 @@ How PHAEMA works out each charge:
 - When the [service charge](service-charges.md) module is on, the same run also charges service charges on
   account. Choose **Rent only**, **Service charges only**, or both.
 - **Rent for a period is only ever charged once**, so runs can overlap without charging twice.
+- Agreements with **rent demands on hold** are left out (rent and service charges), and the preview names them.
+  Put an agreement on hold in **Edit this agreement**. When the hold is taken off, run the same dates again and
+  PHAEMA raises what was missed.
 
 Charges cannot be deleted. Correct a mistake with a [credit note](#credit-notes).
 
@@ -99,6 +102,10 @@ A negative amount records a refund or a returned payment.
 *Arrears, aged.*
 
 
+An agreement whose debt has been **passed to external debt collectors or to legal** is tagged on the list, with
+the date. Record it in **Edit this agreement**, under Rent demands and arrears. Filter the list to see only those
+passed over, or only those still with the council; the download includes the same columns.
+
 The **collection rate** is the rent received in the last 12 months as a percentage of the rent that fell due in the
 same period.
 
@@ -116,12 +123,13 @@ The columns are fixed, so the finance team can map them once:
 | PHAEMA reference | PHAEMA's unique reference for the charge (PHC…). |
 | Invoice number | PHAEMA's invoice number, if PHAEMA numbers invoices. |
 | Credit for | For a credit note, the invoice it credits. |
-| Customer reference, name, address | From the [party](parties.md). The customer reference is the party's finance customer reference. |
+| Customer reference, name, address | From the [party](parties.md). The customer reference is the party's finance customer reference. The address is the agreement's billing address where one is set. |
 | Lease reference, Premises, UPRN | The agreement and its properties. |
 | Description, Period from, Period to | What the charge is for. |
 | Issue date, Due date | |
 | Net, VAT code, VAT rate, VAT, Gross | Amounts in pounds; credit notes are negative. The VAT codes are set in settings. |
 | Income code | The rent or service charge income ledger code set in settings. |
+| Billing contact, Billing email | The agreement's billing contact, or the tenant's main contact if none is set. Added at the end so existing mappings are not disturbed. |
 
 ## Other reports
 

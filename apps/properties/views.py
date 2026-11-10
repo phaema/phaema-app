@@ -2,7 +2,7 @@
 import json
 import os
 import uuid
-from datetime import date
+from datetime import date, timedelta
 
 from django.contrib import messages
 from django.contrib.auth import get_user_model
@@ -45,6 +45,9 @@ COLUMNS = {
 FILTERS = ("property_type", "holding_purpose", "portfolio", "occupation", "tenure")
 
 
+PURPOSE_REVIEW = [("overdue", _("Overdue")), ("12", _("Due in the next 12 months")), ("none", _("No date set"))]
+
+
 def display_name(user):
     return (user.get_full_name() or user.username) if user else ""
 
@@ -68,6 +71,13 @@ def filter_properties(request, qs):
                 qs = qs.filter(portfolio_id=int(value))
         elif value:
             qs = qs.filter(**{f: value})
+    review = get.get("purpose_review", "")
+    if review == "overdue":
+        qs = qs.filter(purpose_review_date__lt=date.today())
+    elif review == "12":
+        qs = qs.filter(purpose_review_date__gte=date.today(), purpose_review_date__lte=date.today() + timedelta(days=365))
+    elif review == "none":
+        qs = qs.filter(purpose_review_date__isnull=True)
     surveyor = get.get("surveyor", "")
     if surveyor == "me":
         qs = qs.filter(managing_surveyor=request.user)
@@ -95,7 +105,8 @@ def filter_context(request):
     params.pop("page", None)
     return {
         "q": get.get("q", ""),
-        "filters": [(f, Property._meta.get_field(f).verbose_name, _filter_choices(f), get.get(f, "")) for f in FILTERS],
+        "filters": [(f, Property._meta.get_field(f).verbose_name, _filter_choices(f), get.get(f, "")) for f in FILTERS]
+        + [("purpose_review", _("Review of holding purpose"), PURPOSE_REVIEW, get.get("purpose_review", ""))],
         "surveyor_options": [("me", _("My properties")), ("none", _("Unassigned"))]
         + [(str(u.pk), display_name(u)) for u in surveyors],
         "surveyor_selected": get.get("surveyor", ""),
@@ -162,6 +173,7 @@ class PropertyDetailView(LoginRequiredMixin, DetailView):
         ctx["photos"] = list(obj.photos.all())
         ctx["breakdown"] = obj.area_breakdown()
         ctx["surveyor_name"] = display_name(obj.managing_surveyor)
+        ctx["purpose_review_overdue"] = bool(obj.purpose_review_date and obj.purpose_review_date < date.today())
         ctx["leases"] = obj.leases.select_related("counterparty").order_by("status", "-term_start")
         ctx["map_config"] = map_config()
         ctx["has_location"] = bool(obj.boundary or obj.easting) or any(

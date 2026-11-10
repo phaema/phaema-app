@@ -23,6 +23,10 @@ body, .phaema-header, .phaema-stat { font-family: arial, sans-serif; }
 .phaema-header__logout button { background: none; border: 0; padding: 0; text-decoration: underline; cursor: pointer; }
 .phaema-stat { border-left: 5px solid #1d3557; padding-left: 15px; margin-bottom: 20px; }
 .phaema-stat__value { font-size: 2.5rem; font-weight: 700; line-height: 1.1; display: block; }
+.phaema-stat--alert { border-left-color: #f47738; }
+/* A breakdown row under a total (lease expiries by 1954 Act status). */
+.phaema-subrow th { font-weight: 400; padding-left: 20px; }
+.phaema-essence { border-left-color: #d4351c; }
 .phaema-filters { background: #f3f2f1; padding: 15px; margin-bottom: 20px; }
 .phaema-filters .govuk-form-group { margin-bottom: 15px; }
 

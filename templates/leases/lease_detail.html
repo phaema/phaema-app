@@ -10,6 +10,7 @@
 {% block content %}
 <span class="govuk-caption-l">{{ object.reference }} · {{ object.get_agreement_type_display }} · {{ object.get_status_display }}</span>
 <h1 class="govuk-heading-xl">{{ object.counterparty.name }}</h1>
+{% if object.time_of_essence or object.demands_on_hold or object.arrears_referral %}<p class="govuk-body">{% if object.time_of_essence %}<strong class="govuk-tag govuk-tag--red">{% translate "Time is of the essence" %}</strong> {% endif %}{% if object.demands_on_hold %}<strong class="govuk-tag govuk-tag--yellow">{% translate "Rent demands on hold" %}</strong> {% endif %}{% if object.arrears_referral %}<strong class="govuk-tag govuk-tag--purple">{% translate "Arrears with" %} {{ object.get_arrears_referral_display|lower }}</strong>{% endif %}</p>{% endif %}
 <p class="govuk-body">{{ object.get_direction_display }}{% if user|can_edit:object %} · <a class="govuk-link" href="{% url 'admin:leases_lease_change' object.pk %}">{% translate "Edit this agreement" %}</a>{% endif %}</p>
 
 <div class="govuk-grid-row">
@@ -27,7 +28,7 @@
     {% for e in open_events %}{% with rag=e.rag %}
       <tr class="govuk-table__row">
         <td class="govuk-table__cell">{{ e.due_date|date:"j M Y" }}</td>
-        <td class="govuk-table__cell"><a class="govuk-link" href="{{ e.get_absolute_url }}">{{ e.display_title }}</a>{% if e.status == "in_progress" %}<br><span class="govuk-body-s">{% translate "In progress" %}</span>{% endif %}</td>
+        <td class="govuk-table__cell"><a class="govuk-link" href="{{ e.get_absolute_url }}">{{ e.display_title }}</a>{% if e.status == "in_progress" %}<br><span class="govuk-body-s">{% translate "In progress" %}</span>{% endif %}{% if e.estimated_rental_value is not None %}<br><span class="govuk-body-s">{% translate "Estimated rental value" %} £{{ e.estimated_rental_value|floatformat:0|intcomma }}</span>{% endif %}</td>
         <td class="govuk-table__cell">{{ e.assigned_to|person:"–" }}</td>
         <td class="govuk-table__cell"><strong class="govuk-tag govuk-tag--{{ rag.0 }}">{{ rag.1 }}</strong>{% if e.days_to_go >= 0 %}<br><span class="govuk-body-s">{% blocktranslate count n=e.days_to_go %}in {{ n }} day{% plural %}in {{ n }} days{% endblocktranslate %}</span>{% endif %}</td>
       </tr>
@@ -58,14 +59,20 @@
     <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Current rent" %}</dt><dd class="govuk-summary-list__value">£{{ object.annual_rent|floatformat:2|intcomma }} {% translate "a year" %}{% if object.vat_chargeable %} {% translate "plus VAT" %}{% endif %}{% if not object.rates_excluded %}<br><span class="govuk-body-s">{% translate "Includes business rates" %}</span>{% endif %}</dd></div>
     {% if object.incentives %}<div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Incentives" %}</dt><dd class="govuk-summary-list__value">{{ object.incentives|linebreaksbr }}</dd></div>{% endif %}
     <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Payable" %}</dt><dd class="govuk-summary-list__value">{{ object.get_rent_frequency_display }}</dd></div>
-    <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Rent review" %}</dt><dd class="govuk-summary-list__value">{{ object.get_review_basis_display }}{% if object.review_interval_years %}, {% blocktranslate count n=object.review_interval_years %}every year{% plural %}every {{ n }} years{% endblocktranslate %}{% endif %}{% if object.next_review_date %}<br><span class="govuk-body-s">{% translate "Next" %}: {{ object.next_review_date|date:"j F Y" }}</span>{% endif %}</dd></div>
+    <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Rent review" %}</dt><dd class="govuk-summary-list__value">{{ object.get_review_basis_display }}{% if object.review_interval_years %}, {% blocktranslate count n=object.review_interval_years %}every year{% plural %}every {{ n }} years{% endblocktranslate %}{% endif %}{% if object.next_review_date %}<br><span class="govuk-body-s">{% translate "Next" %}: {{ object.next_review_date|date:"j F Y" }}</span>{% endif %}{% if object.time_of_essence %}<br><strong class="govuk-tag govuk-tag--red">{% translate "Time is of the essence" %}</strong>{% endif %}</dd></div>
+    {% if object.demands_on_hold %}<div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Rent demands" %}</dt><dd class="govuk-summary-list__value"><strong class="govuk-tag govuk-tag--yellow">{% translate "On hold" %}</strong>{% if object.demands_on_hold_reason %} {{ object.demands_on_hold_reason }}{% endif %}<br><span class="govuk-body-s">{% translate "Demand runs raise nothing on this agreement until the hold is taken off." %}</span></dd></div>{% endif %}
+    {% if object.arrears_referral %}<div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Arrears" %}</dt><dd class="govuk-summary-list__value">{% translate "Passed to" %} {{ object.get_arrears_referral_display|lower }}{% if object.arrears_referred_on %} {% translate "on" %} {{ object.arrears_referred_on|date:"j F Y" }}{% endif %}{% if object.arrears_referral_reference %}<br><span class="govuk-body-s">{% translate "Their reference:" %} {{ object.arrears_referral_reference }}</span>{% endif %}</dd></div>{% endif %}
     {% if object.deposit %}<div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Rent deposit" %}</dt><dd class="govuk-summary-list__value">£{{ object.deposit|floatformat:2|intcomma }}{% if object.deposit_held %}<br><span class="govuk-body-s">{% translate "Held:" %} {{ object.deposit_held }}</span>{% endif %}{% if object.deposit_interest %}<br><span class="govuk-body-s">{% translate "Interest:" %} {{ object.deposit_interest }}</span>{% endif %}</dd></div>{% endif %}
   </dl>
 
   <h2 class="govuk-heading-m">{% translate "Terms" %}</h2>
   <dl class="govuk-summary-list">
     <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Repairing" %}</dt><dd class="govuk-summary-list__value">{{ object.get_repairing_display|default:"–" }}</dd></div>
-    <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Insurance" %}</dt><dd class="govuk-summary-list__value">{{ object.get_insurance_display|default:"–" }}</dd></div>
+    <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Insurance" %}</dt><dd class="govuk-summary-list__value">{{ object.get_insurance_display|default:"–" }}{% if tenant_insures %}<br>
+      {% if insurance_certificate %}<span class="govuk-body-s">{% translate "Certificate held:" %} <a class="govuk-link" href="{{ insurance_certificate.file.url }}" target="_blank" rel="noopener">{{ insurance_certificate.description|default:insurance_certificate.get_document_type_display }}</a>{% with rag=insurance_certificate.review_rag %}{% if rag %}, {% translate "review" %} {{ insurance_certificate.review_date|date:"j M Y" }}{% if rag.0 == "red" %} <strong class="govuk-tag govuk-tag--red">{{ rag.1 }}</strong>{% endif %}{% endif %}{% endwith %}</span>
+      {% else %}<strong class="govuk-tag govuk-tag--yellow">{% translate "No insurance certificate held" %}</strong>{% endif %}
+      {% if insurance_case %}<br><span class="govuk-body-s">{% translate "Case open:" %} <a class="govuk-link" href="{{ insurance_case.get_absolute_url }}">{{ insurance_case.display_reference }}</a></span>
+      {% elif user|can_edit:object %}<br><span class="govuk-body-s"><a class="govuk-link" href="{% url 'cases:new' %}?lease={{ object.pk }}&amp;type=insurance_certificate">{% translate "Start a case to get the tenant's insurance certificate" %}</a></span>{% endif %}{% endif %}</dd></div>
     <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Service charge" %}</dt><dd class="govuk-summary-list__value">{% if object.service_charge_payable %}{% translate "Payable" %}{% else %}{% translate "Not payable" %}{% endif %}</dd></div>
     <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Permitted use" %}</dt><dd class="govuk-summary-list__value">{{ object.permitted_use|default:"–" }}</dd></div>
     <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Assignment and subletting" %}</dt><dd class="govuk-summary-list__value">{{ object.alienation|linebreaksbr|default:"–" }}</dd></div>
@@ -114,13 +121,14 @@
   {% endif %}{% endwith %}
   {% if doc_templates %}<p class="govuk-body-s">{% translate "Create a letter:" %} {% for t in doc_templates %}<a class="govuk-link" href="{% url 'documents:create' t.code %}?lease={{ object.pk }}">{{ t.name }}</a>{% if not forloop.last %} · {% endif %}{% endfor %} · <a class="govuk-link" href="{% url 'documents:library' %}">{% translate "Document library" %}</a></p>{% endif %}
   <h2 class="govuk-heading-m">{% translate "Documents" %}</h2>
-  {% with docs=object.documents.all %}
+  {% with docs=documents %}
   {% if docs %}
   <table class="govuk-table">
     <thead class="govuk-table__head"><tr class="govuk-table__row">
       <th scope="col" class="govuk-table__header">{% translate "Document" %}</th>
       <th scope="col" class="govuk-table__header">{% translate "Type" %}</th>
       <th scope="col" class="govuk-table__header">{% translate "Date" %}</th>
+      <th scope="col" class="govuk-table__header">{% translate "Review" %}</th>
     </tr></thead>
     <tbody class="govuk-table__body">
     {% for d in docs %}
@@ -128,6 +136,7 @@
         <td class="govuk-table__cell"><a class="govuk-link" href="{{ d.file.url }}" target="_blank" rel="noopener">{{ d.description|default:d.get_document_type_display }} (PDF, {{ d.file|file_size }})</a></td>
         <td class="govuk-table__cell">{{ d.get_document_type_display }}</td>
         <td class="govuk-table__cell">{{ d.document_date|date:"j M Y"|default:"–" }}</td>
+        <td class="govuk-table__cell">{% with rag=d.review_rag %}{% if rag %}{{ d.review_date|date:"j M Y" }}{% if rag.0 != "green" %}<br><strong class="govuk-tag govuk-tag--{{ rag.0 }}">{{ rag.1 }}</strong>{% endif %}{% else %}–{% endif %}{% endwith %}</td>
       </tr>
     {% endfor %}
     </tbody>
@@ -148,6 +157,11 @@
   <ul class="govuk-list">{% for p in object.properties.all %}<li><a class="govuk-link" href="{{ p.get_absolute_url }}">{{ p.reference }} {{ p.name }}</a></li>{% endfor %}</ul>
   <h2 class="govuk-heading-m">{% if object.direction == "out" %}{% translate "Tenant" %}{% else %}{% translate "Landlord" %}{% endif %}</h2>
   <p class="govuk-body"><a class="govuk-link" href="{{ object.counterparty.get_absolute_url }}">{{ object.counterparty.name }}</a><br><span class="govuk-body-s">{{ object.counterparty.get_party_type_display }}</span></p>
+  {% if object.direction == "out" %}{% with b=object.billing %}
+  <h3 class="govuk-heading-s govuk-!-margin-bottom-1">{% translate "Billing contact" %}</h3>
+  <p class="govuk-body-s">{% if object.has_billing_contact %}{{ b.name|default:"" }}{% if b.email %}<br>{{ b.email }}{% endif %}{% if b.phone %}<br>{{ b.phone }}{% endif %}{% if b.address %}<br>{{ b.address|linebreaksbr }}{% endif %}
+    {% else %}{% translate "Same as the tenant's main contact" %}{% if b.name or b.email %}: {{ b.name }}{% if b.email %} ({{ b.email }}){% endif %}{% endif %}{% endif %}</p>
+  {% endwith %}{% endif %}
   {% if object.guarantor %}<h2 class="govuk-heading-m">{% translate "Guarantor" %}</h2><p class="govuk-body"><a class="govuk-link" href="{{ object.guarantor.get_absolute_url }}">{{ object.guarantor.name }}</a></p>{% endif %}
 </div>
 </div>
