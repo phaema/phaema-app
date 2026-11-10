@@ -5,7 +5,7 @@ from django.urls import include, path
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 from rest_framework.routers import DefaultRouter
 
-from apps.core import account_requests, cover_views, handover_views, two_step_views
+from apps.core import account_requests, cover_views, handover_views, password_reset, two_step_views
 from apps.core import views as core_views
 from apps.leases import event_views
 from apps.leases.api import LeaseViewSet, PartyViewSet
@@ -31,6 +31,10 @@ urlpatterns = [
         post_reset_login=False), name="set-password"),
     path("account/set-password/done/", auth_views.PasswordResetCompleteView.as_view(
         template_name="registration/set_password_done.html"), name="set-password-done"),
+    path("account/forgot-password/", password_reset.forgot_password, name="forgot-password"),
+    path("account/reset-password/<uidb64>/<token>/", auth_views.PasswordResetConfirmView.as_view(
+        template_name="registration/set_password.html", success_url="/account/set-password/done/",
+        post_reset_login=False, token_generator=password_reset.reset_tokens), name="reset-password"),
     path("account/password/", auth_views.PasswordChangeView.as_view(
         template_name="registration/change_password.html", success_url="/account/password/done/"),
         name="change-password"),

@@ -11,6 +11,11 @@ Use the username and password your PHAEMA administrator gave you. You can type y
 the username. If you can sign in but see a page saying you
 do not have access, you have not been given a [role](users-and-roles.md) yet. Ask an administrator.
 
+**Forgotten your password?** Select **Forgotten your password?** on the sign-in page and enter your email
+address or username. PHAEMA emails you a link to choose a new password. The link works once and for one hour;
+your old password keeps working until you use it. If you use two-step sign-in, you will still be asked for your
+code when you next sign in. If no email arrives, look in your junk folder, then ask an administrator.
+
 ## The menu
 
 The menu at the top of every page takes you to:

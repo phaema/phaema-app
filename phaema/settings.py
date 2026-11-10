@@ -176,6 +176,9 @@ DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL", default="PHAEMA <phaema@localhost
 # The web address of this PHAEMA, used for links in emails, e.g. https://phaema.example.gov.uk
 PHAEMA_BASE_URL = env("PHAEMA_BASE_URL", default="http://localhost:8000")
 
+# How long a "forgotten your password" link works for, in minutes.
+PHAEMA_PASSWORD_RESET_MINUTES = env.int("PHAEMA_PASSWORD_RESET_MINUTES", default=60)
+
 # Name of the organisation shown in the header, e.g. "Example District Council".
 PHAEMA_ORGANISATION_NAME = env("PHAEMA_ORGANISATION_NAME", default="Demonstration Council")
 # A public test site holding only fictional data. Turns on the reset banner and allows ./phaema.sh reset-demo.

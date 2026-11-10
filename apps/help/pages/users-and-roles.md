@@ -114,6 +114,12 @@ then on the next page add their name and email address and choose one group: **A
 People can **sign in with their email address or their username**. Give each person their own email address: if
 two accounts share one address, neither can sign in with it and both must use their usernames.
 
+**Forgotten passwords.** People reset their own password from **Forgotten your password?** on the sign-in page.
+PHAEMA emails a link, valid once and for one hour, to the address on their account, so the account needs a
+correct email address and the site needs [email set up](reminders.md). The page never says whether an account
+was found, closed accounts get no email, and a reset does not switch off two-step sign-in. Where PHAEMA cannot
+send email, set a new password for the person in **Manage data**, **Users**.
+
 ![Manage data](/static/help/admin.jpg)
 *Manage data, where administrators add users and change settings.*
 
