@@ -52,7 +52,7 @@ def login_code(request):
     if not pending or time.time() - pending.get("started", 0) > PENDING_SECONDS:
         request.session.pop(PENDING, None)
         if pending:
-            messages.info(request, "Sign-in took too long. Enter your username and password again.")
+            messages.info(request, "Sign-in took too long. Sign in with your password again.")
         return redirect("login")
     user = get_user_model().objects.filter(pk=pending["user"], is_active=True).first()
     if user is None:
@@ -73,7 +73,7 @@ def login_code(request):
         pending["attempts"] = pending.get("attempts", 0) + 1
         if pending["attempts"] >= MAX_ATTEMPTS:
             request.session.pop(PENDING, None)
-            messages.error(request, "Too many wrong codes. Enter your username and password again.")
+            messages.error(request, "Too many wrong codes. Sign in with your password again.")
             return redirect("login")
         request.session[PENDING] = pending
         error = "Enter the 6-digit code from your authenticator app, or one of your recovery codes."

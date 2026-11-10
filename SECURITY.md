@@ -41,6 +41,8 @@ releases with release notes and a security support period for each will start be
   or optional. Codes cannot be reused, and five wrong codes end the sign-in attempt.
 - The admin site signs in through the same page, so two-step sign-in cannot be bypassed there. The API refuses a
   username and password for anyone with two-step sign-in.
+- People sign in with their username or their email address. An email address only works when exactly one
+  account has it, and the sign-in page gives the same answer whether the name or the password was wrong.
 - Passwords are at least 12 characters, checked against common passwords and the person's own details, and stored
   using Django's salted PBKDF2 hashing. Recovery codes are stored only as hashes.
 - Access is by role (administrator, surveyor, contributor, viewer) and access area, enforced on the server for every

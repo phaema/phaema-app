@@ -6,13 +6,13 @@
   {% if form.errors %}
   <div class="govuk-error-summary" data-module="govuk-error-summary"><div role="alert">
     <h2 class="govuk-error-summary__title">{% translate "There is a problem" %}</h2>
-    <div class="govuk-error-summary__body"><p class="govuk-body">{% translate "Enter a correct username and password." %}</p></div>
+    <div class="govuk-error-summary__body"><p class="govuk-body">{% translate "Enter a correct username or email address, and password." %}</p></div>
   </div></div>
   {% endif %}
   <form method="post" novalidate>
     {% csrf_token %}
     <div class="govuk-form-group">
-      <label class="govuk-label" for="id_username">{% translate "Username" %}</label>
+      <label class="govuk-label" for="id_username">{% translate "Username or email address" %}</label>
       <input class="govuk-input" id="id_username" name="username" type="text" autocomplete="username" spellcheck="false" value="{{ form.username.value|default:'' }}">
     </div>
     <div class="govuk-form-group">
