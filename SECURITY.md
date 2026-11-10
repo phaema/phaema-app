@@ -45,6 +45,10 @@ releases with release notes and a security support period for each will start be
   account has it, and the sign-in page gives the same answer whether the name or the password was wrong.
 - Passwords are at least 12 characters, checked against common passwords and the person's own details, and stored
   using Django's salted PBKDF2 hashing. Recovery codes are stored only as hashes.
+- A forgotten password is reset by a link emailed to the address on the account. The link works once and for one
+  hour (`PHAEMA_PASSWORD_RESET_MINUTES`), the page gives the same answer whether or not an account was found, and
+  requests are limited per connection and per account. Resetting a password does not sign the person in or bypass
+  two-step sign-in, and it signs out their other sessions.
 - Access is by role (administrator, surveyor, contributor, viewer) and access area, enforced on the server for every
   page, download, report and API call. Surveyors see finance information only for their own patch.
 - Hand over work stops a leaver signing in and moves their work in one step.
