@@ -204,6 +204,19 @@ TITLES = [
 ]
 
 
+# Portfolios for the demonstration properties (parts of a property take its portfolio unless listed).
+DEMO_PORTFOLIOS = {
+    "DM-E01": "Investment", "DM-E01-L01": "Highways and transport",
+    "DM-S01": "Investment", "DM-S02": "Corporate estate", "DM-S03": "Highways and transport",
+    "DM-S04": "Waste and environmental services", "DM-S05": "Community", "DM-S06": "Surplus",
+    "DM-S07": "Economic development", "DM-S08": "Parks and open spaces", "DM-S09": "Children's services",
+    "DM-S10": "Farms and rural estate", "DM-S11": "Parks and open spaces",
+    "DM-N01": "Investment", "DM-N01-L01": "Highways and transport", "DM-N02": "Investment", "DM-N03": "Libraries",
+    "DM-N04": "Leisure", "DM-N05": "Community", "DM-N06": "Regeneration and development", "DM-N07": "Investment",
+    "DM-N08": "Parks and open spaces", "DM-N09": "Markets", "DM-N10": "Farms and rural estate",
+    "DM-N11": "Highways and transport", "DM-N12": "Economic development",
+}
+
 from apps.properties import demo_north  # noqa: E402  (Northfield, the second district)
 
 TITLES += demo_north.TITLES
@@ -293,6 +306,7 @@ class Command(BaseCommand):
             title.properties.set(linked)
 
         self.load_surveyors(refs)
+        self.load_portfolios(refs)
         self.load_photos(refs)
         self.load_documents()
         self.load_inspire(refs)
@@ -374,6 +388,18 @@ class Command(BaseCommand):
             if prop.managing_surveyor_id != (surveyor.pk if surveyor else None):
                 prop.managing_surveyor = surveyor
                 prop.save(update_fields=["managing_surveyor", "updated_at"])
+
+    def load_portfolios(self, refs):
+        """Put each demonstration property in a portfolio; parts of a property share its portfolio."""
+        from apps.properties.models import Portfolio
+
+        names = {p.name: p for p in Portfolio.objects.all()}
+        for ref, obj in refs.items():
+            top = ref if ref.count("-") == 1 else "-".join(ref.split("-")[:2])
+            name = DEMO_PORTFOLIOS.get(ref) or DEMO_PORTFOLIOS.get(top)
+            if name in names and obj.portfolio_id != names[name].pk:
+                obj.portfolio = names[name]
+                obj.save(update_fields=["portfolio"])
 
     def load_access_areas(self):
         """Put the demonstration people in realistic access areas, and add a finance officer."""

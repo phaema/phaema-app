@@ -151,7 +151,7 @@ def _describe_filters(ds, filters):
         if not f or not spec:
             continue
         if "in" in spec:
-            names = dict(f.choices) if f.type == "choice" else {}
+            names = dict(f.options) if f.type == "choice" else {}
             if f.type == "user":
                 users = {str(u.pk): (u.get_full_name() or u.username)
                          for u in get_user_model().objects.filter(pk__in=[v for v in spec["in"] if str(v).isdigit()])}
@@ -259,7 +259,7 @@ def _form_context(ds, report, errors=None):
         if f.type == "user":
             row["options"] = [("none", _("Nobody"))] + [(str(u.pk), u.get_full_name() or u.username) for u in _officers()]
         elif f.type == "choice":
-            row["options"] = f.choices
+            row["options"] = f.options
         if f.type == "date":
             mode = ("next" if "next_days" in spec else "last" if "last_days" in spec else "upto"
                     if "upto_days" in spec else "before_today"

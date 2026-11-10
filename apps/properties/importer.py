@@ -49,6 +49,8 @@ COLUMNS = [
     ("Areas measured on", "areas_measured_on", False, "Date the areas were measured, dd/mm/yyyy."),
     ("Site hazards", "site_hazards", False, "What anyone visiting should know first: access, lone working, "
                                             "fragile roofs, dogs, confined spaces."),
+    ("Portfolio", "portfolio", False, "One of the council's portfolios, as listed under Manage data, Portfolios, "
+                                      "e.g. Investment, Leisure, Adult social care."),
 ]
 CHOICE_FIELDS = {"property_type", "holding_purpose", "tenure", "occupation", "area_standard", "area_source"}
 DECIMAL_FIELDS = {"gia_sqm", "nia_sqm", "site_area_ha", "gea_sqm"}
@@ -184,6 +186,12 @@ def validate(rows, user_model=None):
                     if text.lower() not in ("yes", "y", "true", "1", "no", "n", "false", "0"):
                         raise ValueError(f"'{text}' should be Yes or No.")
                     value = text.lower() in ("yes", "y", "true", "1")
+                elif f == "portfolio":
+                    from .models import Portfolio
+
+                    value = Portfolio.objects.filter(name__iexact=text).first()
+                    if value is None:
+                        raise ValueError(f"No portfolio called '{text}'. Add it under Manage data, Portfolios first.")
                 elif f == "managing_surveyor":
                     user = User.objects.filter(Q(username__iexact=text) | Q(email__iexact=text)).first()
                     if user is None:
@@ -271,6 +279,7 @@ def template_workbook():
         cell.fill = PatternFill("solid", fgColor="1D3557")
     example = {"reference": "EX-001", "name": "Example Business Park", "property_type": "Site",
                "address_line_1": "Example Road", "town": "Exampletown", "holding_purpose": "Investment",
+               "portfolio": "Investment",
                "tenure": "Freehold", "occupation": "Partly let", "use_description": "Business park",
                "site_area_ha": "2.5", "area_standard": "RICS Code of Measuring Practice, 6th edition",
                "area_source": "Lease or title plan", "notes": "Delete this example row"}
@@ -288,6 +297,18 @@ def template_workbook():
         letter = lists.cell(1, col).column_letter
         target = next(i for i, (_h, ff, _r, _g) in enumerate(COLUMNS, start=1) if ff == f)
         dv = DataValidation(type="list", formula1=f"=Lists!${letter}$1:${letter}${len(labels)}", allow_blank=True)
+        ws.add_data_validation(dv)
+        dv.add(f"{ws.cell(2, target).column_letter}2:{ws.cell(2, target).column_letter}5000")
+    from .models import Portfolio
+
+    names = list(Portfolio.objects.filter(active=True).values_list("name", flat=True))
+    if names:
+        col = 7
+        for row, name in enumerate(names, start=1):
+            lists.cell(row, col, name)
+        letter = lists.cell(1, col).column_letter
+        target = next(i for i, (_h, ff, _r, _g) in enumerate(COLUMNS, start=1) if ff == "portfolio")
+        dv = DataValidation(type="list", formula1=f"=Lists!${letter}$1:${letter}${len(names)}", allow_blank=True)
         ws.add_data_validation(dv)
         dv.add(f"{ws.cell(2, target).column_letter}2:{ws.cell(2, target).column_letter}5000")
     yes_no = DataValidation(type="list", formula1='"Yes,No"', allow_blank=True)

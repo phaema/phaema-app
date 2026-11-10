@@ -27,6 +27,7 @@
           <td class="govuk-table__cell">{{ p.name }}{% if p.parent %}<br><span class="govuk-body-s">{% translate "part of" %} {{ p.parent.name }}</span>{% endif %}</td>
           <td class="govuk-table__cell">{{ p.get_property_type_display }}</td>
           <td class="govuk-table__cell">{{ p.get_holding_purpose_display }}</td>
+          <td class="govuk-table__cell">{{ p.portfolio.name|default:"" }}</td>
           <td class="govuk-table__cell">{{ p.get_occupation_display }}</td>
           <td class="govuk-table__cell">{{ p.postcode }}</td>
           <td class="govuk-table__cell govuk-table__cell--numeric">{{ p.nia_sqm|default_if_none:""|floatformat:0 }}</td>

@@ -8,6 +8,8 @@ from .models import Property, Title
 
 
 class PropertySerializer(serializers.ModelSerializer):
+    portfolio_name = serializers.CharField(source="portfolio.name", read_only=True, default=None,
+                                           help_text="The portfolio's name (portfolio is its id).")
     boundary = serializers.SerializerMethodField(help_text="Boundary as GeoJSON (EPSG:27700).")
 
     class Meta:
@@ -42,7 +44,7 @@ class PropertyViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         qs = super().get_queryset()
-        for param in ("property_type", "holding_purpose", "occupation", "uprn"):
+        for param in ("property_type", "holding_purpose", "portfolio", "occupation", "uprn"):
             value = self.request.query_params.get(param)
             if value:
                 qs = qs.filter(**{param: value})
