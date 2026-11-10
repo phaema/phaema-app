@@ -145,10 +145,13 @@ REST_FRAMEWORK = {
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
     "PAGE_SIZE": 50,
 }
+# The release number: keep in step with the release tag on GitHub (v0.9.0 and so on).
+PHAEMA_VERSION = "0.9.0"
+
 SPECTACULAR_SETTINGS = {
     "TITLE": "PHAEMA API",
     "DESCRIPTION": "Property Holding and Estate Management Application: open API.",
-    "VERSION": "0.1.0",
+    "VERSION": PHAEMA_VERSION,
     "LICENSE": {"name": "AGPL-3.0-or-later"},
 }
 
