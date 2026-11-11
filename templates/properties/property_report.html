@@ -1,0 +1,22 @@
+{% extends "base.html" %}{% load i18n %}
+{% block title %}{{ title }}: {{ object.reference }} {{ object.name }}{% endblock %}
+{% block help_page %}properties{% endblock %}
+{% block breadcrumbs %}
+<nav class="govuk-breadcrumbs govuk-!-display-none-print" aria-label="Breadcrumb"><ol class="govuk-breadcrumbs__list">
+  <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="{% url 'properties:list' %}">{% translate "Properties" %}</a></li>
+  <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="{{ object.get_absolute_url }}">{{ object.name }}</a></li>
+  {% if case %}<li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="{{ case.get_absolute_url }}">{{ case.reference }}</a></li>{% endif %}
+  <li class="govuk-breadcrumbs__list-item">{{ title }}</li>
+</ol></nav>
+{% endblock %}
+{% block content %}
+<div class="govuk-!-display-none-print">
+  <p class="govuk-body">{% if case %}{% translate "Drawn from the property records as they are now, for the valuer. Add anything missing on the property's page and open this report again." %}{% else %}{% translate "Drawn from the property records as they are now." %}{% endif %}</p>
+  <div class="govuk-button-group">
+    <a class="govuk-button" data-module="govuk-button" role="button" draggable="false" href="?format=docx{% if case %}&amp;case={{ case.pk }}{% endif %}">{% translate "Download as Word" %}</a>
+    <a class="govuk-button govuk-button--secondary" data-module="govuk-button" role="button" draggable="false" href="javascript:window.print()">{% translate "Print" %}</a>
+    {% if can_edit %}<a class="govuk-link" href="{% url 'admin:properties_property_change' object.pk %}">{% translate "Edit the property" %}</a>{% endif %}
+  </div>
+</div>
+<div class="phaema-report">{{ body }}</div>
+{% endblock %}

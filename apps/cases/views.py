@@ -269,6 +269,7 @@ def case_detail(request, pk):
         "doc_templates": _templates_for(case) if can_contribute else [],
         "hidden_notes": case.notes.filter(confidential=True).count() if not show_confidential else 0,
         "is_administrator": is_administrator(request.user),
+        "valuation_report_property": case.main_property if case.case_type.group == "valuation" else None,
         **_approval_context(request.user, case),
         **_leasing_context(case),
         **_standards_context(case),

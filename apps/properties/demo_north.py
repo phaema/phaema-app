@@ -40,7 +40,16 @@ def add_records(add, rect):
     put("DM-N01", "Northfield Business Park", "estate", holding_purpose="investment", tenure="freehold",
         occupation="part_let", use_description="Business park", address_line_1="Enterprise Road", postcode="ZZ98 1BP",
         usrn="99980001", boundary=r(0, 0, 380, 220),
-        notes="Business park built by the council in 2008, let on a mix of protected and contracted-out leases.")
+        notes="Business park built by the council in 2008, let on a mix of protected and contracted-out leases.",
+        location_description="On the eastern edge of Northfield, about a mile from the town centre and half a mile "
+                             "from the ring road. Reached from Enterprise Road, with housing to the west and "
+                             "farmland to the east.",
+        building_description="Two terraces of industrial units around a shared service yard: the Hangar block of "
+                             "five warehouse units and the Workshop block of five smaller workshops, with estate "
+                             "roads, verges and car parking.",
+        built="2008", site_area_ha=D("8.36"), parking="Marked spaces in front of each unit and a shared visitor "
+                                                      "car park by the entrance.", parking_spaces=96,
+        mains_gas="yes", electricity="three", mains_water="yes", drainage="mains")
     blocks = {"B01": ("Hangar block", 20, 20, [("01", "let", 650), ("02", "let", 650), ("03", "let", 650),
                                                ("04", "vacant", 650), ("05", "let", 1300)]),
               "B02": ("Workshop block", 20, 130, [("06", "let", 240), ("07", "let", 240), ("08", "let", 240),
@@ -50,7 +59,16 @@ def add_records(add, rect):
         put(block, bname, "building", "DM-N01", holding_purpose="investment", tenure="freehold",
             occupation="part_let", use_description="Industrial and warehouse", use_class="B8",
             address_line_1=f"{bname}, Enterprise Road", postcode="ZZ98 1BP",
-            gia_sqm=D(sum(u[2] for u in units)) * D("1.08"), boundary=r(bx, by, 68 * len(units), 70))
+            gia_sqm=D(sum(u[2] for u in units)) * D("1.08"), boundary=r(bx, by, 68 * len(units), 70),
+            building_description=f"Terrace of {len(units)} single-storey units, each with a roller shutter door, "
+                                 "personnel door and a small office and WC.",
+            built="2008", construction_type="portal_frame",
+            construction_detail="Blockwork to 2 m with profiled metal cladding above, "
+                                "power-floated concrete floor.",
+            storeys=1, roof_type="pitched", roof_covering="composite",
+            roof_detail="Shallow pitch with about 10% roof lights.", window_type="aluminium",
+            mains_gas="yes", electricity="three", mains_water="yes", drainage="mains",
+            solar_pv="yes" if bref == "B01" else "no", solar_capacity_kwp=D("150") if bref == "B01" else None)
         for i, (num, occ, nia) in enumerate(units):
             put(f"DM-N01-U{num}", f"Unit {int(num)}, Northfield Business Park", "unit", block, uprn=uprn(),
                 holding_purpose="investment", tenure="freehold", occupation=occ,
@@ -85,7 +103,16 @@ def add_records(add, rect):
         occupation="council", use_description="Public library", use_class="F1(d)", address_line_1="Library Square",
         postcode="ZZ98 3LS", gia_sqm=D("1180"), boundary=r(420, 420, 45, 35),
         site_hazards="Asbestos insulating board in the first floor ceiling void: do not disturb. Check the register.",
-        notes="1960s library with a community meeting room. Listed as an asset of community value (fictional).")
+        notes="1960s library with a community meeting room. Listed as an asset of community value (fictional).",
+        location_description="In the town centre on the north side of Library Square, next to the bus station.",
+        building_description="Purpose-built two-storey public library with a community meeting room and staff "
+                             "offices on the first floor.",
+        built="1964", construction_type="concrete_frame", construction_detail="Concrete frame with brick infill.",
+        storeys=2, roof_type="flat", roof_covering="asphalt", roof_detail="Mastic asphalt on a concrete deck, "
+                                                                           "last overlaid in 1987.",
+        window_type="aluminium", window_detail="Replaced in 2011.", parking="None on site; public car park "
+                                                                            "opposite.", parking_spaces=0,
+        mains_gas="yes", electricity="three", mains_water="yes", drainage="mains", solar_pv="no")
     put("DM-N04", "Northfield Leisure Centre", "building", uprn=uprn(), holding_purpose="community",
         tenure="freehold", occupation="let", use_description="Leisure centre with pool", use_class="F2(c)",
         address_line_1="Park Road", postcode="ZZ98 3PR", gia_sqm=D("5400"), boundary=r(700, 420, 110, 70),

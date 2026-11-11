@@ -82,6 +82,48 @@ Estimated areas are marked as estimates wherever they are shown. You can also re
 (GEA)**, used for planning, insurance and some valuations. The ready-made report **Floor areas with no measurement basis** lists
 properties still to be checked.
 
+## Site and buildings
+
+The **Site and buildings** section on a property's page describes what is physically there, so that whoever
+manages or values it can understand it without a visit. Fill it in from **Edit this property**, under **Site and
+buildings** and **Services**. Leave blank anything you do not know: blanks are not shown.
+
+| What | Notes |
+|---|---|
+| Location | Where the property is and what surrounds it: the part of town, road links, neighbouring uses, access. |
+| Site area | In hectares or square metres. Type either one and PHAEMA works out the other. |
+| Description | For a site, the buildings and land. For a building, its layout and accommodation. |
+| Built | A year or a period, such as 1987 or 1930s. |
+| Construction | Chosen from a list, with a line of detail such as "cavity brick walls, solid concrete floors". |
+| Storeys | Above ground, with basement levels counted separately. |
+| Roof type and covering | Each chosen from a list, with a line of detail for mixed roofs or the date of re-covering. |
+| Windows | Chosen from a list, with a line of detail. |
+| Parking | A description and the number of spaces. |
+| Services | Mains gas, electricity (three-phase or single-phase), mains water and drainage, with notes for heating, capacity or meters. |
+| Solar panels | Yes or no, and the capacity in kWp. |
+
+**Sites with several blocks.** Record the site as a whole (location, site area, parking) on the site or estate,
+and the construction, storeys, roof, windows and services on each building within it. See
+[how properties fit together](#how-properties-fit-together).
+
+**Floor plans.** In **Edit this property**, under **Floor plans**, add each plan with a title, such as "Ground
+floor plan". Plans can be PDFs or AutoCAD drawings (.dwg or .dxf), up to 50 MB each. PDFs open in the browser;
+AutoCAD drawings download to open in your drawing software. Surveyors can add plans to the properties they manage.
+
+All of these can be chosen as columns and filters in [reports](reports.md), and filled in from a spreadsheet with
+the [property import](import-export.md).
+
+### The property report
+
+**Property report** on a property's page gathers everything PHAEMA holds about it into one document: the key
+facts, location, description, construction and services (with each building in turn), floor areas and how they
+are made up, floor plans, titles, current tenancies and other agreements with their main terms, and the cases in
+hand. It ends with a list of what a valuer is likely to ask for that has not been recorded yet. Read it on
+screen, print it, or select **Download as Word** to edit and send.
+
+On an asset valuation case the same report is headed **Initial valuation report**: see
+[cases](cases.md#initial-valuation-report).
+
 ## Photos
 
 Add photos in **Edit this property or add photos**. They are resized and their location data removed when

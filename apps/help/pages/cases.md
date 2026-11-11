@@ -123,6 +123,26 @@ That last day becomes the case's target. PHAEMA warns if the date in the notice 
 was given, or is before the lease's contractual expiry. Check the dates against the notice itself: PHAEMA is a
 reminder, not legal advice.
 
+## Initial valuation report
+
+Every case in the **Asset valuation** group (asset valuation, disposal valuation, impairment review and the
+annual programme) that is about a property has an **Initial valuation report** link. It brings together, for the
+valuer:
+
+- the property's key facts, location, description, construction, roof, windows, parking and services, with each
+  building on a site described in turn
+- floor areas, the basis they were measured on, and how they are made up from the parts
+- the floor plans held, and the titles with their restrictions and covenants
+- current tenancies and other agreements over the property, its parts and anything it is part of, with the
+  term, rent, review, breaks, security of tenure, repairs, insurance and permitted use
+- the other open cases on the property and its agreements
+- a list of anything a valuer usually needs that has not been recorded.
+
+It is drawn from the records as they are when you open it, so correct the property or agreement and open it
+again. Select **Download as Word** to add your own comments and send it, then file the version you sent on the
+case. It is background information, not a valuation. The details come from
+[Site and buildings](properties.md#site-and-buildings) on each property.
+
 ## Dates and targets
 
 | Date | What it is |

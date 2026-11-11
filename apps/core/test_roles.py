@@ -121,6 +121,7 @@ def test_surveyor_new_property_becomes_theirs_and_parent_must_be_own(client, sur
     add = reverse("admin:properties_property_add")
     base = {"reference": "S-1", "name": "New store", "property_type": "building",
             "photos-TOTAL_FORMS": "0", "photos-INITIAL_FORMS": "0",
+            "plans-TOTAL_FORMS": "0", "plans-INITIAL_FORMS": "0",
             "Title_properties-TOTAL_FORMS": "0", "Title_properties-INITIAL_FORMS": "0"}
     resp = client.post(add, {**base, "parent": other.pk})
     assert resp.status_code == 200 and b"only add parts to properties you manage" in resp.content

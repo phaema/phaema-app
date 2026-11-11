@@ -10,7 +10,7 @@ from django.core.validators import MinValueValidator, RegexValidator
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 
-from apps.core.files import process_image, validate_image, validate_pdf
+from apps.core.files import process_image, validate_image, validate_pdf, validate_plan
 from apps.core.models import TimeStampedModel
 
 uprn_validator = RegexValidator(r"^\d{1,12}$", _("A UPRN is a number of up to 12 digits."))
@@ -189,6 +189,109 @@ class Property(TimeStampedModel):
                     "cases and valuations for this property and its parts."))
     notes = models.TextField(_("notes"), blank=True)
 
+    # Site and buildings: what the property physically is. Recorded on a site, and on each building (block) in it.
+    class Construction(models.TextChoices):
+        MASONRY = "masonry", _("Traditional masonry (brick or block)")
+        STONE = "stone", _("Stone")
+        STEEL_FRAME = "steel_frame", _("Steel frame")
+        PORTAL_FRAME = "portal_frame", _("Steel portal frame")
+        CONCRETE_FRAME = "concrete_frame", _("Concrete frame")
+        TIMBER_FRAME = "timber_frame", _("Timber frame")
+        MODULAR = "modular", _("Modular or prefabricated")
+        MIXED = "mixed", _("Mixed")
+        OTHER = "other", _("Other")
+
+    class RoofType(models.TextChoices):
+        PITCHED = "pitched", _("Pitched")
+        HIPPED = "hipped", _("Hipped")
+        MONO = "mono", _("Mono-pitch")
+        FLAT = "flat", _("Flat")
+        MANSARD = "mansard", _("Mansard")
+        NORTH_LIGHT = "north_light", _("North light (saw-tooth)")
+        CURVED = "curved", _("Curved or barrel")
+        MIXED = "mixed", _("Mixed")
+        OTHER = "other", _("Other")
+
+    class RoofCovering(models.TextChoices):
+        SLATE = "slate", _("Slate")
+        CLAY_TILE = "clay_tile", _("Clay tile")
+        CONCRETE_TILE = "concrete_tile", _("Concrete tile")
+        METAL_SHEET = "metal_sheet", _("Profiled metal sheet")
+        COMPOSITE = "composite", _("Insulated composite panel")
+        FIBRE_CEMENT = "fibre_cement", _("Fibre cement or asbestos cement sheet")
+        FELT = "felt", _("Built-up bituminous felt")
+        SINGLE_PLY = "single_ply", _("Single-ply membrane")
+        ASPHALT = "asphalt", _("Mastic asphalt")
+        LIQUID = "liquid", _("Liquid-applied membrane")
+        GRP = "grp", _("GRP (glass fibre)")
+        METAL = "metal", _("Lead, zinc or copper")
+        GREEN = "green", _("Green roof")
+        MIXED = "mixed", _("Mixed")
+        OTHER = "other", _("Other")
+
+    class WindowType(models.TextChoices):
+        TIMBER_SINGLE = "timber_single", _("Timber, single glazed")
+        TIMBER_DOUBLE = "timber_double", _("Timber, double glazed")
+        UPVC = "upvc", _("uPVC, double glazed")
+        ALUMINIUM = "aluminium", _("Aluminium, double glazed")
+        STEEL = "steel", _("Steel, single glazed")
+        CURTAIN = "curtain", _("Curtain walling")
+        ROOFLIGHTS = "rooflights", _("Roof lights only")
+        NONE = "none", _("None")
+        MIXED = "mixed", _("Mixed")
+        OTHER = "other", _("Other")
+
+    class YesNo(models.TextChoices):
+        YES = "yes", _("Yes")
+        NO = "no", _("No")
+
+    class Electricity(models.TextChoices):
+        THREE = "three", _("Three-phase")
+        SINGLE = "single", _("Single-phase")
+        YES = "yes", _("Connected, phase not known")
+        NONE = "none", _("None")
+
+    class Drainage(models.TextChoices):
+        MAINS = "mains", _("Mains drainage")
+        PRIVATE = "private", _("Private (septic tank or treatment plant)")
+        NONE = "none", _("None")
+
+    location_description = models.TextField(
+        _("location"), blank=True,
+        help_text=_("Where the property is and what surrounds it: the part of town, road links, neighbouring "
+                    "uses, access."))
+    building_description = models.TextField(
+        _("description"), blank=True,
+        help_text=_("What is there: for a site, the buildings and land; for a building, its layout, "
+                    "accommodation and condition in outline."))
+    built = models.CharField(_("built"), max_length=40, blank=True, help_text=_("Year or period, e.g. 1987 or 1930s."))
+    construction_type = models.CharField(_("construction"), max_length=20, choices=Construction.choices, blank=True)
+    construction_detail = models.CharField(
+        _("construction detail"), max_length=255, blank=True,
+        help_text=_("e.g. cavity brick walls under a steel truss roof, solid concrete floors."))
+    storeys = models.PositiveSmallIntegerField(_("storeys"), null=True, blank=True,
+                                               help_text=_("Above ground, including the ground floor."))
+    basement_levels = models.PositiveSmallIntegerField(_("basement levels"), null=True, blank=True)
+    roof_type = models.CharField(_("roof type"), max_length=20, choices=RoofType.choices, blank=True)
+    roof_covering = models.CharField(_("roof covering"), max_length=20, choices=RoofCovering.choices, blank=True)
+    roof_detail = models.CharField(_("roof detail"), max_length=255, blank=True,
+                                   help_text=_("e.g. main roof pitched slate; rear extension flat, single-ply, 2019."))
+    window_type = models.CharField(_("windows"), max_length=20, choices=WindowType.choices, blank=True)
+    window_detail = models.CharField(_("window detail"), max_length=255, blank=True)
+    parking = models.TextField(_("parking"), blank=True,
+                               help_text=_("e.g. surface car park to the front, shared with Unit 2; 2 accessible bays."))
+    parking_spaces = models.PositiveIntegerField(_("parking spaces"), null=True, blank=True)
+    mains_gas = models.CharField(_("mains gas"), max_length=3, choices=YesNo.choices, blank=True)
+    electricity = models.CharField(_("electricity"), max_length=10, choices=Electricity.choices, blank=True)
+    mains_water = models.CharField(_("mains water"), max_length=3, choices=YesNo.choices, blank=True)
+    drainage = models.CharField(_("drainage"), max_length=10, choices=Drainage.choices, blank=True)
+    services_notes = models.TextField(_("services notes"), blank=True,
+                                      help_text=_("e.g. heating, supply capacity, where the meters are."))
+    solar_pv = models.CharField(_("solar panels"), max_length=3, choices=YesNo.choices, blank=True)
+    solar_capacity_kwp = models.DecimalField(
+        _("solar capacity (kWp)"), max_digits=8, decimal_places=2, null=True, blank=True,
+        validators=[MinValueValidator(0)])
+
     class Meta:
         ordering = ["reference"]
         verbose_name = _("property")
@@ -224,6 +327,7 @@ class Property(TimeStampedModel):
                 node = node.parent
         if (self.easting is None) != (self.northing is None):
             raise ValidationError(_("Enter both easting and northing, or neither."))
+        self.clean_physical()
 
     def save(self, *args, **kwargs):
         # Derive easting/northing from the boundary centre when not entered.
@@ -301,6 +405,64 @@ class Property(TimeStampedModel):
         }
 
     @property
+    def site_area_sqm(self):
+        return (self.site_area_ha * 10000).quantize(Decimal("1")) if self.site_area_ha is not None else None
+
+    def site_area_text(self):
+        """The site area in both units, e.g. "0.2500 ha (2,500 m²)"."""
+        if self.site_area_ha is None:
+            return ""
+        return f"{self.site_area_ha.normalize():f} ha ({self.site_area_sqm:,} m²)"
+
+    def storeys_text(self):
+        parts = []
+        if self.storeys:
+            parts.append(str(self.storeys))
+        if self.basement_levels:
+            parts.append(f"{self.basement_levels} basement level{'s' if self.basement_levels != 1 else ''}")
+        return " plus ".join(parts)
+
+    def services_rows(self):
+        """(label, value) for each service that has been recorded."""
+        rows = [(_("Mains gas"), self.get_mains_gas_display()), (_("Electricity"), self.get_electricity_display()),
+                (_("Mains water"), self.get_mains_water_display()), (_("Drainage"), self.get_drainage_display())]
+        solar = self.get_solar_pv_display()
+        if self.solar_pv == self.YesNo.YES and self.solar_capacity_kwp is not None:
+            solar = f"{solar}, {self.solar_capacity_kwp.normalize():f} kWp"
+        rows.append((_("Solar panels"), solar))
+        if self.services_notes:
+            rows.append((_("Services notes"), self.services_notes))
+        return [(str(label), str(value)) for label, value in rows if value]
+
+    def physical_rows(self):
+        """(label, value) for each recorded fact about the site and buildings, in report order."""
+        def with_detail(value, detail):
+            return "; ".join(x for x in (str(value), detail) if x)
+
+        parking = self.parking
+        if self.parking_spaces is not None:
+            spaces = f"{self.parking_spaces} space{'s' if self.parking_spaces != 1 else ''}"
+            parking = f"{spaces}. {parking}" if parking else spaces
+        rows = [
+            (_("Location"), self.location_description),
+            (_("Site area"), self.site_area_text()),
+            (_("Description"), self.building_description),
+            (_("Built"), self.built),
+            (_("Construction"), with_detail(self.get_construction_type_display(), self.construction_detail)),
+            (_("Storeys"), self.storeys_text()),
+            (_("Roof"), with_detail(", ".join(x for x in (str(self.get_roof_type_display()),
+                                                         str(self.get_roof_covering_display())) if x),
+                                    self.roof_detail)),
+            (_("Windows"), with_detail(self.get_window_type_display(), self.window_detail)),
+            (_("Parking"), parking),
+        ]
+        return [(str(label), str(value)) for label, value in rows if value] + self.services_rows()
+
+    def clean_physical(self):
+        if self.solar_capacity_kwp is not None and self.solar_pv != self.YesNo.YES:
+            raise ValidationError({"solar_capacity_kwp": _("Set solar panels to Yes to record a capacity.")})
+
+    @property
     def main_photo(self):
         photos = list(self.photos.all())
         return next((p for p in photos if p.is_main), photos[0] if photos else None)
@@ -338,6 +500,44 @@ class PropertyPhoto(TimeStampedModel):
             self.image = process_image(self.image)
         if self.is_main:
             PropertyPhoto.objects.filter(property_id=self.property_id, is_main=True).exclude(pk=self.pk).update(is_main=False)
+        super().save(*args, **kwargs)
+
+
+def _plan_path(instance, filename):
+    ext = filename.rsplit(".", 1)[-1].lower() if "." in filename else "pdf"
+    return f"plans/{instance.property_id}/{uuid.uuid4().hex}.{ext}"
+
+
+class PropertyPlan(TimeStampedModel):
+    """A floor plan or other drawing of a property: a PDF, or an AutoCAD drawing (DWG or DXF)."""
+
+    property = models.ForeignKey(Property, on_delete=models.CASCADE, related_name="plans")
+    title = models.CharField(_("title"), max_length=200, help_text=_("e.g. Ground floor plan, or Site layout."))
+    file = models.FileField(_("file"), upload_to=_plan_path, validators=[validate_plan],
+                            help_text=_("A PDF, or an AutoCAD drawing (.dwg or .dxf), up to 50 MB."))
+    original_filename = models.CharField(_("original file name"), max_length=255, blank=True, editable=False)
+    drawn_on = models.DateField(_("date of plan"), null=True, blank=True)
+    notes = models.CharField(_("notes"), max_length=255, blank=True,
+                             help_text=_("e.g. scale, who drew it, or that it is as-built."))
+
+    class Meta:
+        ordering = ["title", "pk"]
+        verbose_name = _("floor plan")
+        verbose_name_plural = _("floor plans")
+
+    def __str__(self):
+        return self.title
+
+    def get_absolute_url(self):
+        return self.property.get_absolute_url()
+
+    def file_type(self):
+        ext = self.file.name.rsplit(".", 1)[-1].lower() if self.file and "." in self.file.name else ""
+        return {"pdf": "PDF", "dwg": "AutoCAD DWG", "dxf": "AutoCAD DXF"}.get(ext, ext.upper())
+
+    def save(self, *args, **kwargs):
+        if self.file and not getattr(self.file, "_committed", True):
+            self.original_filename = (getattr(self.file, "name", "") or "").rsplit("/", 1)[-1][:255]
         super().save(*args, **kwargs)
 
 
