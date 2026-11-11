@@ -48,7 +48,7 @@
     <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Occupation" %}</dt><dd class="govuk-summary-list__value">{{ object.get_occupation_display|default:"–" }}</dd></div>
     <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Use" %}</dt><dd class="govuk-summary-list__value">{{ object.use_description|default:"–" }}{% if object.use_class %} ({{ object.use_class }}){% endif %}</dd></div>
     <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Areas" %}</dt><dd class="govuk-summary-list__value">
-      {% if object.gia_sqm %}GIA {{ object.gia_sqm|floatformat:0|intcomma }} m²<br>{% endif %}{% if object.nia_sqm %}NIA {{ object.nia_sqm|floatformat:0|intcomma }} m²<br>{% endif %}{% if object.gea_sqm %}GEA {{ object.gea_sqm|floatformat:0|intcomma }} m²<br>{% endif %}{% if object.site_area_ha %}{% translate "Site" %} {{ object.site_area_ha|floatformat:2 }} ha{% endif %}
+      {% if object.gia_sqm %}GIA {{ object.gia_sqm|floatformat:0|intcomma }} m²<br>{% endif %}{% if object.nia_sqm %}NIA {{ object.nia_sqm|floatformat:0|intcomma }} m²<br>{% endif %}{% if object.gea_sqm %}GEA {{ object.gea_sqm|floatformat:0|intcomma }} m²<br>{% endif %}{% if object.site_area_ha %}{% translate "Site" %} {{ object.site_area_ha|floatformat:2 }} ha ({{ object.site_area_sqm|intcomma }} m²){% endif %}
       {% if not object.gia_sqm and not object.nia_sqm and not object.site_area_ha and not object.gea_sqm %}–{% else %}
       <br><span class="govuk-body-s">{% if object.area_standard or object.area_source %}{% translate "Measured to" %} {{ object.get_area_standard_display|default:"an unrecorded standard" }}{% if object.area_source %}; {{ object.get_area_source_display|lower }}{% endif %}{% if object.areas_measured_on %}, {{ object.areas_measured_on|date:"j M Y" }}{% endif %}{% else %}{% translate "How these were measured is not recorded." %}{% endif %}</span>{% if object.area_source == "estimate" %} <strong class="govuk-tag govuk-tag--yellow">{% translate "Estimate" %}</strong>{% endif %}{% endif %}</dd></div>
     <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Grid reference" %}</dt><dd class="govuk-summary-list__value">{% if object.easting %}{{ object.easting }}, {{ object.northing }}{% else %}–{% endif %}</dd></div>
@@ -56,6 +56,18 @@
   </dl>
   {% if object.site_hazards %}<div class="govuk-warning-text"><span class="govuk-warning-text__icon" aria-hidden="true">!</span><strong class="govuk-warning-text__text"><span class="govuk-visually-hidden">{% translate "Warning" %}</span>{% translate "Site hazards:" %} {{ object.site_hazards|linebreaksbr }}</strong></div>{% endif %}
   {% if object.notes %}<h2 class="govuk-heading-m">{% translate "Notes" %}</h2><p class="govuk-body">{{ object.notes|linebreaksbr }}</p>{% endif %}
+
+  <h2 class="govuk-heading-m" id="site-and-buildings">{% translate "Site and buildings" %}</h2>
+  {% if physical %}
+  <dl class="govuk-summary-list">
+    {% for label, value in physical %}<div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{{ label }}</dt><dd class="govuk-summary-list__value">{{ value|linebreaksbr }}</dd></div>{% endfor %}
+  </dl>
+  {% else %}<p class="govuk-body">{% translate "Nothing recorded yet about the location, construction, roof, windows, parking or services." %}{% if user|can_edit:object %} <a class="govuk-link" href="{% url 'admin:properties_property_change' object.pk %}">{% translate "Add it" %}</a>{% endif %}</p>{% endif %}
+  <h3 class="govuk-heading-s">{% translate "Floor plans" %}</h3>
+  {% if plans %}
+  <ul class="govuk-list">{% for plan in plans %}<li><a class="govuk-link" href="{{ plan.file.url }}">{{ plan.title }}</a> <span class="govuk-body-s">({{ plan.file_type }}{% if plan.drawn_on %}, {{ plan.drawn_on|date:"j M Y" }}{% endif %}{% if plan.notes %}; {{ plan.notes }}{% endif %})</span></li>{% endfor %}</ul>
+  {% else %}<p class="govuk-body">{% translate "No floor plans held." %}</p>{% endif %}
+  <p class="govuk-body"><a class="govuk-link" href="{% url 'properties:report' object.pk %}">{% translate "Property report: everything held about this property, to read, print or download" %}</a></p>
 
   {% if breakdown %}
   <h2 class="govuk-heading-m">{% translate "Floor areas" %}</h2>

@@ -36,6 +36,31 @@ def validate_pdf(file):
         raise ValidationError(_("The file must be a PDF."))
 
 
+MAX_PLAN_BYTES = 50 * 1024 * 1024
+PLAN_EXTENSIONS = ("pdf", "dwg", "dxf")
+
+
+def validate_plan(file):
+    """Floor plans and drawings: PDF, or AutoCAD drawings (DWG or DXF)."""
+    name = (getattr(file, "name", "") or "").lower()
+    ext = name.rsplit(".", 1)[-1] if "." in name else ""
+    if ext not in PLAN_EXTENSIONS:
+        raise ValidationError(_("The plan must be a PDF or an AutoCAD drawing (.dwg or .dxf)."))
+    if file.size > MAX_PLAN_BYTES:
+        raise ValidationError(_("The plan must be smaller than 50 MB."))
+    file.seek(0)
+    head = file.read(1024)
+    file.seek(0)
+    if ext == "pdf":
+        ok = head.startswith(b"%PDF-")
+    elif ext == "dwg":
+        ok = head.startswith(b"AC10")  # every DWG version since AutoCAD R10 starts AC10xx
+    else:  # DXF is text starting with a section marker, or the binary form with its own sentinel
+        ok = head.startswith(b"AutoCAD Binary DXF") or (b"SECTION" in head and b"\x00" not in head)
+    if not ok:
+        raise ValidationError(_("The file's contents do not match its type."))
+
+
 def process_image(file):
     """Rotate to the camera orientation, scale down, and re-save as JPEG without EXIF data.
 

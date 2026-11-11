@@ -55,11 +55,38 @@ COLUMNS = [
                                                            "property, e.g. 4.2 Investment estate."),
     ("Holding purpose review date", "purpose_review_date", False, "When the holding purpose is next due for "
                                                                   "review, dd/mm/yyyy."),
+    ("Location", "location_description", False, "Where the property is and what surrounds it."),
+    ("Description", "building_description", False, "What is there: buildings, layout and accommodation."),
+    ("Built", "built", False, "Year or period, e.g. 1987 or 1930s."),
+    ("Construction", "construction_type", False, "Traditional masonry (brick or block), Stone, Steel frame, Steel "
+                                                 "portal frame, Concrete frame, Timber frame, Modular or "
+                                                 "prefabricated, Mixed or Other."),
+    ("Construction detail", "construction_detail", False, ""),
+    ("Storeys", "storeys", False, "Above ground, including the ground floor."),
+    ("Basement levels", "basement_levels", False, ""),
+    ("Roof type", "roof_type", False, "Pitched, Hipped, Mono-pitch, Flat, Mansard, North light (saw-tooth), "
+                                      "Curved or barrel, Mixed or Other."),
+    ("Roof covering", "roof_covering", False, "As listed on the property form, e.g. Slate, Clay tile, Profiled "
+                                              "metal sheet, Built-up bituminous felt, Single-ply membrane."),
+    ("Roof detail", "roof_detail", False, ""),
+    ("Windows", "window_type", False, "As listed on the property form, e.g. uPVC, double glazed."),
+    ("Window detail", "window_detail", False, ""),
+    ("Parking", "parking", False, "Describe the parking."),
+    ("Parking spaces", "parking_spaces", False, "A whole number."),
+    ("Mains gas", "mains_gas", False, "Yes or No."),
+    ("Electricity", "electricity", False, "Three-phase, Single-phase, Connected, phase not known, or None."),
+    ("Mains water", "mains_water", False, "Yes or No."),
+    ("Drainage", "drainage", False, "Mains drainage, Private (septic tank or treatment plant), or None."),
+    ("Services notes", "services_notes", False, ""),
+    ("Solar panels", "solar_pv", False, "Yes or No."),
+    ("Solar capacity kWp", "solar_capacity_kwp", False, "Only with Solar panels set to Yes."),
 ]
-CHOICE_FIELDS = {"property_type", "holding_purpose", "tenure", "occupation", "area_standard", "area_source"}
-DECIMAL_FIELDS = {"gia_sqm", "nia_sqm", "site_area_ha", "gea_sqm"}
+CHOICE_FIELDS = {"property_type", "holding_purpose", "tenure", "occupation", "area_standard", "area_source",
+                 "construction_type", "roof_type", "roof_covering", "window_type", "mains_gas", "electricity",
+                 "mains_water", "drainage", "solar_pv"}
+DECIMAL_FIELDS = {"gia_sqm", "nia_sqm", "site_area_ha", "gea_sqm", "solar_capacity_kwp"}
 DATE_FIELDS = {"areas_measured_on", "purpose_review_date"}
-INTEGER_FIELDS = {"easting", "northing"}
+INTEGER_FIELDS = {"easting", "northing", "storeys", "basement_levels", "parking_spaces"}
 
 
 @dataclass

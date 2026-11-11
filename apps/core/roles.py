@@ -27,6 +27,7 @@ PHAEMA_APPS = ("core", "connectors", "properties", "leases", "ledger", "servicec
 SURVEYOR_PERMISSIONS = {
     "properties.add_property", "properties.change_property",
     "properties.add_propertyphoto", "properties.change_propertyphoto", "properties.delete_propertyphoto",
+    "properties.add_propertyplan", "properties.change_propertyplan", "properties.delete_propertyplan",
     "leases.add_lease", "leases.change_lease",
     "leases.add_breakoption", "leases.change_breakoption", "leases.delete_breakoption",
     "leases.add_party", "leases.change_party",
@@ -113,11 +114,11 @@ def can_edit(user, obj):
     if role != SURVEYORS or obj is None:
         return False
     from apps.leases.models import BreakOption, Lease, LeaseDocument, LeaseEvent, Party, RentScheduleEntry
-    from apps.properties.models import Property, PropertyPhoto
+    from apps.properties.models import Property, PropertyPhoto, PropertyPlan
 
     if isinstance(obj, Property):
         return manages(user, obj)
-    if isinstance(obj, PropertyPhoto):
+    if isinstance(obj, (PropertyPhoto, PropertyPlan)):
         return manages(user, obj.property)
     if isinstance(obj, Lease):
         return obj.pk is None or obj.properties.filter(managing_surveyor=user).exists()

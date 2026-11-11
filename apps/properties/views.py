@@ -174,6 +174,8 @@ class PropertyDetailView(LoginRequiredMixin, DetailView):
         ctx["breakdown"] = obj.area_breakdown()
         ctx["surveyor_name"] = display_name(obj.managing_surveyor)
         ctx["purpose_review_overdue"] = bool(obj.purpose_review_date and obj.purpose_review_date < date.today())
+        ctx["physical"] = obj.physical_rows()
+        ctx["plans"] = list(obj.plans.all())
         ctx["leases"] = obj.leases.select_related("counterparty").order_by("status", "-term_start")
         ctx["map_config"] = map_config()
         ctx["has_location"] = bool(obj.boundary or obj.easting) or any(
@@ -388,3 +390,36 @@ def import_properties(request):
     elif request.method == "POST":
         ctx["file_error"] = _("Choose a file to upload.")
     return render(request, "properties/import.html", ctx)
+
+
+@login_required
+def property_report(request, pk):
+    """Everything held about a property, as a page or a Word file. From a valuation case (?case=) it is headed
+    "Initial valuation report" and leaves that case out of the cases in hand."""
+    from types import SimpleNamespace
+
+    from django.utils.safestring import mark_safe
+
+    from apps.cases.models import Case
+    from apps.documents import merge
+    from apps.documents import render as doc_render
+
+    from . import report
+
+    prop = get_object_or_404(Property.objects.select_related("parent", "managing_surveyor", "portfolio"), pk=pk)
+    case = None
+    if request.GET.get("case", "").isdigit():
+        case = get_object_or_404(Case.objects.select_related("case_type", "property"), pk=request.GET["case"])
+    text = report.build(prop, case=case, user=request.user)
+    values = merge.context(user=request.user, case=case, prop=prop)
+    title = "Initial valuation report" if case else "Property report"
+    if request.GET.get("format") == "docx":
+        data = doc_render.to_docx(SimpleNamespace(letterhead=True, prescribed_form=""), text, values)
+        response = HttpResponse(
+            data, content_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document")
+        name = f"{title} {prop.reference}".replace("/", "-")
+        response["Content-Disposition"] = f'attachment; filename="{name}.docx"'
+        return response
+    return render(request, "properties/property_report.html", {
+        "object": prop, "case": case, "title": title, "body": mark_safe(doc_render.to_html(text, values)),  # noqa: S308
+        "can_edit": can_edit(request.user, prop)})

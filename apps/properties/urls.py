@@ -14,6 +14,7 @@ urlpatterns = [
     path("import/", views.import_properties, name="import"),
     path("import/template.xlsx", views.import_template, name="import-template"),
     path("<int:pk>/", views.PropertyDetailView.as_view(), name="detail"),
+    path("<int:pk>/report/", views.property_report, name="report"),
     path("<int:pk>/map.geojson", views.property_geojson, name="detail-geojson"),
     path("<int:pk>/boundary/", views.boundary_from_inspire, name="boundary"),
     path("titles/<int:pk>/", views.TitleDetailView.as_view(), name="title"),
