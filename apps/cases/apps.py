@@ -14,9 +14,11 @@ class CasesConfig(AppConfig):
 
         from apps.core.models import StaffProfile
 
-        from .models import Approval, Case, CaseDocument, CaseNote, CaseTask, CaseType, CaseTypeTask, Correspondence
+        from .models import (Approval, Case, CaseDocument, CaseNote, CaseTask, CaseType, CaseTypeChecklistItem,
+                             CaseTypeTask, Correspondence)
 
-        for model in (Approval, Case, CaseDocument, CaseNote, CaseTask, CaseType, CaseTypeTask, Correspondence,
+        for model in (Approval, Case, CaseDocument, CaseNote, CaseTask, CaseType, CaseTypeChecklistItem, CaseTypeTask,
+                      Correspondence,
                       StaffProfile):
             audit.register(model)
 

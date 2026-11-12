@@ -74,6 +74,9 @@ SECURE_NOW = [
     ("Two-step sign-in", "A code from an authenticator app after the password, required for administrators by "
      "default and for everyone if the council chooses. Single-use recovery codes, and administrators can reset a "
      "lost phone."),
+    ("Single sign-on, if wanted", "Staff can sign in with the council's own accounts through Microsoft 365 (Entra "
+     "ID) or another OpenID Connect service, so the council's own sign-in rules apply. Outside consultants can keep "
+     "a PHAEMA sign-in. Tested against a stand-in service; not yet proved on a council's live tenant."),
     ("Access by role and area", "Roles decide what people can change and access areas decide what they can open, "
      "checked on the server for every page, download, report and API call."),
     ("A log of every change", "Who changed what and when, across properties, leases, cases, finance, access and "
@@ -87,8 +90,7 @@ SECURE_NOW = [
 
 BEFORE_LIVE = [
     "An independent penetration test by a CREST or CHECK accredited tester, with a summary of the results published",
-    "Single sign-on with the council's own accounts, such as Microsoft Entra ID, so the council's own sign-in rules "
-    "apply",
+    "Single sign-on proved against a pilot council's live Microsoft 365 tenant and its conditional access rules",
     "An independent accessibility audit against WCAG 2.2 AA",
     "Templates for a data protection impact assessment and record of processing, and answers to common security "
     "questionnaires",
@@ -97,11 +99,15 @@ BEFORE_LIVE = [
 
 CAPABILITIES = [
     ("Property register", "Estates, sites, buildings and units in a tree, with UPRN and USRN, floor areas to the RICS "
-     "measurement codes, titles, photos, disposals and a map drawn from Land Registry INSPIRE parcels."),
+     "measurement codes, titles, photos, disposals and a map drawn from Land Registry INSPIRE parcels. Each site "
+     "and building records its construction, roof, windows, services and floor plans, gathered into a property "
+     "report."),
     ("Leases and key dates", "Leases, licences and wayleaves, let out or held. Rent reviews, breaks, expiries and "
      "notice deadlines become events with email reminders and a calendar feed."),
     ("Cases and approvals", "Consents, renewals, dilapidations and enquiries with stages, tasks and statutory target "
-     "dates. Supervisors approve decisions, with conflicts of interest declared first."),
+     "dates. Supervisors approve decisions, with conflicts of interest declared first. Each case has a site visit "
+     "sheet for a phone or to print: safety information, the property details and a checklist the council sets "
+     "for each type of case."),
     ("Projects", "Developments, acquisitions, disposals and programmes taken through four gateways, with milestones, a "
      "budget by financial year, risks and a checklist of the register changes completion needs."),
     ("Document library", "Thirty letter and notice templates, from consent letters to section 25 notice particulars, "
@@ -115,7 +121,7 @@ CAPABILITIES = [
     ("Compliance", "Fire, gas, electrical, water, asbestos, lift and EPC certificates with remedial actions, Golden "
      "Thread information and site hazards shown before every visit."),
     ("Asset valuation", "The rolling valuation programme, internal or external valuers, Red Book records, impairment "
-     "prompts and the year-end schedule for finance."),
+     "prompts, an initial valuation report drawn from the property record, and the year-end schedule for finance."),
     ("People and access", "Four roles, access areas that decide who sees each module, supervision chains, cover for "
      "absence and a hand-over of a leaver's work in one step."),
     ("Reports and open data", "Ready-made and custom reports to Excel and CSV, the Transparency Code land and assets "
@@ -153,6 +159,8 @@ ROADMAP = [
         "One-step server installation with HTTPS and nightly backups",
         "A public test site, reset every 48 hours",
         "Two-step sign-in (multi-factor authentication) and a published security policy",
+        "Single sign-on with the council's own accounts (Microsoft 365 and others), as an option",
+        "Site and building details, floor plans, property and valuation reports, and site visit sheets",
     ]),
     ("now", "Now: testing", [
         "A major test programme run by council staff",
@@ -160,7 +168,7 @@ ROADMAP = [
         "Fixing what testing finds, and preparing for an independent penetration test and accessibility audit",
     ]),
     ("next", "Next: connectors", [
-        "Single sign-on with the council's own accounts",
+        "Email sent through the council's own mailbox",
         "Ordnance Survey address, UPRN and EPC lookups",
         "Map layers for QGIS, ArcGIS and other GIS",
         "Texts and letters to tenants through GOV.UK Notify",
@@ -335,7 +343,7 @@ BODY = r'''<div class="top"><div class="wrap top__inner">
     <div><h3>Free to use</h3><p>No licence fee, ever. Councils pay only for hosting and any support they choose, and can run it themselves or have any supplier host it.</p></div>
     <div><h3>Built by surveyors</h3><p>Covers the day-to-day work of public sector estate and asset management, to the professional standards: heads of terms to the RICS leasing code, 1954 Act notice dates, service charges to the RICS 2nd edition, Red Book valuation records and Golden Thread building information.</p></div>
     <div><h3>Accessible by design</h3><p>Built on the GOV.UK Design System and aiming for WCAG 2.2 AA, with dark, high-contrast and large-text settings.</p></div>
-    <div><h3>Secure by design</h3><p>Two-step sign-in, access by role and area, a log of every change, and hosting in the UK or EU. <a href="#security">What is done, and what comes before live use</a>.</p></div>
+    <div><h3>Secure by design</h3><p>Two-step sign-in, optional single sign-on, access by role and area, a log of every change, and hosting in the UK or EU. <a href="#security">What is done, and what comes before live use</a>.</p></div>
   </div>
 </section>
 

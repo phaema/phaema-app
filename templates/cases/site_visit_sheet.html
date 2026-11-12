@@ -1,0 +1,22 @@
+{% extends "base.html" %}{% load i18n %}
+{% block title %}{% translate "Site visit sheet" %}: {{ case.reference }}{% endblock %}
+{% block help_page %}cases{% endblock %}
+{% block breadcrumbs %}
+<nav class="govuk-breadcrumbs govuk-!-display-none-print" aria-label="Breadcrumb"><ol class="govuk-breadcrumbs__list">
+  <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="{% url 'cases:list' %}">{% translate "Cases" %}</a></li>
+  <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="{{ case.get_absolute_url }}">{{ case.reference }}</a></li>
+  <li class="govuk-breadcrumbs__list-item">{% translate "Site visit sheet" %}</li>
+</ol></nav>
+{% endblock %}
+{% block content %}
+<div class="govuk-!-display-none-print">
+  <p class="govuk-body">{% translate "Read it on your phone, or print it to write on. Nothing you tick or type here is saved: record what you find on the case and the property afterwards." %}</p>
+  <div class="govuk-button-group">
+    <a class="govuk-button" data-module="govuk-button" role="button" draggable="false" href="javascript:window.print()">{% translate "Print" %}</a>
+    <a class="govuk-button govuk-button--secondary" data-module="govuk-button" role="button" draggable="false" href="?format=docx">{% translate "Download as Word" %}</a>
+    <a class="govuk-link" href="{{ case.get_absolute_url }}">{% translate "Back to the case" %}</a>
+    {% if can_configure %}<a class="govuk-link" href="{% url 'admin:cases_casetype_change' case.case_type_id %}">{% translate "Change this sheet for all cases of this type" %}</a>{% endif %}
+  </div>
+</div>
+<div class="phaema-report phaema-sheet">{{ body }}</div>
+{% endblock %}

@@ -123,6 +123,57 @@ That last day becomes the case's target. PHAEMA warns if the date in the notice 
 was given, or is before the lease's contractual expiry. Check the dates against the notice itself: PHAEMA is a
 reminder, not legal advice.
 
+## Site visit sheet
+
+Every case that is about a property, or about an agreement over one, has a **Site visit sheet** link. It is one
+page to take with you on a visit, laid out for a phone and for printing:
+
+1. **The case**: reference, type, what it is about, the owner, target date, and the applicant or tenant with
+   their contact details.
+2. **Before you visit**: the site hazards recorded for the property, everything it is part of and the buildings
+   within it; what is known about asbestos; open compliance actions; and who occupies the property, with a
+   contact name and phone number.
+3. **The property**: the parts of the property record that matter for this type of case, such as the
+   description, construction, services, floor areas, floor plans held, tenancies and other open cases.
+4. **On site**: the checklist for this type of case. Where an item checks something on the record, the
+   recorded value is printed beside it, so you confirm it or note the difference. There is space for who visited,
+   when, who you met, notes and measurements.
+
+On a site with several buildings, things checked once (signing in, occupation, photographs) are listed for the
+visit as a whole, and the items about a building are repeated under each building with that building's own
+details.
+
+Select **Print** to write on it, or **Download as Word**. Nothing you tick or type on the page is saved: when
+you are back, add a note and photos to the case, and correct the property record where the visit showed it was
+wrong. Read the full asbestos register in PHAEMA before any work that disturbs the building.
+
+### Changing the sheet (administrators)
+
+Each case type has its own sheet. In **Manage data**, **Case types**, open a case type (or select **Change this
+sheet for all cases of this type** on any sheet):
+
+- **Property information on the site visit sheet**: tick the parts of the property record to print: key facts,
+  location, description and construction, services, parking, floor areas, floor plans, titles, the tenancy
+  summary, the main terms of each agreement, and other open cases. The case details and **Before you visit**
+  are always printed.
+- **Site visit checklist**: add, reword, reorder or remove items. Each item has:
+
+| Setting | What it does |
+|---|---|
+| Order | Items are printed lowest first. |
+| Heading | Items with the same heading are printed together, such as Outside or Inside. |
+| Item | What to check or record. |
+| Guidance | A short prompt printed under the item. |
+| Answer | Tick when checked, yes or no, a written answer, a number or measurement, or one of a list. |
+| List to choose from | For "one of a list": the choices, separated by commas, such as Good, Fair, Poor, Bad. |
+| Checks the recorded | A detail of the property record to print beside the item: occupation, use, description, when built, construction, storeys, roof, windows, parking, services, solar panels, floor areas, site area or site hazards. |
+| For each building | On a site with several buildings, repeat the item under each one. |
+
+PHAEMA comes with starting checklists for valuations, lease events, consents, dilapidations and breaches, and
+land enquiries. They are a starting point: review them against your own inspection standards. Case types that
+do not involve a visit, such as arrears, have none, and a case type you add yourself starts without one. Your
+changes are kept when PHAEMA is updated.
+
 ## Initial valuation report
 
 Every case in the **Asset valuation** group (asset valuation, disposal valuation, impairment review and the

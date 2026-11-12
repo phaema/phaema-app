@@ -129,3 +129,23 @@ html.phaema-text-largest { font-size: 150%; }
 .phaema-qr svg { display: block; }
 .phaema-setup-key, .phaema-recovery-codes code { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 1.1rem; letter-spacing: .05em; }
 .phaema-recovery-codes { columns: 2; max-width: 24em; }
+
+/* Site visit sheet: one column on a phone, room to write when printed */
+.phaema-sheet .govuk-table__cell { vertical-align: top; }
+.phaema-sheet .govuk-table__cell:empty { min-width: 6em; height: 2.2em; }
+@media (max-width: 40em) {
+  .phaema-sheet .govuk-table, .phaema-sheet .govuk-table__body, .phaema-sheet .govuk-table__row { display: block; }
+  .phaema-sheet .govuk-table__row { border-bottom: 1px solid var(--ph-border, #b1b4b6); padding: 8px 0; }
+  .phaema-sheet .govuk-table__cell { display: block; border: 0; padding: 2px 0; font-size: 1.1875rem; }
+  .phaema-sheet .govuk-table__cell:first-child { font-weight: 700; }
+  .phaema-sheet .govuk-table__cell:empty { display: none; }
+  /* a checklist's heading row: keep the heading, drop the column titles */
+  .phaema-sheet .govuk-table__row:first-child .govuk-table__cell:has(> strong):not(:first-child) { display: none; }
+  .phaema-sheet .govuk-table__cell em { display: block; font-weight: 400; }
+}
+@media print {
+  .phaema-sheet .govuk-table__cell { border: 1px solid #505a5f; padding: 6px 8px; }
+  .phaema-sheet .govuk-table__cell:empty { height: 3em; }
+  .phaema-sheet .govuk-table__row { break-inside: avoid; }
+  .phaema-sheet .govuk-heading-m { break-after: avoid; }
+}
