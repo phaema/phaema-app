@@ -108,7 +108,7 @@ and the construction, storeys, roof, windows and services on each building withi
 
 **Floor plans.** On the property's page, open **Add floor plans or photos** and drag the plans onto the box, or
 choose them: up to 20 at a time, each titled with its file name. Plans can be PDFs or AutoCAD drawings (.dwg or
-.dxf), up to 50 MB each. PDFs open in the browser; AutoCAD drawings download to open in your drawing software.
+.dxf), up to 50 MB each. PDFs open in PHAEMA's [reader](getting-started.md#reading-a-pdf); AutoCAD drawings download to open in your drawing software.
 Change a title or date, or remove a plan, in **Edit this property**, under **Floor plans**. Surveyors can add
 plans to the properties they manage.
 

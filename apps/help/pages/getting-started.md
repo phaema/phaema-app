@@ -56,6 +56,23 @@ with your filters and sort order. See [import and export](import-export.md#expor
 Select **Manage data** (or an **Edit** link on a record's page) to add or change records. Whether you can change
 a record depends on your [role](users-and-roles.md). Every change is recorded in the [change log](change-log.md).
 
+## Reading a PDF
+Leases, deeds, title documents, plans, certificates and any other PDF held in PHAEMA open in PHAEMA's own reader,
+on a page of their own. The page shows the name of the document and a link back to the record it belongs to.
+
+- **‹ and ›** move a page at a time; type a number in the box to jump to that page.
+- **− and +** zoom out and in. **Fit width** fills the screen across; **Whole page** shows a full page at once.
+- **Rotate** turns the pages, for a plan or a scan that is on its side.
+- **Find** searches the wording of the document: type a word or phrase and press Enter. Every match is
+  highlighted, PHAEMA says how many there are, and the arrows move between them.
+- **Download** saves a copy with a name you will recognise. **Print** opens the document in your browser's own
+  PDF reader in a new tab, where you print it in the usual way.
+
+Find only works where the PDF holds real text. A scan is a picture of the page, so there is nothing to search
+unless the scanner made it searchable (often called OCR). A PDF protected with a password cannot be shown:
+download it and open it on your computer. Other files, such as Word documents, spreadsheets and drawings, still
+download.
+
 ## Making PHAEMA easier to read
 
 Under the menu there are three settings that PHAEMA remembers on your computer:

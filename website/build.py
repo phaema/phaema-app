@@ -103,7 +103,8 @@ CAPABILITIES = [
      "and building records its construction, roof, windows, services and floor plans, gathered into a property "
      "report."),
     ("Leases and key dates", "Leases, licences and wayleaves, let out or held. Rent reviews, breaks, expiries and "
-     "notice deadlines become events with email reminders and a calendar feed."),
+     "notice deadlines become events with email reminders and a calendar feed. Leases, deeds and plans held as PDFs "
+     "open in a built-in reader, with search across the wording."),
     ("Cases and approvals", "Consents, renewals, dilapidations and enquiries with stages, tasks and statutory target "
      "dates. Supervisors approve decisions, with conflicts of interest declared first. Documents and saved emails are filed by "
      "dragging them onto the case. Each case has a site visit "
