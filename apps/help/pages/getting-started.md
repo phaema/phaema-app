@@ -60,6 +60,8 @@ a record depends on your [role](users-and-roles.md). Every change is recorded in
 Leases, deeds, title documents, plans, certificates and any other PDF held in PHAEMA open in PHAEMA's own reader,
 on a page of their own. The page shows the name of the document and a link back to the record it belongs to.
 
+- **Pages** shows or hides a strip of small pages down the side. Select one to go to that page; the page you are
+  on is outlined. The strip starts open on a computer and closed on a phone, and PHAEMA remembers your choice.
 - **‹ and ›** move a page at a time; type a number in the box to jump to that page.
 - **− and +** zoom out and in. **Fit width** fills the screen across; **Whole page** shows a full page at once.
 - **Rotate** turns the pages, for a plan or a scan that is on its side.

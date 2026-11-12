@@ -42,6 +42,7 @@ def test_a_person_opening_a_pdf_gets_the_viewer(plan, make_user):
     assert plan.property.get_absolute_url() in page
     assert f'data-src="{url}?raw=1"' in page and f'href="{url}?download=1"' in page
     assert "vendor/pdfjs/build/pdf.min.mjs" in page and "js/pdf-view.mjs" in page
+    assert 'data-pdf="thumbs-toggle"' in page and 'data-pdf="thumbs"' in page          # the strip of small pages
     assert "no-store" in response["Cache-Control"] and "Accept" in response["Vary"]
 
 

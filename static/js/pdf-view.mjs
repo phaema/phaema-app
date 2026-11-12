@@ -86,6 +86,8 @@ async function start(root) {
   eventBus.on("updatefindmatchescount", showCount);
   eventBus.on("updatefindcontrolstate", showCount);
 
+  thumbnails(root, doc, viewer, eventBus);
+
   let resizing;
   window.addEventListener("resize", () => {
     clearTimeout(resizing);
@@ -94,4 +96,92 @@ async function start(root) {
       if (value === "page-width" || value === "page-fit") viewer.currentScaleValue = value;
     }, 150);
   });
+}
+
+// The strip of small pages down the side. Each is drawn only when it scrolls into view, one at a time.
+function thumbnails(root, doc, viewer, eventBus) {
+  const strip = part(root, "thumbs");
+  const toggle = part(root, "thumbs-toggle");
+  const word = strip.dataset.pageWord || "Page";
+  const wide = window.matchMedia("(min-width: 48em)");
+  const items = [];
+  let built = false;
+  let queue = Promise.resolve();
+
+  const refit = () => {
+    const value = viewer.currentScaleValue;
+    if (value === "page-width" || value === "page-fit") viewer.currentScaleValue = value;
+  };
+  const mark = (number, follow) => {
+    items.forEach((item) => item.button.removeAttribute("aria-current"));
+    const item = items[number - 1];
+    if (!item) return;
+    item.button.setAttribute("aria-current", "page");
+    if (follow && !strip.hidden) {                      // keep the current page in sight without moving the whole window
+      const top = item.button.offsetTop, bottom = top + item.button.offsetHeight;
+      if (top < strip.scrollTop) strip.scrollTop = top - 8;
+      else if (bottom > strip.scrollTop + strip.clientHeight) strip.scrollTop = bottom - strip.clientHeight + 8;
+    }
+  };
+  const draw = (item) => {
+    if (item.drawn) return;
+    item.drawn = true;
+    queue = queue.then(async () => {
+      const page = await doc.getPage(item.number);
+      const turn = (page.rotate + viewer.pagesRotation) % 360;
+      const base = page.getViewport({ scale: 1, rotation: turn });
+      const width = item.holder.clientWidth || 110;
+      const viewport = page.getViewport({ scale: (width / base.width) * Math.min(window.devicePixelRatio || 1, 2), rotation: turn });
+      const canvas = document.createElement("canvas");
+      canvas.width = Math.round(viewport.width);
+      canvas.height = Math.round(viewport.height);
+      item.holder.style.height = Math.round(width * base.height / base.width) + "px";
+      await page.render({ canvas, canvasContext: canvas.getContext("2d"), viewport }).promise;
+      item.holder.replaceChildren(canvas);
+    }).catch((err) => { console.error(err); });
+  };
+  const watcher = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => { if (entry.isIntersecting) draw(items[entry.target.dataset.page - 1]); });
+  }, { root: strip, rootMargin: "300px 0px" });
+
+  const build = async () => {
+    built = true;
+    const first = (await doc.getPage(1)).getViewport({ scale: 1 });
+    for (let number = 1; number <= doc.numPages; number += 1) {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "phaema-pdf__thumb";
+      button.dataset.page = number;
+      button.setAttribute("aria-label", `${word} ${number}`);
+      const holder = document.createElement("span");
+      holder.className = "phaema-pdf__thumb-page";
+      const label = document.createElement("span");
+      label.textContent = number;
+      button.append(holder, label);
+      strip.append(button);
+      holder.style.height = Math.round(holder.clientWidth * first.height / first.width) + "px";
+      button.addEventListener("click", () => { viewer.currentPageNumber = number; });
+      items.push({ number, button, holder, drawn: false });
+      watcher.observe(button);
+    }
+    mark(viewer.currentPageNumber, true);
+  };
+  const show = (open, remember) => {
+    strip.hidden = !open;
+    toggle.setAttribute("aria-expanded", open ? "true" : "false");
+    if (open && !built) build();
+    else if (open) mark(viewer.currentPageNumber, true);
+    refit();
+    if (remember) { try { localStorage.setItem("phaema-pdf-pages", open ? "open" : "closed"); } catch (err) { /* not remembered */ } }
+  };
+
+  toggle.addEventListener("click", () => show(strip.hidden, true));
+  eventBus.on("pagechanging", (evt) => mark(evt.pageNumber, true));
+  eventBus.on("rotationchanging", () => {
+    items.forEach((item) => { item.drawn = false; watcher.unobserve(item.button); watcher.observe(item.button); });
+  });
+
+  let saved = null;
+  try { saved = localStorage.getItem("phaema-pdf-pages"); } catch (err) { /* start from the default */ }
+  if (doc.numPages > 1 && wide.matches && saved !== "closed") show(true, false);
 }

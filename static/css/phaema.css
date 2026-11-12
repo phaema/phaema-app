@@ -166,12 +166,26 @@ html.phaema-text-largest { font-size: 150%; }
 .phaema-pdf__group .govuk-body { white-space: nowrap; }
 .phaema-pdf__bar .govuk-input--width-3 { max-width: 4.5em; }
 .phaema-pdf__bar .govuk-input--width-10 { min-width: 0; flex: 1 1 8em; }
-.phaema-pdf__frame { position: relative; height: calc(100vh - 150px); min-height: 420px; border: 1px solid var(--ph-border, #b1b4b6);
+.phaema-pdf__frame { display: flex; height: calc(100vh - 150px); min-height: 420px; border: 1px solid var(--ph-border, #b1b4b6);
   background: #505a5f; }
+.phaema-pdf__main { position: relative; flex: 1 1 auto; min-width: 0; }
 .phaema-pdf__scroll { position: absolute; inset: 0; overflow: auto; }
+.phaema-pdf__thumbs { flex: 0 0 150px; overflow-y: auto; padding: 10px 0; background: #3a4246; border-right: 1px solid #b1b4b6; }
+.phaema-pdf__thumbs[hidden] { display: none; }
+.phaema-pdf__thumb { display: block; width: 100%; margin: 0; padding: 6px 0 2px; border: 0; background: none; color: #fff;
+  font: inherit; font-size: 0.875rem; text-align: center; cursor: pointer; }
+.phaema-pdf__thumb span { display: block; padding: 2px 0 4px; }
+.phaema-pdf__thumb-page { display: block; width: 110px; margin: 0 auto; background: #fff; border: 3px solid transparent; box-sizing: content-box; }
+.phaema-pdf__thumb-page canvas { display: block; width: 100%; height: 100%; }
+.phaema-pdf__thumb[aria-current="page"] .phaema-pdf__thumb-page { border-color: #fd0; }
+.phaema-pdf__thumb[aria-current="page"] span { font-weight: 700; }
+.phaema-pdf__thumb:focus-visible { outline: 3px solid #fd0; outline-offset: -3px; }
+.phaema-pdf__thumb:hover .phaema-pdf__thumb-page { border-color: #b1b4b6; }
 .phaema-pdf__scroll:focus { outline: 3px solid #fd0; outline-offset: 0; }
 @media (max-width: 40em) {
   .phaema-pdf__group--end { margin-left: 0; }
   .phaema-pdf__frame { height: calc(100vh - 110px); }
+  .phaema-pdf__thumbs { flex-basis: 96px; }
+  .phaema-pdf__thumb-page { width: 70px; }
 }
-@media print { .phaema-pdf__bar, .phaema-pdf__head .govuk-back-link { display: none; } }
+@media print { .phaema-pdf__bar, .phaema-pdf__thumbs, .phaema-pdf__head .govuk-back-link { display: none; } }

@@ -13,6 +13,7 @@
   </div>
   <div class="phaema-pdf__bar" role="toolbar" aria-label="{% translate 'Document controls' %}" hidden data-pdf-bar>
     <span class="phaema-pdf__group">
+      <button type="button" class="govuk-button govuk-button--secondary" data-pdf="thumbs-toggle" aria-expanded="false" aria-controls="pdf-thumbs">{% translate "Pages" %}</button>
       <button type="button" class="govuk-button govuk-button--secondary" data-pdf="prev" aria-label="{% translate 'Previous page' %}">‹</button>
       <label class="govuk-visually-hidden" for="pdf-page">{% translate "Page" %}</label>
       <input class="govuk-input govuk-input--width-3" id="pdf-page" data-pdf="page" type="number" min="1" value="1" inputmode="numeric">
@@ -46,7 +47,10 @@
       <p class="govuk-body"><a class="govuk-link" href="{{ download_url }}">{% translate "Download the document" %}</a> {% translate "to open it on your computer, or" %} <a class="govuk-link" href="{{ raw_url }}">{% translate "open it in your browser's own reader" %}</a>.</p></div>
   </div>
   <noscript><p class="govuk-body">{% translate "The viewer needs JavaScript." %} <a class="govuk-link" href="{{ raw_url }}">{% translate "Open the document in your browser" %}</a> {% translate "or" %} <a class="govuk-link" href="{{ download_url }}">{% translate "download it" %}</a>.</p></noscript>
-  <div class="phaema-pdf__frame"><div class="phaema-pdf__scroll" data-pdf="container" tabindex="0" aria-label="{% translate 'Document' %}"><div class="pdfViewer" data-pdf="pages-holder"></div></div></div>
+  <div class="phaema-pdf__frame">
+    <nav class="phaema-pdf__thumbs" id="pdf-thumbs" data-pdf="thumbs" aria-label="{% translate 'Pages of this document' %}" data-page-word="{% translate 'Page' %}" hidden></nav>
+    <div class="phaema-pdf__main"><div class="phaema-pdf__scroll" data-pdf="container" tabindex="0" aria-label="{% translate 'Document' %}"><div class="pdfViewer" data-pdf="pages-holder"></div></div></div>
+  </div>
 </div>
 <script type="module" src="{% static 'js/pdf-view.mjs' %}"></script>
 {% endblock %}
