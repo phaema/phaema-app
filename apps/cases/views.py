@@ -10,6 +10,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import PermissionDenied
 from django.core.files.base import ContentFile
 from django.db.models import Count, Q
+from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils.translation import gettext as _
 from django.utils.translation import gettext_lazy
@@ -270,6 +271,7 @@ def case_detail(request, pk):
         "hidden_notes": case.notes.filter(confidential=True).count() if not show_confidential else 0,
         "is_administrator": is_administrator(request.user),
         "valuation_report_property": case.main_property if case.case_type.group == "valuation" else None,
+        "has_visit_sheet": case.main_property is not None,
         **_approval_context(request.user, case),
         **_leasing_context(case),
         **_standards_context(case),
@@ -634,3 +636,34 @@ def _without_supervisor():
 
     have = StaffProfile.objects.filter(supervisor__isnull=False).values_list("user_id", flat=True)
     return list(_people(SURVEYORS).exclude(pk__in=have))
+
+
+@login_required
+def site_visit_sheet(request, pk):
+    """What to take on a site visit for this case: a page for a phone, to print, or as a Word file."""
+    from types import SimpleNamespace
+
+    from django.http import Http404
+    from django.utils.safestring import mark_safe
+
+    from apps.documents import merge
+    from apps.documents import render as doc_render
+
+    from . import visit
+
+    case = get_object_or_404(Case.objects.select_related("case_type", "property", "lease__counterparty", "party",
+                                                         "owner"), pk=pk)
+    text = visit.build(case, user=request.user)
+    if text is None:
+        raise Http404("This case is not about a property.")
+    prop = case.main_property
+    values = merge.context(user=request.user, case=case, prop=prop)
+    if request.GET.get("format") == "docx":
+        data = doc_render.to_docx(SimpleNamespace(letterhead=True, prescribed_form=""), text, values)
+        response = HttpResponse(
+            data, content_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document")
+        response["Content-Disposition"] = f'attachment; filename="Site visit sheet {case.reference}.docx"'
+        return response
+    return render(request, "cases/site_visit_sheet.html", {
+        "case": case, "property": prop, "body": mark_safe(doc_render.to_html(text, values)),  # noqa: S308
+        "can_configure": is_administrator(request.user)})

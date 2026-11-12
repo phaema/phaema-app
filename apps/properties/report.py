@@ -125,27 +125,59 @@ def gaps(prop, parts):
     return out
 
 
-def build(prop, case=None, user=None, today=None):  # noqa: C901 - one block per section of the report
-    """The report as markup text."""
-    today = today or date.today()
-    parts, ancestors = family(prop)
-    leases = list(agreements(prop, parts, ancestors))
-    title = "Initial valuation report" if case is not None else "Property report"
-    out = [f"# {title}: {prop.reference} {prop.name}", ""]
-    intro = f"Prepared {_date(today)}" + (f" by {_name(user)}" if user else "") + "."
-    if case is not None:
-        intro += f" Case {case.display_reference}: {case.title} ({case.case_type.name})."
-    out += [intro, "",
-            "*Compiled from the council's property records as background information. It is not a valuation, and "
-            "the details should be checked on inspection.*", ""]
+# The parts of the property information. A report or a site visit sheet can include any selection of them.
+PARTS = [
+    ("facts", "Key facts (reference, address, tenure, use, managing surveyor)"),
+    ("location", "Location"),
+    ("description", "Description, construction, storeys, roof and windows"),
+    ("services", "Services and solar panels"),
+    ("parking", "Parking"),
+    ("areas", "Floor areas and how they are made up"),
+    ("plans", "Floor plans held"),
+    ("titles", "Titles, restrictions and covenants"),
+    ("agreements", "Tenancies and other agreements: summary table"),
+    ("agreement_terms", "Tenancies and other agreements: main terms of each"),
+    ("cases", "Other open cases"),
+]
+ALL_PARTS = [key for key, _label in PARTS]
+_SERVICE_LABELS = {"Mains gas", "Electricity", "Mains water", "Drainage", "Solar panels", "Services notes"}
+_SITE_LABELS = {"Location", "Description"}
 
-    out += ["# 1. The property", ""]
-    titles = list(prop.titles.all())
-    out += _table([
+
+class Gathered:
+    """The property with its family, agreements and titles, read once for all the sections."""
+
+    def __init__(self, prop, case=None):
+        self.prop, self.case = prop, case
+        self.parts, self.ancestors = family(prop)
+        self.leases = list(agreements(prop, self.parts, self.ancestors))
+        self.titles = list(prop.titles.all())
+
+
+def _rows_for(prop, wanted):
+    """The recorded facts about a property that belong to the wanted parts, other than the free text."""
+    rows = []
+    for label, value in prop.physical_rows():
+        if label in _SITE_LABELS:
+            continue
+        if label in _SERVICE_LABELS:
+            part = "services"
+        elif label == "Parking":
+            part = "parking"
+        else:
+            part = "description"
+        if part in wanted:
+            rows.append((label, value))
+    return rows
+
+
+def _facts(g, wanted):
+    prop = g.prop
+    return _table([
         ("Reference", prop.reference), ("Name", prop.name), ("Type", prop.get_property_type_display()),
         ("Address", prop.address), ("UPRN", prop.uprn),
-        ("Part of", ", ".join(f"{a.reference} {a.name}" for a in ancestors)),
-        ("Tenure", prop.get_tenure_display()), ("Title numbers", ", ".join(str(t) for t in titles)),
+        ("Part of", ", ".join(f"{a.reference} {a.name}" for a in g.ancestors)),
+        ("Tenure", prop.get_tenure_display()), ("Title numbers", ", ".join(str(t) for t in g.titles)),
         ("Holding purpose", prop.get_holding_purpose_display()),
         ("Portfolio", prop.portfolio.name if prop.portfolio_id else ""),
         ("Occupation", prop.get_occupation_display()),
@@ -154,26 +186,39 @@ def build(prop, case=None, user=None, today=None):  # noqa: C901 - one block per
         ("Grid reference", f"{prop.easting}, {prop.northing}" if prop.easting else ""),
     ]) + [""]
 
-    out += ["# 2. Location", ""]
-    out += _para(prop.location_description) if prop.location_description else [MISSING, ""]
 
-    out += ["# 3. Description, construction and services", ""]
-    out += _para(prop.building_description) if prop.building_description else [MISSING, ""]
-    rows = _physical(prop)
+def _location(g, wanted):
+    return _para(g.prop.location_description) if g.prop.location_description else [MISSING, ""]
+
+
+def _description(g, wanted):
+    """The property and then each building or part in turn, with whichever of description, services and parking
+    are wanted."""
+    prop, out = g.prop, []
+    text = "description" in wanted
+    if text:
+        out += _para(prop.building_description) if prop.building_description else [MISSING, ""]
+    rows = _rows_for(prop, wanted)
     if rows:
         out += _table(rows) + [""]
-    blocks = [(p, d) for p, d in parts
-              if p.property_type == Property.PropertyType.BUILDING or p.physical_rows()]
-    for part, _depth in blocks:
+    elif not text:
+        out += [MISSING, ""]
+    for part, _depth in g.parts:
+        rows = _rows_for(part, wanted)
+        if not (part.property_type == Property.PropertyType.BUILDING or rows
+                or (text and part.building_description)):
+            continue
         out += [f"## {part.get_property_type_display()}: {part.reference} {part.name}", ""]
-        if part.location_description:
+        if text and part.location_description:
             out += _para(part.location_description)
-        if part.building_description:
+        if text and part.building_description:
             out += _para(part.building_description)
-        rows = _physical(part)
-        out += (_table(rows) + [""]) if rows else ([MISSING, ""] if not part.building_description else [])
+        out += (_table(rows) + [""]) if rows else ([MISSING, ""] if not (text and part.building_description) else [])
+    return out
 
-    out += ["# 4. Floor areas", ""]
+
+def _areas(g, wanted):
+    prop, out = g.prop, []
     own = [("Gross internal area (GIA)", _area(prop.gia_sqm)), ("Net internal area (NIA)", _area(prop.nia_sqm)),
            ("Gross external area (GEA)", _area(prop.gea_sqm))]
     own = [(label, value) for label, value in own if value]
@@ -198,87 +243,143 @@ def build(prop, case=None, user=None, today=None):  # noqa: C901 - one block per
                      f"**{breakdown['leaf_gia']:,.0f}**"), ""]
         if breakdown["net_to_gross"]:
             out += [f"Net to gross: {breakdown['net_to_gross']}%.", ""]
+    return out
 
-    out += ["# 5. Floor plans", ""]
-    plans = [(prop, plan) for plan in prop.plans.all()]
-    plans += [(part, plan) for part, _d in parts for plan in part.plans.all()]
-    if plans:
-        out += [_head("Plan", "Of", "File", "Date", "Notes")]
-        out += [_row(plan.title, owner.name, plan.file_type(), _date(plan.drawn_on), plan.notes)
-                for owner, plan in plans]
-        out += ["", "The plans are held in PHAEMA on each property's page.", ""]
-    else:
-        out += ["No floor plans are held.", ""]
 
-    out += ["# 6. Title", ""]
-    if titles:
-        for t in titles:
-            out += _table([("Title", str(t)), ("Tenure", t.get_tenure_display()),
-                           ("Class of title", t.get_title_class_display()),
-                           ("Restrictions, covenants and rights", t.restrictions_and_covenants)]) + [""]
-    else:
-        out += ["No title is linked to this property.", ""]
+def _plans(g, wanted):
+    plans = [(g.prop, plan) for plan in g.prop.plans.all()]
+    plans += [(part, plan) for part, _d in g.parts for plan in part.plans.all()]
+    if not plans:
+        return ["No floor plans are held.", ""]
+    out = [_head("Plan", "Of", "File", "Date", "Notes")]
+    out += [_row(plan.title, owner.name, plan.file_type(), _date(plan.drawn_on), plan.notes) for owner, plan in plans]
+    return out + ["", "The plans are held in PHAEMA on each property's page.", ""]
 
-    out += ["# 7. Tenancies and other agreements", ""]
-    if leases:
-        total = sum((lease.annual_rent or Decimal("0") for lease in leases
+
+def _titles(g, wanted):
+    if not g.titles:
+        return ["No title is linked to this property.", ""]
+    out = []
+    for t in g.titles:
+        out += _table([("Title", str(t)), ("Tenure", t.get_tenure_display()),
+                       ("Class of title", t.get_title_class_display()),
+                       ("Restrictions, covenants and rights", t.restrictions_and_covenants)]) + [""]
+    return out
+
+
+def _term(lease):
+    return f"{_date(lease.term_start)} to {_date(lease.term_end) or 'periodic'}"
+
+
+def _agreement_terms(lease):
+    breaks = "; ".join(
+        f"{_date(b.break_date)} ({b.get_exercisable_by_display().lower()}"
+        + (f", {b.notice_months} months' notice" if b.notice_months else "") + ")" for b in lease.breaks.all())
+    review = str(lease.get_review_basis_display())
+    if lease.next_review_date:
+        review = f"{review}; next review {_date(lease.next_review_date)}"
+        if lease.time_of_essence:
+            review += " (time is of the essence)"
+    pairs = [
+        ("Council is", "Landlord" if lease.direction == "out" else "Tenant"),
+        ("Agreement", lease.get_agreement_type_display()), ("Premises", _premises(lease)),
+        ("Date of agreement", _date(lease.lease_date)), ("Term", _term(lease)),
+        ("Security of tenure", lease.get_security_of_tenure_display()),
+        ("Rent", " ".join(x for x in (_money(lease.annual_rent) + " a year" if lease.annual_rent is not None
+                                      else "", str(lease.get_rent_frequency_display()).lower(),
+                                      "plus VAT" if lease.vat_chargeable else "") if x)),
+        ("Rent review", review), ("Break options", breaks),
+        ("Repairs", lease.get_repairing_display()), ("Insurance", lease.get_insurance_display()),
+        ("Service charge", "Payable" if lease.service_charge_payable else ""),
+        ("Permitted use", lease.permitted_use), ("Assignment and subletting", lease.alienation),
+        ("Alterations", lease.alterations), ("Incentives", lease.incentives),
+        ("Special rights", lease.special_rights),
+    ]
+    return _table([(label, value) for label, value in pairs if _cell(value)]) + [""]
+
+
+def _agreements(g, wanted):
+    if not g.leases:
+        return ["No current tenancies or other agreements are recorded.", ""]
+    out = []
+    if "agreements" in wanted:
+        total = sum((lease.annual_rent or Decimal("0") for lease in g.leases
                      if lease.direction == "out" and lease.status in ("current", "holding_over")), Decimal("0"))
         out += [_head("Agreement", "Party", "Premises", "Term", "Rent a year", "Status")]
-        for lease in leases:
-            term = f"{_date(lease.term_start)} to {_date(lease.term_end) or 'periodic'}"
+        for lease in g.leases:
             out.append(_row(f"{lease.reference} {lease.get_agreement_type_display()}", lease.counterparty.name,
-                            _premises(lease), term, _money(lease.annual_rent), lease.get_status_display()))
+                            _premises(lease), _term(lease), _money(lease.annual_rent), lease.get_status_display()))
         out += ["", f"Total current rent from agreements where the council is landlord: {_money(total)} a year.", ""]
-        for lease in leases:
-            out += [f"## {lease.reference}: {lease.counterparty.name}", ""]
-            breaks = "; ".join(
-                f"{_date(b.break_date)} ({b.get_exercisable_by_display().lower()}"
-                + (f", {b.notice_months} months' notice" if b.notice_months else "") + ")" for b in lease.breaks.all())
-            review = str(lease.get_review_basis_display())
-            if lease.next_review_date:
-                review = f"{review}; next review {_date(lease.next_review_date)}"
-                if lease.time_of_essence:
-                    review += " (time is of the essence)"
-            pairs = [
-                ("Council is", "Landlord" if lease.direction == "out" else "Tenant"),
-                ("Agreement", lease.get_agreement_type_display()), ("Premises", _premises(lease)),
-                ("Date of agreement", _date(lease.lease_date)),
-                ("Term", f"{_date(lease.term_start)} to {_date(lease.term_end) or 'periodic'}"),
-                ("Security of tenure", lease.get_security_of_tenure_display()),
-                ("Rent", " ".join(x for x in (_money(lease.annual_rent) + " a year" if lease.annual_rent is not None
-                                              else "", str(lease.get_rent_frequency_display()).lower(),
-                                              "plus VAT" if lease.vat_chargeable else "") if x)),
-                ("Rent review", review), ("Break options", breaks),
-                ("Repairs", lease.get_repairing_display()), ("Insurance", lease.get_insurance_display()),
-                ("Service charge", "Payable" if lease.service_charge_payable else ""),
-                ("Permitted use", lease.permitted_use), ("Assignment and subletting", lease.alienation),
-                ("Alterations", lease.alterations), ("Incentives", lease.incentives),
-                ("Special rights", lease.special_rights),
-            ]
-            out += _table([(label, value) for label, value in pairs if _cell(value)]) + [""]
-    else:
-        out += ["No current tenancies or other agreements are recorded.", ""]
+    if "agreement_terms" in wanted:
+        for lease in g.leases:
+            out += [f"## {lease.reference}: {lease.counterparty.name}", ""] + _agreement_terms(lease)
+    return out
 
-    out += ["# 8. Cases in hand", ""]
-    cases = list(open_cases(prop, parts, ancestors, leases, exclude=case))
-    if cases:
-        out += [_head("Case", "Type", "About", "Stage", "Owner", "Received")]
-        for c in cases:
-            stage = c.get_stage_display() + (" (on hold)" if c.status == c.Status.ON_HOLD else "")
-            out.append(_row(c.reference, c.case_type.name, c.title, stage, _name(c.owner), _date(c.received_on)))
-        out.append("")
-    else:
-        out += ["No other open cases on this property or its agreements.", ""]
 
+def _cases(g, wanted):
+    cases = list(open_cases(g.prop, g.parts, g.ancestors, g.leases, exclude=g.case))
+    if not cases:
+        return ["No other open cases on this property or its agreements.", ""]
+    out = [_head("Case", "Type", "About", "Stage", "Owner", "Received")]
+    for c in cases:
+        stage = c.get_stage_display() + (" (on hold)" if c.status == c.Status.ON_HOLD else "")
+        out.append(_row(c.reference, c.case_type.name, c.title, stage, _name(c.owner), _date(c.received_on)))
+    return out + [""]
+
+
+def sections(prop, wanted=None, case=None, gathered=None):
+    """(title, lines) for each wanted part of the property information, in report order. Description, services
+    and parking share one section, as do the agreements summary and terms."""
+    wanted = set(ALL_PARTS if wanted is None else wanted)
+    g = gathered or Gathered(prop, case)
+    out = []
+    if "facts" in wanted:
+        out.append(("The property", _facts(g, wanted)))
+    if "location" in wanted:
+        out.append(("Location", _location(g, wanted)))
+    physical = wanted & {"description", "services", "parking"}
+    if physical:
+        if "description" in physical:
+            title = "Description, construction and services" if "services" in physical else "Description and construction"
+        else:
+            title = " and ".join(x for x in ("Services" if "services" in physical else "",
+                                             "parking" if "parking" in physical else "") if x).capitalize()
+        out.append((title, _description(g, physical)))
+    if "areas" in wanted:
+        out.append(("Floor areas", _areas(g, wanted)))
+    if "plans" in wanted:
+        out.append(("Floor plans", _plans(g, wanted)))
+    if "titles" in wanted:
+        out.append(("Title", _titles(g, wanted)))
+    if wanted & {"agreements", "agreement_terms"}:
+        out.append(("Tenancies and other agreements", _agreements(g, wanted)))
+    if "cases" in wanted:
+        out.append(("Cases in hand", _cases(g, wanted)))
+    return out
+
+
+def build(prop, case=None, user=None, today=None):
+    """The whole report as markup text."""
+    today = today or date.today()
+    g = Gathered(prop, case)
+    title = "Initial valuation report" if case is not None else "Property report"
+    out = [f"# {title}: {prop.reference} {prop.name}", ""]
+    intro = f"Prepared {_date(today)}" + (f" by {_name(user)}" if user else "") + "."
+    if case is not None:
+        intro += f" Case {case.display_reference}: {case.title} ({case.case_type.name})."
+    out += [intro, "",
+            "*Compiled from the council's property records as background information. It is not a valuation, and "
+            "the details should be checked on inspection.*", ""]
+    numbered = sections(prop, case=case, gathered=g)
     if prop.site_hazards:
-        out += ["# 9. Site hazards", ""] + _para(prop.site_hazards)
-
-    missing = gaps(prop, parts)
+        numbered.append(("Site hazards", _para(prop.site_hazards)))
+    missing = gaps(prop, g.parts)
     if missing:
-        out += [f"# {'10' if prop.site_hazards else '9'}. Not yet recorded", "",
-                "A valuer is likely to ask for these. Add them on the property's page, then open this report again.",
-                ""]
-        out += [f"- {m}" for m in missing] + [""]
+        numbered.append(("Not yet recorded", [
+            "A valuer is likely to ask for these. Add them on the property's page, then open this report again.", "",
+            *[f"- {m}" for m in missing], ""]))
+    for n, (heading, lines) in enumerate(numbered, 1):
+        out += [f"# {n}. {heading}", ""] + lines
     return "\n".join(out)
 
 

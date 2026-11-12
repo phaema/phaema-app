@@ -204,6 +204,7 @@ p { margin: 0 0 .9em; max-width: 60ch; }
     {id: "register", ch: "work", t: 10, html:
       '<div class="scene"><div class="scene__text"><p class="eyebrow">Property register</p><h2>Every property, in context</h2>' +
       '<p>Estates, sites, buildings and units sit in a tree, with UPRNs, floor areas to the RICS measurement codes, titles, photos and boundaries drawn from Land Registry INSPIRE parcels.</p>' +
+      '<p>Each site and building records its location, construction, roof, windows, services and floor plans, and one property report gathers it all for a colleague or a valuer.</p>' +
       '<p>Everything else, leases, cases, repairs, certificates and valuations, hangs off this one record.</p>' +
       rel([["leases", "Its leases"], ["compliance", "Its certificates"], ["projects", "Projects on it"]]) + '</div>' +
       shot("properties-2", "A property record showing its key facts, map and related records.", "The property record.") + '</div>'},
@@ -216,8 +217,14 @@ p { margin: 0 0 .9em; max-width: 60ch; }
       '<div class="scene"><div class="scene__text"><p class="eyebrow">Cases and approvals</p><h2>Casework with targets and a second pair of eyes</h2>' +
       '<p>Consents, assignments, renewals and enquiries move through five stages with tasks and statutory target dates. Before a decision, the surveyor declares any conflict of interest and their supervisor approves the recommendation.</p>' +
       '<p>Notes, saved emails, documents and fees stay with the case.</p>' +
-      rel([["letters", "Letters from a case"], ["lettings", "Lettings cases"], ["my-work", "Back to My work"]]) + '</div>' +
+      rel([["site-visit", "The site visit sheet"], ["letters", "Letters from a case"], ["lettings", "Lettings cases"]]) + '</div>' +
       shot("cases-5", "A case awaiting the supervisor&#8217;s approval, with the recommendation and approval history.", "Supervisor approval.") + '</div>'},
+    {id: "site-visit", ch: "work", t: 11, html:
+      '<div class="scene"><div class="scene__text"><p class="eyebrow">Site visits</p><h2>One sheet to take on every visit</h2>' +
+      '<p>Each case has a site visit sheet for a phone or to print: the case, the hazards and asbestos information to read before going, who occupies the property, the property details, and a checklist for that type of case.</p>' +
+      '<p>The recorded construction, roof, services and occupation are printed beside each item to confirm or correct on site. Administrators set the checklist and the property details for each type of case.</p>' +
+      rel([["cases", "Cases"], ["register", "The property record"], ["compliance", "Before you visit"]]) + '</div>' +
+      shot("site-visit", "A site visit sheet: the checklist for a building, with the recorded construction, roof and services beside each item and boxes to tick.", "The checklist, with what the record says beside each item.") + '</div>'},
     {id: "lettings", ch: "work", t: 10, html:
       '<div class="scene"><div class="scene__text"><p class="eyebrow">Lettings and renewals</p><h2>Professional standards built in</h2>' +
       '<p>Heads of terms are checked against the 16 items in the RICS code for leasing business premises. Renewals track section 25 and 26 notices under the 1954 Act, with counter-notice and court deadlines.</p>' +
@@ -251,7 +258,7 @@ p { margin: 0 0 .9em; max-width: 60ch; }
       shot("service-3", "The service charge apportionment matrix showing each lease&#8217;s share of each cost heading.", "The apportionment matrix.") + '</div>'},
     {id: "valuation", ch: "money", t: 10, html:
       '<div class="scene"><div class="scene__text"><p class="eyebrow">Asset valuation &middot; optional</p><h2>The valuation programme, run as casework</h2>' +
-      '<p>CIPFA asset classes, a rolling programme, internal or external valuers, Red Book records, impairment prompts, audit queries and the year-end schedule for finance.</p>' +
+      '<p>CIPFA asset classes, a rolling programme, internal or external valuers, Red Book records, impairment prompts, audit queries and the year-end schedule for finance. Each valuation case has an initial valuation report drawn from the property record: construction, floor areas, tenancies and cases in hand.</p>' +
       rel([["reports", "Year-end reports"], ["projects", "Assets from projects"]]) + '</div>' +
       shot("valuation-1", "The valuation programme listing this year&#8217;s valuations and their status.", "This year&#8217;s programme.") + '</div>'},
     {id: "repairs", ch: "buildings", t: 10, html:
@@ -276,8 +283,8 @@ p { margin: 0 0 .9em; max-width: 60ch; }
       shot("users-4", "Hand over work: one person&#8217;s properties, cases and tasks ready to pass to a colleague.", "Hand over work.") + '</div>'},
     {id: "security", ch: "assurance", t: 13, html:
       '<div class="scene"><div class="scene__text"><p class="eyebrow">Security and assurance</p><h2>Secure by design, and open to check</h2>' +
-      '<p><strong>In place now:</strong> two-step sign-in with an authenticator app, required for administrators by default; access by role and area, checked on the server; a log of every change; hosting in the UK or EU, with HTTPS, a firewall, security updates and nightly backups set up by the installer.</p>' +
-      '<p><strong>Before live use:</strong> an independent penetration test, single sign-on with council accounts such as Microsoft Entra ID, an accessibility audit, and DPIA templates. All published in the security policy.</p>' +
+      '<p><strong>In place now:</strong> two-step sign-in with an authenticator app, required for administrators by default; optional single sign-on with council accounts such as Microsoft 365; access by role and area, checked on the server; a log of every change; hosting in the UK or EU, with HTTPS, a firewall, security updates and nightly backups set up by the installer.</p>' +
+      '<p><strong>Before live use:</strong> an independent penetration test, single sign-on proved on a council&#8217;s live Microsoft 365, an accessibility audit, and DPIA templates. All published in the security policy.</p>' +
       rel([["people", "Who sees what"], ["why-open", "Open to inspection"], ["roadmap", "The roadmap"]]) + '</div>' +
       shot("tour-two-step", "Setting up two-step sign-in: a QR code to scan with an authenticator app.", "Two-step sign-in: scan, then enter a code.") + '</div>'},
     {id: "why-open", ch: "open", t: 11, html:
@@ -290,7 +297,7 @@ p { margin: 0 0 .9em; max-width: 60ch; }
     {id: "roadmap", ch: "open", t: 11, html:
       '<div class="scene scene--text"><div class="scene__text"><p class="eyebrow">Where it is going</p><h2>Built, in testing, then connectors</h2>' +
       '<div class="cols"><div><h3>Now: testing</h3><ul><li>Pilot councils run the test programme</li><li>Public test site, reset every 48 hours</li><li>Independent penetration test and accessibility audit</li></ul></div>' +
-      '<div><h3>Next: connectors</h3><ul><li>Single sign-on</li><li>Ordnance Survey, UPRN and EPC lookups</li><li>Map layers for QGIS and other GIS</li><li>GOV.UK Notify for tenants</li></ul></div>' +
+      '<div><h3>Next: connectors</h3><ul><li>Email through the council&#8217;s mailbox</li><li>Ordnance Survey, UPRN and EPC lookups</li><li>Map layers for QGIS and other GIS</li><li>GOV.UK Notify for tenants</li></ul></div>' +
       '<div><h3>Later</h3><ul><li>Tenant and contractor portals</li><li>Condition surveys</li><li>Welsh translation</li></ul></div></div>' +
       '<p>Connectors use open standards, so they work with Microsoft 365 or with open-source alternatives such as Nextcloud.</p>' +
       rel([["for-councils", "For councils"], ["hub", "Back to the modules"]]) + '</div></div>'},

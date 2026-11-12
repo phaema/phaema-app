@@ -119,8 +119,130 @@ def default_approval(code, group):
     return ["decision"] if group in APPROVAL_GROUPS or code in APPROVAL_CODES else []
 
 
+# ------------------------------------------------------------------ site visit sheets
+# What is printed about the property, and what to check on site. Administrators change both per case type.
+
+EVERYTHING = ["facts", "location", "description", "services", "parking", "areas", "plans", "titles", "agreements",
+              "agreement_terms", "cases"]
+LEASE_VISIT = ["facts", "description", "services", "areas", "plans", "agreements", "agreement_terms", "cases"]
+CONSENT_VISIT = ["facts", "description", "services", "plans", "agreements", "agreement_terms", "cases"]
+LAND_VISIT = ["facts", "location", "description", "plans", "titles", "agreements", "cases"]
+BRIEF_VISIT = ["facts", "description", "agreements"]
+
+VISIT_PARTS_BY_GROUP = {"valuation": EVERYTHING, "event": LEASE_VISIT, "management": LEASE_VISIT,
+                        "consent": CONSENT_VISIT, "enquiry": LAND_VISIT, "income": BRIEF_VISIT, "other": LAND_VISIT}
+VISIT_PARTS_BY_CODE = {"signage": BRIEF_VISIT, "charging": BRIEF_VISIT, "insurance_certificate": BRIEF_VISIT,
+                       "deposit_return": BRIEF_VISIT, "new_letting": EVERYTHING, "land_purchase": EVERYTHING}
+
+T, YN, TX, NUM = "tick", "yes_no", "text", "number"
+CONDITION = "Good, Fair, Poor, Bad"
+
+# heading, item, guidance, answer, checks (a detail of the property record), choices
+_ARRIVAL = [
+    ("Arrival", "Signed in and made yourself known to the occupier", "", T, "", ""),
+    ("Arrival", "Site hazards as recorded", "Note any new hazard and add it to the property record.", YN,
+     "site_hazards", ""),
+]
+_BUILDING = [
+    ("Outside", "Construction as recorded", "", YN, "construction_type", ""),
+    ("Outside", "Storeys as recorded", "", YN, "storeys", ""),
+    ("Outside", "Roof type and covering as recorded", "View from the ground or a safe vantage point only.", YN,
+     "roof", ""),
+    ("Outside", "Windows as recorded", "", YN, "window_type", ""),
+    ("Outside", "Condition of roof, walls and windows", "", "choice", "", CONDITION),
+    ("Outside", "Parking, yard and access as recorded", "", YN, "parking", ""),
+    ("Inside", "Layout and accommodation as described", "", YN, "building_description", ""),
+    ("Inside", "Services as recorded", "Gas, electricity and phase, water, drainage, heating.", YN, "services", ""),
+    ("Inside", "Condition of floors, walls, ceilings and fittings", "", "choice", "", CONDITION),
+]
+_OCCUPATION = [
+    ("Occupation", "Occupied as recorded", "Who is in occupation, and of which parts.", YN, "occupation", ""),
+    ("Occupation", "Use as recorded and permitted", "", YN, "use_description", ""),
+    ("Occupation", "Anyone else in occupation, or parts shared or sublet", "", YN, "", ""),
+]
+_PHOTOS = [("Record", "Photographs taken", "Each elevation, the roof where visible, inside, and any defects.", T,
+            "", "")]
+
+VALUATION_CHECKLIST = _ARRIVAL + _BUILDING + _OCCUPATION + [
+    ("Valuation", "Floor areas check-measured", "Note the areas measured and the basis used.", TX, "floor_areas", ""),
+    ("Valuation", "Alterations or extensions since the last inspection", "", YN, "", ""),
+    ("Valuation", "Surroundings and neighbouring uses", "Anything that affects value: new development, vacant "
+     "neighbours, access.", TX, "", ""),
+    ("Valuation", "Solar panels as recorded", "", YN, "solar_pv", ""),
+    ("Valuation", "Site area and boundaries as recorded", "", YN, "site_area_ha", ""),
+] + _PHOTOS
+
+LEASE_CHECKLIST = _ARRIVAL + _OCCUPATION + [
+    ("Premises", "Premises as described in the agreement", "", YN, "building_description", ""),
+    ("Premises", "Tenant's alterations or improvements", "Note what, and whether consent is on file.", TX, "", ""),
+    ("Premises", "State of repair against the repairing obligation", "", "choice", "", CONDITION),
+    ("Premises", "Breaches of covenant seen", "Use, signs, alterations, repair, nuisance.", TX, "", ""),
+    ("Premises", "Floor areas check-measured", "Where the areas matter to the rent.", TX, "floor_areas", ""),
+    ("Evidence", "Comparable properties nearby", "To let boards, recent lettings, vacant units.", TX, "", ""),
+] + _PHOTOS
+
+CONSENT_CHECKLIST = _ARRIVAL + _OCCUPATION + [
+    ("Proposal", "What is there now", "The parts affected, as they are today.", TX, "building_description", ""),
+    ("Proposal", "What is proposed matches the application", "", YN, "", ""),
+    ("Proposal", "Work already started or done", "", YN, "", ""),
+    ("Proposal", "Effect on structure, roof or services", "", TX, "services", ""),
+    ("Proposal", "Effect on neighbours, common parts or other tenants", "", TX, "", ""),
+    ("Proposal", "Other consents likely to be needed", "Planning, building regulations, superior landlord.", TX,
+     "", ""),
+] + _PHOTOS
+
+CONDITION_CHECKLIST = _ARRIVAL + [
+    ("Condition", "Roof and rainwater goods", "", "choice", "roof", CONDITION),
+    ("Condition", "External walls, windows and doors", "", "choice", "window_type", CONDITION),
+    ("Condition", "Floors, internal walls and ceilings", "", "choice", "", CONDITION),
+    ("Condition", "Services and fittings", "", "choice", "services", CONDITION),
+    ("Condition", "Decoration", "", "choice", "", CONDITION),
+    ("Condition", "Yard, parking, fences and boundaries", "", "choice", "parking", CONDITION),
+    ("Obligations", "Tenant's alterations to reinstate", "", TX, "", ""),
+    ("Obligations", "Breaches seen and items for the schedule", "", TX, "", ""),
+    ("Obligations", "Premises vacated and keys returned", "", YN, "occupation", ""),
+] + _PHOTOS
+
+LAND_CHECKLIST = _ARRIVAL + [
+    ("On the ground", "Land or premises as recorded", "", YN, "building_description", ""),
+    ("On the ground", "Boundaries on the ground match the title plan", "Note fences, walls, hedges and who appears "
+     "to maintain them.", YN, "site_area_ha", ""),
+    ("On the ground", "Occupation or use by anyone else", "Encroachment, storage, parking, gardens, fly-tipping.",
+     TX, "occupation", ""),
+    ("On the ground", "Access to the land and rights of way in use", "", TX, "", ""),
+    ("On the ground", "Services, cables or pipes crossing the land", "", TX, "", ""),
+    ("On the ground", "Condition and anything needing action", "", TX, "", ""),
+] + _PHOTOS
+
+CHECKLIST_BY_CODE = {
+    **{c: VALUATION_CHECKLIST for c in ("asset_valuation", "impairment", "disposal_valuation")},
+    **{c: LEASE_CHECKLIST for c in ("rent_review", "break", "expiry", "other_event", "renewal", "variation")},
+    **{c: CONSENT_CHECKLIST for c in ("assignment", "underletting", "alterations", "change_of_use", "sharing",
+                                      "signage", "planning_consent")},
+    **{c: CONDITION_CHECKLIST for c in ("dilapidations", "breach", "surrender")},
+    **{c: LAND_CHECKLIST for c in ("new_letting", "wayleave", "land_purchase", "encroachment", "boundary",
+                                   "other_activity")},
+}
+
+
+# Items under these headings are repeated for each building on a site with several.
+BUILDING_HEADINGS = {"Outside", "Inside", "Condition", "Premises"}
+
+
+def visit_parts_for(code, group):
+    return list(VISIT_PARTS_BY_CODE.get(code) or VISIT_PARTS_BY_GROUP.get(group) or LAND_VISIT)
+
+
+def add_checklist(case_type, item_model):
+    """Give a shipped case type its starting checklist."""
+    item_model.objects.bulk_create([
+        item_model(case_type=case_type, heading=heading, label=label, guidance=guidance, kind=kind, checks=checks,
+                   choices=choices, each_building=heading in BUILDING_HEADINGS, order=n * 10)
+        for n, (heading, label, guidance, kind, checks, choices) in enumerate(CHECKLIST_BY_CODE.get(case_type.code, []))])
+
+
 def ensure_case_types():
-    from .models import CaseType, CaseTypeTask
+    from .models import CaseType, CaseTypeChecklistItem, CaseTypeTask
 
     for i, (code, name, group, target, statutory, fee, event_type, before, tasks) in enumerate(TYPES):
         case_type, created = CaseType.objects.get_or_create(code=code, defaults={
@@ -129,7 +251,9 @@ def ensure_case_types():
             "event_type": event_type, "open_days_before": before,
             "approval_stages": default_approval(code, group),
             "heads_of_terms": code in HEADS_OF_TERMS,
+            "visit_parts": visit_parts_for(code, group),
             "order": i * 10})
         if created:
             CaseTypeTask.objects.bulk_create([CaseTypeTask(case_type=case_type, stage=stage, description=text,
                                                            order=n * 10) for n, (stage, text) in enumerate(tasks)])
+            add_checklist(case_type, CaseTypeChecklistItem)

@@ -28,6 +28,11 @@ class Stage(models.TextChoices):
 STAGE_ORDER = [s for s, _l in Stage.choices]
 
 
+def default_visit_parts():
+    """What a case type added by a council shows on its site visit sheet until an administrator changes it."""
+    return ["facts", "description", "services", "areas", "agreements", "cases"]
+
+
 class CaseType(models.Model):
     class Group(models.TextChoices):
         CONSENT = "consent", _("Landlord's consents")
@@ -66,6 +71,10 @@ class CaseType(models.Model):
         _("heads of terms"), default=False,
         help_text=_("Cases record heads of terms covering every item in the RICS Code for leasing business "
                     "premises, and cannot move to the decision until they do."))
+    visit_parts = models.JSONField(
+        _("property information on the site visit sheet"), default=default_visit_parts, blank=True,
+        help_text=_("The parts of the property record printed on the site visit sheet for cases of this type. "
+                    "The case details and the safety information are always included."))
     active = models.BooleanField(_("active"), default=True)
     order = models.PositiveSmallIntegerField(_("order"), default=0)
 
@@ -77,6 +86,10 @@ class CaseType(models.Model):
         bad = [s for s in (self.approval_stages or []) if s not in STAGE_ORDER]
         if bad or not isinstance(self.approval_stages, list):
             raise ValidationError({"approval_stages": _("Use a list of stages, for example [\"decision\"].")})
+        from apps.properties.report import ALL_PARTS
+
+        if not isinstance(self.visit_parts, list) or [p for p in self.visit_parts if p not in ALL_PARTS]:
+            raise ValidationError({"visit_parts": _("Choose from the parts listed.")})
 
     def __str__(self):
         return self.name
@@ -94,6 +107,56 @@ class CaseTypeTask(models.Model):
 
     def __str__(self):
         return self.description
+
+
+class CaseTypeChecklistItem(models.Model):
+    """One thing to check or record on a site visit for cases of this type. Printed on the site visit sheet."""
+
+    class Kind(models.TextChoices):
+        TICK = "tick", _("Tick when checked")
+        YES_NO = "yes_no", _("Yes or no")
+        TEXT = "text", _("Written answer")
+        NUMBER = "number", _("Number or measurement")
+        CHOICE = "choice", _("One of a list")
+
+    # Details of the property record an item can check: the recorded value is printed beside the item.
+    CHECKS = [
+        ("occupation", _("Occupation")), ("use_description", _("Use")), ("building_description", _("Description")),
+        ("built", _("Built")), ("construction_type", _("Construction")), ("storeys", _("Storeys")),
+        ("roof", _("Roof type and covering")), ("window_type", _("Windows")), ("parking", _("Parking")),
+        ("services", _("Services")), ("solar_pv", _("Solar panels")), ("floor_areas", _("Floor areas")),
+        ("site_area_ha", _("Site area")), ("site_hazards", _("Site hazards")),
+    ]
+
+    case_type = models.ForeignKey(CaseType, on_delete=models.CASCADE, related_name="checklist_items")
+    heading = models.CharField(_("heading"), max_length=60, blank=True,
+                               help_text=_("Items with the same heading are printed together, for example "
+                                           "Outside or Inside."))
+    label = models.CharField(_("item"), max_length=200)
+    guidance = models.CharField(_("guidance"), max_length=255, blank=True,
+                                help_text=_("A short prompt printed under the item."))
+    kind = models.CharField(_("answer"), max_length=10, choices=Kind.choices, default=Kind.TICK)
+    choices = models.CharField(_("list to choose from"), max_length=200, blank=True,
+                               help_text=_("For \"One of a list\": the choices, separated by commas."))
+    checks = models.CharField(_("checks the recorded"), max_length=30, blank=True, choices=CHECKS,
+                              help_text=_("The value on the property record is printed beside the item, to "
+                                          "confirm or correct on site."))
+    each_building = models.BooleanField(
+        _("for each building"), default=False,
+        help_text=_("On a site with several buildings, repeat this item for each one. Leave unticked for things "
+                    "checked once for the whole visit."))
+    order = models.PositiveSmallIntegerField(_("order"), default=0)
+
+    class Meta:
+        ordering = ["order", "pk"]
+        verbose_name = _("site visit checklist item")
+
+    def __str__(self):
+        return self.label
+
+    def clean(self):
+        if self.kind == self.Kind.CHOICE and not [c for c in self.choices.split(",") if c.strip()]:
+            raise ValidationError({"choices": _("Give the choices, separated by commas.")})
 
 
 class Case(TimeStampedModel):

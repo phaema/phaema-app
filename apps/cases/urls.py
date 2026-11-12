@@ -9,4 +9,5 @@ urlpatterns = [
     path("", views.CaseListView.as_view(), name="list"),
     path("new/", views.case_new, name="new"),
     path("<int:pk>/", views.case_detail, name="detail"),
+    path("<int:pk>/site-visit/", views.site_visit_sheet, name="site-visit"),
 ]
