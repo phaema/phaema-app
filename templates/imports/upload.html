@@ -84,7 +84,7 @@
     <label class="govuk-label govuk-label--s" for="file">{% translate "Spreadsheet (.xlsx or .csv)" %}</label>
     <div class="govuk-hint">{% translate "A CSV file holds one sheet only. Use Excel to import several sheets together." %}</div>
     {% if file_error %}<p id="file-error" class="govuk-error-message"><span class="govuk-visually-hidden">{% translate "Error:" %}</span> {{ file_error }}</p>{% endif %}
-    <input class="govuk-file-upload{% if file_error %} govuk-file-upload--error{% endif %}" id="file" name="file" type="file" accept=".xlsx,.csv"{% if file_error %} aria-describedby="file-error"{% endif %}>
+    <div class="govuk-drop-zone" data-module="govuk-file-upload"><input class="govuk-file-upload{% if file_error %} govuk-file-upload--error{% endif %}" id="file" name="file" type="file" accept=".xlsx,.csv"{% if file_error %} aria-describedby="file-error"{% endif %}></div>
   </div>
   <button class="govuk-button govuk-button--secondary" data-module="govuk-button">{% translate "Upload and check" %}</button>
 </form>

@@ -60,8 +60,10 @@ landlord or either) and the notice period in months. PHAEMA works out the **last
 
 ## Documents
 
-Store PDFs of the lease, licence, deeds of variation and other documents in **Edit this agreement**, under
-Documents. Only signed-in users can open them.
+Under **Documents** on an agreement's page, drag PDFs of the lease, licence, deeds of variation and other
+documents onto **Add documents**, or select **Choose files**. Pick the type of document, then **File them**: up
+to 20 at a time, each named after its file. To give a document its date or a date for review, or to change or
+remove it, use **Edit this agreement**, under Documents. Only signed-in users can open them.
 
 Any document can have a **date for review**: when it should next be looked at. Use it for an insurance
 certificate's expiry, a schedule of condition to re-inspect or a side letter that runs out. Documents coming up

@@ -105,7 +105,8 @@ CAPABILITIES = [
     ("Leases and key dates", "Leases, licences and wayleaves, let out or held. Rent reviews, breaks, expiries and "
      "notice deadlines become events with email reminders and a calendar feed."),
     ("Cases and approvals", "Consents, renewals, dilapidations and enquiries with stages, tasks and statutory target "
-     "dates. Supervisors approve decisions, with conflicts of interest declared first. Each case has a site visit "
+     "dates. Supervisors approve decisions, with conflicts of interest declared first. Documents and saved emails are filed by "
+     "dragging them onto the case. Each case has a site visit "
      "sheet for a phone or to print: safety information, the property details and a checklist the council sets "
      "for each type of case."),
     ("Projects", "Developments, acquisitions, disposals and programmes taken through four gateways, with milestones, a "

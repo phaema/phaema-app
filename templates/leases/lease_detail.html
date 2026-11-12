@@ -120,7 +120,7 @@
   <ul class="govuk-list">{% for b in breaks %}<li><strong>{{ b.break_date|date:"j F Y" }}</strong> – {{ b.get_exercisable_by_display }}{% if b.notice_months %}, {% blocktranslate count n=b.notice_months %}{{ n }} month's notice{% plural %}{{ n }} months' notice{% endblocktranslate %} ({% translate "by" %} {{ b.notice_deadline|date:"j F Y" }}){% endif %}{% if b.conditions %}<br><span class="govuk-body-s">{{ b.conditions }}</span>{% endif %}</li>{% endfor %}</ul>
   {% endif %}{% endwith %}
   {% if doc_templates %}<p class="govuk-body-s">{% translate "Create a letter:" %} {% for t in doc_templates %}<a class="govuk-link" href="{% url 'documents:create' t.code %}?lease={{ object.pk }}">{{ t.name }}</a>{% if not forloop.last %} · {% endif %}{% endfor %} · <a class="govuk-link" href="{% url 'documents:library' %}">{% translate "Document library" %}</a></p>{% endif %}
-  <h2 class="govuk-heading-m">{% translate "Documents" %}</h2>
+  <h2 class="govuk-heading-m" id="documents">{% translate "Documents" %}</h2>
   {% with docs=documents %}
   {% if docs %}
   <table class="govuk-table">
@@ -143,7 +143,15 @@
   </table>
   {% else %}<p class="govuk-body">{% translate "No documents stored." %}</p>{% endif %}
   {% endwith %}
-  {% if user|can_edit:object %}<p class="govuk-body-s"><a class="govuk-link" href="{% url 'admin:leases_lease_change' object.pk %}#documents-group">{% translate "Add a document" %}</a></p>{% endif %}
+  {% if user|can_edit:object %}
+  <form method="post" action="{% url 'leases:files' object.pk %}" enctype="multipart/form-data" class="phaema-drop govuk-!-margin-bottom-4">{% csrf_token %}
+    <div class="govuk-form-group govuk-!-margin-bottom-2"><label class="govuk-label govuk-label--s" for="lease-files">{% translate "Add documents" %}</label>
+      <div class="govuk-hint" id="lease-files-hint">{% translate "Drag PDFs here from a folder or your desktop, or choose them: up to 20 at a time, 25 MB each. Each is named after its file. Add its date and date for review afterwards with Edit this agreement." %}</div>
+      <div class="govuk-drop-zone" data-module="govuk-file-upload" data-i18n.choose-files-button="{% translate 'Choose files' %}" data-i18n.drop-instruction="{% translate 'or drop files here' %}" data-i18n.no-file-chosen="{% translate 'No files chosen' %}"><input class="govuk-file-upload" id="lease-files" name="files" type="file" multiple accept=".pdf,application/pdf" aria-describedby="lease-files-hint"></div></div>
+    <div class="phaema-inline-fields"><div><label class="govuk-label" for="lease-files-type">{% translate "Type of document" %}</label><select class="govuk-select" id="lease-files-type" name="document_type">{% for value, label in document_types %}<option value="{{ value }}"{% if value == "other" %} selected{% endif %}>{{ label }}</option>{% endfor %}</select></div>
+      <div><button class="govuk-button govuk-button--secondary govuk-!-margin-bottom-0" data-module="govuk-button">{% translate "File them" %}</button></div></div>
+  </form>
+  <p class="govuk-body-s"><a class="govuk-link" href="{% url 'admin:leases_lease_change' object.pk %}#documents-group">{% translate "Add or change one document, with its date and date for review" %}</a></p>{% endif %}
 
   {% if object.notes %}<h2 class="govuk-heading-m">{% translate "Notes" %}</h2><p class="govuk-body">{{ object.notes|linebreaksbr }}</p>{% endif %}
 

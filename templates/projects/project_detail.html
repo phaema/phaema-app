@@ -53,7 +53,7 @@
       </div></fieldset></div>
       <div class="govuk-form-group"><label class="govuk-label govuk-label--s" for="g-date">{% translate "Date of the decision" %}</label><input class="govuk-input govuk-input--width-10" type="date" id="g-date" name="decided_on" value="{{ today|date:'Y-m-d' }}"></div>
       <div class="govuk-form-group"><label class="govuk-label govuk-label--s" for="g-ref">{% translate "Decision reference" %} <span class="govuk-body-s">({% translate "optional" %})</span></label><div class="govuk-hint">{% translate "For example the Cabinet minute or delegated decision number." %}</div><input class="govuk-input govuk-input--width-20" id="g-ref" name="reference" maxlength="100"></div>
-      <div class="govuk-form-group"><label class="govuk-label govuk-label--s" for="g-report">{% translate "Report" %} <span class="govuk-body-s">({% translate "optional" %})</span></label><input class="govuk-file-upload" type="file" id="g-report" name="report"></div>
+      <div class="govuk-form-group"><label class="govuk-label govuk-label--s" for="g-report">{% translate "Report" %} <span class="govuk-body-s">({% translate "optional" %})</span></label><div class="govuk-drop-zone" data-module="govuk-file-upload"><input class="govuk-file-upload" type="file" id="g-report" name="report"></div></div>
       <div class="govuk-form-group"><label class="govuk-label govuk-label--s" for="g-notes">{% translate "Notes" %} <span class="govuk-body-s">({% translate "optional" %})</span></label><textarea class="govuk-textarea" id="g-notes" name="notes" rows="3"></textarea></div>
       <button class="govuk-button" data-module="govuk-button">{% translate "Record the decision" %}</button>
     </form></div></details>
@@ -227,7 +227,7 @@
   <details class="govuk-details" data-module="govuk-details"><summary class="govuk-details__summary"><span class="govuk-details__summary-text">{% translate "Add a document" %}</span></summary><div class="govuk-details__text">
     <form method="post" enctype="multipart/form-data">{% csrf_token %}<input type="hidden" name="action" value="add_document">
       <div class="govuk-form-group"><label class="govuk-label" for="d-title">{% translate "Title" %}</label><input class="govuk-input" id="d-title" name="title" maxlength="200"></div>
-      <div class="govuk-form-group"><label class="govuk-label" for="d-file">{% translate "File" %}</label><div class="govuk-hint">{% translate "PDF, image, email, Word, Excel, text or CSV, up to 25 MB." %}</div><input class="govuk-file-upload" type="file" id="d-file" name="file"></div>
+      <div class="govuk-form-group"><label class="govuk-label" for="d-file">{% translate "File" %}</label><div class="govuk-hint">{% translate "PDF, image, email, Word, Excel, text or CSV, up to 25 MB." %}</div><div class="govuk-drop-zone" data-module="govuk-file-upload"><input class="govuk-file-upload" type="file" id="d-file" name="file"></div></div>
       <button class="govuk-button govuk-button--secondary" data-module="govuk-button">{% translate "Add the document" %}</button></form></div></details>
   {% endif %}
   {% if documents %}<h3 class="govuk-heading-s">{% translate "Documents" %}</h3>

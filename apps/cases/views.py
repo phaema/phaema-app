@@ -13,6 +13,7 @@ from django.db.models import Count, Q
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils.translation import gettext as _
+from django.utils.translation import ngettext
 from django.utils.translation import gettext_lazy
 from django.views.generic import ListView
 
@@ -223,11 +224,51 @@ def _file_email(case, upload, direction):
     return item, "; ".join(problems)
 
 
+def _file_dropped(request, case, direction):
+    """File several documents and saved emails at once. Emails (.eml, .msg) are read and filed as correspondence
+    with their attachments; everything else is kept as a document named after its file."""
+    from apps.core.files import file_each, title_from_filename
+
+    uploads = request.FILES.getlist("files")
+    if not uploads:
+        messages.error(request, _("Choose or drop at least one file."))
+        return
+    counts = {"emails": 0, "documents": 0}
+    attachment_problems = []
+
+    def file_one(upload):
+        if upload.name.rsplit(".", 1)[-1].lower() in ("eml", "msg"):
+            item, problems = _file_email(case, upload, "out" if direction == "out" else "in")
+            if item is None:
+                return problems
+            counts["emails"] += 1
+            if problems:
+                attachment_problems.append(problems)
+            return None
+        problem = _store_upload(case, upload, title_from_filename(upload.name))
+        if not problem:
+            counts["documents"] += 1
+        return problem
+
+    filed, problems = file_each(uploads, file_one)
+    if filed:
+        parts = []
+        if counts["documents"]:
+            parts.append(ngettext("%(n)s document", "%(n)s documents", counts["documents"]) % {"n": counts["documents"]})
+        if counts["emails"]:
+            parts.append(ngettext("%(n)s email", "%(n)s emails", counts["emails"]) % {"n": counts["emails"]})
+        messages.success(request, _("Filed on this case: %(what)s.") % {"what": " and ".join(parts)})
+    if problems:
+        messages.error(request, _("Not filed: %(p)s") % {"p": "; ".join(problems)})
+    if attachment_problems:
+        messages.error(request, _("Some attachments were not kept: %(p)s") % {"p": "; ".join(attachment_problems)})
+
+
 ACTIONS_WORK = {"next_stage", "hold", "resume", "acknowledge", "complete_application", "decide", "close", "reopen",
                 "add_task", "task_done", "assign", "raise_fee", "links", "request_approval", "withdraw_approval",
                 "save_heads", "save_notice", "save_dilaps", "save_conflict"}
 ACTIONS_APPROVER = {"approve", "return", "reassign_approval"}
-ACTIONS_CONTRIBUTE = {"add_note", "add_correspondence", "add_document", "file_email"}
+ACTIONS_CONTRIBUTE = {"add_note", "add_correspondence", "add_document", "file_email", "file_dropped"}
 
 
 @login_required
@@ -297,7 +338,7 @@ def _standards_context(case):
         "mees_warnings": standards.mees(case) if case.is_open else [],
         "dilaps": standards.dilaps(case),
         "dilaps_fields": [(n, label, getattr(case, n), kind) for n, label, kind in DILAPS_FIELDS],
-        "safety": info(case.property or (case.lease.property if case.lease_id else None)),
+        "safety": info(case.main_property),
     }
 
 
@@ -593,6 +634,8 @@ def _do(request, case, action):  # noqa: C901 - one branch per action keeps each
         messages.success(request, _("Email filed: %(s)s") % {"s": item.subject or upload.name})
         if problems:
             messages.error(request, _("Some attachments were not kept: %(p)s") % {"p": problems})
+    elif action == "file_dropped":
+        _file_dropped(request, case, post.get("direction", "in"))
     elif action == "add_document":
         upload = request.FILES.get("file")
         if not upload:

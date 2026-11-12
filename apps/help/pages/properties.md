@@ -106,9 +106,11 @@ buildings** and **Services**. Leave blank anything you do not know: blanks are n
 and the construction, storeys, roof, windows and services on each building within it. See
 [how properties fit together](#how-properties-fit-together).
 
-**Floor plans.** In **Edit this property**, under **Floor plans**, add each plan with a title, such as "Ground
-floor plan". Plans can be PDFs or AutoCAD drawings (.dwg or .dxf), up to 50 MB each. PDFs open in the browser;
-AutoCAD drawings download to open in your drawing software. Surveyors can add plans to the properties they manage.
+**Floor plans.** On the property's page, open **Add floor plans or photos** and drag the plans onto the box, or
+choose them: up to 20 at a time, each titled with its file name. Plans can be PDFs or AutoCAD drawings (.dwg or
+.dxf), up to 50 MB each. PDFs open in the browser; AutoCAD drawings download to open in your drawing software.
+Change a title or date, or remove a plan, in **Edit this property**, under **Floor plans**. Surveyors can add
+plans to the properties they manage.
 
 All of these can be chosen as columns and filters in [reports](reports.md), and filled in from a spreadsheet with
 the [property import](import-export.md).
@@ -126,8 +128,9 @@ On an asset valuation case the same report is headed **Initial valuation report*
 
 ## Photos
 
-Add photos in **Edit this property or add photos**. They are resized and their location data removed when
-uploaded. Select a photo on the property page to see it full size.
+On the property's page, open **Add floor plans or photos** and drag photos onto the box, or choose them: up to
+20 at a time, each captioned with its file name. You can also add them in **Edit this property**, where you change
+captions and choose the main photo. They are resized and their location data removed when uploaded. Select a photo on the property page to see it full size.
 
 ## Titles
 
