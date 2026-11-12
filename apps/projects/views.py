@@ -531,18 +531,33 @@ def project_file(request, pk, kind, item):
     """Serve a project document or gateway report to people who can see the project (not through /files/, so a
     confidential project's papers stay with its team)."""
     project = _project(request, pk, what=f"{kind} {item}")
+    from apps.core import viewer
+
     if kind == "document":
-        field = get_object_or_404(ProjectDocument, project=project, pk=item).file
+        holder = get_object_or_404(ProjectDocument, project=project, pk=item)
+        field = holder.file
     elif kind == "report":
-        field = get_object_or_404(GatewayDecision, project=project, pk=item).report
+        holder = get_object_or_404(GatewayDecision, project=project, pk=item)
+        field = holder.report
     else:
         raise Http404
     if not field:
         raise Http404
     content_type = mimetypes.guess_type(field.name)[0] or "application/octet-stream"
-    inline = content_type in ("application/pdf", "image/jpeg", "image/png")
+    filename = field.name.rsplit("/", 1)[-1]
+    if content_type == "application/pdf" and (viewer.wants_viewer(request, content_type)
+                                              or viewer.wants_download(request)):
+        about = viewer.describe(item=holder)
+        about["record"] = project
+        if kind == "report":
+            about["title"] = f"Gateway report: {project}"
+            about["filename"] = "Gateway report.pdf"
+        if viewer.wants_viewer(request, content_type):
+            return viewer.page(request, about)
+        filename = about["filename"]
+    inline = content_type in ("application/pdf", "image/jpeg", "image/png") and not viewer.wants_download(request)
     response = FileResponse(field.open("rb"), content_type=content_type, as_attachment=not inline,
-                            filename=field.name.rsplit("/", 1)[-1])
+                            filename=filename)
     response["Cache-Control"] = "private, max-age=0, no-store"
     response["X-Content-Type-Options"] = "nosniff"
     return response

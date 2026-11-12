@@ -12,6 +12,7 @@ from django.db import connection
 from django.db.models import Count, Sum
 from django.http import FileResponse, Http404, HttpResponseRedirect, JsonResponse
 from django.shortcuts import get_object_or_404, render
+from django.utils.cache import patch_vary_headers
 from django.utils.http import url_has_allowed_host_and_scheme
 
 from apps.leases import events as lease_events
@@ -235,11 +236,20 @@ def protected_file(request, path):
     except SuspiciousFileOperation:
         raise Http404
     content_type = mimetypes.guess_type(path)[0] or "application/octet-stream"
-    inline = content_type in ("application/pdf", "image/jpeg", "image/png")
-    response = FileResponse(handle, content_type=content_type, as_attachment=not inline,
-                            filename=path.rsplit("/", 1)[-1])
+    from . import viewer
+
+    filename = path.rsplit("/", 1)[-1]
+    if viewer.wants_viewer(request, content_type):
+        handle.close()
+        return viewer.page(request, viewer.describe(path))
+    if content_type == "application/pdf" and viewer.wants_download(request):
+        filename = viewer.describe(path)["filename"]
+    inline = content_type in ("application/pdf", "image/jpeg", "image/png") and not viewer.wants_download(request)
+    response = FileResponse(handle, content_type=content_type, as_attachment=not inline, filename=filename)
     response["Cache-Control"] = "private, max-age=3600"
     response["X-Content-Type-Options"] = "nosniff"
+    if content_type == "application/pdf":
+        patch_vary_headers(response, ["Accept"])     # a browser opening this address gets the viewer page instead
     return response
 
 

@@ -1,0 +1,56 @@
+{% extends "base.html" %}{% load static i18n %}
+{% block title %}{{ title }}{% endblock %}
+{% block container_class %} phaema-wide{% endblock %}
+{% block help_page %}getting-started#reading-a-pdf{% endblock %}
+{% block content %}
+<link rel="stylesheet" href="{% static 'vendor/pdfjs/web/pdf_viewer.css' %}">
+<div class="phaema-pdf" data-pdf-view data-src="{{ raw_url }}"
+     data-lib="{% static 'vendor/pdfjs/build/pdf.min.mjs' %}" data-worker="{% static 'vendor/pdfjs/build/pdf.worker.min.mjs' %}"
+     data-viewer="{% static 'vendor/pdfjs/web/pdf_viewer.mjs' %}" data-assets="{% get_static_prefix %}vendor/pdfjs/">
+  <div class="phaema-pdf__head">
+    {% if back %}<a class="govuk-back-link govuk-!-margin-0" href="{{ back }}">{% if back_label %}{% blocktranslate %}Back to {{ back_label }}{% endblocktranslate %}{% else %}{% translate "Back" %}{% endif %}</a>{% endif %}
+    <h1 class="govuk-heading-m govuk-!-margin-bottom-2 govuk-!-margin-top-2">{{ title }}</h1>
+  </div>
+  <div class="phaema-pdf__bar" role="toolbar" aria-label="{% translate 'Document controls' %}" hidden data-pdf-bar>
+    <span class="phaema-pdf__group">
+      <button type="button" class="govuk-button govuk-button--secondary" data-pdf="thumbs-toggle" aria-expanded="false" aria-controls="pdf-thumbs">{% translate "Pages" %}</button>
+      <button type="button" class="govuk-button govuk-button--secondary" data-pdf="prev" aria-label="{% translate 'Previous page' %}">‹</button>
+      <label class="govuk-visually-hidden" for="pdf-page">{% translate "Page" %}</label>
+      <input class="govuk-input govuk-input--width-3" id="pdf-page" data-pdf="page" type="number" min="1" value="1" inputmode="numeric">
+      <span class="govuk-body govuk-!-margin-0">{% translate "of" %} <span data-pdf="pages">–</span></span>
+      <button type="button" class="govuk-button govuk-button--secondary" data-pdf="next" aria-label="{% translate 'Next page' %}">›</button>
+    </span>
+    <span class="phaema-pdf__group">
+      <button type="button" class="govuk-button govuk-button--secondary" data-pdf="zoom-out" aria-label="{% translate 'Zoom out' %}">−</button>
+      <button type="button" class="govuk-button govuk-button--secondary" data-pdf="zoom-in" aria-label="{% translate 'Zoom in' %}">+</button>
+      <button type="button" class="govuk-button govuk-button--secondary" data-pdf="fit-width">{% translate "Fit width" %}</button>
+      <button type="button" class="govuk-button govuk-button--secondary" data-pdf="fit-page">{% translate "Whole page" %}</button>
+      <button type="button" class="govuk-button govuk-button--secondary" data-pdf="rotate">{% translate "Rotate" %}</button>
+    </span>
+    <form class="phaema-pdf__group" data-pdf="find-form" role="search">
+      <label class="govuk-visually-hidden" for="pdf-find">{% translate "Find in this document" %}</label>
+      <input class="govuk-input govuk-input--width-10" id="pdf-find" data-pdf="find" type="search" placeholder="{% translate 'Find in this document' %}">
+      <button type="submit" class="govuk-button govuk-button--secondary">{% translate "Find" %}</button>
+      <button type="button" class="govuk-button govuk-button--secondary" data-pdf="find-prev" aria-label="{% translate 'Previous match' %}">↑</button>
+      <button type="button" class="govuk-button govuk-button--secondary" data-pdf="find-next" aria-label="{% translate 'Next match' %}">↓</button>
+      <span class="govuk-body-s govuk-!-margin-0" data-pdf="find-count" role="status"></span>
+    </form>
+    <span class="phaema-pdf__group phaema-pdf__group--end">
+      <a class="govuk-button govuk-button--secondary" href="{{ download_url }}">{% translate "Download" %}</a>
+      <a class="govuk-button govuk-button--secondary" href="{{ raw_url }}" target="_blank" rel="noopener">{% translate "Print" %}</a>
+    </span>
+  </div>
+  <p class="govuk-body" data-pdf="status" role="status">{% translate "Opening the document…" %}</p>
+  <div class="govuk-error-summary" data-pdf="error" hidden role="alert">
+    <h2 class="govuk-error-summary__title">{% translate "This document cannot be shown here" %}</h2>
+    <div class="govuk-error-summary__body"><p class="govuk-body" data-pdf="error-text"></p>
+      <p class="govuk-body"><a class="govuk-link" href="{{ download_url }}">{% translate "Download the document" %}</a> {% translate "to open it on your computer, or" %} <a class="govuk-link" href="{{ raw_url }}">{% translate "open it in your browser's own reader" %}</a>.</p></div>
+  </div>
+  <noscript><p class="govuk-body">{% translate "The viewer needs JavaScript." %} <a class="govuk-link" href="{{ raw_url }}">{% translate "Open the document in your browser" %}</a> {% translate "or" %} <a class="govuk-link" href="{{ download_url }}">{% translate "download it" %}</a>.</p></noscript>
+  <div class="phaema-pdf__frame">
+    <nav class="phaema-pdf__thumbs" id="pdf-thumbs" data-pdf="thumbs" aria-label="{% translate 'Pages of this document' %}" data-page-word="{% translate 'Page' %}" hidden></nav>
+    <div class="phaema-pdf__main"><div class="phaema-pdf__scroll" data-pdf="container" tabindex="0" aria-label="{% translate 'Document' %}"><div class="pdfViewer" data-pdf="pages-holder"></div></div></div>
+  </div>
+</div>
+<script type="module" src="{% static 'js/pdf-view.mjs' %}"></script>
+{% endblock %}
