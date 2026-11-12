@@ -70,7 +70,8 @@ article > img { display:block; margin:1em 0; }
   </ul></nav>
   <article id="doc">
     <h1>Integrations review</h1>
-    <p class="meta"><span>Updated 5 November 2026</span><a class="button" href="integrations-review.pdf" download>Download PDF</a></p>
+    <p class="meta"><span>Updated 12 November 2026</span><a class="button" href="integrations-review.pdf" download>Download PDF</a></p>
+<p><strong>Progress since this review was written (5 November 2026).</strong> The first item in the plan, standard sign-in with OpenID Connect, has been built as an optional connector: staff can sign in with Microsoft 365 (Entra ID), Keycloak or another OpenID Connect service, roles and access areas can follow the council&#39;s groups, and people outside the council can keep a PHAEMA sign-in. It is tested against a stand-in sign-in service and has not yet been proved on a council&#39;s live tenant. The other connectors below are not yet built. The rest of this review is as written on 5 November.</p>
 <h2 id="summary">Summary</h2>
 <p>Some councils, almost all in mainland Europe, are leaving Microsoft 365 for open-source and European alternatives. In England and Wales, Microsoft 365 will remain the norm for some years. The alternatives councils are moving to are built on <strong>open standards</strong>: OpenID Connect for sign-in, IMAP and SMTP for email, iCalendar and CalDAV for calendars, WebDAV and WOPI for documents, Matrix for chat, and OGC web services for maps.</p>
 <p>So PHAEMA should connect through those standards, not to particular products. One <strong>connectors module</strong> in the main repository, off by default, would serve councils on Microsoft 365, Nextcloud, openDesk or Google Workspace alike, with each provider just a configuration. The same approach makes PHAEMA&#39;s register visible in any GIS, including the open-source QGIS.</p>
@@ -136,7 +137,7 @@ article > img { display:block; margin:1em 0; }
 </ul>
 <h2 id="priorities">Priorities</h2>
 <ol>
-<li><p><strong>Standard sign-in (OpenID Connect).</strong> Most requested by IT teams, and it removes PHAEMA passwords.</p></li>
+<li><p><strong>Standard sign-in (OpenID Connect).</strong> Most requested by IT teams, and it removes PHAEMA passwords for council staff. Built in November 2026; see the set-up guide in the technical manual.</p></li>
 <li><p><strong>OS Places address and UPRN lookup, and EPC lookup.</strong> Better data at entry, with free public sources.</p></li>
 <li><p><strong>Map layers for GIS (OGC API Features and WFS).</strong> PHAEMA&#39;s register in QGIS, ArcGIS and the rest.</p></li>
 <li><p><strong>GOV.UK Notify.</strong> Texts and letters to tenants at little or no cost.</p></li>
