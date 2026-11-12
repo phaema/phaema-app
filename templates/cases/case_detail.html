@@ -80,10 +80,18 @@
 {% if valuation_report_property %}<p class="govuk-body"><a class="govuk-link" href="{% url 'properties:report' valuation_report_property.pk %}?case={{ case.pk }}">{% translate "Initial valuation report" %}</a><br><span class="govuk-body-s">{% translate "The property's location, description, construction, services, floor areas, plans, titles, tenancies and cases in hand, to read, print or download as Word for the valuer." %}</span></p>{% endif %}
 <h2 class="govuk-heading-m govuk-!-margin-top-6">{% translate "Notes, correspondence and documents" %}</h2>
 {% if can_contribute %}
+<form method="post" enctype="multipart/form-data" class="phaema-drop govuk-!-margin-bottom-4">{% csrf_token %}<input type="hidden" name="action" value="file_dropped">
+  <div class="govuk-form-group govuk-!-margin-bottom-2"><label class="govuk-label govuk-label--s" for="drop-files">{% translate "File documents and emails" %}</label>
+    <div class="govuk-hint" id="drop-files-hint">{% translate "Drag files here from a folder or your desktop, or choose them: up to 20 at a time. Saved emails (.eml or .msg) are read and filed with their attachments; other files are kept as documents named after the file." %}</div>
+    <div class="govuk-drop-zone" data-module="govuk-file-upload" data-i18n.choose-files-button="{% translate 'Choose files' %}" data-i18n.drop-instruction="{% translate 'or drop files here' %}" data-i18n.no-file-chosen="{% translate 'No files chosen' %}"><input class="govuk-file-upload" id="drop-files" name="files" type="file" multiple aria-describedby="drop-files-hint"></div></div>
+  <div class="phaema-inline-fields"><div><label class="govuk-label" for="drop-dir">{% translate "Emails were" %}</label><select class="govuk-select" id="drop-dir" name="direction"><option value="in">{% translate "Received" %}</option><option value="out">{% translate "Sent" %}</option></select></div>
+    <div><button class="govuk-button govuk-button--secondary govuk-!-margin-bottom-0" data-module="govuk-button">{% translate "File them" %}</button></div></div>
+  <p class="govuk-body-s govuk-!-margin-top-2">{% translate "From Apple Mail you can drag an email straight here. From Outlook, drag the email to your desktop first, then drag it here." %}</p>
+</form>
 <details class="govuk-details" data-module="govuk-details"><summary class="govuk-details__summary"><span class="govuk-details__summary-text">{% translate "File an email" %}</span></summary><div class="govuk-details__text">
   <p class="govuk-body-s">{% translate "Save the email from your mail program (in Outlook: File, Save As, Outlook Message Format, or drag it to your desktop), then choose it here. PHAEMA reads the sender, date, subject and text, and keeps its attachments." %}</p>
   <form method="post" enctype="multipart/form-data">{% csrf_token %}<input type="hidden" name="action" value="file_email">
-    <div class="govuk-form-group"><label class="govuk-label" for="email-file">{% translate "Saved email (.eml or .msg)" %}</label><input class="govuk-file-upload" id="email-file" name="file" type="file" accept=".eml,.msg"></div>
+    <div class="govuk-form-group"><label class="govuk-label" for="email-file">{% translate "Saved email (.eml or .msg)" %}</label><div class="govuk-drop-zone" data-module="govuk-file-upload"><input class="govuk-file-upload" id="email-file" name="file" type="file" accept=".eml,.msg"></div></div>
     <div class="govuk-form-group"><label class="govuk-label" for="email-dir">{% translate "This email was" %}</label><select class="govuk-select" id="email-dir" name="direction"><option value="in">{% translate "Received" %}</option><option value="out">{% translate "Sent" %}</option></select></div>
     <button class="govuk-button govuk-button--secondary" data-module="govuk-button">{% translate "File the email" %}</button></form></div></details>
 <details class="govuk-details" data-module="govuk-details"><summary class="govuk-details__summary"><span class="govuk-details__summary-text">{% translate "Add a note" %}</span></summary><div class="govuk-details__text">
@@ -98,12 +106,12 @@
     <div class="govuk-form-group govuk-!-margin-top-3"><label class="govuk-label" for="c-who">{% translate "From or to" %}</label><input class="govuk-input" id="c-who" name="correspondent"></div>
     <div class="govuk-form-group"><label class="govuk-label" for="c-subj">{% translate "Subject" %}</label><input class="govuk-input" id="c-subj" name="subject"></div>
     <div class="govuk-form-group"><label class="govuk-label" for="c-sum">{% translate "Summary" %}</label><textarea class="govuk-textarea" id="c-sum" name="summary" rows="3"></textarea></div>
-    <div class="govuk-form-group"><label class="govuk-label" for="c-file">{% translate "Scanned letter (optional)" %}</label><input class="govuk-file-upload" id="c-file" name="file" type="file"></div>
+    <div class="govuk-form-group"><label class="govuk-label" for="c-file">{% translate "Scanned letter (optional)" %}</label><div class="govuk-drop-zone" data-module="govuk-file-upload"><input class="govuk-file-upload" id="c-file" name="file" type="file"></div></div>
     <button class="govuk-button govuk-button--secondary" data-module="govuk-button">{% translate "Log it" %}</button></form></div></details>
 <details class="govuk-details" data-module="govuk-details"><summary class="govuk-details__summary"><span class="govuk-details__summary-text">{% translate "Add a document" %}</span></summary><div class="govuk-details__text">
   <form method="post" enctype="multipart/form-data">{% csrf_token %}<input type="hidden" name="action" value="add_document">
     <div class="govuk-form-group"><label class="govuk-label" for="doc-d">{% translate "Description" %}</label><input class="govuk-input" id="doc-d" name="description" maxlength="200"></div>
-    <div class="govuk-form-group"><label class="govuk-label" for="doc-f">{% translate "File: PDF, image, Word, Excel, text or CSV, up to 25 MB" %}</label><input class="govuk-file-upload" id="doc-f" name="file" type="file"></div>
+    <div class="govuk-form-group"><label class="govuk-label" for="doc-f">{% translate "File: PDF, image, Word, Excel, text or CSV, up to 25 MB" %}</label><div class="govuk-drop-zone" data-module="govuk-file-upload"><input class="govuk-file-upload" id="doc-f" name="file" type="file"></div></div>
     <button class="govuk-button govuk-button--secondary" data-module="govuk-button">{% translate "Add the document" %}</button></form></div></details>
 {% endif %}
 {% if hidden_notes %}<p class="govuk-body-s">{% blocktranslate count n=hidden_notes %}{{ n }} confidential note is not shown to you.{% plural %}{{ n }} confidential notes are not shown to you.{% endblocktranslate %}</p>{% endif %}

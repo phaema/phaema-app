@@ -107,7 +107,7 @@
 {% if can_work %}<details class="govuk-details" data-module="govuk-details"><summary class="govuk-details__summary"><span class="govuk-details__summary-text">{% translate "Add a photo or document" %}</span></summary><div class="govuk-details__text">
 <form method="post" enctype="multipart/form-data">{% csrf_token %}<input type="hidden" name="action" value="add_document">
   <div class="govuk-form-group"><label class="govuk-label govuk-label--s" for="doc-desc">{% translate "Description" %}</label><input class="govuk-input" id="doc-desc" name="description" maxlength="200"></div>
-  <div class="govuk-form-group"><label class="govuk-label govuk-label--s" for="doc-file">{% translate "File" %}</label><div class="govuk-hint">{% translate "Photo (JPEG or PNG), PDF, Word or Excel, up to 25 MB" %}</div><input class="govuk-file-upload" id="doc-file" name="file" type="file"></div>
+  <div class="govuk-form-group"><label class="govuk-label govuk-label--s" for="doc-file">{% translate "File" %}</label><div class="govuk-hint">{% translate "Photo (JPEG or PNG), PDF, Word or Excel, up to 25 MB" %}</div><div class="govuk-drop-zone" data-module="govuk-file-upload"><input class="govuk-file-upload" id="doc-file" name="file" type="file"></div></div>
   <button class="govuk-button govuk-button--secondary" data-module="govuk-button">{% translate "Add" %}</button></form></div></details>{% endif %}
 
 {% if can_work %}<div class="govuk-button-group govuk-!-margin-top-6">

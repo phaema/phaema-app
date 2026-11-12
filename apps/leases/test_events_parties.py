@@ -101,17 +101,17 @@ def test_lease_documents(client, make_user, db, tmp_path):
     client.force_login(viewer)
     html = client.get(lease.get_absolute_url()).content.decode()
     doc = lease.documents.first()
-    assert doc.file.url in html and "Add a document" not in html
+    assert doc.file.url in html and "Add documents" not in html
     assert client.get(doc.file.url).status_code == 200
 
     # The managing surveyor of the premises can add documents; others cannot.
     owner = lease.properties.first().managing_surveyor
     owner.set_password("a-long-test-password"); owner.save()
     client.force_login(owner)
-    assert "Add a document" in client.get(lease.get_absolute_url()).content.decode()
+    assert "Add documents" in client.get(lease.get_absolute_url()).content.decode()
     other = make_user("sue", "Surveyors")
     client.force_login(other)
-    assert "Add a document" not in client.get(lease.get_absolute_url()).content.decode()
+    assert "Add documents" not in client.get(lease.get_absolute_url()).content.decode()
 
     bad = LeaseDocument(lease=lease, document_type="lease", file=SimpleUploadedFile("x.pdf", b"not a pdf"))
     with pytest.raises(Exception):

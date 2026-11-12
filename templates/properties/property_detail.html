@@ -17,7 +17,7 @@
 <div class="govuk-grid-column-two-thirds">
   {% if photos %}
   {% with first=photos.0 %}
-  <figure class="phaema-gallery" data-phaema-gallery>
+  <figure class="phaema-gallery" data-phaema-gallery id="photos">
     <a href="{{ first.image.url }}" data-gallery-link target="_blank" rel="noopener">
       <img class="phaema-gallery__main" data-gallery-main src="{{ first.image.url }}" alt="{{ first.caption|default:object.name }}">
     </a>
@@ -67,6 +67,21 @@
   {% if plans %}
   <ul class="govuk-list">{% for plan in plans %}<li><a class="govuk-link" href="{{ plan.file.url }}">{{ plan.title }}</a> <span class="govuk-body-s">({{ plan.file_type }}{% if plan.drawn_on %}, {{ plan.drawn_on|date:"j M Y" }}{% endif %}{% if plan.notes %}; {{ plan.notes }}{% endif %})</span></li>{% endfor %}</ul>
   {% else %}<p class="govuk-body">{% translate "No floor plans held." %}</p>{% endif %}
+  {% if user|can_edit:object %}
+  <details class="govuk-details" data-module="govuk-details"><summary class="govuk-details__summary"><span class="govuk-details__summary-text">{% translate "Add floor plans or photos" %}</span></summary><div class="govuk-details__text">
+    <form method="post" action="{% url 'properties:files' object.pk %}" enctype="multipart/form-data" class="phaema-drop govuk-!-margin-bottom-4">{% csrf_token %}<input type="hidden" name="kind" value="plans">
+      <div class="govuk-form-group govuk-!-margin-bottom-2"><label class="govuk-label govuk-label--s" for="plan-files">{% translate "Floor plans" %}</label>
+        <div class="govuk-hint" id="plan-files-hint">{% translate "Drag plans here, or choose them: PDF or AutoCAD (.dwg or .dxf), up to 20 at a time, 50 MB each. Each is named after its file." %}</div>
+        <div class="govuk-drop-zone" data-module="govuk-file-upload" data-i18n.choose-files-button="{% translate 'Choose files' %}" data-i18n.drop-instruction="{% translate 'or drop files here' %}" data-i18n.no-file-chosen="{% translate 'No files chosen' %}"><input class="govuk-file-upload" id="plan-files" name="files" type="file" multiple accept=".pdf,.dwg,.dxf" aria-describedby="plan-files-hint"></div></div>
+      <button class="govuk-button govuk-button--secondary" data-module="govuk-button">{% translate "Add the plans" %}</button></form>
+    <form method="post" action="{% url 'properties:files' object.pk %}" enctype="multipart/form-data" class="phaema-drop">{% csrf_token %}<input type="hidden" name="kind" value="photos">
+      <div class="govuk-form-group govuk-!-margin-bottom-2"><label class="govuk-label govuk-label--s" for="photo-files">{% translate "Photos" %}</label>
+        <div class="govuk-hint" id="photo-files-hint">{% translate "Drag photos here, or choose them: JPEG or PNG, up to 20 at a time, 20 MB each. They are resized and their location data removed. Each is captioned with its file name." %}</div>
+        <div class="govuk-drop-zone" data-module="govuk-file-upload" data-i18n.choose-files-button="{% translate 'Choose files' %}" data-i18n.drop-instruction="{% translate 'or drop files here' %}" data-i18n.no-file-chosen="{% translate 'No files chosen' %}"><input class="govuk-file-upload" id="photo-files" name="files" type="file" multiple accept="image/jpeg,image/png" aria-describedby="photo-files-hint"></div></div>
+      <button class="govuk-button govuk-button--secondary" data-module="govuk-button">{% translate "Add the photos" %}</button></form>
+    <p class="govuk-body-s govuk-!-margin-top-3">{% translate "Change titles, captions and dates, or remove a plan or photo, with Edit this property." %}</p>
+  </div></details>
+  {% endif %}
   <p class="govuk-body"><a class="govuk-link" href="{% url 'properties:report' object.pk %}">{% translate "Property report: everything held about this property, to read, print or download" %}</a></p>
 
   {% if breakdown %}

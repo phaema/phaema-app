@@ -24,7 +24,7 @@
     <label class="govuk-label govuk-!-margin-top-2" for="c-contractor">{% translate "or contractor" %}</label><select class="govuk-select" id="c-contractor" name="contractor"><option value="">–</option>{% for c in contractors %}<option value="{{ c.pk }}">{{ c.name }}</option>{% endfor %}</select></div>
   <div class="govuk-form-group"><label class="govuk-label govuk-label--s" for="c-ref">{% translate "Certificate number" %}</label><input class="govuk-input govuk-input--width-20" id="c-ref" name="reference" maxlength="60"></div>
   {% if jobs %}<div class="govuk-form-group"><label class="govuk-label govuk-label--s" for="c-job">{% translate "From job" %}</label><select class="govuk-select" id="c-job" name="job"><option value="">–</option>{% for j in jobs %}<option value="{{ j.pk }}">{{ j.reference }} {{ j.title|truncatechars:50 }}</option>{% endfor %}</select></div>{% endif %}
-  <div class="govuk-form-group"><label class="govuk-label govuk-label--s" for="c-file">{% translate "The certificate" %}</label><div class="govuk-hint">{% translate "PDF or photo, up to 25 MB" %}</div><input class="govuk-file-upload" id="c-file" name="file" type="file"></div>
+  <div class="govuk-form-group"><label class="govuk-label govuk-label--s" for="c-file">{% translate "The certificate" %}</label><div class="govuk-hint">{% translate "PDF or photo, up to 25 MB" %}</div><div class="govuk-drop-zone" data-module="govuk-file-upload"><input class="govuk-file-upload" id="c-file" name="file" type="file"></div></div>
   <button class="govuk-button" data-module="govuk-button">{% translate "Save the certificate" %}</button>
 </form></div></details>{% endif %}
 {% if kinds %}<details class="govuk-details" data-module="govuk-details"{% if not reqs %} open{% endif %}><summary class="govuk-details__summary"><span class="govuk-details__summary-text">{% translate "Choose the certificates this property needs" %}</span></summary><div class="govuk-details__text">
@@ -93,7 +93,7 @@
   <div class="govuk-form-group"><label class="govuk-label govuk-label--s" for="d-title">{% translate "Title" %}</label><input class="govuk-input" id="d-title" name="title" maxlength="200"></div>
   <div class="govuk-form-group"><label class="govuk-label govuk-label--s" for="d-cat">{% translate "Category" %}</label><select class="govuk-select" id="d-cat" name="category">{% for v, l in categories %}<option value="{{ v }}">{{ l }}</option>{% endfor %}</select></div>
   <div class="govuk-form-group"><label class="govuk-label govuk-label--s" for="d-date">{% translate "Date of the document" %}</label><input class="govuk-input govuk-input--width-10" type="date" id="d-date" name="document_date"></div>
-  <div class="govuk-form-group"><label class="govuk-label govuk-label--s" for="d-file">{% translate "File" %}</label><div class="govuk-hint">{% translate "PDF, photo, Word or Excel, up to 25 MB" %}</div><input class="govuk-file-upload" id="d-file" name="file" type="file"></div>
+  <div class="govuk-form-group"><label class="govuk-label govuk-label--s" for="d-file">{% translate "File" %}</label><div class="govuk-hint">{% translate "PDF, photo, Word or Excel, up to 25 MB" %}</div><div class="govuk-drop-zone" data-module="govuk-file-upload"><input class="govuk-file-upload" id="d-file" name="file" type="file"></div></div>
   <button class="govuk-button govuk-button--secondary" data-module="govuk-button">{% translate "Save" %}</button>
 </form></div></details>{% endif %}
 {% endblock %}

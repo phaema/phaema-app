@@ -423,3 +423,41 @@ def property_report(request, pk):
     return render(request, "properties/property_report.html", {
         "object": prop, "case": case, "title": title, "body": mark_safe(doc_render.to_html(text, values)),  # noqa: S308
         "can_edit": can_edit(request.user, prop)})
+
+
+@login_required
+def property_files(request, pk):
+    """Add several floor plans or photos to a property at once (dragged in or chosen), each named after its file."""
+    from django.core.exceptions import PermissionDenied
+    from django.utils.translation import ngettext
+
+    from apps.core.files import file_each, title_from_filename
+
+    from .models import PropertyPhoto, PropertyPlan
+
+    prop = get_object_or_404(Property, pk=pk)
+    if request.method != "POST":
+        return redirect(prop)
+    if not can_edit(request.user, prop):
+        raise PermissionDenied
+    photos = request.POST.get("kind") == "photos"
+    uploads = request.FILES.getlist("files")
+
+    def file_one(upload):
+        if photos:
+            item = PropertyPhoto(property=prop, image=upload, caption=title_from_filename(upload.name))
+        else:
+            item = PropertyPlan(property=prop, file=upload, title=title_from_filename(upload.name))
+        item.full_clean()
+        item.save()
+
+    filed, problems = file_each(uploads, file_one)
+    if filed and photos:
+        messages.success(request, ngettext("%(n)s photo added.", "%(n)s photos added.", filed) % {"n": filed})
+    elif filed:
+        messages.success(request, ngettext("%(n)s floor plan added.", "%(n)s floor plans added.", filed) % {"n": filed})
+    if problems:
+        messages.error(request, _("Not added: %(p)s") % {"p": "; ".join(problems)})
+    if not uploads:
+        messages.error(request, _("Choose or drop at least one file."))
+    return redirect(prop.get_absolute_url() + ("#photos" if photos else "#site-and-buildings"))

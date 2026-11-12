@@ -2,10 +2,12 @@
 from datetime import date, timedelta
 from decimal import Decimal
 
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Count, DecimalField, Exists, IntegerField, OuterRef, Q, Subquery, Sum, Value
 from django.db.models.functions import Coalesce
 from django.utils.translation import gettext_lazy as _
+from django.views.decorators.http import require_POST
 from django.views.generic import DetailView, ListView
 
 from apps.core.tables import sortable
@@ -111,6 +113,9 @@ class LeaseDetailView(LoginRequiredMixin, DetailView):
 
         ctx = super().get_context_data(**kwargs)
         lease = self.object
+        from .models import LeaseDocument
+
+        ctx["document_types"] = LeaseDocument.DocumentType.choices
         events = list(lease.events.select_related("assigned_to"))
         ctx["open_events"] = [e for e in events if e.is_open]
         ctx["closed_events"] = sorted((e for e in events if not e.is_open),
@@ -286,3 +291,42 @@ class PartyListView(LoginRequiredMixin, ExportMixin, ListView):
         params.pop("page", None)
         ctx["querystring"] = params.urlencode()
         return ctx
+
+
+@login_required
+@require_POST
+def lease_files(request, pk):
+    """File several PDFs on an agreement at once (dragged in or chosen), each named after its file."""
+    from django.contrib import messages
+    from django.core.exceptions import PermissionDenied
+    from django.shortcuts import get_object_or_404, redirect
+    from django.utils.translation import gettext as _
+    from django.utils.translation import ngettext
+
+    from apps.core.files import file_each, title_from_filename
+    from apps.core.roles import can_edit
+
+    from .models import LeaseDocument
+
+    lease = get_object_or_404(Lease, pk=pk)
+    if not can_edit(request.user, lease):
+        raise PermissionDenied
+    kind = request.POST.get("document_type", "")
+    if kind not in LeaseDocument.DocumentType.values:
+        kind = LeaseDocument.DocumentType.OTHER
+    uploads = request.FILES.getlist("files")
+
+    def file_one(upload):
+        doc = LeaseDocument(lease=lease, document_type=kind, description=title_from_filename(upload.name), file=upload)
+        doc.full_clean()
+        doc.save()
+
+    filed, problems = file_each(uploads, file_one)
+    if filed:
+        messages.success(request, ngettext("%(n)s document filed on this agreement.",
+                                           "%(n)s documents filed on this agreement.", filed) % {"n": filed})
+    if problems:
+        messages.error(request, _("Not filed: %(p)s") % {"p": "; ".join(problems)})
+    if not uploads:
+        messages.error(request, _("Choose or drop at least one file."))
+    return redirect(lease.get_absolute_url() + "#documents")

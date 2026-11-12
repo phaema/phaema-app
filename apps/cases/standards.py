@@ -17,7 +17,7 @@ def mees(case, today=None):
     """Warnings about the EPC for the property being let. Warning only: exemptions may apply."""
     if case.case_type.code not in LETTING_TYPES or not ModuleSettings.load().compliance_enabled:
         return []
-    prop = case.property or (case.lease.property if case.lease_id else None)
+    prop = case.main_property
     if prop is None:
         return []
     from apps.compliance.models import Certificate

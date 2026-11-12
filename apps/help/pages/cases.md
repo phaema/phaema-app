@@ -221,12 +221,20 @@ needs approval, ask for it on the case first: the outcome can be recorded once y
 
 ## Notes, emails, letters and documents
 
+- **File documents and emails**: drag files onto the box from a folder or your desktop, or select **Choose
+  files**, then **File them**. You can file up to 20 at a time. Saved emails (.eml or .msg) are read and filed as
+  correspondence with their attachments; set **Emails were** to Received or Sent first. Every other file is kept
+  as a document named after its file. Anything PHAEMA cannot accept is listed and the rest are still filed.
+  From Apple Mail you can drag an email straight onto the box. From Outlook, drag the email to your desktop
+  first, then onto the box.
 - **File an email**: save the email from your mail program (in Outlook, drag it to your desktop or use File,
   Save As, Outlook Message Format), then choose the file. PHAEMA reads the sender, date, subject and text, keeps the
   email, and keeps its attachments as documents.
 - **Log a letter, call or meeting**, with a scanned copy if you have one.
 - **Add a note.** Tick **Confidential** for anything sensitive: only the case owner and administrators can see it.
-- **Add a document**: PDFs, images, Word, Excel, text or CSV files up to 25 MB.
+- **Add a document**: PDFs, images, Word, Excel, text or CSV files up to 25 MB, with your own description.
+
+Wherever PHAEMA asks for a file, you can drag the file onto **Choose file** instead of browsing for it.
 
 ## People
 

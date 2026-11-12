@@ -149,3 +149,8 @@ html.phaema-text-largest { font-size: 150%; }
   .phaema-sheet .govuk-table__row { break-inside: avoid; }
   .phaema-sheet .govuk-heading-m { break-after: avoid; }
 }
+
+/* Filing several files at once: a clear target to drop onto */
+.phaema-drop { border: 2px dashed var(--ph-border, #b1b4b6); padding: 15px; max-width: 46em; }
+.phaema-drop .govuk-drop-zone { display: block; }
+.phaema-drop .phaema-inline-fields { align-items: flex-end; }

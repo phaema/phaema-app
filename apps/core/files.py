@@ -79,3 +79,35 @@ def process_image(file):
         out = BytesIO()
         img.convert("RGB").save(out, "JPEG", quality=85, optimize=True)
     return ContentFile(out.getvalue(), name="photo.jpg")
+
+
+MAX_FILES_AT_ONCE = 20
+
+
+def title_from_filename(name, limit=200):
+    """A readable title for a file that was dropped in without one: "Ground_floor-plan.pdf" -> "Ground floor plan"."""
+    stem = (name or "").rsplit("/", 1)[-1].rsplit("\\", 1)[-1]
+    stem = stem.rsplit(".", 1)[0] if "." in stem else stem
+    return " ".join(stem.replace("_", " ").replace("-", " ").split())[:limit] or "Untitled"
+
+
+def file_each(uploads, file_one):
+    """File several uploads one at a time. file_one(upload) returns None, or what was wrong with it.
+
+    Returns (how many were filed, [problems as "name: reason"]). Files beyond the limit are not filed."""
+    from django.core.exceptions import ValidationError
+
+    filed, problems = 0, []
+    for upload in uploads[:MAX_FILES_AT_ONCE]:
+        try:
+            problem = file_one(upload)
+        except ValidationError as exc:
+            problem = exc.messages[0]
+        if problem:
+            problems.append(f"{upload.name}: {problem}")
+        else:
+            filed += 1
+    if len(uploads) > MAX_FILES_AT_ONCE:
+        problems.append(str(_("Only the first %(n)s files were filed. Add the rest in another go.")
+                            % {"n": MAX_FILES_AT_ONCE}))
+    return filed, problems
