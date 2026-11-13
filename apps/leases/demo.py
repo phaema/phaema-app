@@ -283,7 +283,8 @@ def _documents():
         LeaseDocument.objects.create(
             lease=lease, document_type="lease", description=f"Signed lease {lease.reference}",
             document_date=lease.lease_date,
-            file=ContentFile(placeholder_pdf(f"Lease - {lease.counterparty.name}", lines, banner), name="lease.pdf"))
+            file=ContentFile(placeholder_pdf(f"Lease - {lease.counterparty.name}", lines, banner, more=_lease_pages(lease)),
+                             name="lease.pdf"))
         if ref == "DL-0004":
             LeaseDocument.objects.create(
                 lease=lease, document_type="notice", description="Section 25 notice (landlord's)",
@@ -306,3 +307,34 @@ def _documents():
 def remove():
     Lease.objects.filter(reference__startswith="DL-").delete()
     Party.objects.filter(notes="Fictional demonstration party.", leases__isnull=True, guarantees__isnull=True).delete()
+
+
+def _lease_pages(lease):
+    """Further pages for a demonstration lease, so the PDF reader has several pages and wording to search."""
+    return [
+        ("1. Tenant's covenants", [
+            "1.1  To pay the rent by equal quarterly payments in advance on the usual quarter days.",
+            "1.2  To pay all rates, taxes and outgoings charged on the premises.",
+            f"1.3  Repair: {lease.get_repairing_display()}.",
+            "1.4  Not to make structural alterations. Not to make other alterations without the",
+            "     landlord's written consent, which is not to be unreasonably withheld.",
+            "1.5  Not to assign or underlet the whole without the landlord's written consent.",
+            "1.6  Not to assign or underlet part only.",
+            "1.7  To use the premises only for the permitted use.",
+            "1.8  To yield up the premises at the end of the term in the condition this lease requires.",
+        ]),
+        ("2. Landlord's covenants", [
+            "2.1  Quiet enjoyment: the tenant may hold the premises without interruption by the landlord.",
+            "2.2  To insure the building against the insured risks and to reinstate after damage.",
+            "2.3  To maintain the estate roads, landscaping and shared services, subject to the",
+            "     tenant paying a fair proportion through the service charge.",
+        ]),
+        ("3. Rent review, break and forfeiture", [
+            "3.1  The rent is reviewed to open market rent on each review date, upwards only.",
+            "3.2  Time is not of the essence for the review, except where this lease says so.",
+            "3.3  Any break right is exercised by written notice of not less than six months.",
+            "3.4  The landlord may re-enter if rent is unpaid for 21 days or a covenant is broken.",
+            "",
+            "Schedule: the premises are shown edged red on the plan (not reproduced in this demonstration).",
+        ]),
+    ]

@@ -76,6 +76,9 @@ def test_demo_leases_are_valid(demo):
         obj.full_clean()
         assert obj.properties.exists()
     assert Lease.objects.filter(direction="in").count() == 2
+    # The signed leases have several pages, so the PDF reader has pages to move through and wording to find.
+    signed = Lease.objects.get(reference="DL-0001").documents.get(document_type="lease").file.read()
+    assert signed.count(b"/Type /Page ") == 4 and b"/Count 4 " in signed and b"Quiet enjoyment" in signed
     call_command("load_demo_data", verbosity=0)  # repeatable
     assert Lease.objects.count() == 47 and BreakOption.objects.count() == 5
 
