@@ -8,6 +8,8 @@ library's simple markup (see apps/documents/render.py), so the same text makes t
 from datetime import date
 from decimal import Decimal
 
+from django.utils.formats import date_format
+
 from .models import Property
 
 MISSING = "[Not recorded]"
@@ -171,6 +173,15 @@ def _rows_for(prop, wanted):
     return rows
 
 
+def _costs(prop):
+    cost = prop.latest_cost()
+    if not cost:
+        return ""
+    parts = [f"running cost £{cost.running_cost:,.0f}" if cost.running_cost is not None else "",
+             f"rates £{cost.rates:,.0f}" if cost.rates is not None else ""]
+    return f"{cost.year_label()}: " + ", ".join(x for x in parts if x)
+
+
 def _facts(g, wanted):
     prop = g.prop
     return _table([
@@ -181,7 +192,12 @@ def _facts(g, wanted):
         ("Holding purpose", prop.get_holding_purpose_display()),
         ("Portfolio", prop.portfolio.name if prop.portfolio_id else ""),
         ("Occupation", prop.get_occupation_display()),
-        ("Use", " ".join(x for x in (prop.use_description, f"({prop.use_class})" if prop.use_class else "") if x)),
+        ("Use", prop.use_text()),
+        ("Vacancy", prop.vacancy_text()),
+        ("Acquired", date_format(prop.acquired_on, "j F Y") if prop.acquired_on else ""),
+        ("Designations", "; ".join(f"{label}: {value}" for label, value in prop.designation_rows())),
+        ("Planned disposal", "; ".join(f"{label}: {value}" for label, value in prop.planned_disposal_rows())),
+        ("Running costs and rates", _costs(prop)),
         ("Managing surveyor", _name(prop.managing_surveyor)),
         ("Grid reference", f"{prop.easting}, {prop.northing}" if prop.easting else ""),
     ]) + [""]

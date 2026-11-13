@@ -158,7 +158,8 @@ class PropertyDetailView(LoginRequiredMixin, DetailView):
     template_name = "properties/property_detail.html"
 
     def get_queryset(self):
-        return Property.objects.select_related("parent", "managing_surveyor", "portfolio").prefetch_related("photos")
+        return Property.objects.select_related("parent", "managing_surveyor", "portfolio", "use_type") \
+            .prefetch_related("photos")
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
@@ -175,6 +176,9 @@ class PropertyDetailView(LoginRequiredMixin, DetailView):
         ctx["surveyor_name"] = display_name(obj.managing_surveyor)
         ctx["purpose_review_overdue"] = bool(obj.purpose_review_date and obj.purpose_review_date < date.today())
         ctx["physical"] = obj.physical_rows()
+        ctx["designations"] = obj.designation_rows()
+        ctx["planned_disposal"] = obj.planned_disposal_rows()
+        ctx["costs"] = list(obj.costs.all()[:5])
         ctx["plans"] = list(obj.plans.all())
         ctx["leases"] = obj.leases.select_related("counterparty").order_by("status", "-term_start")
         ctx["map_config"] = map_config()
@@ -461,3 +465,39 @@ def property_files(request, pk):
     if not uploads:
         messages.error(request, _("Choose or drop at least one file."))
     return redirect(prop.get_absolute_url() + ("#photos" if photos else "#site-and-buildings"))
+
+
+def _may_export(user):
+    from apps.core.roles import ADMINISTRATORS, SURVEYORS, role_of
+
+    return role_of(user) in (ADMINISTRATORS, SURVEYORS)
+
+
+@login_required
+def data_standard(request):
+    """What the Government Property Data Standard export holds, how complete it is, and the download."""
+    from . import standard
+
+    if not _may_export(request.user):
+        raise PermissionDenied
+    data = standard.gather(request.user)
+    return render(request, "properties/data_standard.html", {
+        "standard": standard, "data": data, "coverage": standard.coverage(data),
+        "not_exported": standard.NOT_EXPORTED,
+        "counts": [(_("Properties"), len(data["properties"])), (_("Contracts"), len(data["contracts"])),
+                   (_("Vacant spaces"), len(data["vacant"])), (_("FM assets"), len(data["assets"]))]})
+
+
+@login_required
+def data_standard_download(request):
+    from . import standard
+
+    if not _may_export(request.user):
+        raise PermissionDenied
+    data = standard.gather(request.user)
+    response = HttpResponse(
+        standard.workbook(data),
+        content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+    response["Content-Disposition"] = (
+        f'attachment; filename="estate-government-property-data-standard-{data["today"]:%Y-%m-%d}.xlsx"')
+    return response

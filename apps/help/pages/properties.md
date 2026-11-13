@@ -34,10 +34,15 @@ A property's page lists its parts. Lettable parts are shown in bold.
 | Holding purpose review date | When the reason for holding the property is next due for review. The register can be filtered to reviews that are overdue or due in the next 12 months. |
 | Portfolio | The service or portfolio the property belongs to, such as Investment, Leisure, Children's services or Adult social care. See [portfolios](#portfolios). |
 | Tenure | Freehold, leasehold, other, or none (managed but not owned). |
-| Occupation | Occupied by the council, let, partly let, vacant, or not applicable. |
+| Acquired on | When the council acquired its interest. If only the year is known, enter 1 January of that year. |
+| Occupation | Occupied by the council, let, partly let, vacant, or not applicable. For a vacant property, see [vacancy](#vacancy). |
+| Use | The main use, chosen from the council's [list of uses](#uses), with a description in your own words and the planning use class. |
+| Designations | Whether it is a listed building (and its grade), a scheduled monument, a site of special scientific interest or in a conservation area. See [designations](#designations). |
 | Managing surveyor | The surveyor responsible. Surveyors can change the properties they manage (see [roles](users-and-roles.md)). Events on the property's leases are assigned to them. |
 | Exclude from open data | Tick for sensitive properties so they are left out of any published asset list. |
 | Disposed of, disposal price | When the council sold or transferred it, and for how much. A disposed property is kept for its history but left out of open data. Usually recorded from a disposal project's [completion checklist](projects.md#completion-checklist). |
+| Planned disposal | The reason, method, expected date and expected value, once a disposal is planned. See [planning a disposal](#planning-a-disposal). |
+| Running costs and rates | What the property cost to run, and the business rates on it, for each financial year. See [running costs and rates](#running-costs-and-rates). |
 | Site hazards | What anyone visiting should know first, such as fragile roofs, confined spaces, lone working or dogs. Shown on cases, jobs and valuations for the property and everything within it. |
 
 ![The property register filtered to Northfield](/static/help/property-list.jpg)
@@ -59,6 +64,75 @@ Children's services, Education, Adult social care, Highways and transport, Berea
   total floor areas, rents or values by portfolio.
 - A portfolio with properties in it cannot be deleted. Untick **In use** to stop offering it for new
   properties; properties already in it keep it.
+
+## Uses
+
+Each property has a **use** chosen from a list, so that properties can be counted and compared by use. Each
+council keeps its own list: an administrator opens **Manage data**, **Property uses** to add, rename or reorder
+entries. PHAEMA starts with a list of about forty, from Office and Shop to Allotments and Telecoms mast.
+
+- Choose the use in **Edit this property**, under Classification. Put anything more exact in **Use
+  description**, in your own words: for example the use "Car park" with the description "Surface car park (180
+  spaces)".
+- Each entry in the list can be matched to a term in the Government Property Data Standard. That term is what the
+  [standard's export](#government-property-data-standard) shows.
+- A use with properties in it cannot be deleted. Untick **In use** to stop offering it for new properties.
+- In the [report builder](reports.md), Use is a column and a filter in the Properties dataset.
+
+## Designations
+
+In **Edit this property**, under Designations, record whether the property is:
+
+- a **listed building**: Grade I, Grade II*, Grade II, locally listed, or not listed
+- a **scheduled monument**
+- a **site of special scientific interest (SSSI)**
+- **in a conservation area**
+
+Leave a designation blank where nobody has checked. Choose **Not listed** or **No** where it has been checked and
+does not apply. The difference matters: a blank is a gap in the records, and reports can find those. Use
+**Designation notes** for the list entry number or which part of the property is covered.
+
+Designations are shown on the property's page and in the property report.
+
+## Vacancy
+
+When a property's occupation status is **Vacant**, record under Vacancy in **Edit this property**:
+
+| Field | Meaning |
+|---|---|
+| Vacant since | The date it became vacant. |
+| Vacancy status | **Available**, **Under offer**, **Underlet** or **Withdrawn** (not on the market). |
+| Available from, Available until | When it can be occupied, and until when if it is only available for a time, for example until redevelopment starts. |
+
+The status shows as a coloured tag beside the occupation on the property's page. When the occupation status
+changes from Vacant to anything else, PHAEMA clears these details, because they no longer apply.
+
+## Planning a disposal
+
+Once a disposal is planned, fill in under Disposal in **Edit this property**: the **reason for disposal**, the
+**method** (private treaty, auction, formal or informal tender, development or building agreement, community asset
+transfer, or other), the date it is **expected**, and the **expected value**. These appear on the property's page
+as **Planned disposal**.
+
+When the sale or long lease completes, fill in **Disposed of on** and the **disposal price**. The page then shows
+what happened in place of the plan, and the property leaves open data.
+
+The disposal itself is still run as a [case](cases.md) or a [project](projects.md). These fields are the summary
+on the property, which reports and the standard's export can read.
+
+## Running costs and rates
+
+Under **Running costs and rates** in **Edit this property**, add a line for each financial year:
+
+| Field | Meaning |
+|---|---|
+| Financial year starting | The year the financial year starts in: 2025 for 2025-26. One line for each year. |
+| Running cost | The cost of occupying and running the property for the year: energy, water, cleaning, security, repairs and maintenance, insurance and service charges. Leave out rates, rent and capital works. |
+| Business rates | The rates payable by the council for the year. |
+| Notes | Where the figures came from, or what is estimated. |
+
+Enter either figure or both. The figures usually come from the finance system: PHAEMA does not work them out.
+The latest five years are shown on the property's page, and the latest year is a column in the report builder.
 
 ## Floor areas
 
@@ -115,6 +189,24 @@ plans to the properties they manage.
 All of these can be chosen as columns and filters in [reports](reports.md), and filled in from a spreadsheet with
 the [property import](import-export.md).
 
+### Year built and overall condition
+
+Beside **Built**, which takes a year or a period in words ("1930s", "c. 1987, extended 2004"), there is **Year
+built**: a single year for reports. PHAEMA fills it in from the first year in **Built** if you leave it blank.
+
+**Overall condition** is the grade for the building as a whole from its last condition survey, with the date it
+was **surveyed**:
+
+| Grade | Meaning |
+|---|---|
+| A | Good, performing as intended |
+| B | Satisfactory, minor deterioration |
+| C | Poor, major repair or replacement soon |
+| D | Bad, life expired or serious risk |
+
+This is separate from the grades given to individual components (the roof, the boilers) under
+[maintenance](maintenance.md).
+
 ### The property report
 
 **Property report** on a property's page gathers everything PHAEMA holds about it into one document: the key
@@ -125,6 +217,48 @@ screen, print it, or select **Download as Word** to edit and send.
 
 On an asset valuation case the same report is headed **Initial valuation report**: see
 [cases](cases.md#initial-valuation-report).
+
+## Government Property Data Standard
+
+The [Government Property Data Standard](https://www.gov.uk/government/publications/government-property-data-standard)
+is the Cabinet Office's list of the facts central government bodies should hold about their property, each with a
+reference number. It does not bind councils, but it is a recognised yardstick.
+
+Administrators and surveyors can open **Reports**, then **Government Property Data Standard export**. The page
+shows:
+
+- a **Download the workbook** button
+- how many records are in each sheet
+- **how complete the records are**: for each of the standard's fields, how many current properties have it
+  recorded
+- the standard's fields that are **not exported**, and why
+
+The workbook is an Excel file with six sheets:
+
+| Sheet | What it holds |
+|---|---|
+| About | What the workbook is, when it was produced, and notes on how to read it. |
+| Properties | Every site, building, unit and parcel of land, including those disposed of. |
+| Contracts | Agreements under which the council holds property as tenant or licensee. |
+| Vacant spaces | Vacant property that has no parts of its own. |
+| FM assets | Building components from maintenance. |
+| Fields not exported | The standard's fields PHAEMA does not hold, holds partly, or that do not apply to a council. |
+
+Each column is headed with the standard's field name and its reference number in square brackets, for example
+"Listed Building [2.2.0004]". Columns with no number are PHAEMA's own, so that a row can be traced back.
+
+Things to know:
+
+- **It is a mapping, not a certificate.** PHAEMA's records are set out in the standard's layout. That does not
+  make the council "compliant" with a standard that does not apply to it.
+- **A blank cell means not recorded.** Nothing is estimated or filled in by default.
+- **Lettings by the council are not in it.** The standard's contract fields describe what an organisation
+  holds, not what it lets. Use the [reports](reports.md) for lettings.
+- **Names and contact details are left out**, for tenants and officers alike.
+- **You only get what you can see.** Valuations, energy certificates and components are included only if those
+  parts of PHAEMA are switched on and open to you.
+- A **unit** is given its building's name as the primary name and its own name as the secondary name, and takes
+  the building's address if it has none of its own.
 
 ## Photos
 

@@ -131,6 +131,7 @@ def test_edit_form_takes_site_area_in_square_metres(client, site, make_user):
         data[name] = getattr(value, "pk", value)
     data["boundary"] = ""
     data.update({"site_area_sqm": "3600", "photos-TOTAL_FORMS": 0, "photos-INITIAL_FORMS": 0,
+                 "costs-TOTAL_FORMS": 0, "costs-INITIAL_FORMS": 0,
                  "plans-TOTAL_FORMS": 1, "plans-INITIAL_FORMS": 0, "plans-0-title": "Yard plan",
                  "plans-0-file": SimpleUploadedFile("yard.pdf", PDF),
                  "Title_properties-TOTAL_FORMS": 0, "Title_properties-INITIAL_FORMS": 0})

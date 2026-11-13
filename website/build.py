@@ -101,7 +101,8 @@ CAPABILITIES = [
     ("Property register", "Estates, sites, buildings and units in a tree, with UPRN and USRN, floor areas to the RICS "
      "measurement codes, titles, photos, disposals and a map drawn from Land Registry INSPIRE parcels. Each site "
      "and building records its construction, roof, windows, services and floor plans, gathered into a property "
-     "report."),
+     "report. Designations, overall condition, vacancy, planned disposals and yearly running costs are recorded "
+     "too."),
     ("Leases and key dates", "Leases, licences and wayleaves, let out or held. Rent reviews, breaks, expiries and "
      "notice deadlines become events with email reminders and a calendar feed. Leases, deeds and plans held as PDFs "
      "open in a built-in reader, with search across the wording."),
@@ -127,7 +128,8 @@ CAPABILITIES = [
     ("People and access", "Four roles, access areas that decide who sees each module, supervision chains, cover for "
      "absence and a hand-over of a leaver's work in one step."),
     ("Reports and open data", "Ready-made and custom reports to Excel and CSV, the Transparency Code land and assets "
-     "list, an open API and a change log of every edit."),
+     "list, an open API and a change log of every edit. The whole estate can be exported in the layout of the "
+     "Government Property Data Standard, with a table of how complete the records are."),
 ]
 
 OPEN_SOURCE = [

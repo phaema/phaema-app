@@ -1,0 +1,65 @@
+{% extends "base.html" %}{% load i18n humanize %}
+{% block title %}{% translate "Government Property Data Standard export" %}{% endblock %}
+{% block help_page %}properties#government-property-data-standard{% endblock %}
+{% block breadcrumbs %}
+<nav class="govuk-breadcrumbs" aria-label="Breadcrumb"><ol class="govuk-breadcrumbs__list">
+  <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="{% url 'reports:list' %}">{% translate "Reports" %}</a></li>
+  <li class="govuk-breadcrumbs__list-item">{% translate "Government Property Data Standard" %}</li>
+</ol></nav>
+{% endblock %}
+{% block content %}
+<h1 class="govuk-heading-xl">{% translate "Government Property Data Standard export" %}</h1>
+<div class="govuk-grid-row"><div class="govuk-grid-column-two-thirds">
+<p class="govuk-body-l">{% translate "The whole estate as one Excel workbook, with each column headed by the standard's field name and reference number." %}</p>
+<p class="govuk-body">{% blocktranslate with ref=standard.STANDARD_REF url=standard.STANDARD_URL %}PHAEMA's records are mapped to the <a class="govuk-link" href="{{ url }}">Government Property Data Standard</a> ({{ ref }}). The standard binds central government, not councils, so this is a mapping to it and not a certificate of compliance. A blank cell means the fact is not recorded: nothing is estimated.{% endblocktranslate %}</p>
+<p class="govuk-body"><a class="govuk-button" data-module="govuk-button" href="{% url 'properties:data-standard-download' %}">{% translate "Download the workbook (Excel)" %}</a></p>
+
+<h2 class="govuk-heading-m">{% translate "What is in it" %}</h2>
+<dl class="govuk-summary-list">
+  {% for label, n in counts %}<div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{{ label }}</dt><dd class="govuk-summary-list__value">{{ n|intcomma }}</dd></div>{% endfor %}
+</dl>
+<ul class="govuk-list govuk-list--bullet">
+  <li>{% translate "Properties: every site, building, unit and parcel of land, including those disposed of." %}</li>
+  <li>{% translate "Contracts: agreements under which the council holds property as tenant or licensee. Lettings by the council are not part of the standard's contract fields; use the reports for those." %}</li>
+  <li>{% translate "Vacant spaces: vacant property with no parts of its own." %}</li>
+  <li>{% if data.maintenance %}{% translate "FM assets: building components from maintenance." %}{% else %}{% translate "FM assets: empty, because maintenance is switched off or not open to you." %}{% endif %}</li>
+  <li>{% translate "Fields not exported: what PHAEMA does not hold or what does not apply to a council, with the reason." %}</li>
+</ul>
+<p class="govuk-body">{% translate "Tenants' and officers' names and contact details are left out." %}</p>
+</div></div>
+
+<h2 class="govuk-heading-m" id="completeness">{% translate "How complete the records are" %}</h2>
+<p class="govuk-body">{% blocktranslate %}For each of the standard's fields in the Properties sheet: how many current property records have something recorded. Not every field applies to every record (land has no floor area, a freehold has no energy certificate), so 100% is not the aim for all of them.{% endblocktranslate %}</p>
+<table class="govuk-table">
+  <thead class="govuk-table__head"><tr class="govuk-table__row">
+    <th scope="col" class="govuk-table__header">{% translate "Field" %}</th>
+    <th scope="col" class="govuk-table__header">{% translate "Reference" %}</th>
+    <th scope="col" class="govuk-table__header govuk-table__header--numeric">{% translate "Recorded" %}</th>
+    <th scope="col" class="govuk-table__header govuk-table__header--numeric">{% translate "Share" %}</th>
+  </tr></thead>
+  <tbody class="govuk-table__body">
+  {% for heading, ref, filled, total, percent in coverage %}
+    <tr class="govuk-table__row"><td class="govuk-table__cell">{{ heading }}</td><td class="govuk-table__cell">{{ ref }}</td>
+      <td class="govuk-table__cell govuk-table__cell--numeric">{{ filled|intcomma }} {% translate "of" %} {{ total|intcomma }}</td>
+      <td class="govuk-table__cell govuk-table__cell--numeric">{{ percent }}%</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+
+<details class="govuk-details" data-module="govuk-details">
+  <summary class="govuk-details__summary"><span class="govuk-details__summary-text">{% translate "The standard's fields that are not exported" %}</span></summary>
+  <div class="govuk-details__text">
+    <table class="govuk-table">
+      <thead class="govuk-table__head"><tr class="govuk-table__row">
+        <th scope="col" class="govuk-table__header">{% translate "Reference" %}</th><th scope="col" class="govuk-table__header">{% translate "Field" %}</th>
+        <th scope="col" class="govuk-table__header">{% translate "Position" %}</th><th scope="col" class="govuk-table__header">{% translate "Note" %}</th>
+      </tr></thead>
+      <tbody class="govuk-table__body">
+      {% for ref, field, position, note in not_exported %}
+        <tr class="govuk-table__row"><td class="govuk-table__cell">{{ ref }}</td><td class="govuk-table__cell">{{ field }}</td><td class="govuk-table__cell">{{ position }}</td><td class="govuk-table__cell">{{ note }}</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</details>
+{% endblock %}

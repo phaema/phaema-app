@@ -120,7 +120,7 @@ def test_surveyor_new_property_becomes_theirs_and_parent_must_be_own(client, sur
     client.force_login(surveyor)
     add = reverse("admin:properties_property_add")
     base = {"reference": "S-1", "name": "New store", "property_type": "building",
-            "photos-TOTAL_FORMS": "0", "photos-INITIAL_FORMS": "0",
+            "photos-TOTAL_FORMS": "0", "photos-INITIAL_FORMS": "0", "costs-TOTAL_FORMS": "0", "costs-INITIAL_FORMS": "0",
             "plans-TOTAL_FORMS": "0", "plans-INITIAL_FORMS": "0",
             "Title_properties-TOTAL_FORMS": "0", "Title_properties-INITIAL_FORMS": "0"}
     resp = client.post(add, {**base, "parent": other.pk})

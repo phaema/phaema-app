@@ -1,13 +1,15 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 """Property register (terrier) and title records."""
 import uuid
+from datetime import date
 from decimal import Decimal
 
 from django.conf import settings
 from django.contrib.gis.db import models
 from django.core.exceptions import ValidationError
-from django.core.validators import MinValueValidator, RegexValidator
+from django.core.validators import MaxValueValidator, MinValueValidator, RegexValidator
 from django.urls import reverse
+from django.utils.formats import date_format
 from django.utils.translation import gettext_lazy as _
 
 from apps.core.files import process_image, validate_image, validate_pdf, validate_plan
@@ -39,6 +41,31 @@ class Portfolio(models.Model):
         ordering = ["order", "name"]
         verbose_name = _("portfolio")
         verbose_name_plural = _("portfolios")
+
+    def __str__(self):
+        return self.name
+
+
+class PropertyUse(models.Model):
+    """The council's own list of property uses (Office, Shop, Depot and so on), kept by administrators.
+
+    Each can be matched to a term in the Government Property Data Standard's usage list, which the standard's
+    export then uses.
+    """
+
+    name = models.CharField(_("use"), max_length=80, unique=True)
+    standard_usage = models.CharField(
+        _("Government Property Data Standard usage"), max_length=80, blank=True,
+        help_text=_("The matching term in the standard's usage list, for example \"Retail\" or \"Depot\". "
+                    "Used in the standard's export. Leave blank if none fits."))
+    active = models.BooleanField(_("in use"), default=True,
+                                 help_text=_("Untick to stop it being chosen for new properties."))
+    order = models.PositiveSmallIntegerField(_("order"), default=0)
+
+    class Meta:
+        ordering = ["order", "name"]
+        verbose_name = _("property use")
+        verbose_name_plural = _("property uses")
 
     def __str__(self):
         return self.name
@@ -119,8 +146,13 @@ class Property(TimeStampedModel):
         _("occupation status"), max_length=20, choices=Occupation.choices, blank=True
     )
     use_description = models.CharField(
-        _("use"), max_length=100, blank=True, help_text=_("e.g. Retail, Office, Industrial, Car park")
+        _("use description"), max_length=100, blank=True,
+        help_text=_("In your own words, e.g. Light industrial, Kiosk café, Surface car park (180 spaces)")
     )
+    use_type = models.ForeignKey(
+        PropertyUse, verbose_name=_("use (from the list)"), null=True, blank=True, on_delete=models.PROTECT,
+        related_name="properties",
+        help_text=_("The main use, chosen from the council's list. Add anything more exact in the description."))
     use_class = models.CharField(_("planning use class"), max_length=20, blank=True, help_text=_("e.g. E(a), B2, B8"))
     managing_surveyor = models.ForeignKey(
         settings.AUTH_USER_MODEL, verbose_name=_("managing surveyor"), null=True, blank=True,
@@ -168,6 +200,69 @@ class Property(TimeStampedModel):
                                    help_text=_("Completion date of the sale or long lease."))
     disposal_price = models.DecimalField(_("disposal price (£)"), max_digits=14, decimal_places=2, null=True,
                                          blank=True)
+
+    class DisposalMethod(models.TextChoices):
+        PRIVATE_TREATY = "private_treaty", _("Private treaty")
+        AUCTION = "auction", _("Auction")
+        FORMAL_TENDER = "formal_tender", _("Formal tender")
+        INFORMAL_TENDER = "informal_tender", _("Informal tender")
+        DEVELOPMENT_AGREEMENT = "development", _("Development agreement")
+        BUILDING_AGREEMENT = "building", _("Building agreement")
+        COMMUNITY_TRANSFER = "community", _("Community asset transfer")
+        OTHER = "other", _("Other")
+
+    disposal_method = models.CharField(_("method of disposal"), max_length=20, choices=DisposalMethod.choices,
+                                       blank=True)
+    disposal_reason = models.CharField(
+        _("reason for disposal"), max_length=255, blank=True,
+        help_text=_("e.g. Surplus to the service's needs after the depot review; Cabinet decision 14 May 2026."))
+    disposal_expected_on = models.DateField(_("disposal expected on"), null=True, blank=True,
+                                            help_text=_("When completion is expected. A best estimate is fine."))
+    disposal_expected_value = models.DecimalField(
+        _("expected disposal value (£)"), max_digits=14, decimal_places=2, null=True, blank=True,
+        validators=[MinValueValidator(0)])
+
+    # Acquisition
+    acquired_on = models.DateField(
+        _("acquired on"), null=True, blank=True,
+        help_text=_("When the council acquired its interest. If only the year is known, enter 1 January of it."))
+
+    # Designations: blank means not known.
+    class Listed(models.TextChoices):
+        NO = "no", _("Not listed")
+        GRADE_1 = "1", _("Grade I")
+        GRADE_2_STAR = "2star", _("Grade II*")
+        GRADE_2 = "2", _("Grade II")
+        LOCAL = "local", _("Locally listed")
+
+    class Designation(models.TextChoices):
+        YES = "yes", _("Yes")
+        NO = "no", _("No")
+
+    listed_building = models.CharField(_("listed building"), max_length=5, choices=Listed.choices, blank=True)
+    scheduled_monument = models.CharField(_("scheduled monument"), max_length=3, choices=Designation.choices,
+                                          blank=True)
+    sssi = models.CharField(_("site of special scientific interest (SSSI)"), max_length=3,
+                            choices=Designation.choices, blank=True)
+    conservation_area = models.CharField(_("in a conservation area"), max_length=3, choices=Designation.choices,
+                                         blank=True)
+    designation_notes = models.CharField(
+        _("designation notes"), max_length=255, blank=True,
+        help_text=_("e.g. the list entry number, or which part of the property is covered."))
+
+    # Vacancy: for a property whose occupation is Vacant.
+    class VacancyStatus(models.TextChoices):
+        AVAILABLE = "available", _("Available")
+        UNDER_OFFER = "under_offer", _("Under offer")
+        UNDERLET = "underlet", _("Underlet")
+        WITHDRAWN = "withdrawn", _("Withdrawn (not on the market)")
+
+    vacant_since = models.DateField(_("vacant since"), null=True, blank=True)
+    vacancy_status = models.CharField(_("vacancy status"), max_length=12, choices=VacancyStatus.choices, blank=True)
+    available_from = models.DateField(_("available from"), null=True, blank=True)
+    available_until = models.DateField(
+        _("available until"), null=True, blank=True,
+        help_text=_("If the space is only available for a time, for example until redevelopment starts."))
 
     # Location (British National Grid)
     easting = models.PositiveIntegerField(_("easting"), null=True, blank=True)
@@ -265,6 +360,21 @@ class Property(TimeStampedModel):
         help_text=_("What is there: for a site, the buildings and land; for a building, its layout, "
                     "accommodation and condition in outline."))
     built = models.CharField(_("built"), max_length=40, blank=True, help_text=_("Year or period, e.g. 1987 or 1930s."))
+    built_year = models.PositiveSmallIntegerField(
+        _("year built"), null=True, blank=True, validators=[MinValueValidator(1000), MaxValueValidator(2200)],
+        help_text=_("A single year, for reports. Use the earliest year of the period if only that is known."))
+
+    class Condition(models.TextChoices):
+        A = "A", _("A: good, performing as intended")
+        B = "B", _("B: satisfactory, minor deterioration")
+        C = "C", _("C: poor, major repair or replacement soon")
+        D = "D", _("D: bad, life expired or serious risk")
+
+    condition_grade = models.CharField(
+        _("overall condition"), max_length=1, choices=Condition.choices, blank=True,
+        help_text=_("The building as a whole, from its last condition survey. Components are graded separately "
+                    "under Maintenance."))
+    condition_surveyed_on = models.DateField(_("condition surveyed on"), null=True, blank=True)
     construction_type = models.CharField(_("construction"), max_length=20, choices=Construction.choices, blank=True)
     construction_detail = models.CharField(
         _("construction detail"), max_length=255, blank=True,
@@ -334,6 +444,15 @@ class Property(TimeStampedModel):
         if self.boundary and self.easting is None and self.northing is None:
             centre = self.boundary.point_on_surface
             self.easting, self.northing = round(centre.x), round(centre.y)
+        # The year built is taken from the "built" text when it has not been entered.
+        if self.built and self.built_year is None:
+            from .uses import year_from
+
+            self.built_year = year_from(self.built)
+        # Vacancy details belong to a vacant property: they are cleared once it is occupied again.
+        if self.occupation != self.Occupation.VACANT:
+            self.vacant_since = self.available_from = self.available_until = None
+            self.vacancy_status = ""
         super().save(*args, **kwargs)
 
     def ancestors(self):
@@ -447,7 +566,8 @@ class Property(TimeStampedModel):
             (_("Location"), self.location_description),
             (_("Site area"), self.site_area_text()),
             (_("Description"), self.building_description),
-            (_("Built"), self.built),
+            (_("Built"), self.built or (str(self.built_year) if self.built_year else "")),
+            (_("Overall condition"), self.condition_text()),
             (_("Construction"), with_detail(self.get_construction_type_display(), self.construction_detail)),
             (_("Storeys"), self.storeys_text()),
             (_("Roof"), with_detail(", ".join(x for x in (str(self.get_roof_type_display()),
@@ -458,7 +578,87 @@ class Property(TimeStampedModel):
         ]
         return [(str(label), str(value)) for label, value in rows if value] + self.services_rows()
 
+    def condition_text(self):
+        if not self.condition_grade:
+            return ""
+        text = str(self.get_condition_grade_display())
+        if self.condition_surveyed_on:
+            text += " ({})".format(_("surveyed %(date)s") % {"date": date_format(self.condition_surveyed_on, "j F Y")})
+        return text
+
+    def designation_rows(self):
+        """(label, value) for each designation recorded, whether it applies or not; nothing for 'not known'."""
+        rows = [
+            (_("Listed building"), self.get_listed_building_display()),
+            (_("Scheduled monument"), self.get_scheduled_monument_display()),
+            (_("SSSI"), self.get_sssi_display()),
+            (_("Conservation area"), self.get_conservation_area_display()),
+            (_("Notes"), self.designation_notes),
+        ]
+        return [(str(label), str(value)) for label, value in rows if value]
+
+    @property
+    def designated(self):
+        """True when any designation applies, so the page can flag it."""
+        return (self.listed_building not in ("", self.Listed.NO) or "yes" in (
+            self.scheduled_monument, self.sssi, self.conservation_area))
+
+    def use_text(self, with_class=True):
+        """The use as one phrase: the list entry, the description where it adds something, and the use class."""
+        name, detail = (self.use_type.name if self.use_type_id else ""), self.use_description.strip()
+        if name and name.lower() in detail.lower():  # "Public library" already says "Library"
+            name = ""
+        text = ": ".join(x for x in (name, detail) if x)
+        if with_class and self.use_class:
+            text = f"{text} ({self.use_class})".strip()
+        return text
+
+    def vacancy_text(self):
+        if self.occupation != self.Occupation.VACANT:
+            return ""
+        parts = [str(self.get_vacancy_status_display())]
+        if self.vacant_since:
+            parts.append(str(_("vacant since %(date)s") % {"date": date_format(self.vacant_since, "j F Y")}))
+        if self.available_from:
+            parts.append(str(_("available from %(date)s") % {"date": date_format(self.available_from, "j F Y")}))
+        if self.available_until:
+            parts.append(str(_("available until %(date)s") % {"date": date_format(self.available_until, "j F Y")}))
+        return "; ".join(x for x in parts if x)
+
+    def planned_disposal_rows(self):
+        """(label, value) for a disposal that is planned but not yet completed."""
+        if self.disposed_on:
+            return []
+        rows = [
+            (_("Reason"), self.disposal_reason),
+            (_("Method"), self.get_disposal_method_display()),
+            (_("Expected"), date_format(self.disposal_expected_on, "j F Y") if self.disposal_expected_on else ""),
+            (_("Expected value"), f"£{self.disposal_expected_value:,.0f}"
+             if self.disposal_expected_value is not None else ""),
+        ]
+        return [(str(label), str(value)) for label, value in rows if value]
+
+    def latest_cost(self):
+        costs = list(self.costs.all())
+        return costs[0] if costs else None
+
     def clean_physical(self):
+        today = date.today()
+        errors = {}
+        if self.condition_surveyed_on and not self.condition_grade:
+            errors["condition_grade"] = _("Choose the overall condition the survey found.")
+        if self.condition_surveyed_on and self.condition_surveyed_on > today:
+            errors["condition_surveyed_on"] = _("The survey date cannot be in the future.")
+        if self.built_year and self.built_year > today.year + 5:
+            errors["built_year"] = _("Enter the year the building was, or will be, completed.")
+        if self.acquired_on and self.acquired_on > today:
+            errors["acquired_on"] = _("The acquisition date cannot be in the future.")
+        if self.vacant_since and self.vacant_since > today:
+            errors["vacant_since"] = _("The date it became vacant cannot be in the future.")
+        if self.available_from and self.available_until and self.available_until < self.available_from:
+            errors["available_until"] = _("This must be on or after the available from date.")
+        if errors:
+            raise ValidationError(errors)
         if self.solar_capacity_kwp is not None and self.solar_pv != self.YesNo.YES:
             raise ValidationError({"solar_capacity_kwp": _("Set solar panels to Yes to record a capacity.")})
 
@@ -466,6 +666,44 @@ class Property(TimeStampedModel):
     def main_photo(self):
         photos = list(self.photos.all())
         return next((p for p in photos if p.is_main), photos[0] if photos else None)
+
+
+class PropertyCost(TimeStampedModel):
+    """What a property cost to run in one financial year, and the business rates payable on it."""
+
+    property = models.ForeignKey(Property, on_delete=models.CASCADE, related_name="costs")
+    year_starting = models.PositiveSmallIntegerField(
+        _("financial year starting"), validators=[MinValueValidator(1990), MaxValueValidator(2200)],
+        help_text=_("The year the financial year starts in: 2025 for 2025-26."))
+    running_cost = models.DecimalField(
+        _("running cost (£)"), max_digits=14, decimal_places=2, null=True, blank=True,
+        validators=[MinValueValidator(0)],
+        help_text=_("The cost of occupying and running the property for the year: energy, water, cleaning, "
+                    "security, repairs and maintenance, insurance and service charges. Leave out rates, rent "
+                    "and capital works."))
+    rates = models.DecimalField(
+        _("business rates (£)"), max_digits=14, decimal_places=2, null=True, blank=True,
+        validators=[MinValueValidator(0)], help_text=_("Business rates payable by the council for the year."))
+    notes = models.CharField(_("notes"), max_length=255, blank=True,
+                             help_text=_("e.g. where the figures came from, or what is estimated."))
+
+    class Meta:
+        ordering = ["-year_starting"]
+        constraints = [models.UniqueConstraint(fields=["property", "year_starting"], name="one_cost_per_year")]
+        verbose_name = _("running cost")
+        verbose_name_plural = _("running costs and rates")
+
+    def __str__(self):
+        return f"{self.property.reference} {self.year_label()}"
+
+    def year_label(self):
+        """The financial year as it is usually written: 2025-26."""
+        return f"{self.year_starting}-{str(self.year_starting + 1)[-2:]}"
+
+    def clean(self):
+        super().clean()
+        if self.running_cost is None and self.rates is None:
+            raise ValidationError(_("Enter the running cost, the rates, or both."))
 
 
 def _photo_path(instance, filename):
