@@ -118,6 +118,12 @@ maintenance, compliance, asset valuation) appear when that module is switched on
 | Floor areas with no measurement basis | Areas recorded without the RICS measurement standard they follow. |
 | Agreements with no repairing terms | Live lettings without repairing terms, which PHAEMA needs to work out who pays for repairs. |
 
+### The whole estate
+
+Administrators and surveyors also see **Government Property Data Standard export**: the estate as one Excel
+workbook in the layout of the government's property data standard, with a table showing how complete the records
+are. See [Government Property Data Standard](properties.md#government-property-data-standard).
+
 Only administrators can change ready-made reports. Anyone can **copy** one to their own reports and change the copy.
 
 ## Building a report

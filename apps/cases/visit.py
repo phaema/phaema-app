@@ -27,7 +27,7 @@ def _own(prop, key):
     if key == "occupation":
         return str(prop.get_occupation_display())
     if key == "use_description":
-        return " ".join(x for x in (prop.use_description, f"({prop.use_class})" if prop.use_class else "") if x)
+        return prop.use_text()
     if key == "building_description":
         return _short(prop.building_description)
     if key == "built":

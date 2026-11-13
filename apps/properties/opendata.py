@@ -65,7 +65,7 @@ def _row(p):
         "occupation": p.get_occupation_display() if p.occupation else "",
         "site_area_ha": p.site_area_ha if p.site_area_ha is not None else "",
         "gia_sqm": p.gia_sqm if p.gia_sqm is not None else "", "nia_sqm": p.nia_sqm if p.nia_sqm is not None else "",
-        "use": p.use_description, "use_class": p.use_class,
+        "use": p.use_text(with_class=False), "use_class": p.use_class,
     }
 
 

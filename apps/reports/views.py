@@ -13,7 +13,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.utils.translation import gettext as _
 from django.views.decorators.http import require_POST
 
-from apps.core.roles import ADMINISTRATORS, SURVEYORS
+from apps.core.roles import ADMINISTRATORS, SURVEYORS, role_of
 
 from . import datasets, export
 from .models import Report
@@ -50,6 +50,7 @@ def report_list(request):
                    if dataset_allowed(request.user, r.dataset)],
         "mine": [r for r in visible.filter(starter="", owner=request.user) if dataset_allowed(request.user, r.dataset)],
         "datasets": _datasets_for(request.user),
+        "can_export_standard": role_of(request.user) in (ADMINISTRATORS, SURVEYORS),
     })
 
 

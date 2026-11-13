@@ -8,7 +8,8 @@ from django.core.exceptions import ValidationError
 from apps.core.admin_roles import AdministratorOnlyEditingMixin, RoleAdminMixin, RoleInlineMixin
 from apps.core.roles import is_administrator
 
-from .models import InspireParcel, Portfolio, Property, PropertyPhoto, PropertyPlan, Title, TitleDocument
+from .models import (InspireParcel, Portfolio, Property, PropertyCost, PropertyPhoto, PropertyPlan, PropertyUse,
+                     Title, TitleDocument)
 
 
 class TitleInline(admin.TabularInline):
@@ -28,6 +29,12 @@ class PlanInline(RoleInlineMixin, admin.TabularInline):
     model = PropertyPlan
     extra = 1
     fields = ("title", "file", "drawn_on", "notes")
+
+
+class CostInline(RoleInlineMixin, admin.TabularInline):
+    model = PropertyCost
+    extra = 1
+    fields = ("year_starting", "running_cost", "rates", "notes")
 
 
 class PropertyForm(forms.ModelForm):
@@ -83,6 +90,27 @@ class PortfolioAdmin(admin.ModelAdmin):
         return super().has_delete_permission(request, obj) and (obj is None or not obj.properties.exists())
 
 
+@admin.register(PropertyUse)
+class PropertyUseAdmin(admin.ModelAdmin):
+    """The council's own list of property uses, each matched to a Government Property Data Standard term."""
+
+    list_display = ("name", "standard_usage", "active", "order", "property_count")
+    list_editable = ("standard_usage", "active", "order")
+    search_fields = ("name", "standard_usage")
+
+    def get_queryset(self, request):
+        from django.db.models import Count
+
+        return super().get_queryset(request).annotate(_count=Count("properties"))
+
+    @admin.display(description="Properties", ordering="_count")
+    def property_count(self, obj):
+        return obj._count
+
+    def has_delete_permission(self, request, obj=None):
+        return super().has_delete_permission(request, obj) and (obj is None or not obj.properties.exists())
+
+
 @admin.register(Property)
 class PropertyAdmin(AdministratorOnlyEditingMixin, RoleAdminMixin, admin.GISModelAdmin):
     list_display = ("reference", "name", "property_type", "holding_purpose", "occupation", "managing_surveyor", "postcode")
@@ -91,17 +119,26 @@ class PropertyAdmin(AdministratorOnlyEditingMixin, RoleAdminMixin, admin.GISMode
     search_fields = ("reference", "name", "uprn", "address_line_1", "town", "postcode")
     autocomplete_fields = ("parent",)
     form = PropertyForm
-    inlines = [PhotoInline, PlanInline, TitleInline]
+    inlines = [CostInline, PhotoInline, PlanInline, TitleInline]
     gis_widget_kwargs = {"attrs": {"default_lon": -1.5, "default_lat": 52.5, "default_zoom": 6}}
     fieldsets = (
         (None, {"fields": ("reference", "name", "property_type", "parent", "managing_surveyor")}),
         ("Identifiers and address", {"fields": ("uprn", "usrn", "address_line_1", "address_line_2", "town", "postcode")}),
         ("Classification", {"fields": ("holding_purpose", "strategy_section", "purpose_review_date", "portfolio",
-                                       "tenure", "occupation", "use_description", "use_class")}),
+                                       "tenure", "acquired_on", "occupation", "use_type", "use_description",
+                                       "use_class")}),
+        ("Designations", {
+            "fields": ("listed_building", "scheduled_monument", "sssi", "conservation_area", "designation_notes"),
+            "description": "Leave blank where it is not known. Choose Not listed or No where it has been checked."}),
+        ("Vacancy", {
+            "fields": ("vacant_since", "vacancy_status", "available_from", "available_until"),
+            "description": "For a property whose occupation status is Vacant. These are cleared when it is "
+                           "occupied again."}),
         ("Areas", {"fields": ("gia_sqm", "nia_sqm", "gea_sqm", "site_area_ha", "site_area_sqm", "area_standard",
                               "area_source", "areas_measured_on")}),
         ("Site and buildings", {
-            "fields": ("location_description", "building_description", "built", "construction_type",
+            "fields": ("location_description", "building_description", "built", "built_year", "condition_grade",
+                       "condition_surveyed_on", "construction_type",
                        "construction_detail", "storeys", "basement_levels", "roof_type", "roof_covering",
                        "roof_detail", "window_type", "window_detail", "parking", "parking_spaces"),
             "description": "What the property physically is. Record the site as a whole on the site, and each "
@@ -110,26 +147,27 @@ class PropertyAdmin(AdministratorOnlyEditingMixin, RoleAdminMixin, admin.GISMode
         ("Services", {"fields": ("mains_gas", "electricity", "mains_water", "drainage", "services_notes",
                                  "solar_pv", "solar_capacity_kwp")}),
         ("Location", {"fields": ("easting", "northing", "boundary", "boundary_source")}),
-        ("Disposal", {"fields": ("disposed_on", "disposal_price"),
-                      "description": "When the property is sold or let on a long lease. It then leaves open data."}),
+        ("Disposal", {"fields": ("disposal_reason", "disposal_method", "disposal_expected_on",
+                                 "disposal_expected_value", "disposed_on", "disposal_price"),
+                      "description": "Fill in the reason, method and expected date and value once a disposal is "
+                                     "planned. Fill in the last two when the sale or long lease completes: the "
+                                     "property then leaves open data."}),
         ("Other", {"fields": ("site_hazards", "exclude_from_publication", "notes")}),
     )
-
-    def get_form(self, request, obj=None, **kwargs):
-        form = super().get_form(request, obj, **kwargs)
-        field = form.base_fields.get("portfolio")
-        if field is not None:
-            from django.db.models import Q
-
-            field.queryset = Portfolio.objects.filter(Q(active=True) | Q(pk=getattr(obj, "portfolio_id", None)))
-        return form
 
     def get_readonly_fields(self, request, obj=None):
         # Only administrators assign surveyors; a surveyor's new properties are their own.
         return () if is_administrator(request.user) else ("managing_surveyor",)
 
     def get_form(self, request, obj=None, **kwargs):
+        from django.db.models import Q
+
         form = super().get_form(request, obj, **kwargs)
+        # Only lists entries still in use, plus whatever this property already has.
+        for name, model in (("portfolio", Portfolio), ("use_type", PropertyUse)):
+            field = form.base_fields.get(name)
+            if field is not None:
+                field.queryset = model.objects.filter(Q(active=True) | Q(pk=getattr(obj, f"{name}_id", None)))
         if is_administrator(request.user):
             return form
         user = request.user

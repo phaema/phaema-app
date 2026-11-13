@@ -78,13 +78,24 @@ def _user_name(user):
 def _properties():
     from apps.properties.models import Property
 
-    return Property.objects.select_related("parent", "managing_surveyor", "portfolio").prefetch_related(
-        "titles", "leases")
+    return Property.objects.select_related("parent", "managing_surveyor", "portfolio", "use_type").prefetch_related(
+        "titles", "leases", "costs")
 
 
 def _property_rent(p):
     return sum((lease.annual_rent for lease in p.leases.all()
                 if lease.status in ("current", "holding_over") and lease.direction == "out"), Decimal("0"))
+
+
+def _use_choices():
+    from apps.properties.models import PropertyUse
+
+    return [(str(u.pk), u.name) for u in PropertyUse.objects.all()]
+
+
+def _latest_cost(p, field):
+    costs = list(p.costs.all())
+    return getattr(costs[0], field) if costs else None
 
 
 def _portfolio_choices():
@@ -116,7 +127,9 @@ def _property_fields():
               getter=lambda p: p.portfolio.name if p.portfolio else ""),
         Field("tenure", "Tenure", "choice", "tenure", choices=_choices(P, "tenure"), default=True),
         Field("occupation", "Occupation", "choice", "occupation", choices=_choices(P, "occupation"), default=True),
-        Field("use_description", "Use", path="use_description", default=True),
+        Field("use_type", "Use", "choice", "use_type", choices=_use_choices, default=True,
+              getter=lambda p: p.use_type.name if p.use_type else ""),
+        Field("use_description", "Use description", path="use_description", default=True),
         Field("use_class", "Use class", path="use_class"),
         Field("gia_sqm", "GIA m²", "area", "gia_sqm", default=True),
         Field("nia_sqm", "NIA m²", "area", "nia_sqm", default=True),
@@ -129,6 +142,33 @@ def _property_fields():
         Field("location_description", "Location", path="location_description"),
         Field("building_description", "Description", path="building_description"),
         Field("built", "Built", path="built"),
+        Field("built_year", "Year built", "number", "built_year"),
+        Field("condition_grade", "Overall condition", "choice", "condition_grade",
+              choices=_choices(P, "condition_grade")),
+        Field("condition_surveyed_on", "Condition surveyed on", "date", "condition_surveyed_on"),
+        Field("acquired_on", "Acquired on", "date", "acquired_on"),
+        Field("listed_building", "Listed building", "choice", "listed_building",
+              choices=_choices(P, "listed_building")),
+        Field("scheduled_monument", "Scheduled monument", "choice", "scheduled_monument",
+              choices=_choices(P, "scheduled_monument")),
+        Field("sssi", "SSSI", "choice", "sssi", choices=_choices(P, "sssi")),
+        Field("conservation_area", "Conservation area", "choice", "conservation_area",
+              choices=_choices(P, "conservation_area")),
+        Field("designation_notes", "Designation notes", path="designation_notes"),
+        Field("vacancy_status", "Vacancy status", "choice", "vacancy_status", choices=_choices(P, "vacancy_status")),
+        Field("vacant_since", "Vacant since", "date", "vacant_since"),
+        Field("available_from", "Available from", "date", "available_from"),
+        Field("available_until", "Available until", "date", "available_until"),
+        Field("disposal_reason", "Reason for disposal", path="disposal_reason"),
+        Field("disposal_method", "Method of disposal", "choice", "disposal_method",
+              choices=_choices(P, "disposal_method")),
+        Field("disposal_expected_on", "Disposal expected on", "date", "disposal_expected_on"),
+        Field("disposal_expected_value", "Expected disposal value £", "money", "disposal_expected_value"),
+        Field("running_cost", "Running cost £ (latest year)", "money",
+              getter=lambda p: _latest_cost(p, "running_cost")),
+        Field("rates", "Business rates £ (latest year)", "money", getter=lambda p: _latest_cost(p, "rates")),
+        Field("cost_year", "Running cost year", getter=lambda p: (
+            lambda c: c[0].year_label() if c else "")(list(p.costs.all()))),
         Field("construction_type", "Construction", "choice", "construction_type",
               choices=_choices(P, "construction_type")),
         Field("construction_detail", "Construction detail", path="construction_detail"),

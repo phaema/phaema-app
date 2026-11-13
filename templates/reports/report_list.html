@@ -10,6 +10,12 @@
 <h3 class="govuk-heading-m">{{ heading }}</h3>
 {% include "reports/_report_table.html" with reports=reports %}
 {% endfor %}
+{% if can_export_standard %}
+<h2 class="govuk-heading-l govuk-!-margin-top-6">{% translate "The whole estate" %}</h2>
+<ul class="govuk-list">
+  <li><a class="govuk-link" href="{% url 'properties:data-standard' %}">{% translate "Government Property Data Standard export" %}</a><br><span class="govuk-hint govuk-!-margin-bottom-0">{% translate "The estate in the layout of the government's property data standard, with how complete the records are." %}</span></li>
+</ul>
+{% endif %}
 <h2 class="govuk-heading-l govuk-!-margin-top-6">{% translate "My reports" %}</h2>
 {% if mine %}{% include "reports/_report_table.html" with reports=mine %}{% else %}<p class="govuk-body">{% translate "You have not saved any reports yet. Make a new one, or copy a ready-made report and change it." %}</p>{% endif %}
 <h2 class="govuk-heading-l govuk-!-margin-top-6">{% translate "Shared by colleagues" %}</h2>

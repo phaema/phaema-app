@@ -310,6 +310,9 @@ class Command(BaseCommand):
         self.load_photos(refs)
         self.load_documents()
         self.load_inspire(refs)
+        from apps.properties import demo_standard
+
+        demo_standard.load()
         from apps.leases import demo as lease_demo
 
         lease_demo.load()

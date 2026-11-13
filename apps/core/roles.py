@@ -28,6 +28,7 @@ SURVEYOR_PERMISSIONS = {
     "properties.add_property", "properties.change_property",
     "properties.add_propertyphoto", "properties.change_propertyphoto", "properties.delete_propertyphoto",
     "properties.add_propertyplan", "properties.change_propertyplan", "properties.delete_propertyplan",
+    "properties.add_propertycost", "properties.change_propertycost", "properties.delete_propertycost",
     "leases.add_lease", "leases.change_lease",
     "leases.add_breakoption", "leases.change_breakoption", "leases.delete_breakoption",
     "leases.add_party", "leases.change_party",
