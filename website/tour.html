@@ -211,14 +211,26 @@ p { margin: 0 0 .9em; max-width: 60ch; }
     {id: "leases", ch: "work", t: 10, html:
       '<div class="scene"><div class="scene__text"><p class="eyebrow">Leases and key dates</p><h2>Key dates become events, with reminders</h2>' +
       '<p>Leases, licences and wayleaves, let out or held. Rent reviews, breaks, expiries and notice deadlines become events with email reminders at the lead times the council sets, and a calendar feed.</p>' +
-      rel([["cases", "Cases opened automatically"], ["rents", "The rent account"], ["lettings", "Renewals"]]) + '</div>' +
+      rel([["pdf-reader", "Reading the lease"], ["cases", "Cases opened automatically"], ["rents", "The rent account"], ["lettings", "Renewals"]]) + '</div>' +
       shot("leases-2", "An agreement&#8217;s key dates listed as events with due dates and status.", "Key dates as events.") + '</div>'},
+    {id: "pdf-reader", ch: "work", t: 10, html:
+      '<div class="scene"><div class="scene__text"><p class="eyebrow">Reading documents</p><h2>Read the lease without leaving PHAEMA</h2>' +
+      '<p>Leases, deeds, notices and plans held as PDFs open in a built-in reader, with a strip of pages down the side, zoom and rotate.</p>' +
+      '<p>Find searches the wording, so a break clause or a repairing covenant is a few keystrokes away, and Back returns to the agreement it belongs to.</p>' +
+      rel([["leases", "Leases and key dates"], ["filing", "Filing documents"], ["register", "Floor plans on the property"]]) + '</div>' +
+      shot("pdf-reader", "A lease open in the built-in PDF reader, with page thumbnails down the side and a search for the word landlord showing the first of six matches.", "Searching the wording of a lease.") + '</div>'},
     {id: "cases", ch: "work", t: 11, html:
       '<div class="scene"><div class="scene__text"><p class="eyebrow">Cases and approvals</p><h2>Casework with targets and a second pair of eyes</h2>' +
       '<p>Consents, assignments, renewals and enquiries move through five stages with tasks and statutory target dates. Before a decision, the surveyor declares any conflict of interest and their supervisor approves the recommendation.</p>' +
       '<p>Notes, saved emails, documents and fees stay with the case.</p>' +
-      rel([["site-visit", "The site visit sheet"], ["letters", "Letters from a case"], ["lettings", "Lettings cases"]]) + '</div>' +
+      rel([["filing", "Filing emails and documents"], ["site-visit", "The site visit sheet"], ["letters", "Letters from a case"], ["lettings", "Lettings cases"]]) + '</div>' +
       shot("cases-5", "A case awaiting the supervisor&#8217;s approval, with the recommendation and approval history.", "Supervisor approval.") + '</div>'},
+    {id: "filing", ch: "work", t: 10, html:
+      '<div class="scene"><div class="scene__text"><p class="eyebrow">Filing</p><h2>Drag emails and documents onto the case</h2>' +
+      '<p>Drop up to 20 files at once onto a case. Saved emails are read and filed with their sender, date, subject and attachments; anything else is kept as a document named after the file.</p>' +
+      '<p>Agreements and properties take documents, floor plans and photos the same way, so the record is complete without retyping.</p>' +
+      rel([["cases", "Cases"], ["pdf-reader", "Reading what you filed"], ["site-visit", "The site visit sheet"]]) + '</div>' +
+      shot("filing", "The File documents and emails box on a case, where files are dragged or chosen.", "File documents and emails on a case.") + '</div>'},
     {id: "site-visit", ch: "work", t: 11, html:
       '<div class="scene"><div class="scene__text"><p class="eyebrow">Site visits</p><h2>One sheet to take on every visit</h2>' +
       '<p>Each case has a site visit sheet for a phone or to print: the case, the hazards and asbestos information to read before going, who occupies the property, the property details, and a checklist for that type of case.</p>' +
