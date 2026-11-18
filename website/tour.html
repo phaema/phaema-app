@@ -171,6 +171,7 @@ p { margin: 0 0 .9em; max-width: 60ch; }
     ["lettings", "Lettings and renewals", "Heads of terms and the 1954 Act"],
     ["letters", "Letters and notices", "Thirty templates, filled in"],
     ["projects", "Projects", "Gateways, budgets, risks"],
+    ["strategy", "Estate strategy", "Asset strategies and the Asset Challenge"],
     ["rents", "Rents and arrears", "Demands, receipts and arrears", 1],
     ["service", "Service charges", "Budgets to year-end", 1],
     ["valuation", "Asset valuation", "The rolling programme", 1],
@@ -193,7 +194,7 @@ p { margin: 0 0 .9em; max-width: 60ch; }
       '<div><h3>Costly lock-in</h3><p>Each council pays separately for proprietary systems, and changing supplier means changing system.</p></div></div>' +
       rel([["hub", "How PHAEMA joins it up"], ["why-open", "Why open source helps"]]) + '</div></div>'},
     {id: "hub", ch: "intro", t: 14, html:
-      '<div class="scene scene--text" style="max-width:none"><div class="scene__text"><p class="eyebrow">One property record at the centre</p><h2>Thirteen parts, one system. Choose one to jump to it.</h2>' +
+      '<div class="scene scene--text" style="max-width:none"><div class="scene__text"><p class="eyebrow">One property record at the centre</p><h2>Fourteen parts, one system. Choose one to jump to it.</h2>' +
       '<div class="hub">' + MODULES.map(function (m) {
         return '<a class="tile' + (m[3] ? ' tile--opt' : '') + '" href="#' + m[0] + '"><b>' + m[1] + '</b><small>' + m[2] + '</small></a>';
       }).join('') + '</div><p class="key"><i></i>Optional modules: each council switches them on when it is ready, or keeps its existing system.</p></div></div>'},
@@ -252,13 +253,19 @@ p { margin: 0 0 .9em; max-width: 60ch; }
       '<div class="scene"><div class="scene__text"><p class="eyebrow">Projects</p><h2>Developments, acquisitions and disposals</h2>' +
       '<p>Projects move through five phases and four gateways, each decision recorded with who made it. Milestones, a budget by financial year and a risk register sit alongside, and confidential acquisitions are seen only by their team.</p>' +
       '<p>At completion, a checklist prompts every change the register needs.</p>' +
-      rel([["project-checklist", "The completion checklist"], ["register", "The register"], ["valuation", "Valuing the result"]]) + '</div>' +
+      rel([["project-checklist", "The completion checklist"], ["strategy", "The estate strategy"], ["valuation", "Valuing the result"]]) + '</div>' +
       shot("projects-2", "A project page showing its five phases and gateway decisions.", "Phases and gateways.") + '</div>'},
     {id: "project-checklist", ch: "work", t: 9, html:
       '<div class="scene"><div class="scene__text"><p class="eyebrow">Projects</p><h2>Nothing forgotten at completion</h2>' +
       '<p>The checklist links to each form the register needs, already filled in from the project: a new property and title after an acquisition, or each disposal after a sale. PHAEMA never changes the register by itself.</p>' +
       rel([["projects", "Back to projects"], ["register", "The register"]]) + '</div>' +
       shot("projects-6", "A project&#8217;s completion checklist with steps linking to prefilled forms.", "The completion checklist.") + '</div>'},
+    {id: "strategy", ch: "work", t: 11, html:
+      '<div class="scene"><div class="scene__text"><p class="eyebrow">Estate strategy</p><h2>Why we hold it, and what happens next</h2>' +
+      '<p>Every property carries its holding purpose, its asset strategy (retain, invest, remodel or share, release, dispose) with who decided and the minute reference, and a suitability grade. Reviews fall due on the surveyor&#8217;s My work.</p>' +
+      '<p>The Asset Challenge, the review process used by many councils, runs as a case: its approved outcome becomes the property&#8217;s strategy, and a disposal or investment project can start from it.</p>' +
+      rel([["projects", "Projects that follow"], ["space", "How well the space is used"], ["register", "The property record"]]) + '</div>' +
+      shot("strategy", "A property&#8217;s Strategy section: asset strategy Retain as is decided by Cabinet, its review overdue, suitability grade C and an Asset Challenge in progress.", "A property&#8217;s strategy, review and suitability.") + '</div>'},
     {id: "rents", ch: "money", t: 10, html:
       '<div class="scene"><div class="scene__text"><p class="eyebrow">Rents and arrears &middot; optional</p><h2>From demand to receipt</h2>' +
       '<p>Demand runs with VAT, credit notes, receipts imported from the finance system and aged arrears, with a statement for each tenant and an export file for finance. Surveyors see rent for their own patch.</p>' +
