@@ -213,7 +213,7 @@ def test_holding_purpose_strategy_section_and_review(admin_client, estate):
     prop.save()
     Property.objects.create(reference="P2", name="Hall", property_type="building")
     page = admin_client.get(prop.get_absolute_url()).content.decode()
-    assert "4.2 Investment estate" in page and "Review of purpose due" in page and "Overdue" in page
+    assert "4.2 Investment estate" in page and "Strategy review" in page and "Overdue" in page
     listed = admin_client.get(reverse("properties:list") + "?purpose_review=overdue")
     assert [p.reference for p in listed.context["page_obj"]] == ["P1"]
     from apps.reports import datasets

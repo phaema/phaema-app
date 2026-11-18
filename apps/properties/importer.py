@@ -8,6 +8,7 @@ until every row passes validation.
 import csv
 import io
 from dataclasses import dataclass, field
+from datetime import date
 from decimal import Decimal, InvalidOperation
 
 from django.contrib.auth import get_user_model
@@ -53,8 +54,8 @@ COLUMNS = [
                                       "e.g. Investment, Leisure, Adult social care."),
     ("Estate strategy section", "strategy_section", False, "The section of the estate strategy that covers the "
                                                            "property, e.g. 4.2 Investment estate."),
-    ("Holding purpose review date", "purpose_review_date", False, "When the holding purpose is next due for "
-                                                                  "review, dd/mm/yyyy."),
+    ("Holding purpose review date", "purpose_review_date", False, "When the holding purpose and asset strategy "
+                                                                  "are next due for review, dd/mm/yyyy."),
     ("Location", "location_description", False, "Where the property is and what surrounds it."),
     ("Description", "building_description", False, "What is there: buildings, layout and accommodation."),
     ("Built", "built", False, "Year or period, e.g. 1987 or 1930s."),
@@ -80,7 +81,20 @@ COLUMNS = [
     ("Services notes", "services_notes", False, ""),
     ("Solar panels", "solar_pv", False, "Yes or No."),
     ("Solar capacity kWp", "solar_capacity_kwp", False, "Only with Solar panels set to Yes."),
+    # Estates strategy, added 18 November 2026.
+    ("Purpose sub-category", "purpose_category", False, "One of the council's sub-categories of the holding "
+                                                        "purpose, as listed under Manage data, e.g. Depots."),
+    ("Asset strategy", "asset_strategy", False, "One of the council's asset strategies, e.g. Retain as is or "
+                                                "Dispose later. Recorded as imported, with the date and reason "
+                                                "below."),
+    ("Asset strategy decided on", "strategy_decided_on", False, "When it was decided, dd/mm/yyyy. Today if blank."),
+    ("Asset strategy reason", "strategy_reason", False, "Why, with any committee and minute reference."),
+    ("Suitability grade", "suitability_grade", False, "A, B, C or D."),
+    ("Suitability assessed on", "suitability_on", False, "dd/mm/yyyy. Today if blank."),
 ]
+# Columns that are not fields of the property itself: kept as a decision or an assessment with its history.
+EXTRA_FIELDS = {"purpose_category", "asset_strategy", "strategy_decided_on", "strategy_reason", "suitability_grade",
+                "suitability_on"}
 CHOICE_FIELDS = {"property_type", "holding_purpose", "tenure", "occupation", "area_standard", "area_source",
                  "construction_type", "roof_type", "roof_covering", "window_type", "mains_gas", "electricity",
                  "mains_water", "drainage", "solar_pv"}
@@ -194,8 +208,9 @@ def validate(rows, user_model=None):
         else:
             result.action = "update"
         parent_ref = None
+        extras = {f: t for f, t in values.items() if f in EXTRA_FIELDS and t}
         for f, text in values.items():
-            if f == "reference" or text == "":
+            if f == "reference" or text == "" or f in EXTRA_FIELDS:
                 continue
             try:
                 if f in CHOICE_FIELDS:
@@ -258,6 +273,8 @@ def validate(rows, user_model=None):
         if obj.pk and parent_ref and (obj.parent.reference if obj.parent_id else None) != parent_ref:
             result.changed.append("parent")
 
+        if extras and not result.errors:
+            _strategy_extras(obj, extras, result)
         if not result.errors:
             try:
                 obj.full_clean(exclude=["parent", "reference"] if obj.pk else ["parent"],
@@ -271,6 +288,57 @@ def validate(rows, user_model=None):
         results.append(result)
         prepared.append((obj, parent_ref))
     return ImportResult(results, []), prepared
+
+
+def _strategy_extras(obj, extras, result):
+    """The purpose sub-category, asset strategy and suitability columns. A strategy or grade is added to the
+    property's history only when it differs from the current one, so importing the same file twice adds nothing."""
+    from apps.imports.engine import to_date
+
+    from .models import AssetStrategy, AssetStrategyOption, PurposeCategory, SuitabilityAssessment
+
+    records = []
+    text = extras.get("purpose_category")
+    if text:
+        category = PurposeCategory.objects.filter(name__iexact=text, holding_purpose=obj.holding_purpose).first()
+        if category is None:
+            result.errors.append(f"Purpose sub-category: no sub-category '{text}' under "
+                                 f"{obj.get_holding_purpose_display() or 'the holding purpose (not set)'}.")
+        else:
+            if obj.pk and obj.purpose_category_id != category.pk:
+                result.changed.append("purpose_category")
+            obj.purpose_category = category
+    try:
+        decided = to_date(None, extras["strategy_decided_on"]) if extras.get("strategy_decided_on") else date.today()
+        assessed = to_date(None, extras["suitability_on"]) if extras.get("suitability_on") else date.today()
+    except ValueError as exc:
+        result.errors.append(f"Date: {exc}")
+        return
+    text = extras.get("asset_strategy")
+    if text:
+        option = AssetStrategyOption.objects.filter(name__iexact=text).first()
+        if option is None:
+            result.errors.append(f"Asset strategy: no asset strategy called '{text}'. Use one listed under "
+                                 "Manage data, Asset strategy options.")
+        elif decided > date.today():
+            result.errors.append("Asset strategy decided on: the date cannot be in the future.")
+        else:
+            current = obj.own_strategy() if obj.pk else None
+            if current is None or current.strategy_id != option.pk:
+                records.append(AssetStrategy(strategy=option, decided_on=decided,
+                                             reason=extras.get("strategy_reason") or "Imported.",
+                                             source=AssetStrategy.Source.IMPORTED))
+                result.changed.append("asset_strategy")
+    grade = extras.get("suitability_grade", "").strip().upper()
+    if grade:
+        if grade not in SuitabilityAssessment.Grade.values:
+            result.errors.append(f"Suitability grade: '{grade}' should be A, B, C or D.")
+        else:
+            current = obj.current_suitability() if obj.pk else None
+            if current is None or current.grade != grade:
+                records.append(SuitabilityAssessment(grade=grade, assessed_on=assessed))
+                result.changed.append("suitability_grade")
+    obj._import_records = records
 
 
 @transaction.atomic
@@ -287,6 +355,9 @@ def apply(prepared):
             if parent_ref:
                 obj.parent = saved.get(parent_ref) or Property.objects.get(reference=parent_ref)
             obj.save()
+            for record in getattr(obj, "_import_records", []):
+                record.property = obj
+                record.save()
             saved[obj.reference] = obj
             pending.remove(item)
             progress = True

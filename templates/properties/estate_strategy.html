@@ -1,0 +1,49 @@
+{% extends "base.html" %}{% load i18n humanize %}
+{% block title %}{% translate "Estate strategy" %}{% endblock %}
+{% block help_page %}estate-strategy{% endblock %}
+{% block breadcrumbs %}
+<nav class="govuk-breadcrumbs" aria-label="Breadcrumb"><ol class="govuk-breadcrumbs__list">
+  <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="{% url 'reports:list' %}">{% translate "Reports" %}</a></li>
+  <li class="govuk-breadcrumbs__list-item">{% translate "Estate strategy" %}</li>
+</ol></nav>
+{% endblock %}
+{% block content %}
+<h1 class="govuk-heading-l">{% translate "Estate strategy" %}</h1>
+<p class="govuk-body">{% blocktranslate with n=total|intcomma %}The estate at a glance: {{ n }} properties held (disposals left out). Select a figure to see the properties.{% endblocktranslate %}</p>
+
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-one-quarter"><p class="govuk-body govuk-!-margin-bottom-1"><a class="govuk-link govuk-!-font-size-36 govuk-!-font-weight-bold" href="{% url 'properties:list' %}?purpose_review=overdue">{{ overdue }}</a></p><p class="govuk-body-s">{% translate "strategy reviews overdue" %}</p></div>
+  <div class="govuk-grid-column-one-quarter"><p class="govuk-body govuk-!-margin-bottom-1"><a class="govuk-link govuk-!-font-size-36 govuk-!-font-weight-bold" href="{% url 'properties:list' %}?purpose_review=90">{{ due_soon }}</a></p><p class="govuk-body-s">{% translate "due in the next 90 days" %}</p></div>
+  <div class="govuk-grid-column-one-quarter"><p class="govuk-body govuk-!-margin-bottom-1"><a class="govuk-link govuk-!-font-size-36 govuk-!-font-weight-bold" href="{% url 'properties:list' %}?challenge=open">{{ challenges|length }}</a></p><p class="govuk-body-s">{% translate "Asset Challenges in progress" %}</p></div>
+  <div class="govuk-grid-column-one-quarter"><p class="govuk-body govuk-!-margin-bottom-1"><a class="govuk-link govuk-!-font-size-36 govuk-!-font-weight-bold" href="{% url 'properties:list' %}?strategy=none">{{ without_strategy }}</a></p><p class="govuk-body-s">{% translate "properties with no asset strategy" %}</p></div>
+</div>
+
+<h2 class="govuk-heading-m">{% translate "Asset strategies" %}</h2>
+<p class="govuk-body-s">{% translate "Including parts: a unit or building follows the strategy of the estate or site it is part of unless it has its own." %}</p>
+<table class="govuk-table">
+  <thead class="govuk-table__head"><tr class="govuk-table__row"><th scope="col" class="govuk-table__header">{% translate "Asset strategy" %}</th><th scope="col" class="govuk-table__header govuk-table__header--numeric">{% translate "Decided for" %}</th><th scope="col" class="govuk-table__header govuk-table__header--numeric">{% translate "Including parts" %}</th></tr></thead>
+  <tbody class="govuk-table__body">{% for s in strategies %}<tr class="govuk-table__row"><td class="govuk-table__cell"><a class="govuk-link" href="{% url 'properties:list' %}?strategy={{ s.option.pk }}">{{ s.option.name }}</a>{% if s.option.description %}<br><span class="govuk-body-s">{{ s.option.description }}</span>{% endif %}</td><td class="govuk-table__cell govuk-table__cell--numeric">{{ s.own }}</td><td class="govuk-table__cell govuk-table__cell--numeric">{{ s.total }}</td></tr>{% endfor %}
+    <tr class="govuk-table__row"><td class="govuk-table__cell"><a class="govuk-link" href="{% url 'properties:list' %}?strategy=none">{% translate "Not yet decided" %}</a></td><td class="govuk-table__cell"></td><td class="govuk-table__cell govuk-table__cell--numeric">{{ without_strategy }}</td></tr></tbody>
+</table>
+
+<h2 class="govuk-heading-m">{% translate "Holding purposes" %}</h2>
+<table class="govuk-table">
+  <thead class="govuk-table__head"><tr class="govuk-table__row"><th scope="col" class="govuk-table__header">{% translate "Holding purpose" %}</th><th scope="col" class="govuk-table__header govuk-table__header--numeric">{% translate "Properties" %}</th></tr></thead>
+  <tbody class="govuk-table__body">{% for p in purposes %}{% if p.count or p.value %}
+    <tr class="govuk-table__row"><th scope="row" class="govuk-table__header">{% if p.value %}<a class="govuk-link" href="{% url 'properties:list' %}?holding_purpose={{ p.value }}">{{ p.label }}</a>{% else %}{{ p.label }}{% endif %}</th><td class="govuk-table__cell govuk-table__cell--numeric">{{ p.count }}</td></tr>
+    {% for c, n in p.categories %}<tr class="govuk-table__row"><td class="govuk-table__cell govuk-!-padding-left-6"><a class="govuk-link" href="{% url 'properties:list' %}?category={{ c.pk }}">{{ c.name }}</a></td><td class="govuk-table__cell govuk-table__cell--numeric">{{ n }}</td></tr>{% endfor %}
+  {% endif %}{% endfor %}</tbody>
+</table>
+
+<h2 class="govuk-heading-m">{% translate "Asset Challenges in progress" %}</h2>
+{% if challenges %}<table class="govuk-table">
+  <thead class="govuk-table__head"><tr class="govuk-table__row"><th scope="col" class="govuk-table__header">{% translate "Case" %}</th><th scope="col" class="govuk-table__header">{% translate "Property" %}</th><th scope="col" class="govuk-table__header">{% translate "Stage" %}</th><th scope="col" class="govuk-table__header">{% translate "Proposed" %}</th><th scope="col" class="govuk-table__header">{% translate "Owner" %}</th></tr></thead>
+  <tbody class="govuk-table__body">{% for c in challenges %}<tr class="govuk-table__row"><td class="govuk-table__cell"><a class="govuk-link" href="{{ c.get_absolute_url }}">{{ c.display_reference }}</a></td><td class="govuk-table__cell">{% if c.property %}<a class="govuk-link" href="{{ c.property.get_absolute_url }}#strategy">{{ c.property.reference }} {{ c.property.name }}</a>{% endif %}</td><td class="govuk-table__cell">{{ c.get_stage_display }}</td><td class="govuk-table__cell">{{ c.proposed_strategy.name|default:"–" }}</td><td class="govuk-table__cell">{{ c.owner.get_full_name|default:c.owner.username|default:"–" }}</td></tr>{% endfor %}</tbody>
+</table>{% else %}<p class="govuk-body">{% translate "None at the moment. Start one from a property's page, under Strategy." %}</p>{% endif %}
+
+<h2 class="govuk-heading-m">{% translate "Suitability" %}</h2>
+<p class="govuk-body-s">{% blocktranslate count n=graded %}{{ n }} property graded, from its latest assessment.{% plural %}{{ n }} properties graded, from their latest assessments.{% endblocktranslate %}</p>
+<table class="govuk-table">
+  <tbody class="govuk-table__body">{% for value, label, n in grades %}<tr class="govuk-table__row"><td class="govuk-table__cell"><a class="govuk-link" href="{% url 'properties:list' %}?suitability={{ value }}">{{ label }}</a></td><td class="govuk-table__cell govuk-table__cell--numeric">{{ n }}</td></tr>{% endfor %}</tbody>
+</table>
+{% endblock %}

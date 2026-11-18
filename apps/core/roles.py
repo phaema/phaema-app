@@ -29,6 +29,9 @@ SURVEYOR_PERMISSIONS = {
     "properties.add_propertyphoto", "properties.change_propertyphoto", "properties.delete_propertyphoto",
     "properties.add_propertyplan", "properties.change_propertyplan", "properties.delete_propertyplan",
     "properties.add_propertycost", "properties.change_propertycost", "properties.delete_propertycost",
+    # Estates strategy: surveyors record asset strategies and suitability for the properties they manage.
+    "properties.add_assetstrategy", "properties.view_assetstrategy",
+    "properties.add_suitabilityassessment", "properties.view_suitabilityassessment",
     "leases.add_lease", "leases.change_lease",
     "leases.add_breakoption", "leases.change_breakoption", "leases.delete_breakoption",
     "leases.add_leaseoption", "leases.change_leaseoption", "leases.delete_leaseoption",

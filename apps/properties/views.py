@@ -45,7 +45,8 @@ COLUMNS = {
 FILTERS = ("property_type", "holding_purpose", "portfolio", "occupation", "tenure")
 
 
-PURPOSE_REVIEW = [("overdue", _("Overdue")), ("12", _("Due in the next 12 months")), ("none", _("No date set"))]
+PURPOSE_REVIEW = [("overdue", _("Overdue")), ("90", _("Due in the next 90 days")), ("12", _("Due in the next 12 months")),
+                  ("none", _("No date set"))]
 
 
 def display_name(user):
@@ -76,8 +77,11 @@ def filter_properties(request, qs):
         qs = qs.filter(purpose_review_date__lt=date.today())
     elif review == "12":
         qs = qs.filter(purpose_review_date__gte=date.today(), purpose_review_date__lte=date.today() + timedelta(days=365))
+    elif review == "90":
+        qs = qs.filter(purpose_review_date__gte=date.today(), purpose_review_date__lte=date.today() + timedelta(days=90))
     elif review == "none":
         qs = qs.filter(purpose_review_date__isnull=True)
+    qs = _strategy_filters(get, qs)
     surveyor = get.get("surveyor", "")
     if surveyor == "me":
         qs = qs.filter(managing_surveyor=request.user)
@@ -86,6 +90,41 @@ def filter_properties(request, qs):
     elif surveyor.isdigit():
         qs = qs.filter(managing_surveyor_id=int(surveyor))
     return qs
+
+
+def _strategy_filters(get, qs):
+    """Purpose sub-category, asset strategy (its own or the one it follows), suitability grade, Asset Challenge."""
+    from . import strategy
+
+    if get.get("category", "").isdigit():
+        qs = qs.filter(purpose_category_id=int(get["category"]))
+    wanted = get.get("strategy", "")
+    if wanted == "none":
+        qs = qs.exclude(pk__in=list(strategy.effective_strategies()))
+    elif wanted.isdigit():
+        qs = qs.filter(pk__in=[pk for pk, (d, _own) in strategy.effective_strategies().items()
+                               if d.strategy_id == int(wanted)])
+    grade = get.get("suitability", "")
+    if grade == "none":
+        qs = qs.exclude(pk__in=list(strategy.latest_grades()))
+    elif grade in ("A", "B", "C", "D"):
+        qs = qs.filter(pk__in=[pk for pk, g in strategy.latest_grades().items() if g == grade])
+    if get.get("challenge") == "open":
+        qs = qs.filter(cases__case_type__asset_challenge=True).exclude(cases__status="closed").distinct()
+    return qs
+
+
+def _strategy_filter_options(get):
+    from .models import AssetStrategyOption, PurposeCategory, SuitabilityAssessment
+
+    return [
+        ("category", _("Purpose sub-category"), [(str(c.pk), str(c)) for c in PurposeCategory.objects.all()],
+         get.get("category", "")),
+        ("strategy", _("Asset strategy"), [(str(o.pk), o.name) for o in AssetStrategyOption.objects.all()]
+         + [("none", _("Not yet decided"))], get.get("strategy", "")),
+        ("suitability", _("Suitability"), [(v, label) for v, label in SuitabilityAssessment.Grade.choices]
+         + [("none", _("Not assessed"))], get.get("suitability", "")),
+    ]
 
 
 def _filter_choices(name):
@@ -106,7 +145,8 @@ def filter_context(request):
     return {
         "q": get.get("q", ""),
         "filters": [(f, Property._meta.get_field(f).verbose_name, _filter_choices(f), get.get(f, "")) for f in FILTERS]
-        + [("purpose_review", _("Review of holding purpose"), PURPOSE_REVIEW, get.get("purpose_review", ""))],
+        + [("purpose_review", _("Strategy review"), PURPOSE_REVIEW, get.get("purpose_review", ""))]
+        + _strategy_filter_options(get),
         "surveyor_options": [("me", _("My properties")), ("none", _("Unassigned"))]
         + [(str(u.pk), display_name(u)) for u in surveyors],
         "surveyor_selected": get.get("surveyor", ""),
@@ -175,6 +215,7 @@ class PropertyDetailView(LoginRequiredMixin, DetailView):
         ctx["breakdown"] = obj.area_breakdown()
         ctx["surveyor_name"] = display_name(obj.managing_surveyor)
         ctx["purpose_review_overdue"] = bool(obj.purpose_review_date and obj.purpose_review_date < date.today())
+        ctx.update(_strategy_context(self.request.user, obj))
         ctx["physical"] = obj.physical_rows()
         ctx["designations"] = obj.designation_rows()
         ctx["planned_disposal"] = obj.planned_disposal_rows()
@@ -191,6 +232,46 @@ class PropertyDetailView(LoginRequiredMixin, DetailView):
             content_type=ContentType.objects.get_for_model(Property), object_id=str(obj.pk)
         ).select_related("user")[:20]
         return ctx
+
+
+def _strategy_context(user, prop):
+    """The Strategy section of a property's page: purpose, asset strategy (its own or inherited), suitability."""
+    from apps.cases.models import Case, CaseType
+
+    from . import strategy
+
+    decision, inherited_from = prop.asset_strategy()
+    editable = can_edit(user, prop)
+    challenge = CaseType.objects.filter(asset_challenge=True, active=True).first()
+    follow_on = None
+    if decision and not inherited_from and decision.strategy.follow_on:
+        from apps.projects import rules as project_rules
+
+        if project_rules.can_create(user):
+            follow_on = decision.strategy.follow_on
+    return {
+        "strategy": decision, "strategy_from": inherited_from,
+        "strategy_history": list(prop.strategies.select_related("strategy", "case", "recorded_by")[:10]),
+        "suitability": prop.current_suitability(),
+        "suitability_history": list(prop.suitability.select_related("assessed_by")[:10]),
+        "shows_suitability": prop.property_type in (Property.PropertyType.BUILDING, Property.PropertyType.UNIT)
+                             or prop.suitability.exists(),
+        "review_state": strategy.review_state(prop),
+        "can_record_strategy": editable and user.has_perm("properties.add_assetstrategy"),
+        "can_record_suitability": editable and user.has_perm("properties.add_suitabilityassessment"),
+        "challenge_type": challenge if editable and user.has_perm("cases.add_case") else None,
+        "open_challenges": list(Case.objects.filter(property=prop, case_type__asset_challenge=True)
+                                .exclude(status=Case.Status.CLOSED)) if challenge else [],
+        "follow_on": follow_on,
+    }
+
+
+@login_required
+def estate_strategy(request):
+    """The estate at a glance for the strategy: purposes, asset strategies, reviews, challenges, suitability."""
+    from . import strategy
+
+    return render(request, "properties/estate_strategy.html", strategy.overview())
 
 
 class TitleDetailView(LoginRequiredMixin, DetailView):

@@ -129,6 +129,11 @@ class ModuleSettings(models.Model):
         default=SsoPasswords.UNLINKED,
         help_text=_("Applies once single sign-on is on. A person counts as having a council account from the "
                     "first time they sign in with it."))
+    strategy_review_years = models.PositiveSmallIntegerField(
+        _("asset strategies are reviewed every (years)"), default=5,
+        validators=[MinValueValidator(1), MaxValueValidator(20)],
+        help_text=_("When an asset strategy is recorded without a review date, it is due for review this many "
+                    "years later. The managing surveyor is prompted as it falls due."))
     outside_access_months = models.PositiveSmallIntegerField(
         _("outside users' access lasts (months)"), default=6,
         validators=[MinValueValidator(1), MaxValueValidator(60)],
