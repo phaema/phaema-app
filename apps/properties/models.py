@@ -130,13 +130,18 @@ class Property(TimeStampedModel):
     holding_purpose = models.CharField(
         _("holding purpose"), max_length=20, choices=HoldingPurpose.choices, blank=True
     )
+    purpose_category = models.ForeignKey(
+        "PurposeCategory", verbose_name=_("purpose sub-category"), null=True, blank=True, on_delete=models.PROTECT,
+        related_name="properties",
+        help_text=_("The council's own sub-category under the holding purpose, for example Operational: Depots."))
     strategy_section = models.CharField(
         _("estate strategy section"), max_length=100, blank=True,
         help_text=_("The section of the council's estate strategy or asset management plan that covers this "
                     "property, for example \"4.2 Investment estate\"."))
     purpose_review_date = models.DateField(
-        _("holding purpose review date"), null=True, blank=True,
-        help_text=_("When the reason for holding the property is next due to be reviewed."))
+        _("strategy review date"), null=True, blank=True,
+        help_text=_("When the holding purpose and asset strategy are next due for review. Set automatically when "
+                    "an asset strategy is recorded; the managing surveyor is prompted as it falls due."))
     portfolio = models.ForeignKey(
         Portfolio, verbose_name=_("portfolio"), null=True, blank=True, on_delete=models.PROTECT,
         related_name="properties", help_text=_("The service or portfolio the property belongs to."),
@@ -437,6 +442,10 @@ class Property(TimeStampedModel):
                 node = node.parent
         if (self.easting is None) != (self.northing is None):
             raise ValidationError(_("Enter both easting and northing, or neither."))
+        if self.purpose_category_id and self.purpose_category.holding_purpose != self.holding_purpose:
+            raise ValidationError({"purpose_category": _(
+                "Choose a sub-category of the property's holding purpose (%(purpose)s), or none.")
+                % {"purpose": self.get_holding_purpose_display() or _("not set")}})
         self.clean_physical()
 
     def save(self, *args, **kwargs):
@@ -454,6 +463,24 @@ class Property(TimeStampedModel):
             self.vacant_since = self.available_from = self.available_until = None
             self.vacancy_status = ""
         super().save(*args, **kwargs)
+
+    def own_strategy(self):
+        return self.strategies.select_related("strategy").order_by("-decided_on", "-created_at").first()
+
+    def asset_strategy(self):
+        """(decision, from_property): this property's own current asset strategy, or else that of the nearest
+        property it is part of (from_property is then that property). (None, None) if there is none."""
+        own = self.own_strategy()
+        if own:
+            return own, None
+        for node in reversed(self.ancestors()):
+            found = node.own_strategy()
+            if found:
+                return found, node
+        return None, None
+
+    def current_suitability(self):
+        return self.suitability.order_by("-assessed_on", "-created_at").first()
 
     def ancestors(self):
         chain, node = [], self.parent
@@ -899,3 +926,138 @@ def inspire_attribution():
         "the permission of HM Land Registry. The polygons (including the associated geometry, namely x, y "
         f"co-ordinates) are subject to Crown copyright and database rights {year} Ordnance Survey AC0000851063."
     )
+
+
+# ---------------------------------------------------------------- estates strategy, step 1
+
+class PurposeCategory(models.Model):
+    """The council's own sub-categories under PHAEMA's five fixed holding purposes, for example
+    Operational: Depots. The five stay fixed because valuations, the data standard export and reports rely on them."""
+
+    holding_purpose = models.CharField(_("holding purpose"), max_length=20, choices=Property.HoldingPurpose.choices)
+    name = models.CharField(_("sub-category"), max_length=80)
+    active = models.BooleanField(_("in use"), default=True,
+                                 help_text=_("Untick to stop it being chosen for properties."))
+    order = models.PositiveSmallIntegerField(_("order"), default=0)
+
+    class Meta:
+        ordering = ["holding_purpose", "order", "name"]
+        constraints = [models.UniqueConstraint(fields=["holding_purpose", "name"], name="purpose_category_once")]
+        verbose_name = _("holding purpose sub-category")
+        verbose_name_plural = _("holding purpose sub-categories")
+
+    def __str__(self):
+        return f"{self.get_holding_purpose_display()}: {self.name}"
+
+
+class AssetStrategyOption(models.Model):
+    """The council's list of asset strategies, from retaining a property as it is to disposing of it."""
+
+    class FollowOn(models.TextChoices):
+        NONE = "", _("Nothing")
+        DEVELOPMENT = "development", _("Offer to start a development project")
+        DISPOSAL = "disposal", _("Offer to start a disposal project")
+
+    name = models.CharField(_("asset strategy"), max_length=80, unique=True)
+    description = models.CharField(_("what it means"), max_length=255, blank=True)
+    follow_on = models.CharField(
+        _("afterwards"), max_length=12, choices=FollowOn.choices, blank=True,
+        help_text=_("What PHAEMA offers once a property is given this strategy."))
+    active = models.BooleanField(_("in use"), default=True)
+    order = models.PositiveSmallIntegerField(_("order"), default=0)
+
+    class Meta:
+        ordering = ["order", "name"]
+        verbose_name = _("asset strategy option")
+        verbose_name_plural = _("asset strategy options")
+
+    def __str__(self):
+        return self.name
+
+
+class AssetStrategy(TimeStampedModel):
+    """One decision about a property's future. The newest is the property's current asset strategy; earlier ones
+    are its history. A property with none of its own follows the property it is part of."""
+
+    class Source(models.TextChoices):
+        CHALLENGE = "challenge", _("Asset Challenge")
+        DIRECT = "direct", _("Recorded directly")
+        IMPORTED = "imported", _("Imported")
+
+    property = models.ForeignKey(Property, on_delete=models.CASCADE, related_name="strategies",
+                                 verbose_name=_("property"))
+    strategy = models.ForeignKey(AssetStrategyOption, on_delete=models.PROTECT, related_name="decisions",
+                                 verbose_name=_("asset strategy"))
+    decided_on = models.DateField(_("decided on"), default=date.today)
+    reason = models.TextField(_("reason"), help_text=_("Why: the evidence and the options weighed."))
+    decided_by = models.CharField(
+        _("decided by"), max_length=120, blank=True,
+        help_text=_("Who made the decision, for example Head of Estates, Cabinet or the Asset Management Board."))
+    meeting_on = models.DateField(_("meeting date"), null=True, blank=True)
+    minute_reference = models.CharField(_("minute or decision reference"), max_length=60, blank=True)
+    review_on = models.DateField(_("review by"), null=True, blank=True,
+                                 help_text=_("Leave blank for the council's usual review period."))
+    source = models.CharField(_("how recorded"), max_length=10, choices=Source.choices, default=Source.DIRECT)
+    case = models.ForeignKey("cases.Case", on_delete=models.SET_NULL, null=True, blank=True,
+                             related_name="strategies", verbose_name=_("Asset Challenge case"))
+    recorded_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True,
+                                    related_name="+", verbose_name=_("recorded by"))
+
+    class Meta:
+        ordering = ["-decided_on", "-created_at"]
+        verbose_name = _("asset strategy decision")
+        verbose_name_plural = _("asset strategy decisions")
+
+    def __str__(self):
+        return f"{self.property.reference}: {self.strategy} ({self.decided_on:%d %b %Y})"
+
+    def clean(self):
+        if self.decided_on and self.decided_on > date.today():
+            raise ValidationError({"decided_on": _("The decision date cannot be in the future.")})
+        if self.review_on and self.decided_on and self.review_on <= self.decided_on:
+            raise ValidationError({"review_on": _("The review must be after the decision.")})
+
+    def save(self, *args, **kwargs):
+        from apps.core.models import ModuleSettings
+
+        if not self.review_on and self.decided_on:
+            years = ModuleSettings.load().strategy_review_years
+            try:
+                self.review_on = self.decided_on.replace(year=self.decided_on.year + years)
+            except ValueError:  # 29 February
+                self.review_on = self.decided_on.replace(year=self.decided_on.year + years, day=28)
+        super().save(*args, **kwargs)
+        latest = self.property.strategies.order_by("-decided_on", "-created_at").first()
+        if latest and latest.pk == self.pk:
+            Property.objects.filter(pk=self.property_id).update(purpose_review_date=self.review_on)
+
+
+class SuitabilityAssessment(TimeStampedModel):
+    """How well a building suits the service in it, graded A to D. The newest is the current grade."""
+
+    class Grade(models.TextChoices):
+        A = "A", _("A: good, suits the service well")
+        B = "B", _("B: satisfactory, minor shortcomings")
+        C = "C", _("C: poor, shortcomings that hamper the service")
+        D = "D", _("D: unsuitable, cannot serve its purpose without major change")
+
+    property = models.ForeignKey(Property, on_delete=models.CASCADE, related_name="suitability",
+                                 verbose_name=_("property"))
+    grade = models.CharField(_("suitability grade"), max_length=1, choices=Grade.choices)
+    assessed_on = models.DateField(_("assessed on"), default=date.today)
+    notes = models.TextField(_("notes"), blank=True,
+                             help_text=_("What the grade rests on: layout, access, location, size, image."))
+    assessed_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True,
+                                    related_name="+", verbose_name=_("assessed by"))
+
+    class Meta:
+        ordering = ["-assessed_on", "-created_at"]
+        verbose_name = _("suitability assessment")
+        verbose_name_plural = _("suitability assessments")
+
+    def __str__(self):
+        return f"{self.property.reference}: {self.grade} ({self.assessed_on:%d %b %Y})"
+
+    def clean(self):
+        if self.assessed_on and self.assessed_on > date.today():
+            raise ValidationError({"assessed_on": _("The assessment date cannot be in the future.")})

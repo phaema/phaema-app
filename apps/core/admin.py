@@ -20,6 +20,9 @@ class ModuleSettingsAdmin(admin.ModelAdmin):
                                             "website"]}),
         ("Maintenance", {"fields": ["order_approval_limit"]}),
         ("Maps", {"fields": ["os_maps_api_key", "os_map_style"]}),
+        ("Estate strategy", {"fields": ["strategy_review_years"],
+                             "description": "The lists of holding purpose sub-categories and asset strategies are "
+                                            "in Manage data."}),
         ("Security", {"fields": ["two_step_required", "outside_access_months"]}),
         ("Single sign-on", {"fields": ["sso_enabled", "sso_passwords", "sso_create_accounts"],
                             "description": "Sign in with Microsoft 365 or another sign-in service. See Help, "

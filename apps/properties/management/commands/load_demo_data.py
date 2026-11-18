@@ -360,6 +360,9 @@ class Command(BaseCommand):
         from apps.space import demo as space_demo
 
         space_demo.load()
+        from apps.properties import demo_strategy
+
+        demo_strategy.load()
 
         self.load_access_areas()
         from apps.projects import demo as project_demo

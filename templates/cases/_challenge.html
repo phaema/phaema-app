@@ -1,0 +1,16 @@
+{% load i18n %}{% if challenge %}
+<h2 class="govuk-heading-m">{% translate "Asset Challenge" %}</h2>
+{% if not challenge_property %}<div class="govuk-warning-text"><span class="govuk-warning-text__icon" aria-hidden="true">!</span><strong class="govuk-warning-text__text"><span class="govuk-visually-hidden">{% translate "Warning" %}</span>{% translate "Link the property this challenge is about, under Links, before recording the outcome." %}</strong></div>{% endif %}
+<dl class="govuk-summary-list">
+  <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Strategy now" %}</dt><dd class="govuk-summary-list__value">{% if current_strategy %}{{ current_strategy.strategy.name }} <span class="govuk-body-s">({% blocktranslate with d=current_strategy.decided_on|date:"j M Y" %}decided {{ d }}{% endblocktranslate %}{% if current_strategy_from %}, {% translate "follows" %} {{ current_strategy_from.reference }}{% endif %})</span>{% else %}{% translate "None recorded" %}{% endif %}</dd></div>
+  <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Proposed" %}</dt><dd class="govuk-summary-list__value">{{ case.proposed_strategy.name|default:"–" }}</dd></div>
+  {% if strategy_recorded %}<div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Decided" %}</dt><dd class="govuk-summary-list__value"><strong>{{ strategy_recorded.strategy.name }}</strong> <span class="govuk-body-s">{{ strategy_recorded.decided_on|date:"j M Y" }}{% if strategy_recorded.decided_by %}, {{ strategy_recorded.decided_by }}{% endif %}{% if strategy_recorded.minute_reference %}, {{ strategy_recorded.minute_reference }}{% endif %}</span><br><span class="govuk-body-s">{% translate "Recorded on the property; next review" %} {{ strategy_recorded.review_on|date:"j M Y" }}.</span>{% if strategy_recorded.strategy.follow_on and challenge_property %} <a class="govuk-link govuk-body-s" href="{{ challenge_property.get_absolute_url }}#strategy">{% translate "Start what follows from the property's page" %}</a>{% endif %}</dd></div>{% endif %}
+</dl>
+{% if can_work and case.is_open and not case.decision %}
+<form method="post" class="govuk-!-margin-bottom-6">{% csrf_token %}<input type="hidden" name="action" value="save_proposal">
+  <div class="govuk-form-group"><label class="govuk-label govuk-label--s" for="proposed-strategy">{% translate "Proposed asset strategy" %}</label>
+    <div class="govuk-hint" id="proposed-strategy-hint">{% translate "Your recommendation after the option appraisal. Explain it in the request for approval." %}</div>
+    <select class="govuk-select" id="proposed-strategy" name="proposed_strategy" aria-describedby="proposed-strategy-hint"><option value="">{% translate "Not yet" %}</option>{% for o in strategy_options %}<option value="{{ o.pk }}"{% if o.pk == case.proposed_strategy_id %} selected{% endif %}>{{ o.name }}</option>{% endfor %}</select></div>
+  <button class="govuk-button govuk-button--secondary" data-module="govuk-button">{% translate "Save the proposal" %}</button>
+</form>{% endif %}
+{% endif %}

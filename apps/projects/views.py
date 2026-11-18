@@ -156,6 +156,11 @@ def _form_page(request, form, project=None):
 def project_new(request):
     if not rules.can_create(request.user):
         raise PermissionDenied
+    # From a property's asset strategy: ?type=disposal&property=<id> starts the project with the property in it.
+    from apps.properties.models import Property
+
+    prop_id = request.GET.get("property") or request.POST.get("from_property") or ""
+    from_property = Property.objects.filter(pk=prop_id).first() if prop_id.isdigit() else None
     if request.method == "POST":
         form = ProjectForm(request.POST, user=request.user, new=True)
         if form.is_valid():
@@ -165,11 +170,28 @@ def project_new(request):
             if project.lead is None:
                 project.lead = request.user
             workflow.start(project, request.user)
+            if from_property is not None:
+                part = {ProjectType.Kind.DISPOSAL: ProjectProperty.Part.DISPOSE,
+                        ProjectType.Kind.DEVELOPMENT: ProjectProperty.Part.IMPROVE}.get(
+                    project.project_type.kind, ProjectProperty.Part.IN_SCOPE)
+                ProjectProperty.objects.get_or_create(project=project, property=from_property,
+                                                      defaults={"part": part})
             messages.success(request, _("Project %(ref)s started.") % {"ref": project.display_reference})
             return redirect(project)
     else:
-        form = ProjectForm(user=request.user, new=True, initial={"lead": request.user, "start_date": date.today()})
-    return _form_page(request, form)
+        initial = {"lead": request.user, "start_date": date.today()}
+        wanted = ProjectType.objects.filter(code=request.GET.get("type", ""), active=True).first()
+        if wanted:
+            initial["project_type"] = wanted.pk
+        if from_property is not None:
+            initial["name"] = f"{wanted.name if wanted else _('Project')}: {from_property.name}"
+            decision, _from = from_property.asset_strategy()
+            if decision:
+                initial["description"] = _("Following the asset strategy %(s)s decided on %(d)s.") % {
+                    "s": decision.strategy.name, "d": decision.decided_on.strftime("%d %B %Y")}
+        form = ProjectForm(user=request.user, new=True, initial=initial)
+    return render(request, "projects/project_form.html", {"form": form, "project": None,
+                                                          "from_property": from_property})
 
 
 @login_required

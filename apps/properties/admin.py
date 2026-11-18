@@ -8,8 +8,9 @@ from django.core.exceptions import ValidationError
 from apps.core.admin_roles import AdministratorOnlyEditingMixin, RoleAdminMixin, RoleInlineMixin
 from apps.core.roles import is_administrator
 
-from .models import (InspireParcel, Portfolio, Property, PropertyCost, PropertyPhoto, PropertyPlan, PropertyUse,
-                     Title, TitleDocument)
+from .models import (AssetStrategy, AssetStrategyOption, InspireParcel, Portfolio, Property, PropertyCost,
+                     PropertyPhoto, PropertyPlan, PropertyUse, PurposeCategory, SuitabilityAssessment, Title,
+                     TitleDocument)
 
 
 class TitleInline(admin.TabularInline):
@@ -111,6 +112,72 @@ class PropertyUseAdmin(admin.ModelAdmin):
         return super().has_delete_permission(request, obj) and (obj is None or not obj.properties.exists())
 
 
+@admin.register(PurposeCategory)
+class PurposeCategoryAdmin(admin.ModelAdmin):
+    """The council's own sub-categories under PHAEMA's five holding purposes (Operational: Depots and so on).
+    The five purposes stay fixed: valuations, the data standard export and reports rely on them."""
+
+    list_display = ("name", "holding_purpose", "active", "order", "property_count")
+    list_editable = ("active", "order")
+    list_filter = ("holding_purpose", "active")
+    search_fields = ("name",)
+
+    def get_queryset(self, request):
+        from django.db.models import Count
+
+        return super().get_queryset(request).annotate(_count=Count("properties"))
+
+    @admin.display(description="Properties", ordering="_count")
+    def property_count(self, obj):
+        return obj._count
+
+    def has_delete_permission(self, request, obj=None):
+        return super().has_delete_permission(request, obj) and (obj is None or not obj.properties.exists())
+
+
+@admin.register(AssetStrategyOption)
+class AssetStrategyOptionAdmin(admin.ModelAdmin):
+    """The council's list of asset strategies, from retain as is to dispose now."""
+
+    list_display = ("name", "description", "follow_on", "active", "order", "use_count")
+    list_editable = ("active", "order")
+    search_fields = ("name", "description")
+
+    def get_queryset(self, request):
+        from django.db.models import Count
+
+        return super().get_queryset(request).annotate(_count=Count("decisions"))
+
+    @admin.display(description="Decisions", ordering="_count")
+    def use_count(self, obj):
+        return obj._count
+
+    def has_delete_permission(self, request, obj=None):
+        return super().has_delete_permission(request, obj) and (obj is None or not obj.decisions.exists())
+
+
+@admin.register(AssetStrategy)
+class AssetStrategyAdmin(RoleAdminMixin, admin.ModelAdmin):
+    """Every asset strategy decision. Recorded from the property's page or an Asset Challenge; corrected here."""
+
+    list_display = ("property", "strategy", "decided_on", "decided_by", "minute_reference", "source", "review_on")
+    list_filter = ("strategy", "source")
+    search_fields = ("property__reference", "property__name", "decided_by", "minute_reference", "reason")
+    autocomplete_fields = ("property",)
+    raw_id_fields = ("case",)
+    readonly_fields = ("recorded_by",)
+    date_hierarchy = "decided_on"
+
+
+@admin.register(SuitabilityAssessment)
+class SuitabilityAssessmentAdmin(RoleAdminMixin, admin.ModelAdmin):
+    list_display = ("property", "grade", "assessed_on", "assessed_by")
+    list_filter = ("grade",)
+    search_fields = ("property__reference", "property__name", "notes")
+    autocomplete_fields = ("property",)
+    readonly_fields = ("assessed_by",)
+
+
 @admin.register(Property)
 class PropertyAdmin(AdministratorOnlyEditingMixin, RoleAdminMixin, admin.GISModelAdmin):
     list_display = ("reference", "name", "property_type", "holding_purpose", "occupation", "managing_surveyor", "postcode")
@@ -124,7 +191,8 @@ class PropertyAdmin(AdministratorOnlyEditingMixin, RoleAdminMixin, admin.GISMode
     fieldsets = (
         (None, {"fields": ("reference", "name", "property_type", "parent", "managing_surveyor")}),
         ("Identifiers and address", {"fields": ("uprn", "usrn", "address_line_1", "address_line_2", "town", "postcode")}),
-        ("Classification", {"fields": ("holding_purpose", "strategy_section", "purpose_review_date", "portfolio",
+        ("Classification", {"fields": ("holding_purpose", "purpose_category", "strategy_section", "purpose_review_date",
+                                       "portfolio",
                                        "tenure", "acquired_on", "occupation", "use_type", "use_description",
                                        "use_class")}),
         ("Designations", {

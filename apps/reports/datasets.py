@@ -87,6 +87,24 @@ def _property_rent(p):
                 if lease.status in ("current", "holding_over") and lease.direction == "out"), Decimal("0"))
 
 
+def _category_choices():
+    from apps.properties.models import PurposeCategory
+
+    return [(str(c.pk), str(c)) for c in PurposeCategory.objects.all()]
+
+
+def _strategy(prop, what):
+    """The property's current asset strategy, its own or the one it follows."""
+    decision, inherited_from = prop.asset_strategy()
+    if decision is None:
+        return None if what == "decided_on" else ""
+    if what == "name":
+        return decision.strategy.name
+    if what == "decided_on":
+        return decision.decided_on
+    return f"{inherited_from.reference} {inherited_from.name}" if inherited_from else ""
+
+
 def _use_choices():
     from apps.properties.models import PropertyUse
 
@@ -121,8 +139,15 @@ def _property_fields():
         Field("postcode", "Postcode", path="postcode", default=True),
         Field("holding_purpose", "Holding purpose", "choice", "holding_purpose",
               choices=_choices(P, "holding_purpose"), default=True),
+        Field("purpose_category", "Purpose sub-category", "choice", "purpose_category", choices=_category_choices,
+              getter=lambda p: p.purpose_category.name if p.purpose_category else ""),
         Field("strategy_section", "Estate strategy section", path="strategy_section"),
-        Field("purpose_review_date", "Holding purpose review date", "date", "purpose_review_date"),
+        Field("asset_strategy", "Asset strategy", getter=lambda p: _strategy(p, "name")),
+        Field("strategy_decided", "Asset strategy decided", "date", getter=lambda p: _strategy(p, "decided_on")),
+        Field("strategy_followed", "Asset strategy follows", getter=lambda p: _strategy(p, "from")),
+        Field("purpose_review_date", "Strategy review date", "date", "purpose_review_date"),
+        Field("suitability", "Suitability grade", getter=lambda p: (
+            lambda s: s.grade if s else "")(p.current_suitability())),
         Field("portfolio", "Portfolio", "choice", "portfolio", choices=_portfolio_choices, default=True,
               getter=lambda p: p.portfolio.name if p.portfolio else ""),
         Field("tenure", "Tenure", "choice", "tenure", choices=_choices(P, "tenure"), default=True),

@@ -82,6 +82,14 @@ TYPES = [
         (A, "Assess the trigger"), (D, "No change, or a new valuation")]),
     ("disposal_valuation", "Disposal valuation", "valuation", None, False, None, "", None, [
         (A, "Instruct the valuation"), (D, "Valuation received"), (C, "Recorded for the disposal decision")]),
+    ("asset_challenge", "Asset Challenge", "strategy", None, False, None, "", None, [
+        (I, "Strategic purpose: does the property serve a council aim, and will it in future?"),
+        (I, "Opportunities and risks: partners, planning, market, condition, compliance"),
+        (A, "Performance appraisal: cost, use, condition, suitability, income"),
+        (A, "Option appraisal: retain, invest, remodel or share, release, dispose"),
+        (A, "Consultation: services, ward members, partners and occupiers"),
+        (D, "Outcome: the asset strategy decided, with who decided and the minute reference"),
+        (C, "Start what follows: a project, a disposal or the next review")]),
     ("new_letting", "New letting or licence application", "enquiry", None, False, None, "", None, [
         ACK, (A, "Check availability and terms"),
         (A, "Heads of terms covering every item the RICS Code for leasing business premises requires"),
@@ -105,7 +113,7 @@ TYPES = [
 
 # Where a supervisor's approval is needed by default: before the decision on anything that commits the
 # council (consents, settlements, disposals, lettings). Administrators change this per case type.
-APPROVAL_GROUPS = {"consent", "event", "management", "valuation"}
+APPROVAL_GROUPS = {"consent", "event", "management", "valuation", "strategy"}
 APPROVAL_CODES = {"new_letting", "wayleave", "land_purchase", "other_activity"}
 NO_APPROVAL = {"other_event", "deposit_return", "insurance_certificate"}
 
@@ -129,7 +137,7 @@ CONSENT_VISIT = ["facts", "description", "services", "plans", "agreements", "agr
 LAND_VISIT = ["facts", "location", "description", "plans", "titles", "agreements", "cases"]
 BRIEF_VISIT = ["facts", "description", "agreements"]
 
-VISIT_PARTS_BY_GROUP = {"valuation": EVERYTHING, "event": LEASE_VISIT, "management": LEASE_VISIT,
+VISIT_PARTS_BY_GROUP = {"valuation": EVERYTHING, "strategy": EVERYTHING, "event": LEASE_VISIT, "management": LEASE_VISIT,
                         "consent": CONSENT_VISIT, "enquiry": LAND_VISIT, "income": BRIEF_VISIT, "other": LAND_VISIT}
 VISIT_PARTS_BY_CODE = {"signage": BRIEF_VISIT, "charging": BRIEF_VISIT, "insurance_certificate": BRIEF_VISIT,
                        "deposit_return": BRIEF_VISIT, "new_letting": EVERYTHING, "land_purchase": EVERYTHING}
@@ -215,7 +223,7 @@ LAND_CHECKLIST = _ARRIVAL + [
 ] + _PHOTOS
 
 CHECKLIST_BY_CODE = {
-    **{c: VALUATION_CHECKLIST for c in ("asset_valuation", "impairment", "disposal_valuation")},
+    **{c: VALUATION_CHECKLIST for c in ("asset_valuation", "impairment", "disposal_valuation", "asset_challenge")},
     **{c: LEASE_CHECKLIST for c in ("rent_review", "break", "expiry", "other_event", "renewal", "variation")},
     **{c: CONSENT_CHECKLIST for c in ("assignment", "underletting", "alterations", "change_of_use", "sharing",
                                       "signage", "planning_consent")},
@@ -251,6 +259,7 @@ def ensure_case_types():
             "event_type": event_type, "open_days_before": before,
             "approval_stages": default_approval(code, group),
             "heads_of_terms": code in HEADS_OF_TERMS,
+            "asset_challenge": code == "asset_challenge",
             "visit_parts": visit_parts_for(code, group),
             "order": i * 10})
         if created:

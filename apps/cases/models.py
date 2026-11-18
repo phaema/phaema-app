@@ -40,6 +40,7 @@ class CaseType(models.Model):
         MANAGEMENT = "management", _("Lease management")
         INCOME = "income", _("Income recovery")
         VALUATION = "valuation", _("Asset valuation")
+        STRATEGY = "strategy", _("Estate strategy")
         ENQUIRY = "enquiry", _("Land and property enquiries")
         OTHER = "other", _("Other activities")
 
@@ -71,6 +72,10 @@ class CaseType(models.Model):
         _("heads of terms"), default=False,
         help_text=_("Cases record heads of terms covering every item in the RICS Code for leasing business "
                     "premises, and cannot move to the decision until they do."))
+    asset_challenge = models.BooleanField(
+        _("Asset Challenge"), default=False,
+        help_text=_("Cases propose an asset strategy for the property; the decision records it on the property, "
+                    "with who decided and the minute reference."))
     visit_parts = models.JSONField(
         _("property information on the site visit sheet"), default=default_visit_parts, blank=True,
         help_text=_("The parts of the property record printed on the site visit sheet for cases of this type. "
@@ -234,6 +239,15 @@ class Case(TimeStampedModel):
     landlord_opposes = models.BooleanField(_("council opposes a new tenancy"), default=False)
     opposition_grounds = models.CharField(_("grounds of opposition"), max_length=100, blank=True,
                                           help_text=_("Section 30(1) paragraphs, for example (f) redevelopment."))
+    # Asset Challenge
+    proposed_strategy = models.ForeignKey(
+        "properties.AssetStrategyOption", on_delete=models.PROTECT, null=True, blank=True, related_name="+",
+        verbose_name=_("proposed asset strategy"))
+    decided_by = models.CharField(
+        _("decided by"), max_length=120, blank=True,
+        help_text=_("For example Head of Estates, Cabinet or the Asset Management Board."))
+    meeting_on = models.DateField(_("meeting date"), null=True, blank=True)
+    minute_reference = models.CharField(_("minute or decision reference"), max_length=60, blank=True)
     # Dilapidations
     dilaps_schedule_value = models.DecimalField(_("schedule of dilapidations (£)"), max_digits=12,
                                                 decimal_places=2, null=True, blank=True)

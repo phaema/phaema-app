@@ -89,6 +89,15 @@ def build(user, today=None, viewer=None):
                     t.case.display_reference)
         (now if t.due_date < today else ahead).append(item)
 
+    # Strategy reviews falling due on their properties.
+    from apps.properties.models import Property
+
+    for p in Property.objects.filter(pk__in=props, purpose_review_date__isnull=False, purpose_review_date__lte=horizon,
+                                     disposed_on__isnull=True):
+        item = Item(p.purpose_review_date, _("Strategy review"), "estate", f"{p.reference} {p.name}",
+                    p.get_absolute_url() + "#strategy", _("Review the holding purpose and asset strategy"))
+        (now if p.purpose_review_date < today else ahead).append(item)
+
     # Projects: tasks they own, and the projects they lead or are on (only those the viewer may see).
     from apps.projects import rules as project_rules
     from apps.projects.models import ProjectTask

@@ -1,0 +1,23 @@
+{% extends "base.html" %}{% load i18n %}
+{% block title %}{{ title }}: {{ object.reference }} {{ object.name }}{% endblock %}
+{% block help_page %}estate-strategy{% endblock %}
+{% block breadcrumbs %}
+<nav class="govuk-breadcrumbs" aria-label="Breadcrumb"><ol class="govuk-breadcrumbs__list">
+  <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="{% url 'properties:list' %}">{% translate "Properties" %}</a></li>
+  <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="{{ object.get_absolute_url }}#strategy">{{ object.name }}</a></li>
+  <li class="govuk-breadcrumbs__list-item">{{ title }}</li>
+</ol></nav>
+{% endblock %}
+{% block content %}
+<span class="govuk-caption-l">{{ object.reference }} {{ object.name }}</span>
+<h1 class="govuk-heading-l">{{ title }}</h1>
+<div class="govuk-grid-row"><div class="govuk-grid-column-two-thirds">
+<p class="govuk-body">{{ intro }}</p>
+<form method="post" novalidate>{% csrf_token %}
+  {% include "core/_form_errors.html" %}
+  {% for field in form %}{% include "core/_field.html" %}{% endfor %}
+  <button class="govuk-button" data-module="govuk-button">{{ button }}</button>
+  <a class="govuk-link govuk-!-margin-left-3" href="{{ object.get_absolute_url }}#strategy">{% translate "Cancel" %}</a>
+</form>
+</div></div>
+{% endblock %}

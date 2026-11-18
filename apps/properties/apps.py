@@ -12,9 +12,11 @@ class PropertiesConfig(AppConfig):
 
         from django.db.models.signals import post_delete
 
-        from .models import Property, PropertyPhoto, PropertyPlan, Title, TitleDocument
+        from .models import (AssetStrategy, AssetStrategyOption, Property, PropertyPhoto, PropertyPlan, PurposeCategory,
+                             SuitabilityAssessment, Title, TitleDocument)
 
-        for model in (Property, Title, PropertyPhoto, TitleDocument, PropertyPlan):
+        for model in (Property, Title, PropertyPhoto, TitleDocument, PropertyPlan, AssetStrategy, AssetStrategyOption,
+                      PurposeCategory, SuitabilityAssessment):
             audit.register(model)
 
         def remove_file(sender, instance, **kwargs):

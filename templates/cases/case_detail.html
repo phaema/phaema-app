@@ -34,6 +34,7 @@
 </dl>
 
 {% include "cases/_leasing.html" %}
+{% include "cases/_challenge.html" %}
 {% include "cases/_standards.html" %}
 {% include "cases/_approval.html" %}
 
@@ -47,8 +48,9 @@
     <div class="govuk-form-group"><fieldset class="govuk-fieldset"><legend class="govuk-fieldset__legend govuk-fieldset__legend--s">{% translate "Decision" %}</legend><div class="govuk-radios govuk-radios--small">
       {% for value, label in decisions %}<div class="govuk-radios__item"><input class="govuk-radios__input" id="d-{{ value }}" name="decision" type="radio" value="{{ value }}"{% if value == case.decision %} checked{% endif %}><label class="govuk-label govuk-radios__label" for="d-{{ value }}">{{ label }}</label></div>{% endfor %}
     </div></fieldset></div>
-    <div class="govuk-form-group"><label class="govuk-label govuk-label--s" for="reasons">{% translate "Reasons and conditions" %}</label>{% if case.case_type.statutory_1988 %}<div class="govuk-hint">{% translate "Required for conditions or a refusal." %}</div>{% endif %}<textarea class="govuk-textarea" id="reasons" name="reasons" rows="4">{{ case.reasons }}</textarea></div>
+    <div class="govuk-form-group"><label class="govuk-label govuk-label--s" for="reasons">{% if challenge %}{% translate "Reasons" %}{% else %}{% translate "Reasons and conditions" %}{% endif %}</label>{% if challenge %}<div class="govuk-hint">{% translate "Kept with the property as the reason for its asset strategy." %}</div>{% elif case.case_type.statutory_1988 %}<div class="govuk-hint">{% translate "Required for conditions or a refusal." %}</div>{% endif %}<textarea class="govuk-textarea" id="reasons" name="reasons" rows="4">{{ case.reasons }}</textarea></div>
     <div class="govuk-form-group"><label class="govuk-label govuk-label--s" for="decision-date">{% translate "Date the decision was sent" %}</label><input class="govuk-input govuk-input--width-10" type="date" id="decision-date" name="date" value="{{ case.decision_on|default:today|date:'Y-m-d' }}"></div>
+    {% include "cases/_challenge_decision.html" %}
     {% if decision_needs_approval %}<p class="govuk-body-s">{% translate "Only Withdrawn can be recorded until the supervisor approves the recommendation." %}</p>{% endif %}
     <button class="govuk-button" data-module="govuk-button">{% translate "Save the decision" %}</button>
   </form></div></details>

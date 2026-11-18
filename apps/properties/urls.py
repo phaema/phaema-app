@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 from django.urls import path
 
-from . import views
+from . import strategy_views, views
 
 app_name = "properties"
 
@@ -14,9 +14,12 @@ urlpatterns = [
     path("import/", views.import_properties, name="import"),
     path("import/template.xlsx", views.import_template, name="import-template"),
     path("data-standard/", views.data_standard, name="data-standard"),
+    path("strategy/", views.estate_strategy, name="estate-strategy"),
     path("data-standard/estate.xlsx", views.data_standard_download, name="data-standard-download"),
     path("<int:pk>/", views.PropertyDetailView.as_view(), name="detail"),
     path("<int:pk>/report/", views.property_report, name="report"),
+    path("<int:pk>/strategy/", strategy_views.record_strategy, name="record-strategy"),
+    path("<int:pk>/suitability/", strategy_views.record_suitability, name="record-suitability"),
     path("<int:pk>/files/", views.property_files, name="files"),
     path("<int:pk>/map.geojson", views.property_geojson, name="detail-geojson"),
     path("<int:pk>/boundary/", views.boundary_from_inspire, name="boundary"),

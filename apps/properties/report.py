@@ -194,6 +194,20 @@ def _costs(prop):
     return f"{cost.year_label()}: " + ", ".join(x for x in parts if x)
 
 
+def _strategy_text(prop):
+    decision, inherited_from = prop.asset_strategy()
+    if decision is None:
+        return ""
+    text = f"{decision.strategy.name}, decided {_date(decision.decided_on)}"
+    if decision.decided_by:
+        text += f" by {decision.decided_by}"
+    if decision.minute_reference:
+        text += f" ({decision.minute_reference})"
+    if inherited_from:
+        text += f"; follows {inherited_from.reference} {inherited_from.name}"
+    return text
+
+
 def _facts(g, wanted):
     prop = g.prop
     return _table([
@@ -201,7 +215,12 @@ def _facts(g, wanted):
         ("Address", prop.address), ("UPRN", prop.uprn),
         ("Part of", ", ".join(f"{a.reference} {a.name}" for a in g.ancestors)),
         ("Tenure", prop.get_tenure_display()), ("Title numbers", ", ".join(str(t) for t in g.titles)),
-        ("Holding purpose", prop.get_holding_purpose_display()),
+        ("Holding purpose", prop.get_holding_purpose_display()
+         + (f": {prop.purpose_category.name}" if prop.purpose_category_id else "")),
+        ("Asset strategy", _strategy_text(prop)),
+        ("Strategy review", _date(prop.purpose_review_date)),
+        ("Suitability", (lambda a: f"Grade {a.grade}, {_date(a.assessed_on)}" if a else "")(
+            prop.current_suitability())),
         ("Portfolio", prop.portfolio.name if prop.portfolio_id else ""),
         ("Occupation", prop.get_occupation_display()),
         ("Use", prop.use_text()),

@@ -266,7 +266,7 @@ def _file_dropped(request, case, direction):
 
 ACTIONS_WORK = {"next_stage", "hold", "resume", "acknowledge", "complete_application", "decide", "close", "reopen",
                 "add_task", "task_done", "assign", "raise_fee", "links", "request_approval", "withdraw_approval",
-                "save_heads", "save_notice", "save_dilaps", "save_conflict"}
+                "save_heads", "save_notice", "save_dilaps", "save_conflict", "save_proposal"}
 ACTIONS_APPROVER = {"approve", "return", "reassign_approval"}
 ACTIONS_CONTRIBUTE = {"add_note", "add_correspondence", "add_document", "file_email", "file_dropped"}
 
@@ -315,6 +315,7 @@ def case_detail(request, pk):
         "has_visit_sheet": case.main_property is not None,
         **_approval_context(request.user, case),
         **_leasing_context(case),
+        **_challenge_context(case),
         **_standards_context(case),
     })
 
@@ -377,6 +378,51 @@ def _blocked_by_terms(request, case, stage):
     for problem in problems:
         messages.error(request, problem)
     return bool(problems)
+
+
+def _challenge_context(case):
+    """The Asset Challenge panel: the property's strategy now and the one proposed."""
+    if not case.case_type.asset_challenge:
+        return {}
+    from apps.properties.models import AssetStrategyOption
+
+    prop = case.main_property
+    current, inherited_from = prop.asset_strategy() if prop else (None, None)
+    return {"challenge": True, "challenge_property": prop, "current_strategy": current,
+            "current_strategy_from": inherited_from,
+            "strategy_options": AssetStrategyOption.objects.filter(active=True),
+            "strategy_recorded": case.strategies.select_related("strategy").first()}
+
+
+def _record_challenge_outcome(request, case, post):
+    """On an approved Asset Challenge, put the decided strategy on the property. Returns False if it cannot."""
+    from apps.properties.models import AssetStrategy, AssetStrategyOption
+
+    prop = case.main_property
+    option = AssetStrategyOption.objects.filter(pk=post.get("strategy") or case.proposed_strategy_id or 0).first()
+    if prop is None:
+        messages.error(request, _("An Asset Challenge needs a property before its outcome can be recorded."))
+        return False
+    if option is None:
+        messages.error(request, _("Choose the asset strategy decided."))
+        return False
+    if not post.get("reasons", "").strip():
+        messages.error(request, _("Give the reasons for the asset strategy: they are kept with the property."))
+        return False
+    case.decided_by = post.get("decided_by", "").strip()[:120]
+    case.meeting_on = _date(post.get("meeting_on")) if post.get("meeting_on") else None
+    case.minute_reference = post.get("minute_reference", "").strip()[:60]
+    decided_on = _date(post.get("date"))
+    if decided_on > date.today():
+        messages.error(request, _("The decision date cannot be in the future."))
+        return False
+    AssetStrategy.objects.filter(case=case).delete()  # a corrected decision replaces the first
+    AssetStrategy.objects.create(
+        property=prop, strategy=option, decided_on=decided_on, reason=post["reasons"].strip(),
+        decided_by=case.decided_by, meeting_on=case.meeting_on, minute_reference=case.minute_reference,
+        source=AssetStrategy.Source.CHALLENGE, case=case, recorded_by=request.user)
+    case.proposed_strategy = case.proposed_strategy or option
+    return True
 
 
 def _leasing_context(case):
@@ -482,11 +528,22 @@ def _do(request, case, action):  # noqa: C901 - one branch per action keeps each
             messages.error(request, _("The Landlord and Tenant Act 1988 requires written reasons for conditions or "
                                       "a refusal."))
             return
+        if case.case_type.asset_challenge:
+            if decision in (Case.Decision.APPROVED, Case.Decision.CONDITIONS):
+                if not _record_challenge_outcome(request, case, post):
+                    return
+            else:
+                case.strategies.all().delete()
         case.decision, case.reasons, case.decision_on = decision, reasons, _date(post.get("date"))
         if case.stage in (Stage.RECEIVED, Stage.INFORMATION, Stage.ASSESSING):
             case.stage = Stage.DECISION
-        case.save(update_fields=["decision", "reasons", "decision_on", "stage", "updated_at"])
-        messages.success(request, _("Decision recorded."))
+        case.save(update_fields=["decision", "reasons", "decision_on", "stage", "decided_by", "meeting_on",
+                                 "minute_reference", "proposed_strategy", "updated_at"])
+        if case.case_type.asset_challenge and case.strategies.exists():
+            messages.success(request, _("Decision recorded. The asset strategy is now on the property, with the "
+                                        "next review date."))
+        else:
+            messages.success(request, _("Decision recorded."))
     elif action == "close":
         if workflow.needs_approval(case, "decision") and case.decision != Case.Decision.WITHDRAWN:
             messages.error(request, _("This case needs approval before a decision. If the request was withdrawn, "
@@ -520,6 +577,13 @@ def _do(request, case, action):  # noqa: C901 - one branch per action keeps each
             return
         messages.success(request, _("Sent to %(name)s for approval.")
                          % {"name": approval.approver.get_full_name() or approval.approver.username})
+    elif action == "save_proposal":
+        from apps.properties.models import AssetStrategyOption
+
+        option = AssetStrategyOption.objects.filter(pk=post.get("proposed_strategy") or 0, active=True).first()
+        case.proposed_strategy = option
+        case.save(update_fields=["proposed_strategy", "updated_at"])
+        messages.success(request, _("Proposed asset strategy saved.") if option else _("Proposal cleared."))
     elif action == "save_heads":
         case.heads_of_terms = {k: post.get(f"hot_{k}", "").strip() for k in leasing.KEYS
                                if post.get(f"hot_{k}", "").strip()}
