@@ -139,6 +139,8 @@ PARTS = [
     ("titles", "Titles, restrictions and covenants"),
     ("agreements", "Tenancies and other agreements: summary table"),
     ("agreement_terms", "Tenancies and other agreements: main terms of each"),
+    ("occupation", "Occupiers floor by floor, headcount and use of space (if the space module is on)"),
+    ("occupation_costs", "Occupation costs and each occupier's share (if space costing is on)"),
     ("cases", "Other open cases"),
 ]
 ALL_PARTS = [key for key, _label in PARTS]
@@ -149,11 +151,21 @@ _SITE_LABELS = {"Location", "Description"}
 class Gathered:
     """The property with its family, agreements and titles, read once for all the sections."""
 
-    def __init__(self, prop, case=None):
-        self.prop, self.case = prop, case
+    def __init__(self, prop, case=None, user=None):
+        self.prop, self.case, self.user = prop, case, user
         self.parts, self.ancestors = family(prop)
         self.leases = list(agreements(prop, self.parts, self.ancestors))
         self.titles = list(prop.titles.all())
+        self._space = False
+
+    @property
+    def space(self):
+        """Who occupies the property and its buildings, or None if this person cannot see the space module."""
+        if self._space is False:
+            from apps.space import overview
+
+            self._space = overview.for_property(self.prop, self.user)
+        return self._space
 
 
 def _rows_for(prop, wanted):
@@ -343,6 +355,88 @@ def _cases(g, wanted):
     return out + [""]
 
 
+def _sqm(value):
+    return f"{value:,.0f}" if value is not None else ""
+
+
+def _space_heading(g, b, out, many):
+    if many or b.building.pk != g.prop.pk:
+        out += [f"## {b.building.get_property_type_display()}: {b.building.reference} {b.building.name}", ""]
+
+
+def _occupation(g, wanted):
+    found = g.space
+    if not found:
+        return ["No occupiers are recorded against this property's floors or rooms.", ""]
+    out, many = [], len(found) > 1
+    for b in found:
+        _space_heading(g, b, out, many)
+        facts = [("Occupiers", f"{len(b.holdings)}" + (f" ({b.external} from outside the council)"
+                                                       if b.external else "")),
+                 ("Floor area of the floors", _area(b.floor_area)), ("Held by occupiers", _area(b.held)),
+                 ("Vacant", _area(b.vacant)),
+                 ("People", f"{b.people:,}" if b.people is not None else MISSING),
+                 ("Workspace capacity", f"{b.capacity:,.0f}" if b.capacity else ""),
+                 ("Utilisation", f"{b.utilisation}%" if b.utilisation is not None else "")]
+        out += _table([(label, value) for label, value in facts if value]) + [""]
+        if b.occupations:
+            out += [_head("Floor or space", "Occupier", "Basis", "Area m²", "Share", "Since", "Checked on site")]
+            for o in b.occupations:
+                where = str(o.space) if o.space else "Whole building"
+                cells = [_cell(where), _cell(o.occupier.name), _cell(o.get_basis_display()), _sqm(o.area()),
+                         f"{o.percent():.0f}%", _date(o.starts)]
+                out.append("| " + " | ".join([c or "–" for c in cells] + [" "]) + " |")  # last column left to fill in
+            out.append("")
+        if b.holdings:
+            out += [_head("Occupier", "Held m²", "Shared space m²", "Total m²", "People", "Capacity",
+                          "Utilisation", "m² a person")]
+            for h in b.holdings:
+                people = f"{h.people:,} ({_date(h.people_on)})" if h.people is not None else ""
+                out.append(_row(h.occupier.name + (" (outside the council)" if h.occupier.is_external else ""),
+                                _sqm(h.area), _sqm(h.shared), _sqm(h.total), people,
+                                f"{h.capacity:,.0f}" if h.capacity else "",
+                                f"{h.utilisation}%" if h.utilisation is not None else "",
+                                f"{h.per_person}" if h.per_person is not None else ""))
+            out.append("")
+        if b.shared:
+            out += ["Shared space: " + "; ".join(
+                f"{s.name}" + (f", {s.floor.name}" if s.floor_id else "")
+                + (f", {s.area_sqm:,.0f} m²" if s.area_sqm is not None else "") for s in b.shared) + ".", ""]
+        out += [f"- {w}" for w in b.warnings] + ([""] if b.warnings else [])
+    return out + ["Check who is in each space on site, and correct the record on the building's Space and "
+                  "occupiers page in PHAEMA.", ""]
+
+
+def _occupation_costs(g, wanted):
+    found = [b for b in (g.space or []) if b.sharing is not None]
+    if not found:
+        return ["No occupation costs are recorded for this property.", ""]
+    out, many = [], len(found) > 1
+    for b in found:
+        s = b.sharing
+        _space_heading(g, b, out, many)
+        out += [f"Financial year {s.label}. Method: {s.method_label[0].lower() + s.method_label[1:]}.", ""]
+        out += [_head("Cost", "£", "Source")]
+        for c in s.costs:
+            out.append(_row(c.line + (" (notional)" if c.notional else ""), f"{c.amount:,.0f}", c.source))
+        per_sqm = f", £{s.per_sqm:,.2f} a m²" if s.per_sqm else ""
+        out += [_row("**Total**", f"**{s.total:,.0f}**", ""), "",
+                f"Total cost {_money(s.total)}{per_sqm}"
+                + (f", of which {_money(s.notional)} is notional (not paid out)." if s.notional else "."), ""]
+        if s.shares:
+            notional = bool(s.notional)
+            heads = ["Occupier", "Share", "Cash £", "Notional £", "Total £", "£ a m²", "£ a person"]
+            out.append(_head(*(heads if notional else heads[:2] + heads[4:])))
+            for sh in s.shares:
+                cells = [sh.label, f"{sh.percent}%", f"{sh.cash:,.0f}", f"{sh.notional:,.0f}", f"{sh.total:,.0f}",
+                         f"{sh.per_sqm:,.2f}" if sh.per_sqm is not None else "",
+                         f"{sh.per_person:,.0f}" if sh.per_person is not None else ""]
+                out.append(_row(*(cells if notional else cells[:2] + cells[4:])))
+            out.append("")
+        out += [f"- {w}" for w in s.warnings] + ([""] if s.warnings else [])
+    return out
+
+
 def sections(prop, wanted=None, case=None, gathered=None):
     """(title, lines) for each wanted part of the property information, in report order. Description, services
     and parking share one section, as do the agreements summary and terms."""
@@ -369,15 +463,25 @@ def sections(prop, wanted=None, case=None, gathered=None):
         out.append(("Title", _titles(g, wanted)))
     if wanted & {"agreements", "agreement_terms"}:
         out.append(("Tenancies and other agreements", _agreements(g, wanted)))
+    if "occupation" in wanted and g.space is not None:
+        out.append(("Occupation", _occupation(g, wanted)))
+    if "occupation_costs" in wanted and g.space is not None and _can_cost(g.user):
+        out.append(("Occupation costs", _occupation_costs(g, wanted)))
     if "cases" in wanted:
         out.append(("Cases in hand", _cases(g, wanted)))
     return out
 
 
+def _can_cost(user):
+    from apps.core.access import can_use
+
+    return user is not None and can_use(user, "spacecosts")
+
+
 def build(prop, case=None, user=None, today=None):
     """The whole report as markup text."""
     today = today or date.today()
-    g = Gathered(prop, case)
+    g = Gathered(prop, case, user)
     title = "Initial valuation report" if case is not None else "Property report"
     out = [f"# {title}: {prop.reference} {prop.name}", ""]
     intro = f"Prepared {_date(today)}" + (f" by {_name(user)}" if user else "") + "."

@@ -212,7 +212,9 @@ This is separate from the grades given to individual components (the roof, the b
 **Property report** on a property's page gathers everything PHAEMA holds about it into one document: the key
 facts, location, description, construction and services (with each building in turn), floor areas and how they
 are made up, floor plans, titles, current tenancies and other agreements with their main terms, and the cases in
-hand. It ends with a list of what a valuer is likely to ask for that has not been recorded yet. Read it on
+hand. If the [space module](space.md) is on, it also lists who occupies each floor and room, with a blank
+**Checked on site** column to tick or correct on a visit, and each occupier's area, headcount and use of space. If
+you can see space costing, it adds the latest year's occupation costs and each occupier's share. It ends with a list of what a valuer is likely to ask for that has not been recorded yet. Read it on
 screen, print it, or select **Download as Word** to edit and send.
 
 On an asset valuation case the same report is headed **Initial valuation report**: see

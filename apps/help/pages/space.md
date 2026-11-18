@@ -62,6 +62,11 @@ warns on the building page if the shares in a space add up to more than 100%.
 
 Use the date in the address (`?on=2026-04-01`) to see an earlier date.
 
+The property's own page has a short **Occupiers** summary (area, people and, with costing, each occupier's cost for
+the latest year with figures), and the **property report** sets out the occupation floor by floor for checking on
+site. On a site visit sheet, an administrator can include the occupation and its costs for a case type under
+**Property information on the site visit sheet**.
+
 ## Headcount and use of space
 
 **Record headcount** gives the people based in the building for an occupier, as at a date, with the full-time

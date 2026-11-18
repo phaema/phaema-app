@@ -181,6 +181,9 @@ class PropertyDetailView(LoginRequiredMixin, DetailView):
         ctx["costs"] = list(obj.costs.all()[:5])
         ctx["plans"] = list(obj.plans.all())
         ctx["leases"] = obj.leases.select_related("counterparty").order_by("status", "-term_start")
+        from apps.space import overview
+
+        ctx["space"] = overview.for_property(obj, self.request.user)
         ctx["map_config"] = map_config()
         ctx["has_location"] = bool(obj.boundary or obj.easting) or any(
             p.boundary or p.easting for p, _d in (ctx["breakdown"]["parts"] if ctx["breakdown"] else []))
