@@ -1,0 +1,35 @@
+{% extends "base.html" %}{% load i18n %}
+{% block title %}{% translate "Asset management health check" %}{% endblock %}
+{% block help_page %}estate-strategy{% endblock %}
+{% block breadcrumbs %}<nav class="govuk-breadcrumbs" aria-label="Breadcrumb"><ol class="govuk-breadcrumbs__list">
+  <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="{% url 'strategy:home' %}">{% translate "Estate strategy" %}</a></li>
+  <li class="govuk-breadcrumbs__list-item">{% translate "Health check" %}</li></ol></nav>{% endblock %}
+{% block content %}
+<h1 class="govuk-heading-l">{% translate "Asset management health check" %}</h1>
+<p class="govuk-body">{% blocktranslate with n=questions %}Once a year, the head of estates answers {{ n }} short questions about how well the council manages its property: strategy, planning, finance, operations, governance, data and review. Each answer is yes, partly, no or not applicable, with notes and where the evidence is. Gaps can be added to the estate strategy's action plan, and the report compares each answer with the year before.{% endblocktranslate %}</p>
+<p class="govuk-body-s">{{ credit }}</p>
+
+{% if is_admin and not started %}
+<form method="post" class="govuk-!-margin-bottom-6">{% csrf_token %}
+  <div class="govuk-form-group"><label class="govuk-label govuk-label--s" for="lead">{% translate "Who will answer it" %}</label>
+    <select class="govuk-select" id="lead" name="lead">{% for p in people %}<option value="{{ p.pk }}"{% if p.pk == request.user.pk %} selected{% endif %}>{{ p.get_full_name|default:p.username }}</option>{% endfor %}</select></div>
+  <button class="govuk-button" data-module="govuk-button">{% blocktranslate %}Start the {{ year_label }} health check{% endblocktranslate %}</button>
+</form>
+{% endif %}
+
+{% if rows %}
+<table class="govuk-table">
+  <thead class="govuk-table__head"><tr class="govuk-table__row"><th scope="col" class="govuk-table__header">{% translate "Year" %}</th><th scope="col" class="govuk-table__header">{% translate "Lead" %}</th><th scope="col" class="govuk-table__header">{% translate "Status" %}</th><th scope="col" class="govuk-table__header govuk-table__header--numeric">{% translate "Yes" %}</th><th scope="col" class="govuk-table__header govuk-table__header--numeric">{% translate "Partly" %}</th><th scope="col" class="govuk-table__header govuk-table__header--numeric">{% translate "No" %}</th><th scope="col" class="govuk-table__header govuk-table__header--numeric">{% translate "Not answered" %}</th></tr></thead>
+  <tbody class="govuk-table__body">{% for c, n in rows %}<tr class="govuk-table__row">
+    <td class="govuk-table__cell"><a class="govuk-link" href="{{ c.get_absolute_url }}">{{ c }}</a></td>
+    <td class="govuk-table__cell">{{ c.lead.get_full_name|default:c.lead.username|default:"–" }}</td>
+    <td class="govuk-table__cell">{% if c.status == "finished" %}<strong class="govuk-tag govuk-tag--green">{% translate "Finished" %}</strong> {{ c.finished_on|date:"j M Y" }}{% else %}<strong class="govuk-tag govuk-tag--yellow">{% translate "In progress" %}</strong>{% endif %}</td>
+    <td class="govuk-table__cell govuk-table__cell--numeric">{{ n.yes }}</td>
+    <td class="govuk-table__cell govuk-table__cell--numeric">{{ n.partly }}</td>
+    <td class="govuk-table__cell govuk-table__cell--numeric">{{ n.no }}</td>
+    <td class="govuk-table__cell govuk-table__cell--numeric">{{ n.open }}</td>
+  </tr>{% endfor %}</tbody>
+</table>
+{% else %}<p class="govuk-body">{% translate "No health check has been done yet." %}{% if not is_admin %} {% translate "An administrator starts each year's check." %}{% endif %}</p>{% endif %}
+{% if is_admin %}<p class="govuk-body"><a class="govuk-link" href="{% url 'admin:strategy_healthquestion_changelist' %}">{% translate "Change the questions" %}</a></p>{% endif %}
+{% endblock %}

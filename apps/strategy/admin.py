@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 from django.contrib import admin
 
-from .models import Action, EstateStrategy, Objective
+from .models import Action, EstateStrategy, HealthAnswer, HealthCheck, HealthQuestion, Objective
 
 
 class ObjectiveInline(admin.TabularInline):
@@ -41,3 +41,36 @@ class ObjectiveAdmin(admin.ModelAdmin):
                  ("As the RICS guidance suggests (all optional)", {
                      "fields": ("corporate_aim", "outcomes", "measures", "financial_effect", "risks")}),
                  ("Progress", {"fields": ("reported_status", "progress_note")}))
+
+
+@admin.register(HealthQuestion)
+class HealthQuestionAdmin(admin.ModelAdmin):
+    """The questions in the annual asset management health check. Changes apply to checks started afterwards; past
+    checks keep the wording they were answered with."""
+
+    list_display = ("text", "heading", "active", "order")
+    list_editable = ("active", "order")
+    list_filter = ("heading", "active")
+    search_fields = ("text",)
+    fields = ("heading", "text", "guidance", "active", "order")
+
+
+class HealthAnswerInline(admin.TabularInline):
+    model = HealthAnswer
+    extra = 0
+    fields = ("heading", "wording", "answer", "answered_by", "answered_on", "action")
+    readonly_fields = ("heading", "wording", "answered_by", "answered_on", "action")
+    can_delete = False
+
+    def has_add_permission(self, request, obj=None):
+        return False
+
+
+@admin.register(HealthCheck)
+class HealthCheckAdmin(admin.ModelAdmin):
+    """Each year's health check. Answer it on its own page (Estate strategy, Health check); here an administrator
+    can change the lead or the status."""
+
+    list_display = ("__str__", "lead", "status", "finished_on")
+    fields = ("year", "lead", "status", "finished_on", "summary")
+    inlines = [HealthAnswerInline]

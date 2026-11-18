@@ -1,0 +1,14 @@
+{% extends "base.html" %}{% load i18n %}
+{% block title %}{{ check }}{% endblock %}
+{% block help_page %}estate-strategy{% endblock %}
+{% block breadcrumbs %}<nav class="govuk-breadcrumbs govuk-!-display-none-print" aria-label="Breadcrumb"><ol class="govuk-breadcrumbs__list">
+  <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="{% url 'strategy:health-list' %}">{% translate "Health check" %}</a></li>
+  <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="{{ check.get_absolute_url }}">{{ check }}</a></li>
+  <li class="govuk-breadcrumbs__list-item">{% translate "Report" %}</li></ol></nav>{% endblock %}
+{% block content %}
+<div class="govuk-!-display-none-print"><div class="govuk-button-group">
+  <a class="govuk-button" data-module="govuk-button" role="button" draggable="false" href="?format=docx">{% translate "Download as Word" %}</a>
+  <a class="govuk-button govuk-button--secondary" data-module="govuk-button" role="button" draggable="false" href="javascript:window.print()">{% translate "Print" %}</a>
+</div></div>
+<div class="phaema-report">{{ body }}</div>
+{% endblock %}

@@ -158,3 +158,133 @@ class Action(TimeStampedModel):
         if self.status != self.Status.DONE:
             self.done_on = None
         super().save(*args, **kwargs)
+
+
+# ---------------------------------------------------------------- the annual asset management health check
+
+class HealthQuestion(models.Model):
+    """One question in the annual health check. PHAEMA's own wording, grouped under the headings used by the RICS
+    guidance on strategic public sector property asset management. Administrators can change the list."""
+
+    class Heading(models.TextChoices):
+        STRATEGY = "strategy", _("Strategy")
+        PLANNING = "planning", _("Planning")
+        FINANCE = "finance", _("Financial planning")
+        DEMAND = "demand", _("Demand and change")
+        OPERATIONS = "operations", _("Operations")
+        GOVERNANCE = "governance", _("Governance")
+        CLIENT = "client", _("Intelligent client")
+        POLICIES = "policies", _("Policies")
+        DATA = "data", _("Data")
+        REVIEW = "review", _("Review")
+
+    heading = models.CharField(_("heading"), max_length=12, choices=Heading.choices)
+    text = models.CharField(_("question"), max_length=300)
+    guidance = models.CharField(_("what a good answer looks like"), max_length=400, blank=True)
+    active = models.BooleanField(_("in use"), default=True,
+                                 help_text=_("Untick to leave the question out of future checks. Past answers are "
+                                             "kept."))
+    order = models.PositiveSmallIntegerField(_("order"), default=0)
+
+    class Meta:
+        ordering = ["order", "pk"]
+        verbose_name = _("health check question")
+        verbose_name_plural = _("health check questions")
+
+    def __str__(self):
+        return self.text
+
+
+class HealthCheck(TimeStampedModel):
+    """The year's asset management health check: one per financial year."""
+
+    class Status(models.TextChoices):
+        DRAFT = "draft", _("In progress")
+        FINISHED = "finished", _("Finished")
+
+    year = models.PositiveSmallIntegerField(_("financial year starting"), unique=True,
+                                            help_text=_("2026 means 2026/27."))
+    lead = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True,
+                             related_name="health_checks", verbose_name=_("lead"),
+                             help_text=_("The person who answers the questions, usually the head of estates."))
+    status = models.CharField(_("status"), max_length=10, choices=Status.choices, default=Status.DRAFT)
+    finished_on = models.DateField(_("finished on"), null=True, blank=True)
+    summary = models.TextField(_("summary"), blank=True,
+                               help_text=_("The lead's overall view: strengths, gaps and priorities for the year."))
+
+    class Meta:
+        ordering = ["-year"]
+        verbose_name = _("asset management health check")
+        verbose_name_plural = _("asset management health checks")
+
+    def __str__(self):
+        from apps.projects.models import financial_year_label
+
+        return f"Asset management health check {financial_year_label(self.year)}"
+
+    def get_absolute_url(self):
+        return reverse("strategy:health", args=[self.pk])
+
+    def previous(self):
+        return HealthCheck.objects.filter(year__lt=self.year).order_by("-year").first()
+
+
+class HealthAnswer(models.Model):
+    """The answer to one question in one year's check. The question's wording is copied in, so changing the list
+    later does not rewrite past checks."""
+
+    class Answer(models.TextChoices):
+        YES = "yes", _("Yes")
+        PARTLY = "partly", _("Partly")
+        NO = "no", _("No")
+        NA = "na", _("Not applicable")
+
+    health_check = models.ForeignKey(HealthCheck, on_delete=models.CASCADE, related_name="answers")
+    question = models.ForeignKey(HealthQuestion, on_delete=models.SET_NULL, null=True, blank=True,
+                                 related_name="answers")
+    heading = models.CharField(_("heading"), max_length=12, choices=HealthQuestion.Heading.choices)
+    wording = models.CharField(_("question"), max_length=300)
+    guidance = models.CharField(_("what a good answer looks like"), max_length=400, blank=True)
+    order = models.PositiveSmallIntegerField(default=0)
+    answer = models.CharField(_("answer"), max_length=8, choices=Answer.choices, blank=True)
+    notes = models.TextField(_("notes"), blank=True)
+    evidence = models.TextField(_("evidence"), blank=True,
+                                help_text=_("Where the evidence is: a link, a document or a committee report, one "
+                                            "per line."))
+    answered_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True,
+                                    related_name="+", verbose_name=_("answered by"))
+    answered_on = models.DateField(_("answered on"), null=True, blank=True)
+    action = models.ForeignKey(Action, on_delete=models.SET_NULL, null=True, blank=True, related_name="health_answers",
+                               verbose_name=_("improvement action"))
+
+    class Meta:
+        ordering = ["order", "pk"]
+        verbose_name = _("health check answer")
+        verbose_name_plural = _("health check answers")
+
+    def __str__(self):
+        return self.wording
+
+    @property
+    def is_gap(self):
+        return self.answer in (self.Answer.NO, self.Answer.PARTLY)
+
+    def evidence_lines(self):
+        return [line.strip() for line in self.evidence.splitlines() if line.strip()]
+
+
+class HealthNote(TimeStampedModel):
+    """A colleague's note on the check, or on one answer in it."""
+
+    health_check = models.ForeignKey(HealthCheck, on_delete=models.CASCADE, related_name="notes")
+    answer = models.ForeignKey(HealthAnswer, on_delete=models.CASCADE, null=True, blank=True, related_name="comments")
+    author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name="+")
+    text = models.TextField(_("note"))
+
+    class Meta:
+        ordering = ["created_at"]
+        verbose_name = _("health check note")
+        verbose_name_plural = _("health check notes")
+
+    def __str__(self):
+        return self.text[:60]
