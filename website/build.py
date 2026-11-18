@@ -48,6 +48,8 @@ BRINGS_TOGETHER = [
      "building."),
     ("Asset valuation", "The rolling programme, Red Book records and the year-end schedule for finance."),
     ("Projects, acquisitions and disposals", "Gateways, budgets, risks and the register changes completion needs."),
+    ("Estate strategy", "Each property's holding purpose, asset strategy and suitability, the Asset Challenge, and "
+     "reviews that fall due, organised around the RICS guidance on public sector asset management."),
     ("Space and occupation costs", "Who occupies each operational building, floor by floor, how well the space is "
      "used, and what occupation costs each department."),
     ("Rents and service charges, if wanted", "Optional ledgers that feed the council's finance system, or leave this "
@@ -127,6 +129,9 @@ CAPABILITIES = [
      "Thread information and site hazards shown before every visit."),
     ("Asset valuation", "The rolling valuation programme, internal or external valuers, Red Book records, impairment "
      "prompts, an initial valuation report drawn from the property record, and the year-end schedule for finance."),
+    ("Estate strategy", "Holding purposes with the council's own sub-categories; an asset strategy for each property "
+     "(retain, invest, remodel or share, release, dispose) with who decided and the minute reference; the Asset "
+     "Challenge run as a case; suitability grades; strategy reviews prompted on My work; and an estate-wide overview."),
     ("Space and occupiers", "Departments, teams and outside organisations such as the NHS in each building, floor "
      "and room, with a stacking plan, headcount and use of space, and each occupier's share of the building's "
      "costs, including a notional rent for freehold buildings. The property report sets it out for checking on "
@@ -164,6 +169,7 @@ ROADMAP = [
         "Maintenance, compliance and the Golden Thread",
         "Asset valuation",
         "Space, occupation and costs by occupier",
+        "Estate strategy: asset strategies, the Asset Challenge and suitability",
         "Projects with gateways, budgets, risks and completion",
         "Access areas, cover and hand-over of work",
         "Reports, imports, open data and API",
@@ -347,7 +353,7 @@ BODY = r'''<div class="top"><div class="wrap top__inner">
 
   <div class="wrap band">
     <h2>Where the project is</h2>
-    <p class="band__lead">All thirteen modules are built and documented, with about 450 automated tests, a user manual, a technical manual and e-learning for five roles. A public test site is running. Next come testing by pilot councils, independent security and accessibility checks, and connectors to the systems councils already use.</p>
+    <p class="band__lead">All fourteen modules are built and documented, with about 450 automated tests, a user manual, a technical manual and e-learning for five roles. A public test site is running. Next come testing by pilot councils, independent security and accessibility checks, and connectors to the systems councils already use.</p>
     <p><a href="#roadmap">See the roadmap</a></p>
   </div>
 

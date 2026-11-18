@@ -192,6 +192,29 @@ COURSES = [
             {"q": "A disposal completes. How does the property leave the register's open data?", "options": ["Someone records its disposal date, then it drops out", "PHAEMA removes it automatically at gateway 3", "It is deleted"], "answer": 0,
              "why": "The checklist links to the property; once the disposal date is saved, the step ticks itself and open data leaves it out."},
         ]}, {
+        "id": "strategy", "title": "Estate strategy", "minutes": 15,
+        "intro": "Record why the council holds each property, what it plans to do with it and how well it suits the service, and run an Asset Challenge.",
+        "steps": [
+            (T, "/properties/125/", "#strategy", "Strategy on the property page",
+             "Each property shows its asset strategy (retain, invest, remodel, release or dispose), who decided it and when, the strategy review date and the building's suitability grade. Units and buildings follow the estate or site they are part of unless they have their own."),
+            (T, "/properties/125/strategy/", "form[novalidate]", "Recording a decision already made",
+             "Record an asset strategy already decided, for example at a committee: choose the strategy, give the reason, who decided and the minute reference. The next review is set five years on, and you are reminded on My work as it falls due."),
+            (T, "/cases/124/", "h2:has-text('Asset Challenge')", "The Asset Challenge",
+             "To review a property afresh, start an Asset Challenge from its page. Work through the tasks, save your proposed strategy, and ask for approval. When the decision is recorded, the strategy goes onto the property with the reasons and the minute reference."),
+            (T, "/properties/strategy/", "h1", "The estate at a glance",
+             "Reports, Estate strategy shows reviews overdue and due, Asset Challenges in progress, how many properties are on each strategy, the holding purposes and the suitability grades. Every figure opens the list of those properties."),
+        ],
+        "exercise": {"q": "Open DM-E01-U03, a unit on Riverside Industrial Estate. What is its asset strategy?",
+                     "options": ["Retain as is, following the estate", "Dispose now", "Not yet decided", "Retain and invest"], "answer": 0,
+                     "hint": "Look at the Strategy section: a unit follows its estate unless it has its own."},
+        "quiz": [
+            {"q": "A committee decided last year to sell a site. How do you put that on the property?", "options": ["Record an asset strategy already decided, with the minute reference", "Start an Asset Challenge and backdate it", "Change the holding purpose only"], "answer": 0,
+             "why": "Decisions made elsewhere are recorded directly, with who decided and the reason, and kept in the history."},
+            {"q": "An Asset Challenge is refused. What happens to the property's asset strategy?", "options": ["It stays as it was", "It is cleared", "It becomes Dispose later"], "answer": 0,
+             "why": "Only an approved outcome changes the property's strategy."},
+            {"q": "What does a suitability grade measure?", "options": ["How well the building suits the service in it", "Its physical condition", "Its market value"], "answer": 0,
+             "why": "Suitability is about fitness for purpose, whatever the building's condition."},
+        ]}, {
         "id": "space", "title": "Space and occupiers", "minutes": 15,
         "intro": "See who occupies the council's operational buildings, floor by floor, and how well the space is used.",
         "steps": [
