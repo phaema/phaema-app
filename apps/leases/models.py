@@ -183,7 +183,12 @@ class Lease(TimeStampedModel):
                                                     "tenant, yearly, at base rate\"."))
     rates_excluded = models.BooleanField(_("rent excludes business rates"), default=True,
                                          help_text=_("Untick if the rent includes business rates."))
-    incentives = models.TextField(_("rent-free period or other incentive"), blank=True)
+    rent_free_until = models.DateField(
+        _("rent-free until"), null=True, blank=True,
+        help_text=_("The last day of any rent-free period. Rent starts the next day; PHAEMA adds an event for it."))
+    incentives = models.TextField(_("rent-free period or other incentive"), blank=True,
+                                  help_text=_("Details, for example \"6 months rent-free, then half rent for 6 "
+                                              "months\", or a fitting-out contribution."))
 
     # Reviews
     review_basis = models.CharField(_("rent review basis"), max_length=20, choices=ReviewBasis.choices,
@@ -299,6 +304,13 @@ class Lease(TimeStampedModel):
             dates.append((b.break_date, _("Break option (%(who)s)") % {"who": who}, "break"))
             if b.notice_deadline:
                 dates.append((b.notice_deadline, _("Last date to serve break notice (%(who)s)") % {"who": who}, "notice"))
+        for o in self.options.all():
+            if o.exercise_by:
+                who = o.get_exercisable_by_display().lower()
+                dates.append((o.exercise_by, _("Last date: %(option)s (%(who)s)") % {
+                    "option": o.get_option_type_display().lower(), "who": who}, "option"))
+        if self.rent_free_until:
+            dates.append((self.rent_free_until, _("Rent-free period ends"), "rent_start"))
         if self.term_end:
             dates.append((self.term_end, _("Contractual expiry"), "expiry"))
         return sorted(dates, key=lambda d: d[0])
@@ -340,6 +352,43 @@ class BreakOption(TimeStampedModel):
 
         day = min(self.break_date.day, monthrange(year, month)[1])
         return date(year, month, day)
+
+
+class LeaseOption(TimeStampedModel):
+    """An option in the agreement other than a break: to renew, extend, purchase, or a right of first refusal."""
+
+    class OptionType(models.TextChoices):
+        RENEW = "renew", _("Option to renew")
+        EXTEND = "extend", _("Option to extend the term")
+        PURCHASE = "purchase", _("Option to purchase")
+        FIRST_REFUSAL = "first_refusal", _("Right of first refusal or pre-emption")
+        MORE_SPACE = "more_space", _("Option to take more space")
+        OTHER = "other", _("Other option")
+
+    lease = models.ForeignKey(Lease, on_delete=models.CASCADE, related_name="options")
+    option_type = models.CharField(_("option"), max_length=20, choices=OptionType.choices)
+    exercisable_by = models.CharField(_("exercisable by"), max_length=10, choices=BreakOption.ExercisableBy.choices,
+                                      default=BreakOption.ExercisableBy.TENANT)
+    exercise_from = models.DateField(_("can be exercised from"), null=True, blank=True)
+    exercise_by = models.DateField(
+        _("must be exercised by"), null=True, blank=True,
+        help_text=_("The last date to exercise the option or serve notice of it. PHAEMA adds an event for it."))
+    notice_months = models.PositiveSmallIntegerField(_("notice (months)"), null=True, blank=True)
+    terms = models.TextField(_("terms and conditions"), blank=True,
+                             help_text=_("For example the new term and rent for a renewal, or the price for a "
+                                         "purchase, and any conditions such as no breach of covenant."))
+
+    class Meta:
+        ordering = ["exercise_by", "pk"]
+        verbose_name = _("option")
+        verbose_name_plural = _("options (renew, purchase and others)")
+
+    def __str__(self):
+        text = self.get_option_type_display()
+        return f"{text} by {self.exercise_by:%d %b %Y}" if self.exercise_by else text
+
+    def get_absolute_url(self):
+        return self.lease.get_absolute_url()
 
 
 def _lease_document_path(instance, filename):
@@ -447,6 +496,8 @@ class LeaseEvent(TimeStampedModel):
         BREAK_NOTICE = "notice", _("Break notice deadline")
         BREAK = "break", _("Break date")
         EXPIRY = "expiry", _("Lease expiry")
+        OPTION = "option", _("Option deadline")
+        RENT_START = "rent_start", _("Rent-free period ends")
         OTHER = "other", _("Other (added by hand)")
 
     class Status(models.TextChoices):

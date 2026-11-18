@@ -1,0 +1,29 @@
+{% extends "base.html" %}{% load i18n humanize %}
+{% block title %}{% translate "Space and costing" %}{% endblock %}
+{% block help_page %}space{% endblock %}
+{% block content %}
+<h1 class="govuk-heading-xl govuk-!-margin-bottom-4">{% translate "Space and costing" %}</h1>
+<p class="govuk-body">{% translate "Who occupies the council's buildings, how much space each occupier holds, and how well it is used." %}</p>
+{% include "space/_nav.html" %}
+{% if rows %}
+<table class="govuk-table">
+  <thead class="govuk-table__head"><tr class="govuk-table__row">
+    <th scope="col" class="govuk-table__header">{% translate "Building" %}</th>
+    <th scope="col" class="govuk-table__header">{% translate "Occupiers" %}</th>
+    <th scope="col" class="govuk-table__header govuk-table__header--numeric">{% translate "Area held (m²)" %}</th>
+    <th scope="col" class="govuk-table__header govuk-table__header--numeric">{% translate "People" %}</th>
+    <th scope="col" class="govuk-table__header govuk-table__header--numeric">{% translate "Capacity" %}</th>
+    <th scope="col" class="govuk-table__header govuk-table__header--numeric">{% translate "Use" %}</th></tr></thead>
+  <tbody class="govuk-table__body">{% for r in rows %}<tr class="govuk-table__row">
+    <td class="govuk-table__cell"><a class="govuk-link" href="{% url 'space:building' r.building.pk %}">{{ r.building.reference }} {{ r.building.name }}</a></td>
+    <td class="govuk-table__cell">{{ r.occupiers|length }}{% if r.external %} <strong class="govuk-tag govuk-tag--blue">{% blocktranslate count n=r.external %}{{ n }} outside{% plural %}{{ n }} outside{% endblocktranslate %}</strong>{% endif %}</td>
+    <td class="govuk-table__cell govuk-table__cell--numeric">{{ r.area|floatformat:0|intcomma }}</td>
+    <td class="govuk-table__cell govuk-table__cell--numeric">{{ r.people|default:"–" }}</td>
+    <td class="govuk-table__cell govuk-table__cell--numeric">{{ r.capacity|floatformat:0|default:"–" }}</td>
+    <td class="govuk-table__cell govuk-table__cell--numeric">{% if r.utilisation is not None %}{{ r.utilisation }}%{% else %}–{% endif %}</td>
+  </tr>{% endfor %}</tbody>
+</table>
+{% else %}
+<div class="govuk-inset-text">{% translate "No spaces or occupiers recorded yet. Open a building, then select Space and occupiers, or add floors and rooms in Manage data." %}</div>
+{% endif %}
+{% endblock %}

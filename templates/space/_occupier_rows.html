@@ -1,0 +1,15 @@
+{% load i18n humanize %}<table class="govuk-table">
+  <thead class="govuk-table__head"><tr class="govuk-table__row">
+    <th scope="col" class="govuk-table__header">{% translate "Occupier" %}</th>
+    <th scope="col" class="govuk-table__header">{% translate "Part of" %}</th>
+    <th scope="col" class="govuk-table__header govuk-table__header--numeric">{% translate "Buildings" %}</th>
+    <th scope="col" class="govuk-table__header govuk-table__header--numeric">{% translate "Area held (m²)" %}</th>
+    <th scope="col" class="govuk-table__header govuk-table__header--numeric">{% translate "People" %}</th></tr></thead>
+  <tbody class="govuk-table__body">{% for f in items %}<tr class="govuk-table__row">
+    <td class="govuk-table__cell"><a class="govuk-link" href="{{ f.occupier.get_absolute_url }}">{{ f.occupier.name }}</a>{% if f.occupier.external_kind %} <span class="govuk-body-s">({{ f.occupier.get_external_kind_display }})</span>{% endif %}</td>
+    <td class="govuk-table__cell">{{ f.occupier.parent.name|default:"–" }}</td>
+    <td class="govuk-table__cell govuk-table__cell--numeric">{{ f.buildings }}</td>
+    <td class="govuk-table__cell govuk-table__cell--numeric">{{ f.area|floatformat:0|intcomma }}</td>
+    <td class="govuk-table__cell govuk-table__cell--numeric">{{ f.people|default:"–" }}</td>
+  </tr>{% endfor %}</tbody>
+</table>

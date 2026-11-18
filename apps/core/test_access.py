@@ -47,7 +47,7 @@ def _leases_with_charges(user, inside=True):
 def test_five_standard_areas_exist():
     areas = {a.code: a for a in AccessArea.objects.all()}
     assert set(areas) == {"estates", "finance", "maintenance", "valuation", "legal"}
-    assert areas["estates"].own_patch_finance and not areas["estates"].modules
+    assert areas["estates"].own_patch_finance and areas["estates"].modules == ["space"]
     assert areas["finance"].finance_actions and "ledger" in areas["finance"].modules
     assert set(areas["maintenance"].modules) == {"maintenance", "compliance"}
 

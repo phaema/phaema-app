@@ -109,6 +109,14 @@ def _wanted_events(lease, today):
         if b.notice_deadline and b.notice_deadline >= today:
             wanted[f"notice:{b.pk}"] = (LeaseEvent.EventType.BREAK_NOTICE, b.notice_deadline,
                                         f"Last date to serve break notice ({who})")
+    for o in lease.options.all():
+        if o.exercise_by and o.exercise_by >= today:
+            who = o.get_exercisable_by_display().lower()
+            wanted[f"option:{o.pk}"] = (LeaseEvent.EventType.OPTION, o.exercise_by,
+                                        f"Last date: {o.get_option_type_display().lower()} ({who})")
+    if lease.rent_free_until and lease.rent_free_until >= today:
+        wanted["rent_start"] = (LeaseEvent.EventType.RENT_START, lease.rent_free_until,
+                                "Rent-free period ends: rent starts the next day")
     if lease.term_end:
         title = "Holding over: renew or recover possession" if lease.status == Lease.Status.HOLDING_OVER else ""
         wanted["expiry"] = (LeaseEvent.EventType.EXPIRY, lease.term_end, title)
@@ -245,7 +253,7 @@ def complete_other(event, user, status, notes=""):
 def sync_all(today=None):
     """Daily housekeeping: stepped rents take effect, and events catch up with the calendar."""
     changed = 0
-    for lease in Lease.objects.filter(status__in=LIVE).prefetch_related("breaks"):
+    for lease in Lease.objects.filter(status__in=LIVE).prefetch_related("breaks", "options"):
         changed += refresh_current_rent(lease, today)
         sync_events(lease, today)
     return changed

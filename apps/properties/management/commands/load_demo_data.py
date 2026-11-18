@@ -113,6 +113,12 @@ def build_records():
         tenure="freehold", occupation="council", use_description="Council offices", use_class="E(g)(i)",
         address_line_1="High Street", postcode="ZZ99 1TH", gia_sqm=Decimal("4250"),
         boundary=rect(520, 470, 60, 45), notes="Listed building (Grade II). Civic offices and council chamber.")
+    add("DM-S30", "Exampleton Civic Centre", "building", uprn=uprn(), holding_purpose="operational",
+        tenure="freehold", occupation="council", use_description="Civic offices, library and health hub",
+        use_class="E(g)(i)", address_line_1="Market Square", postcode="ZZ99 1CC", gia_sqm=Decimal("3650"),
+        nia_sqm=Decimal("3300"), boundary=rect(600, 470, 50, 40),
+        notes="Invented demonstration building, shared by four departments, the library and an NHS clinic "
+              "(One Public Estate). See Space and occupiers.")
     add("DM-S03", "Station Road multi-storey car park", "site", uprn=uprn(), holding_purpose="operational",
         tenure="freehold", occupation="council", use_description="Car park (420 spaces)",
         address_line_1="Station Road", postcode="ZZ99 1SR", gia_sqm=Decimal("11800"),
@@ -207,7 +213,7 @@ TITLES = [
 # Portfolios for the demonstration properties (parts of a property take its portfolio unless listed).
 DEMO_PORTFOLIOS = {
     "DM-E01": "Investment", "DM-E01-L01": "Highways and transport",
-    "DM-S01": "Investment", "DM-S02": "Corporate estate", "DM-S03": "Highways and transport",
+    "DM-S01": "Investment", "DM-S02": "Corporate estate", "DM-S30": "Corporate estate", "DM-S03": "Highways and transport",
     "DM-S04": "Waste and environmental services", "DM-S05": "Community", "DM-S06": "Surplus",
     "DM-S07": "Economic development", "DM-S08": "Parks and open spaces", "DM-S09": "Children's services",
     "DM-S10": "Farms and rural estate", "DM-S11": "Parks and open spaces",
@@ -231,7 +237,7 @@ SURVEYORS = {
 ASSIGNMENTS = {
     "DM-E01": "demo.amorgan", "DM-S11": "demo.amorgan", "DM-S07": "demo.amorgan",
     "DM-S01": "demo.pshah", "DM-S05": "demo.pshah", "DM-S08": "demo.pshah",
-    "DM-S02": "demo.ojones", "DM-S03": "demo.ojones", "DM-S04": "demo.ojones", "DM-S09": "demo.ojones",
+    "DM-S02": "demo.ojones", "DM-S30": "demo.ojones", "DM-S03": "demo.ojones", "DM-S04": "demo.ojones", "DM-S09": "demo.ojones",
     # DM-S06 and DM-S10 are left unassigned to show the "Unassigned" filter.
 }
 SURVEYORS.update(demo_north.SURVEYORS)
@@ -351,6 +357,9 @@ class Command(BaseCommand):
         valuation_demo.HISTORY.update(demo_north.VALUATION_HISTORY)
         valuation_demo.load()
         demo_north.load_valuations(date.today())
+        from apps.space import demo as space_demo
+
+        space_demo.load()
 
         self.load_access_areas()
         from apps.projects import demo as project_demo
@@ -485,6 +494,9 @@ class Command(BaseCommand):
         from apps.valuations import demo as valuation_demo
 
         valuation_demo.remove()
+        from apps.space import demo as space_demo
+
+        space_demo.remove()
         case_demo.remove()
         ledger_demo.remove()
         service_demo.remove()

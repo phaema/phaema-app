@@ -1,0 +1,13 @@
+{% extends "base.html" %}{% load i18n %}
+{% block title %}{% translate "Occupiers" %}{% endblock %}
+{% block help_page %}space{% endblock %}
+{% block content %}
+<h1 class="govuk-heading-xl govuk-!-margin-bottom-4">{% translate "Occupiers" %}</h1>
+{% include "space/_nav.html" %}
+<p class="govuk-body">{% translate "Figures for a directorate or department include the teams below it." %}</p>
+<h2 class="govuk-heading-m">{% translate "Council directorates, departments and teams" %}</h2>
+{% if council %}{% include "space/_occupier_rows.html" with items=council %}{% else %}<p class="govuk-body">{% translate "None yet." %}</p>{% endif %}
+<h2 class="govuk-heading-m">{% translate "Outside organisations sharing council buildings" %}</h2>
+<p class="govuk-body-s">{% translate "NHS, police, other public bodies and charities: the One Public Estate picture." %}</p>
+{% if outside %}{% include "space/_occupier_rows.html" with items=outside %}{% else %}<p class="govuk-body">{% translate "None yet." %}</p>{% endif %}
+{% endblock %}

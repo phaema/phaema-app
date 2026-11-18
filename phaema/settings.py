@@ -56,6 +56,7 @@ INSTALLED_APPS = [
     "apps.valuations",
     "apps.documents",
     "apps.projects",
+    "apps.space",
 ]
 
 MIDDLEWARE = [
@@ -69,6 +70,7 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "apps.core.middleware.CurrentUserMiddleware",
+    "apps.core.middleware.AccessEndedMiddleware",
     "apps.core.middleware.RoleRequiredMiddleware",
     "apps.core.middleware.TwoStepRequiredMiddleware",
 ]

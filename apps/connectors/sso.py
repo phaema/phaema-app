@@ -241,6 +241,10 @@ def find_user(claims):
     user = link.user
     if not user.is_active:
         raise SsoError("Your PHAEMA account is closed. Ask your PHAEMA administrator.")
+    from apps.core.outside import access_ended
+
+    if access_ended(user):
+        raise SsoError("Your access to PHAEMA has ended. Ask your PHAEMA administrator if you still need it.")
     changed = []
     for field, value in (("first_name", claims.get("given_name")), ("last_name", claims.get("family_name"))):
         if value and not getattr(user, field):

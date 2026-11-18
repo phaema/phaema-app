@@ -81,6 +81,13 @@ Record one of:
 - **Tenant holding over**: the agreement's status becomes Holding over and the event stays in progress until you
   record that the tenant has left or the lease has been renewed.
 
+### Options and rent-free periods
+
+An option to renew, extend, purchase or similar with a **must be exercised by** date creates an **Option deadline**
+event on that date. Reminders follow **option deadline reminders** in Module settings (180, 90, 30 and 7 days
+before, to start with). A **rent-free until** date creates a **Rent-free period ends** event, reminded like other
+events, so the first rent is demanded on time. Both follow changes to the agreement, like breaks.
+
 ### Other events
 
 Mark the event completed (or no longer needed) and add notes.

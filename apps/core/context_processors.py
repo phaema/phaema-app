@@ -36,7 +36,22 @@ def phaema(request):
         "brand_colour": getattr(modules, "brand_colour", "") if modules else "",
         "demo_site": settings.PHAEMA_DEMO_SITE,
         "demo_reset_hours": settings.PHAEMA_DEMO_RESET_HOURS,
+        "access_ends_soon": _ends_soon(user),
     }
+
+
+def _ends_soon(user):
+    """The access end date if it is within the warning period, for a banner."""
+    if user is None or not user.is_authenticated:
+        return None
+    from datetime import date, timedelta
+
+    from .outside import WARN_DAYS, ends_on
+
+    end = ends_on(user)
+    if end and date.today() <= end <= date.today() + timedelta(days=WARN_DAYS):
+        return end
+    return None
 
 
 class _lazy_cover:

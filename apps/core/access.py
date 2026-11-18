@@ -20,7 +20,7 @@ from .roles import ADMINISTRATORS, SURVEYORS, role_of
 
 FLAGS = {"ledger": "rent_ledger_enabled", "servicecharges": "service_charges_enabled",
          "maintenance": "maintenance_enabled", "compliance": "compliance_enabled",
-         "valuations": "valuation_enabled"}
+         "valuations": "valuation_enabled", "space": "space_enabled"}
 PATCH_MODULES = ("ledger", "servicecharges")
 
 

@@ -153,6 +153,24 @@ send email, set a new password for the person in **Manage data**, **Users**.
 *Manage data, where administrators add users and change settings.*
 
 
+## Outside users
+
+Consultants, contractors, tenants' agents and other people who are not council staff can be given a PHAEMA
+account for a limited time. On their user record, under **Staff details**, tick **Outside user** and add their
+**organisation**. Leave **Access ends** blank and PHAEMA fills it in from **Module settings**, **Security**
+("outside users' access lasts", six months to start with), or enter a date. Council staff can also be given an
+access end date, for example a temporary post.
+
+- The person can sign in up to and including the end date. From the next day, sign-in with a password, the
+  council's own account or the API is refused, and anyone still signed in is signed out at their next click and
+  told why.
+- In their last 14 days, they see a notice at the top of every page.
+- Each night the account is closed (Active unticked), and the change log records why.
+- The users list shows outside users, their organisation and end date, and can be filtered to them.
+
+To extend someone's access, change the date (and tick **Active** again if the account has already been closed).
+Give outside users the narrowest role and [access areas](#access-areas) their work needs.
+
 ## Supervisors
 
 Each surveyor needs a **supervisor and approver**, who approves their recommendations on [cases](cases.md#approvals).
