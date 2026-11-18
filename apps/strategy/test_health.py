@@ -147,3 +147,9 @@ def test_demo_health_checks(db):
     now = HealthCheck.objects.get(year=YEAR)
     assert now.status == "draft" and now.answers.exclude(answer="").count() == 15
     assert now.answers.exclude(action=None).exists()
+    # the demonstration site visit, finished, with differences still to decide (it shares this slow test)
+    from apps.cases import visit
+    from apps.cases.models import SiteVisit
+
+    sv = SiteVisit.objects.get(case__property__reference="DM-E01-U04")
+    assert sv.is_finished and visit.open_differences(sv)
