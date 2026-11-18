@@ -65,7 +65,7 @@
 <form method="post" enctype="multipart/form-data">{% csrf_token %}<input type="hidden" name="action" value="photos">
   <div class="govuk-form-group"><label class="govuk-label govuk-label--s" for="photo-files">{% translate "Take or choose photos" %}</label>
     <div class="govuk-hint" id="photo-hint">{% translate "On a phone this opens the camera. Photos are made smaller and their location data removed when they are saved." %}</div>
-    <input class="govuk-file-upload" id="photo-files" name="photos" type="file" accept="image/jpeg,image/png" capture="environment" multiple aria-describedby="photo-hint"></div>
+    <div class="govuk-drop-zone" data-module="govuk-file-upload" data-i18n.choose-files-button="{% translate 'Choose photos' %}" data-i18n.drop-instruction="{% translate 'or drop photos here' %}" data-i18n.no-file-chosen="{% translate 'No photos chosen' %}"><input class="govuk-file-upload" id="photo-files" name="photos" type="file" accept="image/jpeg,image/png" capture="environment" multiple aria-describedby="photo-hint"></div></div>
   <div class="govuk-form-group"><label class="govuk-label" for="photo-about">{% translate "About" %}</label>
     <select class="govuk-select" id="photo-about" name="answer"><option value="">{% translate "The visit generally" %}</option>{% for s in sections %}<optgroup label="{{ s.title }}">{% for a in s.answers %}<option value="{{ a.pk }}">{{ a.label|truncatechars:70 }}</option>{% endfor %}</optgroup>{% endfor %}</select></div>
   <div class="govuk-form-group"><label class="govuk-label" for="photo-caption">{% translate "Caption" %}</label><input class="govuk-input" id="photo-caption" name="caption" maxlength="200"></div>
