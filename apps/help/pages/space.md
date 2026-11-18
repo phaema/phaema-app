@@ -11,7 +11,9 @@ buildings. It records **who occupies each building, floor and room**, how much s
 
 Administrators switch it on in **Manage data**, **Module settings**, under Modules (**Space and costing**). It is
 opened for people by [access areas](users-and-roles.md#access-areas); the standard **Estates** area includes it.
-Switching it off hides every page and keeps the data. Showing costs by occupier is a later stage.
+Switching it off hides every page and keeps the data. A second tick, **Space and costing: show costs**, adds
+[costs by occupier](#costs-by-occupier). Costs are seen only by administrators and people whose access areas open
+**Space costs** (the standard **Finance** area does).
 
 ## Occupiers
 
@@ -79,11 +81,45 @@ in **Manage data**, **Public use measures**, and councils can add their own.
 **Flexibility but accountability.** Councils can change these lists, but every figure shows its source, who entered
 it and when, and every change is in the [change log](change-log.md).
 
+## Costs by occupier
+
+Costs are entered **per building per financial year** (April to March), one figure per **cost line**, each with its
+**source**. From the building's **Space and occupiers** page, select **Add a cost**. The cost lines are a list the
+council keeps in **Manage data**, **Cost lines**, starting with rent paid, business rates, energy, water, cleaning,
+security, repairs and maintenance, insurance, facilities management contracts, capital charges (off to start with)
+and **notional rent**.
+
+- **Notional rent** is what a freehold building would cost to rent, usually the valuer's estimate of market rent.
+  It is not cash, so it is tagged **Notional** and totals are shown both with and without it. It lets departments
+  in freehold buildings see a realistic cost of occupancy, comparable with leased space.
+- If no figures are entered for a year, the **running cost** and **business rates** on the property record are
+  used, marked "from the property record".
+- If no repairs figure is entered and the maintenance module is on, PHAEMA totals the maintenance jobs completed in
+  the year at the council's cost, marked "from the maintenance jobs".
+
+**How a building's cost is shared.** By **floor area held** unless the council chooses otherwise for the building
+(**Change how costs are shared**):
+
+| Method | How |
+|---|---|
+| By floor area held | Each occupier's own space plus its share of shared space, as a share of the building's whole floor area. The cost of **vacant space stays with the corporate landlord** and is shown as its own line. |
+| By headcount | People based in the building. An occupier with no headcount takes no share, and PHAEMA says so. |
+| Fixed percentages | Shares agreed with finance, entered per occupier. PHAEMA warns if they do not add up to 100% or an occupier has none. |
+
+Every table says which method was used. The figures **show** what occupation costs; they are not recharges, which
+stay with the council's finance system.
+
+**Costs by occupier** (from the Space and occupiers pages) totals each occupier across the estate for a year, with
+cost a square metre and a person, and the cost of vacant space. **Download for finance** gives an Excel workbook:
+by occupier, by building, every cost with its source, and a note on the method. Each occupier's own page shows its
+costs building by building; a directorate includes its departments.
+
 ## Who can change what
 
 | Role | Can |
 |---|---|
-| Administrators | Everything, including the occupiers list and public use measures. |
+| Administrators | Everything, including the occupiers list, public use measures and cost lines. |
+| People with Space costs open (for example Finance) | Enter building costs and choose how each building's costs are shared. |
 | Surveyors | Spaces, occupation, headcount and public use for the buildings they manage. |
 | Others with the module open | Look. |
 
@@ -92,4 +128,5 @@ it and when, and every change is in the [change log](change-log.md).
 On the demonstration site, open **Buildings**, **Space and occupiers**, then **DM-S30 Exampleton Civic Centre** (an
 invented building). Four departments, the library and an NHS clinic share three floors, with reception, meeting
 rooms and a kitchen shared. Planning and Customer Services share the second-floor office 60% and 20%, leaving 100 m²
-of it vacant. **Northfield Library** shows public use figures.
+of it vacant. **Northfield Library** shows public use figures. Signed in as the finance officer, both buildings show
+two years of costs with notional rent, and **Costs by occupier** shows the estate total.

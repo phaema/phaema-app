@@ -76,6 +76,8 @@
 <p class="govuk-body-s">{% translate "Shared space is shared out in proportion to the space each occupier holds. Use is people based here against desks or places in the spaces they hold; with hybrid working it overstates actual use until occupancy is surveyed." %}{% if has_external %} {% translate "Outside organisations sharing this building count towards One Public Estate." %}{% endif %}</p>
 {% endif %}
 
+{% if sharing %}{% include "space/_building_costs.html" %}{% endif %}
+
 {% if figures %}
 <h2 class="govuk-heading-m">{% translate "Public use" %}</h2>
 <table class="govuk-table">

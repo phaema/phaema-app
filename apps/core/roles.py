@@ -49,6 +49,10 @@ SURVEYOR_PERMISSIONS = {
     "space.add_occupation", "space.change_occupation", "space.delete_occupation",
     "space.add_headcount", "space.change_headcount", "space.delete_headcount",
     "space.add_usefigure", "space.change_usefigure", "space.delete_usefigure",
+    # Costs: surveyors with the space costs module open (for example finance officers) enter them.
+    "space.add_buildingcost", "space.change_buildingcost", "space.delete_buildingcost",
+    "space.add_costsharing", "space.change_costsharing",
+    "space.add_fixedshare", "space.change_fixedshare", "space.delete_fixedshare",
 }
 ADMIN_EXTRA = {
     "auth.view_user", "auth.add_user", "auth.change_user",

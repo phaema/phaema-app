@@ -281,7 +281,8 @@ class AccessArea(models.Model):
 
     MODULES = [("ledger", _("Rent ledger")), ("servicecharges", _("Service charges")),
                ("maintenance", _("Maintenance")), ("compliance", _("Compliance")),
-               ("valuations", _("Asset valuation")), ("space", _("Space and costing"))]
+               ("valuations", _("Asset valuation")), ("space", _("Space and costing")),
+               ("spacecosts", _("Space costs: costs by occupier"))]
 
     code = models.SlugField(_("code"), max_length=30, unique=True)
     name = models.CharField(_("name"), max_length=60)

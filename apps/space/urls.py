@@ -10,4 +10,5 @@ urlpatterns = [
     path("building/<int:pk>/", views.building, name="building"),
     path("occupiers/", views.occupiers, name="occupiers"),
     path("occupiers/<int:pk>/", views.occupier, name="occupier"),
+    path("costs/", views.estate_costs, name="costs"),
 ]

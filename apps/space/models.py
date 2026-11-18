@@ -310,3 +310,99 @@ class UseFigure(TimeStampedModel):
         if self.available:
             return (Decimal(str(self.value)) / Decimal(str(self.available)) * 100).quantize(Decimal("0.1"))
         return None
+
+
+# ---------------------------------------------------------------- costs (module level 2)
+
+def financial_year_label(year):
+    return f"{year}-{(year + 1) % 100:02d}"
+
+
+class CostLine(models.Model):
+    """A kind of building cost, from a list the council keeps: rates, energy, cleaning ... and notional rent."""
+
+    name = models.CharField(_("name"), max_length=100, unique=True)
+    notional = models.BooleanField(
+        _("notional (not cash)"), default=False,
+        help_text=_("For notional rent on freehold buildings: shown separately, and totals are given with and "
+                    "without it."))
+    from_jobs = models.BooleanField(
+        _("can be worked out from maintenance jobs"), default=False,
+        help_text=_("If no figure is entered for a year, use the council's cost of maintenance jobs completed in "
+                    "that year (when the maintenance module is on)."))
+    help = models.CharField(_("what to include"), max_length=255, blank=True)
+    active = models.BooleanField(_("active"), default=True)
+    order = models.PositiveSmallIntegerField(_("order"), default=0)
+
+    class Meta:
+        ordering = ["order", "name"]
+        verbose_name = _("cost line")
+        verbose_name_plural = _("cost lines")
+
+    def __str__(self):
+        return self.name
+
+
+class BuildingCost(TimeStampedModel):
+    building = models.ForeignKey(Property, verbose_name=_("building"), on_delete=models.CASCADE,
+                                 related_name="building_costs")
+    year_starting = models.PositiveSmallIntegerField(
+        _("financial year starting"), validators=[MinValueValidator(1990), MaxValueValidator(2200)],
+        help_text=_("2025 for 2025-26."))
+    line = models.ForeignKey(CostLine, verbose_name=_("cost"), on_delete=models.PROTECT, related_name="amounts")
+    amount = models.DecimalField(_("amount (£)"), max_digits=14, decimal_places=2,
+                                 validators=[MinValueValidator(0)])
+    source = models.CharField(_("source"), max_length=200, blank=True,
+                              help_text=_("Where the figure comes from, for example \"Finance ledger, cost centre "
+                                          "PL210\" or \"Valuer's estimate of rental value\"."))
+
+    class Meta:
+        ordering = ["building", "-year_starting", "line"]
+        constraints = [models.UniqueConstraint(fields=["building", "year_starting", "line"],
+                                               name="one_cost_line_per_year")]
+        verbose_name = _("building cost")
+        verbose_name_plural = _("building costs")
+
+    def __str__(self):
+        return f"{self.line} {financial_year_label(self.year_starting)}: £{self.amount:,.0f} ({self.building})"
+
+    def get_absolute_url(self):
+        return reverse("space:building", args=[self.building_id])
+
+
+class CostSharing(TimeStampedModel):
+    """How one building's costs are shared between its occupiers."""
+
+    class Method(models.TextChoices):
+        AREA = "area", _("By floor area held (shared space spread in proportion)")
+        HEADCOUNT = "headcount", _("By headcount")
+        FIXED = "fixed", _("Fixed percentages agreed with finance")
+
+    building = models.OneToOneField(Property, verbose_name=_("building"), on_delete=models.CASCADE,
+                                    related_name="cost_sharing")
+    method = models.CharField(_("share costs"), max_length=10, choices=Method.choices, default=Method.AREA)
+    notes = models.CharField(_("notes"), max_length=255, blank=True,
+                             help_text=_("For example who agreed fixed percentages, and when."))
+
+    class Meta:
+        verbose_name = _("cost sharing")
+        verbose_name_plural = _("cost sharing")
+
+    def __str__(self):
+        return f"{self.building}: {self.get_method_display()}"
+
+
+class FixedShare(models.Model):
+    sharing = models.ForeignKey(CostSharing, on_delete=models.CASCADE, related_name="shares")
+    occupier = models.ForeignKey(Occupier, verbose_name=_("occupier"), on_delete=models.PROTECT,
+                                 related_name="fixed_shares")
+    percent = models.DecimalField(_("share (%)"), max_digits=5, decimal_places=2,
+                                  validators=[MinValueValidator(0), MaxValueValidator(100)])
+
+    class Meta:
+        constraints = [models.UniqueConstraint(fields=["sharing", "occupier"], name="one_fixed_share_each")]
+        verbose_name = _("fixed share")
+        verbose_name_plural = _("fixed shares")
+
+    def __str__(self):
+        return f"{self.occupier}: {self.percent}%"
