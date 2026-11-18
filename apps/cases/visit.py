@@ -180,7 +180,7 @@ def build(case, user=None, today=None):
     if prop is None:
         return None
     today = today or date.today()
-    gathered = r.Gathered(prop, case)
+    gathered = r.Gathered(prop, case, user)
     items = list(case.case_type.checklist_items.all())
     out = [f"# Site visit sheet: {case.display_reference}", "",
            f"{case.case_type.name}: {case.title}. Prepared {r._date(today)}" + (f" by {r._name(user)}" if user else "")

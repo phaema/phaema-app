@@ -127,6 +127,42 @@
   </details>
   {% endif %}
 
+  {% if space is not None %}{% if space or object.property_type == "building" %}
+  <h2 class="govuk-heading-m" id="occupation">{% translate "Occupiers" %}</h2>
+  {% for b in space %}
+    {% if space|length > 1 or b.building.pk != object.pk %}<h3 class="govuk-heading-s"><a class="govuk-link" href="{{ b.building.get_absolute_url }}">{{ b.building.reference }} {{ b.building.name }}</a></h3>{% endif %}
+    <p class="govuk-body-s">{% blocktranslate count n=b.holdings|length %}{{ n }} occupier{% plural %}{{ n }} occupiers{% endblocktranslate %}{% if b.external %} ({% blocktranslate count n=b.external %}{{ n }} from outside the council{% plural %}{{ n }} from outside the council{% endblocktranslate %}){% endif %}{% if b.floor_area %} · {{ b.held|floatformat:0|intcomma }} {% translate "of" %} {{ b.floor_area|floatformat:0|intcomma }} m² {% translate "held" %}{% if b.vacant %}, {{ b.vacant|floatformat:0|intcomma }} m² {% translate "vacant" %}{% endif %}{% endif %}{% if b.utilisation is not None %} · {% translate "utilisation" %} {{ b.utilisation }}%{% endif %}</p>
+    {% if b.holdings %}
+    <table class="govuk-table">
+      <thead class="govuk-table__head"><tr class="govuk-table__row">
+        <th scope="col" class="govuk-table__header">{% translate "Occupier" %}</th>
+        <th scope="col" class="govuk-table__header govuk-table__header--numeric">m²</th>
+        <th scope="col" class="govuk-table__header govuk-table__header--numeric">{% translate "People" %}</th>
+        {% if b.sharing %}<th scope="col" class="govuk-table__header govuk-table__header--numeric">{% blocktranslate with year=b.sharing.label %}Cost {{ year }} £{% endblocktranslate %}</th>{% endif %}
+      </tr></thead>
+      <tbody class="govuk-table__body">
+      {% for h in b.holdings %}
+        <tr class="govuk-table__row">
+          <td class="govuk-table__cell"><a class="govuk-link" href="{% url 'space:occupier' h.occupier.pk %}">{{ h.occupier.name }}</a>{% if h.occupier.is_external %} <strong class="govuk-tag govuk-tag--blue">{% translate "Outside" %}</strong>{% endif %}</td>
+          <td class="govuk-table__cell govuk-table__cell--numeric">{{ h.total|floatformat:0|intcomma }}</td>
+          <td class="govuk-table__cell govuk-table__cell--numeric">{{ h.people|default_if_none:"–" }}</td>
+          {% if b.sharing %}<td class="govuk-table__cell govuk-table__cell--numeric">{% for sh in b.sharing.shares %}{% if sh.occupier and sh.occupier.pk == h.occupier.pk %}{{ sh.total|floatformat:0|intcomma }}{% endif %}{% endfor %}</td>{% endif %}
+        </tr>
+      {% endfor %}
+      {% if b.sharing %}{% for sh in b.sharing.shares %}{% if not sh.occupier %}
+        <tr class="govuk-table__row"><td class="govuk-table__cell" colspan="3">{{ sh.label }}</td><td class="govuk-table__cell govuk-table__cell--numeric">{{ sh.total|floatformat:0|intcomma }}</td></tr>
+      {% endif %}{% endfor %}{% endif %}
+      </tbody>
+    </table>
+    {% if b.sharing %}<p class="govuk-body-s">{% blocktranslate with year=b.sharing.label method=b.sharing.method_label|lower total=b.sharing.total|floatformat:0|intcomma %}Costs for {{ year }}: £{{ total }} in all. Method: {{ method }}.{% endblocktranslate %}</p>{% endif %}
+    {% endif %}
+    {% if b.warnings %}<p class="govuk-body-s"><strong class="govuk-tag govuk-tag--yellow">{% translate "Check" %}</strong> {{ b.warnings.0 }}</p>{% endif %}
+    <p class="govuk-body-s"><a class="govuk-link" href="{% url 'space:building' b.building.pk %}">{% translate "Floors, rooms and full details" %}</a></p>
+  {% empty %}
+    <p class="govuk-body">{% translate "No occupiers recorded against floors or rooms." %} <a class="govuk-link" href="{% url 'space:building' object.pk %}">{% translate "Record them" %}</a></p>
+  {% endfor %}
+  {% endif %}{% endif %}
+
   <h2 class="govuk-heading-m">{% translate "Leases and licences" %}</h2>
   {% if leases %}
   <table class="govuk-table">
