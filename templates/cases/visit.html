@@ -1,0 +1,82 @@
+{% extends "base.html" %}{% load i18n %}
+{% block title %}{% translate "Site visit" %}: {{ case.reference }}{% endblock %}
+{% block help_page %}cases{% endblock %}
+{% block breadcrumbs %}<nav class="govuk-breadcrumbs" aria-label="Breadcrumb"><ol class="govuk-breadcrumbs__list">
+  <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="{{ case.get_absolute_url }}">{{ case.reference }}</a></li>
+  <li class="govuk-breadcrumbs__list-item">{% translate "Site visit" %}</li></ol></nav>{% endblock %}
+{% block content %}
+<span class="govuk-caption-m">{{ case.reference }} · {{ case.case_type.name }}</span>
+<h1 class="govuk-heading-l">{% translate "Site visit" %}: {{ visit.property.name }}</h1>
+<p class="govuk-body">{% blocktranslate %}{{ answered }} of {{ total }} items answered.{% endblocktranslate %} <a class="govuk-link" href="#details">{% translate "Visit details" %}</a> · <a class="govuk-link" href="#photos">{% translate "Photos" %}</a> · <a class="govuk-link" href="#finish">{% translate "Finish" %}</a> · <a class="govuk-link" href="{% url 'cases:site-visit' case.pk %}">{% translate "Visit sheet" %}</a></p>
+<p class="govuk-body-s">{% translate "Save each section as you go: if the signal drops, only the section you are on is lost. You can leave and carry on later from the case page." %}</p>
+
+{% for s in sections %}
+<form method="post" id="s{{ s.key }}" class="phaema-visit-section">{% csrf_token %}<input type="hidden" name="action" value="section"><input type="hidden" name="section" value="{{ s.key }}">
+<h2 class="govuk-heading-m">{{ s.title }}</h2>
+{% regroup s.answers by heading as by_heading %}
+{% for group in by_heading %}{% if group.grouper %}<h3 class="govuk-heading-s govuk-!-margin-top-4">{{ group.grouper }}</h3>{% endif %}
+{% for a in group.list %}
+<div class="govuk-form-group govuk-!-margin-bottom-5">
+  {% if a.kind == "tick" %}
+  <div class="govuk-checkboxes govuk-checkboxes--small" data-module="govuk-checkboxes"><div class="govuk-checkboxes__item"><input class="govuk-checkboxes__input" id="v{{ a.pk }}" name="v{{ a.pk }}" type="checkbox" value="checked"{% if a.value %} checked{% endif %}><label class="govuk-label govuk-checkboxes__label govuk-label--s" for="v{{ a.pk }}">{{ a.label }}</label>{% if a.guidance %}<div class="govuk-hint govuk-checkboxes__hint">{{ a.guidance }}</div>{% endif %}</div></div>
+  {% elif a.kind == "yes_no" or a.kind == "choice" %}
+  <fieldset class="govuk-fieldset"><legend class="govuk-fieldset__legend govuk-fieldset__legend--s">{{ a.label }}</legend>
+    {% if a.guidance %}<div class="govuk-hint">{{ a.guidance }}</div>{% endif %}
+    {% if a.checks %}<div class="govuk-hint"><strong>{% translate "Recorded" %}:</strong> {{ a.recorded|default:_("not recorded") }}</div>{% endif %}
+    <div class="govuk-radios govuk-radios--small{% if a.kind == 'yes_no' %} govuk-radios--inline{% endif %}" data-module="govuk-radios">
+      {% if a.kind == "yes_no" %}
+      <div class="govuk-radios__item"><input class="govuk-radios__input" id="v{{ a.pk }}-y" name="v{{ a.pk }}" type="radio" value="yes"{% if a.value == "yes" %} checked{% endif %}><label class="govuk-label govuk-radios__label" for="v{{ a.pk }}-y">{% translate "Yes" %}</label></div>
+      <div class="govuk-radios__item"><input class="govuk-radios__input" id="v{{ a.pk }}-n" name="v{{ a.pk }}" type="radio" value="no"{% if a.value == "no" %} checked{% endif %}><label class="govuk-label govuk-radios__label" for="v{{ a.pk }}-n">{% translate "No" %}</label></div>
+      {% else %}{% for c in a.choice_list %}
+      <div class="govuk-radios__item"><input class="govuk-radios__input" id="v{{ a.pk }}-{{ forloop.counter }}" name="v{{ a.pk }}" type="radio" value="{{ c }}"{% if a.value == c %} checked{% endif %}><label class="govuk-label govuk-radios__label" for="v{{ a.pk }}-{{ forloop.counter }}">{{ c }}</label></div>{% endfor %}{% endif %}
+    </div></fieldset>
+  {% else %}
+  <label class="govuk-label govuk-label--s" for="v{{ a.pk }}">{{ a.label }}</label>
+  {% if a.guidance %}<div class="govuk-hint">{{ a.guidance }}</div>{% endif %}
+  {% if a.checks %}<div class="govuk-hint"><strong>{% translate "Recorded" %}:</strong> {{ a.recorded|default:_("not recorded") }}</div>{% endif %}
+  {% if a.kind == "number" %}<input class="govuk-input govuk-input--width-20" id="v{{ a.pk }}" name="v{{ a.pk }}" value="{{ a.value }}" inputmode="decimal">
+  {% else %}<textarea class="govuk-textarea govuk-!-margin-bottom-0" id="v{{ a.pk }}" name="v{{ a.pk }}" rows="2">{{ a.value }}</textarea>{% endif %}
+  {% endif %}
+  {% if a.kind == "tick" and a.checks %}<div class="govuk-hint govuk-!-margin-top-1"><strong>{% translate "Recorded" %}:</strong> {{ a.recorded|default:_("not recorded") }}</div>{% endif %}
+  <div class="govuk-!-margin-top-2"><label class="govuk-label govuk-!-font-size-16" for="n{{ a.pk }}">{% translate "Note" %}</label><input class="govuk-input" id="n{{ a.pk }}" name="n{{ a.pk }}" value="{{ a.note }}" maxlength="500"></div>
+  {% if a.photos.all %}<p class="govuk-body-s govuk-!-margin-top-1">{% blocktranslate count n=a.photos.all|length %}{{ n }} photo{% plural %}{{ n }} photos{% endblocktranslate %}</p>{% endif %}
+</div>
+{% endfor %}{% endfor %}
+<button class="govuk-button" data-module="govuk-button">{% translate "Save this section" %}</button>
+</form>
+{% empty %}<p class="govuk-body">{% translate "This type of case has no checklist. Record what you find in the visit details and photos below." %}</p>
+{% endfor %}
+
+<h2 class="govuk-heading-m" id="details">{% translate "Visit details" %}</h2>
+<form method="post">{% csrf_token %}<input type="hidden" name="action" value="details">
+  <div class="govuk-form-group"><label class="govuk-label" for="visited_on">{% translate "Date of visit" %}</label><input class="govuk-input govuk-input--width-10" id="visited_on" name="visited_on" type="date" value="{{ visit.visited_on|date:'Y-m-d' }}"></div>
+  <div class="govuk-form-group"><label class="govuk-label" for="time">{% translate "Time" %}</label><input class="govuk-input govuk-input--width-10" id="time" name="time" value="{{ visit.time }}"></div>
+  <div class="govuk-form-group"><label class="govuk-label" for="weather">{% translate "Weather" %}</label><input class="govuk-input" id="weather" name="weather" value="{{ visit.weather }}"></div>
+  <div class="govuk-form-group"><label class="govuk-label" for="people_met">{% translate "People met" %}</label><input class="govuk-input" id="people_met" name="people_met" value="{{ visit.people_met }}"></div>
+  <div class="govuk-form-group"><label class="govuk-label" for="notes">{% translate "General notes" %}</label><textarea class="govuk-textarea" id="notes" name="notes" rows="4">{{ visit.notes }}</textarea></div>
+  <div class="govuk-form-group"><label class="govuk-label" for="follow_up">{% translate "To follow up" %}</label><textarea class="govuk-textarea" id="follow_up" name="follow_up" rows="3">{{ visit.follow_up }}</textarea></div>
+  <button class="govuk-button" data-module="govuk-button">{% translate "Save the details" %}</button>
+</form>
+
+<h2 class="govuk-heading-m" id="photos">{% translate "Photos" %}</h2>
+{% if photos %}<ul class="phaema-visit-photos">{% for p in photos %}<li><a href="{{ p.image.url }}"><img src="{{ p.image.url }}" alt="{{ p.caption|default:_('Site visit photo') }}" loading="lazy"></a>
+  <span class="govuk-body-s">{{ p.caption|default:"–" }}{% if p.property_photo_id %} · {% translate "also on the property" %}{% endif %}</span>
+  <form method="post">{% csrf_token %}<input type="hidden" name="action" value="delete_photo"><input type="hidden" name="photo" value="{{ p.pk }}"><button class="govuk-button govuk-button--secondary govuk-!-margin-bottom-0 govuk-!-font-size-14" data-module="govuk-button">{% translate "Remove" %}</button></form></li>{% endfor %}</ul>{% endif %}
+<form method="post" enctype="multipart/form-data">{% csrf_token %}<input type="hidden" name="action" value="photos">
+  <div class="govuk-form-group"><label class="govuk-label govuk-label--s" for="photo-files">{% translate "Take or choose photos" %}</label>
+    <div class="govuk-hint" id="photo-hint">{% translate "On a phone this opens the camera. Photos are made smaller and their location data removed when they are saved." %}</div>
+    <input class="govuk-file-upload" id="photo-files" name="photos" type="file" accept="image/jpeg,image/png" capture="environment" multiple aria-describedby="photo-hint"></div>
+  <div class="govuk-form-group"><label class="govuk-label" for="photo-about">{% translate "About" %}</label>
+    <select class="govuk-select" id="photo-about" name="answer"><option value="">{% translate "The visit generally" %}</option>{% for s in sections %}<optgroup label="{{ s.title }}">{% for a in s.answers %}<option value="{{ a.pk }}">{{ a.label|truncatechars:70 }}</option>{% endfor %}</optgroup>{% endfor %}</select></div>
+  <div class="govuk-form-group"><label class="govuk-label" for="photo-caption">{% translate "Caption" %}</label><input class="govuk-input" id="photo-caption" name="caption" maxlength="200"></div>
+  <div class="govuk-checkboxes govuk-checkboxes--small govuk-!-margin-bottom-4" data-module="govuk-checkboxes"><div class="govuk-checkboxes__item"><input class="govuk-checkboxes__input" id="to-property" name="to_property" type="checkbox" value="1"><label class="govuk-label govuk-checkboxes__label" for="to-property">{% translate "Also add to the property's photos" %}</label></div></div>
+  <button class="govuk-button" data-module="govuk-button">{% translate "Add photos" %}</button>
+</form>
+
+<h2 class="govuk-heading-m" id="finish">{% translate "Finish the visit" %}</h2>
+<p class="govuk-body">{% translate "Save any section you have changed first. A finished visit cannot be changed, except by an administrator, and is noted on the case." %}</p>
+<div class="govuk-button-group">
+<form method="post">{% csrf_token %}<button class="govuk-button govuk-button--warning" data-module="govuk-button" name="action" value="finish">{% translate "Finish the visit" %}</button></form>
+<a class="govuk-link" href="{% url 'cases:visit-record' case.pk visit.pk %}">{% translate "See the record so far" %}</a>
+</div>
+{% endblock %}

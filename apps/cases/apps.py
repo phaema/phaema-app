@@ -15,10 +15,10 @@ class CasesConfig(AppConfig):
         from apps.core.models import StaffProfile
 
         from .models import (Approval, Case, CaseDocument, CaseNote, CaseTask, CaseType, CaseTypeChecklistItem,
-                             CaseTypeTask, Correspondence)
+                             CaseTypeTask, Correspondence, SiteVisit, SiteVisitAnswer, SiteVisitPhoto)
 
         for model in (Approval, Case, CaseDocument, CaseNote, CaseTask, CaseType, CaseTypeChecklistItem, CaseTypeTask,
-                      Correspondence,
+                      Correspondence, SiteVisit, SiteVisitAnswer, SiteVisitPhoto,
                       StaffProfile):
             audit.register(model)
 

@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 from django.urls import path
 
-from . import views
+from . import views, visit_views
 
 app_name = "cases"
 
@@ -10,4 +10,7 @@ urlpatterns = [
     path("new/", views.case_new, name="new"),
     path("<int:pk>/", views.case_detail, name="detail"),
     path("<int:pk>/site-visit/", views.site_visit_sheet, name="site-visit"),
+    path("<int:pk>/visits/start/", visit_views.visit_start, name="visit-start"),
+    path("<int:pk>/visits/<int:visit_pk>/", visit_views.visit_page, name="visit"),
+    path("<int:pk>/visits/<int:visit_pk>/record/", visit_views.visit_record, name="visit-record"),
 ]

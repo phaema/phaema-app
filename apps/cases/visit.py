@@ -211,3 +211,114 @@ def build(case, user=None, today=None):
         out += _checklist(items, prop, gathered.parts)
     out += _write_in(["Notes", "Measurements", "To follow up"]) + [""]
     return "\n".join(out)
+
+
+# ------------------------------------------------------------------ level B: a visit filled in and saved
+
+def _plan(case, prop, gathered):
+    """[(building or None, [items])]: the checklist as it is answered, a group for the visit as a whole and, on a
+    site with several buildings, a group for each building."""
+    items = list(case.case_type.checklist_items.all())
+    buildings = buildings_of(prop, gathered.parts)
+    if items and (len(buildings) > 1 or (buildings and buildings[0].pk != prop.pk)):
+        whole = [i for i in items if not i.each_building]
+        each = [i for i in items if i.each_building]
+        groups = [(None, whole)] if whole else []
+        groups += [(b, each) for b in buildings] if each else []
+        return groups
+    return [(None, items)] if items else []
+
+
+def start_visit(case, user, today=None):
+    """Start a visit for the case: one answer for each checklist item (and building), with the recorded value as
+    it stands today."""
+    from .models import SiteVisit, SiteVisitAnswer
+
+    prop = case.main_property
+    if prop is None:
+        return None
+    gathered = r.Gathered(prop, case, user)
+    visit = SiteVisit.objects.create(case=case, property=prop, visited_by=user, visited_on=today or date.today(),
+                                     created_by=user)
+    answers, n = [], 0
+    for building, items in _plan(case, prop, gathered):
+        for item in items:
+            n += 1
+            value = recorded(building, item.checks) if building else recorded(prop, item.checks, gathered.parts)
+            answers.append(SiteVisitAnswer(
+                visit=visit, item=item, building=building, heading=item.heading, label=item.label,
+                guidance=item.guidance, kind=item.kind, choices=item.choices, checks=item.checks,
+                recorded=(value or "")[:400], order=n))
+    SiteVisitAnswer.objects.bulk_create(answers)
+    return visit
+
+
+def visit_sections(visit):
+    """[{"key", "title", "answers"}]: the answers grouped as they are filled in, a section for the visit as a whole
+    and one for each building. Each section is saved on its own, so a dropped connection loses little."""
+    groups = {}
+    for a in visit.answers.select_related("building").prefetch_related("photos"):
+        key = str(a.building_id or 0)
+        if key not in groups:
+            title = f"{a.building.reference} {a.building.name}" if a.building_id else (
+                f"The visit as a whole: {visit.property.name}" if visit.answers.exclude(building=None).exists()
+                else visit.property.name)
+            groups[key] = {"key": key, "title": title, "answers": []}
+        groups[key]["answers"].append(a)
+    return list(groups.values())
+
+
+def answer_from(post, a):
+    """The value for one answer from a submitted form, checked against its kind."""
+    raw = (post.get(f"v{a.pk}") or "").strip()
+    if a.kind == "tick":
+        return "checked" if raw else ""
+    if a.kind == "yes_no":
+        return raw if raw in ("yes", "no") else ""
+    if a.kind == "choice":
+        return raw if raw in a.choice_list() else ""
+    return raw[:2000]
+
+
+def progress(visit):
+    """(answered, total)."""
+    answers = list(visit.answers.values_list("value", flat=True))
+    return sum(1 for v in answers if v), len(answers)
+
+
+def build_record(visit, user=None, today=None):
+    """The finished (or draft) visit as markup: the record of the inspection."""
+    case = visit.case
+    today = today or date.today()
+    answered, total = progress(visit)
+    state = (f"Finished {r._date(visit.finished_on)}" if visit.is_finished
+             else f"In progress at {r._date(today)}")
+    out = [f"# Site visit record: {case.display_reference}", "",
+           f"{case.case_type.name}: {case.title}. {state}.", ""]
+    facts = [("Property", f"{visit.property.reference} {visit.property.name}"), ("Address", visit.property.address),
+             ("Visited by", r._name(visit.visited_by)), ("Date", r._date(visit.visited_on)), ("Time", visit.time),
+             ("Weather", visit.weather), ("People met", visit.people_met),
+             ("Checklist", f"{answered} of {total} items answered"), ("Photos", str(visit.photos.count()))]
+    out += r._table([(k, v) for k, v in facts if r._cell(v)]) + [""]
+    for section in visit_sections(visit):
+        out += [f"# {section['title']}", ""]
+        heading = None
+        for a in section["answers"]:
+            if a.heading != heading or heading is None:
+                if heading is not None:
+                    out.append("")
+                heading = a.heading
+                out.append(r._head(a.heading or "Check", "Recorded", "Found on site", "Note"))
+            out.append(r._row(a.label, a.recorded if a.checks else "", a.shown(), a.note))
+        out.append("")
+    if visit.notes:
+        out += ["# General notes", ""] + r._para(visit.notes)
+    if visit.follow_up:
+        out += ["# To follow up", ""] + r._para(visit.follow_up)
+    photos = list(visit.photos.select_related("answer"))
+    if photos:
+        out += ["# Photos", "", r._head("Photo", "Caption", "About", "Also on the property")]
+        out += [r._row(str(n), p.caption, p.answer.label if p.answer_id else "The visit",
+                       "Yes" if p.property_photo_id else "No") for n, p in enumerate(photos, start=1)]
+        out.append("")
+    return "\n".join(out)

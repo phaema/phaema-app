@@ -189,3 +189,7 @@ html.phaema-text-largest { font-size: 150%; }
   .phaema-pdf__thumb-page { width: 70px; }
 }
 @media print { .phaema-pdf__bar, .phaema-pdf__thumbs, .phaema-pdf__head .govuk-back-link { display: none; } }
+/* Site visits: photos in a grid that suits a phone */
+.phaema-visit-photos { list-style: none; padding: 0; margin: 0 0 20px; display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 15px; }
+.phaema-visit-photos img { width: 100%; height: 120px; object-fit: cover; display: block; margin-bottom: 5px; }
+.phaema-visit-section { border-bottom: 1px solid #b1b4b6; margin-bottom: 30px; }

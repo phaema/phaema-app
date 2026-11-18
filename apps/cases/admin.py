@@ -6,7 +6,7 @@ from apps.core.admin_roles import RoleAdminMixin
 
 from apps.properties.report import PARTS
 
-from .models import STAGE_ORDER, Case, CaseType, CaseTypeChecklistItem, CaseTypeTask, Stage
+from .models import STAGE_ORDER, Case, CaseType, CaseTypeChecklistItem, CaseTypeTask, SiteVisit, SiteVisitAnswer, Stage
 
 
 class CaseTypeForm(forms.ModelForm):
@@ -63,3 +63,26 @@ class CaseAdmin(RoleAdminMixin, admin.ModelAdmin):
 
     def view_on_site(self, obj):
         return obj.get_absolute_url()
+
+
+class SiteVisitAnswerInline(admin.TabularInline):
+    model = SiteVisitAnswer
+    extra = 0
+    fields = ("building", "heading", "label", "recorded", "value", "note")
+    readonly_fields = ("building", "heading", "label", "recorded")
+    can_delete = False
+
+    def has_add_permission(self, request, obj=None):
+        return False
+
+
+@admin.register(SiteVisit)
+class SiteVisitAdmin(admin.ModelAdmin):
+    """Visits made for cases. Fill them in from the case page; here an administrator can correct a finished visit."""
+
+    list_display = ("__str__", "property", "visited_by", "status")
+    list_filter = ("status",)
+    raw_id_fields = ("case", "property")
+    fields = ("case", "property", "visited_by", "visited_on", "time", "weather", "people_met", "notes", "follow_up",
+              "status", "finished_on")
+    inlines = [SiteVisitAnswerInline]

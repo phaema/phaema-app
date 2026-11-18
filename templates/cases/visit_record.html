@@ -1,0 +1,16 @@
+{% extends "base.html" %}{% load i18n %}
+{% block title %}{% translate "Site visit record" %}: {{ case.reference }}{% endblock %}
+{% block help_page %}cases{% endblock %}
+{% block breadcrumbs %}<nav class="govuk-breadcrumbs govuk-!-display-none-print" aria-label="Breadcrumb"><ol class="govuk-breadcrumbs__list">
+  <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="{{ case.get_absolute_url }}">{{ case.reference }}</a></li>
+  <li class="govuk-breadcrumbs__list-item">{% translate "Site visit record" %}</li></ol></nav>{% endblock %}
+{% block content %}
+<div class="govuk-!-display-none-print"><div class="govuk-button-group">
+  <a class="govuk-button" data-module="govuk-button" role="button" draggable="false" href="?format=docx">{% translate "Download as Word" %}</a>
+  <a class="govuk-button govuk-button--secondary" data-module="govuk-button" role="button" draggable="false" href="javascript:window.print()">{% translate "Print" %}</a>
+  {% if can_fill_in %}<a class="govuk-link" href="{{ visit.get_absolute_url }}">{% translate "Carry on filling it in" %}</a>{% endif %}
+  {% if is_admin and visit.is_finished %}<form method="post" action="{{ visit.get_absolute_url }}">{% csrf_token %}<button class="govuk-button govuk-button--warning" data-module="govuk-button" name="action" value="reopen">{% translate "Reopen" %}</button></form>{% endif %}
+</div></div>
+<div class="phaema-report">{{ body }}</div>
+{% if photos %}<ul class="phaema-visit-photos">{% for p in photos %}<li><a href="{{ p.image.url }}"><img src="{{ p.image.url }}" alt="{{ p.caption|default:_('Site visit photo') }}" loading="lazy"></a><span class="govuk-body-s">{{ forloop.counter }}. {{ p.caption|default:"–" }}</span></li>{% endfor %}</ul>{% endif %}
+{% endblock %}
