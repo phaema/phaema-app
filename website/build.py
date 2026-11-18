@@ -48,6 +48,8 @@ BRINGS_TOGETHER = [
      "building."),
     ("Asset valuation", "The rolling programme, Red Book records and the year-end schedule for finance."),
     ("Projects, acquisitions and disposals", "Gateways, budgets, risks and the register changes completion needs."),
+    ("Space and occupation costs", "Who occupies each operational building, floor by floor, how well the space is "
+     "used, and what occupation costs each department."),
     ("Rents and service charges, if wanted", "Optional ledgers that feed the council's finance system, or leave this "
      "to the systems it already has."),
 ]
@@ -125,8 +127,13 @@ CAPABILITIES = [
      "Thread information and site hazards shown before every visit."),
     ("Asset valuation", "The rolling valuation programme, internal or external valuers, Red Book records, impairment "
      "prompts, an initial valuation report drawn from the property record, and the year-end schedule for finance."),
+    ("Space and occupiers", "Departments, teams and outside organisations such as the NHS in each building, floor "
+     "and room, with a stacking plan, headcount and use of space, and each occupier's share of the building's "
+     "costs, including a notional rent for freehold buildings. The property report sets it out for checking on "
+     "site."),
     ("People and access", "Four roles, access areas that decide who sees each module, supervision chains, cover for "
-     "absence and a hand-over of a leaver's work in one step."),
+     "absence, accounts for outside consultants that end on a set date, and a hand-over of a leaver's work in one "
+     "step."),
     ("Reports and open data", "Ready-made and custom reports to Excel and CSV, the Transparency Code land and assets "
      "list, an open API and a change log of every edit. The whole estate can be exported in the layout of the "
      "Government Property Data Standard, with a table of how complete the records are."),
@@ -156,6 +163,7 @@ ROADMAP = [
         "Rent ledger and service charges",
         "Maintenance, compliance and the Golden Thread",
         "Asset valuation",
+        "Space, occupation and costs by occupier",
         "Projects with gateways, budgets, risks and completion",
         "Access areas, cover and hand-over of work",
         "Reports, imports, open data and API",
@@ -339,7 +347,7 @@ BODY = r'''<div class="top"><div class="wrap top__inner">
 
   <div class="wrap band">
     <h2>Where the project is</h2>
-    <p class="band__lead">All twelve modules are built and documented, with about 240 automated tests, a user manual, a technical manual and e-learning for five roles. A public test site is running. Next come testing by pilot councils, independent security and accessibility checks, and connectors to the systems councils already use.</p>
+    <p class="band__lead">All thirteen modules are built and documented, with about 450 automated tests, a user manual, a technical manual and e-learning for five roles. A public test site is running. Next come testing by pilot councils, independent security and accessibility checks, and connectors to the systems councils already use.</p>
     <p><a href="#roadmap">See the roadmap</a></p>
   </div>
 
@@ -381,7 +389,7 @@ __WAYS__
 <section class="view" id="capabilities" aria-labelledby="h-capabilities">
   <div class="wrap">
     <h2 id="h-capabilities">What PHAEMA does</h2>
-    <p class="lede">The optional modules (rents, service charges, maintenance, compliance and valuation) can each be switched on when a council is ready, or left to the systems it already has.</p>
+    <p class="lede">The optional modules (rents, service charges, maintenance, compliance, valuation, and space and costing) can each be switched on when a council is ready, or left to the systems it already has.</p>
     <div class="modules">
 __CAPABILITIES__
     </div>

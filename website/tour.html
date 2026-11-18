@@ -176,12 +176,13 @@ p { margin: 0 0 .9em; max-width: 60ch; }
     ["valuation", "Asset valuation", "The rolling programme", 1],
     ["repairs", "Maintenance", "Repairs and works orders", 1],
     ["compliance", "Compliance", "Certificates and the Golden Thread", 1],
+    ["space", "Space and occupiers", "Who occupies what, and what it costs", 1],
     ["reports", "Reports and open data", "Reports, exports and the API"]
   ];
   var S = [
     {id: "welcome", ch: "intro", t: 9, html:
       '<div class="scene"><div class="scene__text"><p class="eyebrow">Open-source estate management for councils</p>' +
-      '<h1>PHAEMA</h1><p class="lede">Property Holding and Estate Management Application: one open system for a council&#8217;s property, leases, casework, projects, rents, repairs, compliance and valuations.</p>' +
+      '<h1>PHAEMA</h1><p class="lede">Property Holding and Estate Management Application: one open system for a council&#8217;s property, leases, casework, projects, rents, repairs, compliance, valuations and the use of its buildings.</p>' +
       '<p>No licence fee, built in the open, and designed by a chartered surveyor around how estates teams actually work.</p>' +
       '<div class="cta"><a class="button" href="#hub">Explore the modules</a><a class="button button--quiet" href="#for-councils">For councils</a></div></div>' +
       shot("my-work", "A surveyor&#8217;s My work page: overdue items, events in the next 90 days, open cases and managed properties.", "My work: each surveyor&#8217;s day on one page.") + '</div>'},
@@ -192,7 +193,7 @@ p { margin: 0 0 .9em; max-width: 60ch; }
       '<div><h3>Costly lock-in</h3><p>Each council pays separately for proprietary systems, and changing supplier means changing system.</p></div></div>' +
       rel([["hub", "How PHAEMA joins it up"], ["why-open", "Why open source helps"]]) + '</div></div>'},
     {id: "hub", ch: "intro", t: 14, html:
-      '<div class="scene scene--text" style="max-width:none"><div class="scene__text"><p class="eyebrow">One property record at the centre</p><h2>Twelve parts, one system. Choose one to jump to it.</h2>' +
+      '<div class="scene scene--text" style="max-width:none"><div class="scene__text"><p class="eyebrow">One property record at the centre</p><h2>Thirteen parts, one system. Choose one to jump to it.</h2>' +
       '<div class="hub">' + MODULES.map(function (m) {
         return '<a class="tile' + (m[3] ? ' tile--opt' : '') + '" href="#' + m[0] + '"><b>' + m[1] + '</b><small>' + m[2] + '</small></a>';
       }).join('') + '</div><p class="key"><i></i>Optional modules: each council switches them on when it is ready, or keeps its existing system.</p></div></div>'},
@@ -273,6 +274,11 @@ p { margin: 0 0 .9em; max-width: 60ch; }
       '<p>CIPFA asset classes, a rolling programme, internal or external valuers, Red Book records, impairment prompts, audit queries and the year-end schedule for finance. Each valuation case has an initial valuation report drawn from the property record: construction, floor areas, tenancies and cases in hand.</p>' +
       rel([["reports", "Year-end reports"], ["projects", "Assets from projects"]]) + '</div>' +
       shot("valuation-1", "The valuation programme listing this year&#8217;s valuations and their status.", "This year&#8217;s programme.") + '</div>'},
+    {id: "space-costs", ch: "money", t: 10, html:
+      '<div class="scene"><div class="scene__text"><p class="eyebrow">Occupation costs &middot; optional</p><h2>What each department&#8217;s space really costs</h2>' +
+      '<p>Each building&#8217;s costs, from rates and energy to a notional rent for freehold buildings, are shared between its occupiers by floor area, headcount or agreed percentages. Vacant space stays with the corporate landlord. Finance gets a workbook; departments see a realistic cost of occupancy.</p>' +
+      rel([["space", "Who occupies what"], ["valuation", "Where notional rent comes from"], ["reports", "Reports"]]) + '</div>' +
+      shot("space-costs", "Costs by occupier for the year: each department&#8217;s area, cash cost, cost a square metre and cost a person.", "Costs by occupier.") + '</div>'},
     {id: "repairs", ch: "buildings", t: 10, html:
       '<div class="scene"><div class="scene__text"><p class="eyebrow">Maintenance &middot; optional</p><h2>Repairs that know the lease</h2>' +
       '<p>Who pays is worked out from the lease repairing terms. Works orders go to contractors, with approval above a set value, and recharges reach the rent account. Site hazards show before anyone visits.</p>' +
@@ -283,6 +289,12 @@ p { margin: 0 0 .9em; max-width: 60ch; }
       '<p>Fire, gas, electrical, water, asbestos, lift and EPC certificates, each with remedial actions. Higher-risk buildings are screened for their Golden Thread tier and keep building information with versions.</p>' +
       rel([["repairs", "Raise a repair"], ["register", "The building"]]) + '</div>' +
       shot("compliance-2", "A building&#8217;s certificates with their status and remedial actions.", "A building&#8217;s certificates.") + '</div>'},
+    {id: "space", ch: "buildings", t: 11, html:
+      '<div class="scene"><div class="scene__text"><p class="eyebrow">Space and occupiers &middot; optional</p><h2>Who occupies each building, floor by floor</h2>' +
+      '<p>A stacking plan shows each department, team and outside organisation, such as the NHS, on every floor, with shared and vacant space. Headcount against desks shows how well the space is used: the evidence for an estates strategy to stay, share, remodel or release.</p>' +
+      '<p>The property report sets the occupation out floor by floor, ready to check on site.</p>' +
+      rel([["space-costs", "What it costs"], ["register", "The building"], ["site-visit", "Checking on site"]]) + '</div>' +
+      shot("space", "A stacking plan of an invented civic centre: three floors, with each occupier a coloured block sized by its area, shared space grey and vacant space hatched.", "The stacking plan.") + '</div>'},
     {id: "reports", ch: "control", t: 10, html:
       '<div class="scene"><div class="scene__text"><p class="eyebrow">Reports and open data</p><h2>Your data, out whenever you want it</h2>' +
       '<p>Ready-made and custom reports to Excel and CSV, the Transparency Code land and assets list in one click, imports from spreadsheets, an open API and a change log of every edit.</p>' +
@@ -290,7 +302,7 @@ p { margin: 0 0 .9em; max-width: 60ch; }
       shot("reports-3", "Building a custom report by choosing records, columns and filters.", "Build your own report.") + '</div>'},
     {id: "people", ch: "control", t: 10, html:
       '<div class="scene"><div class="scene__text"><p class="eyebrow">People and access</p><h2>The right people see the right things</h2>' +
-      '<p>Four roles decide what people can change; access areas decide which modules they open. Supervision chains, cover for absence, and handing a leaver&#8217;s work to colleagues in one step.</p>' +
+      '<p>Four roles decide what people can change; access areas decide which modules they open. Supervision chains, cover for absence, accounts for outside consultants that end on a set date, and handing a leaver&#8217;s work to colleagues in one step.</p>' +
       rel([["security", "Security and assurance"], ["cases", "Supervisor approval"], ["reports", "The change log"]]) + '</div>' +
       shot("users-4", "Hand over work: one person&#8217;s properties, cases and tasks ready to pass to a colleague.", "Hand over work.") + '</div>'},
     {id: "security", ch: "assurance", t: 13, html:
