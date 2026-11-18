@@ -152,6 +152,29 @@ sub-category, asset strategy, suitability and strategy review.
 The report builder has columns for the sub-category, asset strategy, when it was decided, which property it follows,
 the strategy review date and the suitability grade.
 
+## The property events pipeline
+
+**Property events pipeline** (on Reports and the Estate strategy page) lists dated property events for the next
+five financial years (April to March), with anything overdue first. It uses records PHAEMA already holds; nothing
+extra needs entering. There are five sections:
+
+| Section | What it lists |
+|---|---|
+| Council as landlord | Rent reviews, breaks, break notice deadlines, options and expiries on agreements the council has let out, with the rent received. |
+| Council as tenant | The same for agreements under which the council holds property, with the rent paid. Each one is a decision to stay, move or leave. |
+| Disposals | Expected disposal dates and values on properties; disposal projects with their forecast receipts; properties given an asset strategy that leads to disposal but with no expected date yet (under "No date yet"). |
+| Acquisitions | Acquisition projects with their target dates and forecast cost. |
+| Strategy reviews due | Each property's strategy review date: the rolling Asset Challenge programme. |
+
+A key figures table at the top counts the events in each year, with the values. A rent review whose date has passed
+but which is not settled, or an agreement past its expiry but not recorded as ended, shows as overdue. Break,
+notice and option dates that have passed are left out, because they have lapsed.
+
+A property that is part of a disposal project is counted once, under the project, so receipts are not added twice.
+Confidential projects appear only for people who can see them, and project budgets only for people who can see the
+budget. Choose a portfolio to see only its properties. Download the pipeline as Excel (one sheet per section) or as
+Word for a committee report.
+
 ## Who can do what
 
 | Role | Can |

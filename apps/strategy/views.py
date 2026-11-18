@@ -161,3 +161,47 @@ def board_report(request):
         return response
     return render(request, "strategy/report.html", {
         "strategy": strategy, "body": mark_safe(doc_render.to_html(text, merge.context(user=request.user)))})  # noqa: S308
+
+
+@login_required
+def pipeline_report(request):
+    """The property events pipeline: lease events, disposals, acquisitions and strategy reviews, five years ahead."""
+    from apps.core.roles import has_role
+    from apps.properties.models import Portfolio
+
+    from . import pipeline
+
+    if not has_role(request.user):
+        raise PermissionDenied
+    portfolio = None
+    if request.GET.get("portfolio", "").isdigit():
+        portfolio = Portfolio.objects.filter(pk=int(request.GET["portfolio"])).first()
+    pipe = pipeline.build(request.user, portfolio=portfolio)
+    stamp = f"{pipe.today:%Y-%m-%d}"
+    fmt = request.GET.get("format")
+    if fmt == "xlsx":
+        response = HttpResponse(pipeline.to_xlsx(pipe),
+                                content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+        response["Content-Disposition"] = f'attachment; filename="Property events pipeline {stamp}.xlsx"'
+        return response
+    if fmt == "docx":
+        from types import SimpleNamespace
+
+        from apps.documents import merge
+        from apps.documents import render as doc_render
+
+        data = doc_render.to_docx(SimpleNamespace(letterhead=True, prescribed_form=""),
+                                  pipeline.to_markup(pipe, request.user), merge.context(user=request.user))
+        response = HttpResponse(
+            data, content_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document")
+        response["Content-Disposition"] = f'attachment; filename="Property events pipeline {stamp}.docx"'
+        return response
+    sections = [{"key": key, "title": title, "note": note, "groups": pipe.grouped(key),
+                 "value_label": pipeline.VALUE_LABELS[key], "beyond": pipe.beyond.get(key, 0)}
+                for key, title, note in pipeline.SECTIONS]
+    query = f"portfolio={portfolio.pk}&" if portfolio else ""
+    return render(request, "strategy/pipeline.html", {
+        "pipe": pipe, "sections": sections, "summary": pipe.summary(),
+        "bucket_labels": [pipe.bucket_label(b) for b in pipe.buckets()],
+        "first_year": pipe.bucket_label(pipe.years[0]), "last_year": pipe.bucket_label(pipe.years[-1]),
+        "portfolios": Portfolio.objects.all(), "portfolio": portfolio, "query": query})

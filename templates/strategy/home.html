@@ -10,6 +10,7 @@
 <div class="govuk-button-group">
   <a class="govuk-button" data-module="govuk-button" role="button" draggable="false" href="{% url 'strategy:report' %}?strategy={{ strategy.pk }}">{% translate "Board report" %}</a>
   <a class="govuk-link" href="{% url 'properties:estate-strategy' %}">{% translate "The estate at a glance: purposes, asset strategies, reviews and suitability" %}</a>
+  <a class="govuk-link" href="{% url 'strategy:pipeline' %}">{% translate "Property events pipeline" %}</a>
   {% if is_admin %}<a class="govuk-link" href="{% url 'admin:strategy_estatestrategy_change' strategy.pk %}">{% translate "Change the strategy and its objectives" %}</a>{% endif %}
 </div>
 {% if principles %}<details class="govuk-details" data-module="govuk-details"><summary class="govuk-details__summary"><span class="govuk-details__summary-text">{% translate "Policy principles" %}</span></summary><div class="govuk-details__text"><ol class="govuk-list govuk-list--number">{% for p in principles %}<li>{{ p }}</li>{% endfor %}</ol></div></details>{% endif %}
@@ -31,6 +32,7 @@
 <p class="govuk-body">{% translate "No estate strategy has been recorded yet. Record the council's asset management strategy, its period and its objectives; then link projects, cases and other actions to each objective and report progress to the board." %}</p>
 {% if is_admin %}<p class="govuk-body"><a class="govuk-button" data-module="govuk-button" role="button" draggable="false" href="{% url 'admin:strategy_estatestrategy_add' %}">{% translate "Record the estate strategy" %}</a></p>{% endif %}
 <p class="govuk-body"><a class="govuk-link" href="{% url 'properties:estate-strategy' %}">{% translate "The estate at a glance: purposes, asset strategies, reviews and suitability" %}</a></p>
+<p class="govuk-body"><a class="govuk-link" href="{% url 'strategy:pipeline' %}">{% translate "Property events pipeline" %}</a></p>
 {% endif %}
 {% if others %}<h2 class="govuk-heading-s">{% translate "Other strategies" %}</h2><ul class="govuk-list">{% for s in others %}<li><a class="govuk-link" href="{{ s.get_absolute_url }}">{{ s.title }}</a> <span class="govuk-body-s">({{ s.get_status_display|lower }})</span></li>{% endfor %}</ul>{% endif %}
 {% endblock %}
