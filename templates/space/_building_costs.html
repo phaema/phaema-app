@@ -1,0 +1,40 @@
+{% load i18n humanize %}
+<h2 class="govuk-heading-m" id="costs">{% blocktranslate with y=sharing.label %}Costs in {{ y }}{% endblocktranslate %}</h2>
+{% include "space/_year.html" %}
+{% if can_edit_costs %}<p class="govuk-body-s"><a class="govuk-link" href="{% url 'admin:space_buildingcost_add' %}?building={{ object.pk }}&year={{ year }}">{% translate "Add a cost" %}</a> · <a class="govuk-link" href="{% url 'admin:space_buildingcost_changelist' %}?building__id__exact={{ object.pk }}">{% translate "All costs for this building" %}</a> · {% if sharing_setting %}<a class="govuk-link" href="{% url 'admin:space_costsharing_change' sharing_setting.pk %}">{% translate "Change how costs are shared" %}</a>{% else %}<a class="govuk-link" href="{% url 'admin:space_costsharing_add' %}?building={{ object.pk }}">{% translate "Change how costs are shared" %}</a>{% endif %}</p>{% endif %}
+{% if sharing.costs %}
+<table class="govuk-table">
+  <thead class="govuk-table__head"><tr class="govuk-table__row"><th scope="col" class="govuk-table__header">{% translate "Cost" %}</th><th scope="col" class="govuk-table__header govuk-table__header--numeric">{% translate "Amount" %}</th><th scope="col" class="govuk-table__header">{% translate "Source" %}</th></tr></thead>
+  <tbody class="govuk-table__body">{% for c in sharing.costs %}<tr class="govuk-table__row">
+    <td class="govuk-table__cell">{{ c.line }}{% if c.notional %} <strong class="govuk-tag govuk-tag--grey">{% translate "Notional" %}</strong>{% endif %}</td>
+    <td class="govuk-table__cell govuk-table__cell--numeric">£{{ c.amount|floatformat:0|intcomma }}</td>
+    <td class="govuk-table__cell govuk-body-s">{{ c.source|default:"–" }}{% if c.origin != "entered" %} ({% blocktranslate with o=c.origin %}from the {{ o }}{% endblocktranslate %}){% endif %}</td></tr>{% endfor %}
+    <tr class="govuk-table__row"><th scope="row" class="govuk-table__header">{% translate "Cash cost" %}</th><td class="govuk-table__cell govuk-table__cell--numeric"><strong>£{{ sharing.cash|floatformat:0|intcomma }}</strong></td><td class="govuk-table__cell"></td></tr>
+    {% if sharing.notional %}<tr class="govuk-table__row"><th scope="row" class="govuk-table__header">{% translate "Including notional rent" %}</th><td class="govuk-table__cell govuk-table__cell--numeric"><strong>£{{ sharing.total|floatformat:0|intcomma }}</strong></td><td class="govuk-table__cell govuk-body-s">{% if sharing.per_sqm %}£{{ sharing.per_sqm|floatformat:2|intcomma }} {% translate "a m²" %}{% endif %}</td></tr>{% endif %}
+  </tbody>
+</table>
+{% for w in sharing.warnings %}<div class="govuk-warning-text"><span class="govuk-warning-text__icon" aria-hidden="true">!</span><strong class="govuk-warning-text__text"><span class="govuk-visually-hidden">{% translate "Warning" %}</span>{{ w }}</strong></div>{% endfor %}
+{% if sharing.shares %}
+<h3 class="govuk-heading-s">{% translate "Shared between occupiers" %}</h3>
+<p class="govuk-body-s">{% blocktranslate with m=sharing.method_label|lower %}Method: {{ m }}.{% endblocktranslate %} {% translate "These figures show what occupation costs; they are not recharges." %}</p>
+<table class="govuk-table">
+  <thead class="govuk-table__head"><tr class="govuk-table__row">
+    <th scope="col" class="govuk-table__header">{% translate "Occupier" %}</th>
+    <th scope="col" class="govuk-table__header govuk-table__header--numeric">{% translate "Share" %}</th>
+    <th scope="col" class="govuk-table__header govuk-table__header--numeric">{% translate "Cash cost" %}</th>
+    {% if sharing.notional %}<th scope="col" class="govuk-table__header govuk-table__header--numeric">{% translate "With notional rent" %}</th>{% endif %}
+    <th scope="col" class="govuk-table__header govuk-table__header--numeric">{% translate "£ a m²" %}</th>
+    <th scope="col" class="govuk-table__header govuk-table__header--numeric">{% translate "£ a person" %}</th></tr></thead>
+  <tbody class="govuk-table__body">{% for x in sharing.shares %}<tr class="govuk-table__row">
+    <td class="govuk-table__cell">{% if x.occupier %}<a class="govuk-link" href="{{ x.occupier.get_absolute_url }}?year={{ year }}">{{ x.label }}</a>{% else %}<em>{{ x.label }}</em>{% endif %}</td>
+    <td class="govuk-table__cell govuk-table__cell--numeric">{{ x.percent }}%</td>
+    <td class="govuk-table__cell govuk-table__cell--numeric">£{{ x.cash|floatformat:0|intcomma }}</td>
+    {% if sharing.notional %}<td class="govuk-table__cell govuk-table__cell--numeric">£{{ x.total|floatformat:0|intcomma }}</td>{% endif %}
+    <td class="govuk-table__cell govuk-table__cell--numeric">{% if x.per_sqm %}£{{ x.per_sqm|floatformat:0|intcomma }}{% else %}–{% endif %}</td>
+    <td class="govuk-table__cell govuk-table__cell--numeric">{% if x.per_person %}£{{ x.per_person|intcomma }}{% else %}–{% endif %}</td>
+  </tr>{% endfor %}</tbody>
+</table>
+{% endif %}
+{% else %}
+<p class="govuk-body">{% translate "No costs recorded for this year." %}</p>
+{% endif %}

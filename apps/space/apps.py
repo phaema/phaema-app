@@ -12,15 +12,18 @@ class SpaceConfig(AppConfig):
     def ready(self):
         from apps.core import audit
 
-        from .models import Headcount, Occupation, Occupier, Space, UseFigure, UseMeasure
+        from .models import (BuildingCost, CostLine, CostSharing, FixedShare, Headcount, Occupation, Occupier, Space,
+                             UseFigure, UseMeasure)
 
-        for model in (Occupier, Space, Occupation, Headcount, UseMeasure, UseFigure):
+        for model in (Occupier, Space, Occupation, Headcount, UseMeasure, UseFigure, CostLine, BuildingCost,
+                      CostSharing, FixedShare):
             audit.register(model)
 
         def seed(sender, **kwargs):
             if sender.label == "space" and "space_usemeasure" in connection.introspection.table_names():
-                from .seed import ensure_measures
+                from .seed import ensure_cost_lines, ensure_measures
 
                 ensure_measures()
+                ensure_cost_lines()
 
         post_migrate.connect(seed, dispatch_uid="phaema_space_measures", weak=False)

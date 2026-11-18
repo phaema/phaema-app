@@ -3,7 +3,8 @@ from django.contrib import admin
 
 from apps.core.admin_roles import RoleAdminMixin
 
-from .models import BUILDING_TYPES, Headcount, Occupation, Occupier, Space, UseFigure, UseMeasure
+from .models import (BUILDING_TYPES, BuildingCost, CostLine, CostSharing, FixedShare, Headcount, Occupation,
+                     Occupier, Space, UseFigure, UseMeasure)
 
 
 class _BuildingChoices:
@@ -144,3 +145,88 @@ class UseFigureAdmin(_BuildingChoices, RoleAdminMixin, admin.ModelAdmin):
         if db_field.name == "measure":
             field.queryset = UseMeasure.objects.filter(active=True)
         return field
+
+
+class _CostsOnly:
+    """Cost figures are seen only by people the space costs module is opened for (administrators, finance)."""
+
+    def _allowed(self, request):
+        from apps.core.access import can_use
+
+        return can_use(request.user, "spacecosts")
+
+    def has_module_permission(self, request):
+        return self._allowed(request) and super().has_module_permission(request)
+
+    def has_view_permission(self, request, obj=None):
+        return self._allowed(request) and super().has_view_permission(request, obj)
+
+    def has_add_permission(self, request, *args):
+        return self._allowed(request) and super().has_add_permission(request, *args)
+
+    def has_change_permission(self, request, obj=None):
+        return self._allowed(request) and super().has_change_permission(request, obj)
+
+    def has_delete_permission(self, request, obj=None):
+        return self._allowed(request) and super().has_delete_permission(request, obj)
+
+
+@admin.register(CostLine)
+class CostLineAdmin(_CostsOnly, admin.ModelAdmin):
+    list_display = ("name", "notional", "from_jobs", "order", "active")
+    list_editable = ("order", "active")
+
+    def has_delete_permission(self, request, obj=None):
+        if obj is not None and obj.amounts.exists():
+            return False
+        return super().has_delete_permission(request, obj)
+
+
+@admin.register(BuildingCost)
+class BuildingCostAdmin(_CostsOnly, _BuildingChoices, admin.ModelAdmin):
+    list_display = ("building", "year", "line", "amount", "source", "entered_by")
+    list_filter = ("year_starting", "line")
+    search_fields = ("building__reference", "building__name", "source")
+    autocomplete_fields = ("building",)
+    fields = ("building", "year_starting", "line", "amount", "source")
+
+    @admin.display(description="Year", ordering="year_starting")
+    def year(self, obj):
+        from .models import financial_year_label
+
+        return financial_year_label(obj.year_starting)
+
+    @admin.display(description="Entered by")
+    def entered_by(self, obj):
+        who = obj.updated_by or obj.created_by
+        return (who.get_full_name() or who.username) if who else "–"
+
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        field = super().formfield_for_foreignkey(db_field, request, **kwargs)
+        if db_field.name == "line":
+            field.queryset = CostLine.objects.filter(active=True)
+        return field
+
+    def get_changeform_initial_data(self, request):
+        initial = super().get_changeform_initial_data(request)
+        if request.GET.get("year", "").isdigit():
+            initial["year_starting"] = int(request.GET["year"])
+        return initial
+
+
+class FixedShareInline(admin.TabularInline):
+    model = FixedShare
+    extra = 1
+
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        if db_field.name == "occupier":
+            kwargs["queryset"] = Occupier.objects.filter(active=True)
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
+
+
+@admin.register(CostSharing)
+class CostSharingAdmin(_CostsOnly, _BuildingChoices, admin.ModelAdmin):
+    list_display = ("building", "method", "notes")
+    autocomplete_fields = ("building",)
+    fields = ("building", "method", "notes")
+    inlines = [FixedShareInline]

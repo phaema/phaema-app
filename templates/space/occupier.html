@@ -31,4 +31,28 @@
   </tr>{% endfor %}</tbody>
 </table>
 {% else %}<p class="govuk-body">{% translate "Not recorded in any building at this date." %}</p>{% endif %}
+
+{% if cost_rows is not None %}
+<h2 class="govuk-heading-m" id="costs">{% translate "What occupation costs" %}</h2>
+{% include "space/_year.html" %}
+{% if cost_rows %}
+<p class="govuk-body">{% blocktranslate with c=cost_total.cash|floatformat:0|intcomma %}Cash cost: <strong>£{{ c }}</strong>.{% endblocktranslate %}{% if cost_total.notional %} {% blocktranslate with t=cost_total.total|floatformat:0|intcomma %}Including notional rent: <strong>£{{ t }}</strong>.{% endblocktranslate %}{% endif %}</p>
+<table class="govuk-table">
+  <thead class="govuk-table__head"><tr class="govuk-table__row">
+    <th scope="col" class="govuk-table__header">{% translate "Building" %}</th>
+    <th scope="col" class="govuk-table__header">{% translate "Occupier" %}</th>
+    <th scope="col" class="govuk-table__header govuk-table__header--numeric">{% translate "Share" %}</th>
+    <th scope="col" class="govuk-table__header govuk-table__header--numeric">{% translate "Cash cost" %}</th>
+    <th scope="col" class="govuk-table__header govuk-table__header--numeric">{% translate "With notional rent" %}</th>
+    <th scope="col" class="govuk-table__header">{% translate "Method" %}</th></tr></thead>
+  <tbody class="govuk-table__body">{% for b, s, mine in cost_rows %}{% for x in mine %}<tr class="govuk-table__row">
+    <td class="govuk-table__cell"><a class="govuk-link" href="{% url 'space:building' b.pk %}?year={{ year }}#costs">{{ b.reference }} {{ b.name }}</a></td>
+    <td class="govuk-table__cell">{{ x.label }}</td>
+    <td class="govuk-table__cell govuk-table__cell--numeric">{{ x.percent }}%</td>
+    <td class="govuk-table__cell govuk-table__cell--numeric">£{{ x.cash|floatformat:0|intcomma }}</td>
+    <td class="govuk-table__cell govuk-table__cell--numeric">£{{ x.total|floatformat:0|intcomma }}</td>
+    <td class="govuk-table__cell govuk-body-s">{{ s.method_label }}</td></tr>{% endfor %}{% endfor %}</tbody>
+</table>
+{% else %}<p class="govuk-body">{% translate "No costs for this year." %}</p>{% endif %}
+{% endif %}
 {% endblock %}

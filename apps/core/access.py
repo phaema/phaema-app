@@ -20,7 +20,8 @@ from .roles import ADMINISTRATORS, SURVEYORS, role_of
 
 FLAGS = {"ledger": "rent_ledger_enabled", "servicecharges": "service_charges_enabled",
          "maintenance": "maintenance_enabled", "compliance": "compliance_enabled",
-         "valuations": "valuation_enabled", "space": "space_enabled"}
+         "valuations": "valuation_enabled", "space": "space_enabled",
+         "spacecosts": "space_costing_enabled"}
 PATCH_MODULES = ("ledger", "servicecharges")
 
 
@@ -39,7 +40,10 @@ def areas(user):
 
 
 def switched_on(module, settings=None):
-    return bool(getattr(settings or _settings(), FLAGS[module]))
+    settings = settings or _settings()
+    if module == "spacecosts" and not settings.space_enabled:
+        return False  # costs are part of the space module
+    return bool(getattr(settings, FLAGS[module]))
 
 
 def scope(user, module, settings=None):

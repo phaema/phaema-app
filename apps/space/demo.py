@@ -10,12 +10,22 @@ from decimal import Decimal
 from apps.core.models import ModuleSettings
 from apps.properties.models import Property
 
-from .models import Headcount, Occupation, Occupier, Space, UseFigure, UseMeasure
-from .seed import ensure_measures
+from .models import BuildingCost, CostLine, Headcount, Occupation, Occupier, Space, UseFigure, UseMeasure
+from .seed import ensure_cost_lines, ensure_measures
+
 
 CIVIC = "DM-S30"
 LIBRARY = "DM-N03"
 SOURCE = "Demonstration figures"
+
+# Yearly costs (£) for the latest full year; the year before is about 4% lower.
+COSTS = {
+    CIVIC: {"Business rates": 168000, "Energy": 96000, "Water": 9500, "Cleaning": 58000, "Security": 31000,
+            "Repairs and maintenance": 47000, "Insurance": 14200, "Facilities management contracts": 22000,
+            "Notional rent": 412500},
+    LIBRARY: {"Business rates": 21000, "Energy": 18500, "Water": 2100, "Cleaning": 9800,
+              "Repairs and maintenance": 7600, "Insurance": 2900, "Notional rent": 64000},
+}
 
 # (name, level, parent, external kind, head of service, cost centre)
 OCCUPIERS = [
@@ -40,16 +50,18 @@ def _civic_centre():
 def load(today=None):
     today = today or date.today()
     modules = ModuleSettings.load()
-    if not modules.space_enabled:
-        modules.space_enabled = True
+    if not (modules.space_enabled and modules.space_costing_enabled):
+        modules.space_enabled = modules.space_costing_enabled = True
         modules.save()
     ensure_measures()
+    ensure_cost_lines()
     occ = {}
     for name, level, parent, kind, head, cc in OCCUPIERS:
         occ[name], _c = Occupier.objects.update_or_create(name=name, defaults={
             "level": level, "parent": occ.get(parent), "external_kind": kind, "head_of_service": head,
             "cost_centre": cc, "active": True})
     civic = _civic_centre()
+    _costs(today)
     if Space.objects.filter(building=civic).exists():
         return Space.objects.filter(building=civic).count()
     start = date(today.year - 2, 4, 1)
@@ -90,6 +102,10 @@ def load(today=None):
                              ("Exampleton Community Health (NHS)", 11, "9.0")]:
         Headcount.objects.create(building=civic, occupier=occ[who], counted_on=counted, people=people,
                                  fte=Decimal(fte), source="HR establishment list, April (demonstration)")
+        # the year before, a few more people, for the previous year's costs and a trend
+        Headcount.objects.create(building=civic, occupier=occ[who], counted_on=date(counted.year - 1, 4, 1),
+                                 people=people + 3, fte=Decimal(fte) + 2,
+                                 source="HR establishment list, April (demonstration)")
 
     measures = {m.name: m for m in UseMeasure.objects.all()}
     year_start = date(today.year - 1, 4, 1)
@@ -113,9 +129,28 @@ def load(today=None):
     return Space.objects.filter(building=civic).count()
 
 
+def _costs(today):
+    from .costs import year_of
+
+    lines = {c.name: c for c in CostLine.objects.all()}
+    latest = year_of(today) - 1
+    for ref, amounts in COSTS.items():
+        building = Property.objects.filter(reference=ref).first()
+        if building is None:
+            continue
+        for year, factor in ((latest, Decimal("1")), (latest - 1, Decimal("0.96"))):
+            for name, amount in amounts.items():
+                source = ("Valuer's estimate of market rent (demonstration)" if name == "Notional rent"
+                          else "Finance ledger (demonstration)")
+                BuildingCost.objects.get_or_create(
+                    building=building, year_starting=year, line=lines[name],
+                    defaults={"amount": (Decimal(amount) * factor).quantize(Decimal("1")), "source": source})
+
+
 def remove():
     demo = Property.objects.filter(reference__startswith="DM-")
     UseFigure.objects.filter(building__in=demo).delete()
+    BuildingCost.objects.filter(building__in=demo).delete()
     Headcount.objects.filter(building__in=demo).delete()
     Occupation.objects.filter(building__in=demo).delete()
     Space.objects.filter(building__in=demo, floor__isnull=False).delete()  # rooms before their floors

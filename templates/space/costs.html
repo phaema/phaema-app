@@ -1,0 +1,38 @@
+{% extends "base.html" %}{% load i18n humanize %}
+{% block title %}{% translate "Costs by occupier" %}{% endblock %}
+{% block help_page %}space{% endblock %}
+{% block content %}
+<h1 class="govuk-heading-xl govuk-!-margin-bottom-4">{% blocktranslate with y=label %}Costs by occupier, {{ y }}{% endblocktranslate %}</h1>
+{% include "space/_nav.html" %}
+<p class="govuk-body">{% translate "What it costs each department and outside organisation to occupy the council's buildings. Each building's costs are shared by the method set for it; vacant space stays with the corporate landlord. These figures show the cost of occupation; they are not recharges." %}</p>
+{% include "space/_year.html" %}
+<p class="govuk-body-s"><a class="govuk-link" href="?year={{ year }}&amp;format=xlsx">{% translate "Download for finance (Excel)" %}</a>{% if is_admin %} · <a class="govuk-link" href="{% url 'admin:space_costline_changelist' %}">{% translate "Cost lines" %}</a>{% endif %}</p>
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-one-third"><p class="govuk-body"><span class="govuk-heading-l govuk-!-margin-bottom-0">£{{ cash|floatformat:0|intcomma }}</span>{% translate "cash cost of the buildings" %}</p></div>
+  {% if notional %}<div class="govuk-grid-column-one-third"><p class="govuk-body"><span class="govuk-heading-l govuk-!-margin-bottom-0">£{{ notional|floatformat:0|intcomma }}</span>{% translate "notional rent on freehold buildings" %}</p></div>{% endif %}
+  {% if unshared %}<div class="govuk-grid-column-one-third"><p class="govuk-body"><span class="govuk-heading-l govuk-!-margin-bottom-0">£{{ unshared|floatformat:0|intcomma }}</span>{% translate "cost of vacant or unshared space" %}</p></div>{% endif %}
+</div>
+{% if rows %}
+<table class="govuk-table">
+  <thead class="govuk-table__head"><tr class="govuk-table__row">
+    <th scope="col" class="govuk-table__header">{% translate "Occupier" %}</th>
+    <th scope="col" class="govuk-table__header govuk-table__header--numeric">{% translate "Buildings" %}</th>
+    <th scope="col" class="govuk-table__header govuk-table__header--numeric">{% translate "Area (m²)" %}</th>
+    <th scope="col" class="govuk-table__header govuk-table__header--numeric">{% translate "Cash cost" %}</th>
+    {% if notional %}<th scope="col" class="govuk-table__header govuk-table__header--numeric">{% translate "With notional rent" %}</th>{% endif %}
+    <th scope="col" class="govuk-table__header govuk-table__header--numeric">{% translate "£ a m²" %}</th>
+    <th scope="col" class="govuk-table__header govuk-table__header--numeric">{% translate "£ a person" %}</th></tr></thead>
+  <tbody class="govuk-table__body">{% for t in rows %}<tr class="govuk-table__row">
+    <td class="govuk-table__cell"><a class="govuk-link" href="{{ t.occupier.get_absolute_url }}?year={{ year }}">{{ t.occupier.name }}</a>{% if t.occupier.is_external %} <strong class="govuk-tag govuk-tag--blue">{% translate "Outside" %}</strong>{% endif %}</td>
+    <td class="govuk-table__cell govuk-table__cell--numeric">{{ t.buildings }}</td>
+    <td class="govuk-table__cell govuk-table__cell--numeric">{{ t.area|floatformat:0|intcomma }}</td>
+    <td class="govuk-table__cell govuk-table__cell--numeric">£{{ t.cash|floatformat:0|intcomma }}</td>
+    {% if notional %}<td class="govuk-table__cell govuk-table__cell--numeric">£{{ t.total|floatformat:0|intcomma }}</td>{% endif %}
+    <td class="govuk-table__cell govuk-table__cell--numeric">{% if t.per_sqm %}£{{ t.per_sqm|floatformat:0|intcomma }}{% else %}–{% endif %}</td>
+    <td class="govuk-table__cell govuk-table__cell--numeric">{% if t.per_person %}£{{ t.per_person|intcomma }}{% else %}–{% endif %}</td>
+  </tr>{% endfor %}</tbody>
+</table>
+{% else %}<div class="govuk-inset-text">{% translate "No buildings have occupiers and costs for this year yet." %}</div>{% endif %}
+<h2 class="govuk-heading-m">{% translate "Buildings" %}</h2>
+<ul class="govuk-list">{% for s in sharings %}<li><a class="govuk-link" href="{% url 'space:building' s.building.pk %}?year={{ year }}#costs">{{ s.building.reference }} {{ s.building.name }}</a>: £{{ s.cash|floatformat:0|intcomma }}{% if s.notional %} {% blocktranslate with n=s.notional|floatformat:0|intcomma %}plus £{{ n }} notional rent{% endblocktranslate %}{% endif %} <span class="govuk-body-s">({{ s.method_label|lower }})</span>{% for w in s.warnings %}<br><span class="govuk-body-s govuk-!-font-weight-bold">{{ w }}</span>{% endfor %}</li>{% endfor %}</ul>
+{% endblock %}

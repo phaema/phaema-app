@@ -1,0 +1,3 @@
+{% load i18n %}<form method="get" class="phaema-inline-fields govuk-!-margin-bottom-4"><label class="govuk-label govuk-!-margin-right-2" for="year">{% translate "Financial year" %}</label>
+<select class="govuk-select govuk-!-margin-right-2" id="year" name="year">{% for y, label in years %}<option value="{{ y }}"{% if y == year %} selected{% endif %}>{{ label }}</option>{% endfor %}</select>
+<button class="govuk-button govuk-button--secondary govuk-!-margin-bottom-0" data-module="govuk-button">{% translate "Show" %}</button></form>
