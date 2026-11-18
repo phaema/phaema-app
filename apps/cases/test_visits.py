@@ -140,3 +140,124 @@ def test_case_page_lists_visits(client, site, valuation):  # noqa: F811
     client.login(username="sue", password=PASSWORD)
     page = client.get(valuation.get_absolute_url()).content.decode()
     assert "Start a site visit" in page and "In progress" in page
+
+
+# ------------------------------------------------------------------ part 2: differences, saved record, reporting
+
+def _finished_with_differences(site, valuation):  # noqa: F811
+    v = visit.start_visit(valuation, site["sue"])
+    construction = v.answers.get(label="Construction as recorded", building=site["a"])
+    construction.kind, construction.value, construction.note = "yes_no", "no", "Steel frame, not portal"
+    construction.save()
+    areas = v.answers.filter(checks="floor_areas").first()
+    if areas is None:
+        areas = construction
+    else:
+        areas.value = "GIA 1,250 m²"
+        areas.save()
+    v.status = "finished"
+    v.save()
+    return v, construction, areas
+
+
+def test_differences_found(site, valuation):  # noqa: F811
+    v, construction, _areas = _finished_with_differences(site, valuation)
+    found = visit.differences(v)
+    assert construction in found
+    # a tick or an unanswered item is never a difference; nor is an answer that matches the record
+    same = v.answers.exclude(pk__in=[a.pk for a in found]).filter(checks__gt="").first()
+    if same:
+        same.kind, same.value = "text", same.recorded
+        same.save()
+        assert not visit.is_difference(same)
+    assert "Differences from the record" in visit.build_record(v)
+
+
+def test_update_the_record_and_leave_it(client, site, valuation, make_user):  # noqa: F811
+    v, construction, _areas = _finished_with_differences(site, valuation)
+    record = reverse("cases:visit-record", args=[valuation.pk, v.pk])
+    update = reverse("cases:visit-update", args=[valuation.pk, v.pk, construction.pk])
+    # someone who cannot edit the building cannot update it
+    make_user("otto", SURVEYORS)
+    client.login(username="otto", password=PASSWORD)
+    assert client.get(update).status_code == 403
+    assert b"To decide by the managing surveyor" in client.get(record).content
+    site["a"].managing_surveyor = site["sue"]  # the normal edit rule: the building's own managing surveyor
+    site["a"].save()
+    client.login(username="sue", password=PASSWORD)
+    page = client.get(update)
+    assert page.status_code == 200 and b"Steel frame, not portal" in page.content
+    client.post(update, {"construction_type": "steel_frame", "construction_detail": "Steel frame, brick infill"})
+    site["a"].refresh_from_db()
+    construction.refresh_from_db()
+    assert site["a"].construction_detail == "Steel frame, brick infill"
+    assert construction.resolution == "applied" and construction.resolved_by == site["sue"]
+    # a second difference left as it was
+    other = v.answers.exclude(pk=construction.pk).filter(checks__gt="").first()
+    other.kind, other.value = "text", "Something else entirely"
+    other.save()
+    client.post(v.get_absolute_url(), {"action": "keep", "answer": other.pk})
+    other.refresh_from_db()
+    assert other.resolution == "kept"
+    assert construction not in visit.open_differences(v) and other not in visit.open_differences(v)
+
+
+def test_check_measure_offers_areas(client, site, valuation):  # noqa: F811
+    v = visit.start_visit(valuation, site["sue"])
+    a = v.answers.filter(checks="floor_areas", building=site["a"]).first() or v.answers.filter(
+        checks="floor_areas").first()
+    if a is None:
+        pytest.skip("this checklist has no floor areas item")
+    a.value = "GIA 999 m²"
+    a.save()
+    v.status = "finished"
+    v.save()
+    a.target.managing_surveyor = site["sue"]
+    a.target.save()
+    client.login(username="sue", password=PASSWORD)
+    url = reverse("cases:visit-update", args=[valuation.pk, v.pk, a.pk])
+    page = client.get(url).content.decode()
+    assert 'name="gia_sqm"' in page and 'value="survey" selected' in page
+    client.post(url, {"gia_sqm": "999", "area_standard": "", "area_source": "survey",
+                      "areas_measured_on": str(v.visited_on)})
+    a.target.refresh_from_db()
+    assert a.target.gia_sqm == 999 and a.target.areas_measured_on == v.visited_on
+
+
+def test_finishing_saves_the_record_to_the_case(client, site, valuation):  # noqa: F811
+    v = visit.start_visit(valuation, site["sue"])
+    client.login(username="sue", password=PASSWORD)
+    client.post(v.get_absolute_url(), {"action": "finish"})
+    doc = valuation.documents.get()
+    assert doc.description.startswith("Site visit record") and doc.file.name.endswith(".docx")
+
+
+def test_hand_over_unfinished_visits(site, valuation, make_user):  # noqa: F811
+    from apps.core import handover
+
+    other = make_user("otto", SURVEYORS)
+    v = visit.start_visit(valuation, site["sue"])
+    done = visit.start_visit(valuation, site["sue"])
+    done.status = "finished"
+    done.save()
+    moved = handover.hand_over(site["sue"], {"site_visits": other})
+    v.refresh_from_db()
+    done.refresh_from_db()
+    assert moved["site_visits"] == 1 and v.visited_by == other and done.visited_by == site["sue"]
+
+
+def test_my_work_and_reports(site, valuation):  # noqa: F811
+    from apps.core import mywork
+    from apps.reports.datasets import get as dataset
+
+    v, _c, _a = _finished_with_differences(site, valuation)
+    draft = visit.start_visit(valuation, site["sue"])
+    notes = [str(i.note) for i in mywork.build(site["sue"])["now"] if str(i.kind) == "Site visit"]
+    assert any("not yet finished" in n for n in notes) and any("to decide" in n for n in notes)
+    ds = dataset("site_visits")
+    row = next(r for r in ds.queryset() if r.pk == v.pk)
+    assert ds.field("differences").value(row) >= 1
+    cases = dataset("cases")
+    case_row = next(c for c in cases.queryset() if c.pk == valuation.pk)
+    assert cases.field("last_visited").value(case_row) == v.visited_on
+    assert draft.pk

@@ -105,6 +105,9 @@ def items():
              _("The new person is added as a contributor in their place."),
              lambda u: Case.objects.filter(open_case, contributors=u), ("property", "lease__properties"),
              roles=STAFF + (CONTRIBUTORS,), move=_swap_contributor),
+        Item("site_visits", _("Site visits not yet finished"),
+             _("The new person can carry on filling them in. The visit keeps its date and answers."),
+             lambda u: _visits().filter(visited_by=u, status="draft"), ("property",), field_name="visited_by"),
         Item("lease_events", _("Lease events assigned to them"), _("Events still to do or in progress."),
              lambda u: LeaseEvent.objects.filter(
                  assigned_to=u, status__in=(LeaseEvent.Status.OPEN, LeaseEvent.Status.IN_PROGRESS)),
@@ -198,3 +201,9 @@ def hand_over(old, choices, building=None):
         if records:
             moved[item.key] = len(records)
     return moved
+
+
+def _visits():
+    from apps.cases.models import SiteVisit
+
+    return SiteVisit.objects.all()

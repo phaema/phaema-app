@@ -13,4 +13,5 @@ urlpatterns = [
     path("<int:pk>/visits/start/", visit_views.visit_start, name="visit-start"),
     path("<int:pk>/visits/<int:visit_pk>/", visit_views.visit_page, name="visit"),
     path("<int:pk>/visits/<int:visit_pk>/record/", visit_views.visit_record, name="visit-record"),
+    path("<int:pk>/visits/<int:visit_pk>/update/<int:answer_pk>/", visit_views.visit_update, name="visit-update"),
 ]

@@ -7,11 +7,12 @@ from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.http import Http404, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
 from django.utils import timezone
 from django.utils.safestring import mark_safe
 from django.utils.translation import gettext as _
 
-from apps.core.roles import has_role, is_administrator
+from apps.core.roles import can_edit, has_role, is_administrator
 
 from . import visit as v
 from . import workflow
@@ -85,6 +86,13 @@ def visit_page(request, pk, visit_pk):
             visit.status, visit.finished_on = SiteVisit.Status.DRAFT, None
             visit.save()
             return redirect(visit)
+        if what == "keep":
+            a = get_object_or_404(visit.answers, pk=request.POST.get("answer") or 0)
+            if not visit.is_finished or not can_edit(request.user, a.target):
+                raise PermissionDenied
+            v.resolve(a, request.user, "kept")
+            messages.success(request, _("The record is left as it was."))
+            return redirect(reverse("cases:visit-record", args=[case.pk, visit.pk]) + "#differences")
         if not filling:
             raise PermissionDenied
         if what == "section":
@@ -132,8 +140,12 @@ def visit_page(request, pk, visit_pk):
                 f"Site visit on {visit.visited_on:%d %B %Y} by "
                 f"{visit.visited_by.get_full_name() or visit.visited_by.username if visit.visited_by else 'unknown'} "
                 f"finished: {answered} of {total} checklist items answered, {visit.photos.count()} photos."))
-            messages.success(request, _("The visit is finished and noted on the case."))
-            return redirect(visit)
+            v.save_record_to_case(visit, request.user)
+            found = len(v.open_differences(visit))
+            messages.success(request, _("The visit is finished. The record is saved to the case documents.") + (
+                " " + _("%(n)s difference(s) from the property record to decide.") % {"n": found} if found else ""))
+            return redirect(reverse("cases:visit-record", args=[case.pk, visit.pk]) + ("#differences" if found
+                                                                                        else ""))
     if not filling:
         return redirect("cases:visit-record", case.pk, visit.pk)
     answered, total = v.progress(visit)
@@ -163,7 +175,33 @@ def visit_record(request, pk, visit_pk):
         response["Content-Disposition"] = (
             f'attachment; filename="Site visit {case.reference} {visit.visited_on:%Y-%m-%d}.docx"')
         return response
+    found = [(a, can_edit(request.user, a.target)) for a in v.differences(visit)]
     return render(request, "cases/visit_record.html", {
+        "differences": found,
         "case": case, "visit": visit, "body": mark_safe(doc_render.to_html(text, values)),  # noqa: S308
         "photos": visit.photos.select_related("answer"), "can_fill_in": can_fill_in(request.user, visit),
         "is_admin": is_administrator(request.user)})
+
+
+@login_required
+def visit_update(request, pk, visit_pk, answer_pk):
+    """Correct the property record from one difference found on a finished visit, through the normal edit rules,
+    so the change is in the change log under the person who made it."""
+    case = _case(pk)
+    visit = get_object_or_404(SiteVisit.objects.select_related("property"), pk=visit_pk, case=case)
+    a = get_object_or_404(visit.answers.select_related("building"), pk=answer_pk)
+    target = a.target
+    if not visit.is_finished or not v.is_difference(a) or not can_edit(request.user, target):
+        raise PermissionDenied
+    Form = v.update_form_class(a.checks)
+    if request.method == "POST":
+        form = Form(request.POST, instance=target)
+        if form.is_valid():
+            form.save()
+            v.resolve(a, request.user, "applied")
+            messages.success(request, _("%(property)s updated.") % {"property": target})
+            return redirect(reverse("cases:visit-record", args=[case.pk, visit.pk]) + "#differences")
+    else:
+        form = Form(instance=target, initial=v.initial_for(a, visit))
+    return render(request, "cases/visit_update.html", {
+        "case": case, "visit": visit, "answer": a, "target": target, "form": form})

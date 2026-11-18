@@ -311,6 +311,15 @@ def build_record(visit, user=None, today=None):
                 out.append(r._head(a.heading or "Check", "Recorded", "Found on site", "Note"))
             out.append(r._row(a.label, a.recorded if a.checks else "", a.shown(), a.note))
         out.append("")
+    found = differences(visit)
+    if found:
+        out += ["# Differences from the record", "", r._head("Item", "Property", "Recorded", "Found on site", "Outcome")]
+        for a in found:
+            outcome = a.get_resolution_display() if a.resolution else "To decide"
+            if a.resolution and a.resolved_by:
+                outcome += f" ({r._name(a.resolved_by)}, {r._date(a.resolved_at.date())})"
+            out.append(r._row(a.label, a.target.reference, a.recorded, a.shown(), outcome))
+        out.append("")
     if visit.notes:
         out += ["# General notes", ""] + r._para(visit.notes)
     if visit.follow_up:
@@ -322,3 +331,100 @@ def build_record(visit, user=None, today=None):
                        "Yes" if p.property_photo_id else "No") for n, p in enumerate(photos, start=1)]
         out.append("")
     return "\n".join(out)
+
+
+# ------------------------------------------------------------------ level B part 2: differences from the record
+
+# The property fields a surveyor can correct for each detail a checklist item checks. Floor areas are the
+# check-measure: the measured areas with their standard, source and date.
+UPDATES = {
+    "occupation": ["occupation"],
+    "use_description": ["use_description"],
+    "building_description": ["building_description"],
+    "built": ["built"],
+    "construction_type": ["construction_type", "construction_detail"],
+    "storeys": ["storeys", "basement_levels"],
+    "roof": ["roof_type", "roof_covering", "roof_detail"],
+    "window_type": ["window_type", "window_detail"],
+    "parking": ["parking_spaces", "parking"],
+    "services": ["mains_gas", "electricity", "mains_water", "drainage", "services_notes"],
+    "solar_pv": ["solar_pv", "solar_capacity_kwp"],
+    "floor_areas": ["gia_sqm", "nia_sqm", "gea_sqm", "area_standard", "area_source", "areas_measured_on"],
+    "site_area_ha": ["site_area_ha"],
+    "site_hazards": ["site_hazards"],
+}
+
+
+def _plain(text):
+    return " ".join(str(text or "").lower().replace(",", " ").split())
+
+
+def is_difference(a):
+    """Did the visit find something other than the record? A "no" to an item that checks the record, or a written,
+    chosen or measured answer that is not what was recorded."""
+    if not a.checks or not a.value or a.checks not in UPDATES:
+        return False
+    if a.kind == "yes_no":
+        return a.value == "no"
+    if a.kind == "tick":
+        return False
+    return _plain(a.value) != _plain(a.recorded)
+
+
+def differences(visit):
+    return [a for a in visit.answers.select_related("building", "resolved_by") if is_difference(a)]
+
+
+def open_differences(visit):
+    return [a for a in differences(visit) if not a.resolution]
+
+
+def update_form_class(key):
+    from django import forms
+
+    from apps.properties.models import Property
+
+    fields = UPDATES[key]
+
+    class UpdateForm(forms.ModelForm):
+        class Meta:
+            model = Property
+            fields = UPDATES[key]
+            widgets = {"areas_measured_on": forms.DateInput(attrs={"type": "date"})}
+
+    UpdateForm.field_names = fields
+    return UpdateForm
+
+
+def initial_for(a, visit):
+    """Starting values for the update form: for a check-measure, the measured source and date of the visit."""
+    if a.checks == "floor_areas":
+        return {"area_source": "survey", "areas_measured_on": visit.visited_on}
+    return {}
+
+
+def resolve(a, user, resolution):
+    from django.utils import timezone
+
+    a.resolution, a.resolved_by, a.resolved_at = resolution, user, timezone.now()
+    a.save(update_fields=["resolution", "resolved_by", "resolved_at"])
+
+
+def save_record_to_case(visit, user):
+    """Keep the finished record as a Word document on the case."""
+    from types import SimpleNamespace
+
+    from django.core.files.base import ContentFile
+
+    from apps.documents import merge
+    from apps.documents import render as doc_render
+
+    from .models import CaseDocument
+
+    data = doc_render.to_docx(SimpleNamespace(letterhead=True, prescribed_form=""), build_record(visit, user),
+                              merge.context(user=user, case=visit.case, prop=visit.property))
+    name = f"Site visit {visit.case.reference} {visit.visited_on:%Y-%m-%d}.docx"
+    doc = CaseDocument(case=visit.case, description=f"Site visit record, {visit.visited_on:%d %B %Y}",
+                       original_filename=name, created_by=user)
+    doc.file.save(name, ContentFile(data), save=True)
+    return doc

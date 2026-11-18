@@ -5,6 +5,7 @@ from datetime import date, timedelta
 
 from django.contrib.auth import get_user_model
 from django.db.models import Q
+from django.urls import reverse
 from django.utils.translation import gettext as _
 
 from apps.properties.models import Property
@@ -111,6 +112,22 @@ def build(user, today=None, viewer=None):
             .exclude(status_on__gte=today - timedelta(days=90)):
         now.append(Item(None, _("Strategy objective"), "estate", str(o), o.get_absolute_url(),
                         _("Report progress (none in the last 90 days)")))
+    from apps.cases import visit as site_visit
+    from apps.cases.models import SiteVisit
+
+    visits = SiteVisit.objects.filter(visited_by=user).filter(
+        Q(status="draft") | Q(answers__resolution="", answers__checks__gt="")).distinct()
+    for sv in visits.select_related("case", "property"):
+        if sv.status == "draft":
+            now.append(Item(None, _("Site visit"), "case", f"{sv.case.display_reference} {sv.property.name}",
+                            sv.get_absolute_url(), _("Visit of %(day)s not yet finished") % {
+                                "day": sv.visited_on.strftime("%d %b %Y")}))
+        else:
+            left = len(site_visit.open_differences(sv))
+            if left:
+                now.append(Item(None, _("Site visit"), "case", f"{sv.case.display_reference} {sv.property.name}",
+                                reverse("cases:visit-record", args=[sv.case_id, sv.pk]) + "#differences",
+                                _("%(n)s difference(s) from the record to decide") % {"n": left}))
     from apps.strategy.models import HealthCheck
 
     for c in HealthCheck.objects.filter(lead=user, status="draft"):
