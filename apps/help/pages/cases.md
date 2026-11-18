@@ -143,9 +143,30 @@ On a site with several buildings, things checked once (signing in, occupation, p
 visit as a whole, and the items about a building are repeated under each building with that building's own
 details.
 
-Select **Print** to write on it, or **Download as Word**. Nothing you tick or type on the page is saved: when
-you are back, add a note and photos to the case, and correct the property record where the visit showed it was
-wrong. Read the full asbestos register in PHAEMA before any work that disturbs the building.
+Select **Print** to write on it, or **Download as Word**. Nothing you tick or type on the sheet itself is saved;
+to record the visit in PHAEMA, start a site visit (below). Read the full asbestos register in PHAEMA before any work
+that disturbs the building.
+
+### Recording a site visit
+
+Under **Site visits** on the case page, select **Start a site visit**. The case owner, the property's managing
+surveyor and administrators can start and fill in a visit. PHAEMA copies the case type's checklist into the visit,
+with the value on the record beside each item that checks one, as it stands that day.
+
+- **Answer on your phone.** The checklist is in sections: one for the visit as a whole and, on a site with several
+  buildings, one for each building. Tick, choose or type each answer, add a short note if needed, and select
+  **Save this section**. Each section is saved on its own, so if the signal drops you lose only the section you are
+  on. You can leave and carry on later from the case page.
+- **Visit details**: the date and time, the weather, who you met, general notes and anything to follow up.
+- **Photos**: on a phone, **Take or choose photos** opens the camera. Say what a photo is about (an item, or the
+  visit generally) and give a caption. Photos are made smaller and their location data removed. They stay with
+  the visit; tick **Also add to the property's photos** to add them to the building's (or property's) photos too.
+- **Finish the visit** when you are done. A finished visit cannot be changed, except by an administrator, who can
+  reopen it. A note is added to the case.
+
+The **record** of a visit (case page, Site visits, or **See the record so far**) shows each answer beside what was
+recorded, the notes, details and photos. Print it or download it as Word. Changing a checklist later does not change
+visits already made: each keeps the wording it was answered with.
 
 ### Changing the sheet (administrators)
 

@@ -479,3 +479,113 @@ class Approval(TimeStampedModel):
 
     def __str__(self):
         return f"Approval for {self.case.reference}: {self.get_stage_display()}"
+
+
+# ------------------------------------------------------------------ site visits (the visit sheet, level B)
+
+def _visit_photo_path(instance, filename):
+    return f"cases/{instance.visit.case_id}/visits/{uuid.uuid4().hex}.jpg"
+
+
+class SiteVisit(TimeStampedModel):
+    """A visit made for a case, filled in on the phone from the case type's checklist and kept as a dated record."""
+
+    class Status(models.TextChoices):
+        DRAFT = "draft", _("In progress")
+        FINISHED = "finished", _("Finished")
+
+    case = models.ForeignKey(Case, on_delete=models.CASCADE, related_name="visits")
+    property = models.ForeignKey(Property, on_delete=models.PROTECT, related_name="site_visits",
+                                 verbose_name=_("property"))
+    visited_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True,
+                                   related_name="site_visits", verbose_name=_("visited by"))
+    visited_on = models.DateField(_("date of visit"), default=date.today)
+    time = models.CharField(_("time"), max_length=40, blank=True, help_text=_("For example 10:30 to 12:00."))
+    weather = models.CharField(_("weather"), max_length=120, blank=True)
+    people_met = models.CharField(_("people met"), max_length=255, blank=True)
+    notes = models.TextField(_("general notes"), blank=True)
+    follow_up = models.TextField(_("to follow up"), blank=True)
+    status = models.CharField(_("status"), max_length=10, choices=Status.choices, default=Status.DRAFT)
+    finished_on = models.DateField(_("finished on"), null=True, blank=True)
+
+    class Meta:
+        ordering = ["-visited_on", "-pk"]
+        verbose_name = _("site visit")
+        verbose_name_plural = _("site visits")
+
+    def __str__(self):
+        return f"Site visit {self.visited_on:%d %b %Y}: {self.case.display_reference}"
+
+    def get_absolute_url(self):
+        return reverse("cases:visit", args=[self.case_id, self.pk])
+
+    @builtins.property
+    def is_finished(self):
+        return self.status == self.Status.FINISHED
+
+
+class SiteVisitAnswer(models.Model):
+    """One checklist item on one visit, for the whole visit or for one building. The item's wording and the value
+    recorded at the start are copied in, so later changes to the checklist or the record do not rewrite the visit."""
+
+    visit = models.ForeignKey(SiteVisit, on_delete=models.CASCADE, related_name="answers")
+    item = models.ForeignKey(CaseTypeChecklistItem, on_delete=models.SET_NULL, null=True, blank=True,
+                             related_name="answers")
+    building = models.ForeignKey(Property, on_delete=models.SET_NULL, null=True, blank=True, related_name="+",
+                                 help_text=_("For items answered for each building on a site."))
+    heading = models.CharField(_("heading"), max_length=60, blank=True)
+    label = models.CharField(_("item"), max_length=200)
+    guidance = models.CharField(_("guidance"), max_length=255, blank=True)
+    kind = models.CharField(_("answer"), max_length=10, choices=CaseTypeChecklistItem.Kind.choices)
+    choices = models.CharField(_("list to choose from"), max_length=200, blank=True)
+    checks = models.CharField(_("checks the recorded"), max_length=30, blank=True)
+    recorded = models.CharField(_("recorded at the start"), max_length=400, blank=True)
+    order = models.PositiveIntegerField(default=0)
+    value = models.TextField(_("found on site"), blank=True)
+    note = models.CharField(_("note"), max_length=500, blank=True)
+    answered_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        ordering = ["order", "pk"]
+        verbose_name = _("site visit answer")
+
+    def __str__(self):
+        return self.label
+
+    def choice_list(self):
+        return [c.strip() for c in self.choices.split(",") if c.strip()]
+
+    def shown(self):
+        """The answer as text: "Checked", "Yes", the choice, or what was written."""
+        if self.kind == CaseTypeChecklistItem.Kind.TICK:
+            return "Checked" if self.value else ""
+        if self.kind == CaseTypeChecklistItem.Kind.YES_NO:
+            return {"yes": "Yes", "no": "No"}.get(self.value, "")
+        return self.value
+
+
+class SiteVisitPhoto(TimeStampedModel):
+    """A photo taken on a visit. Resized and stripped of location data like every photo in PHAEMA. It stays with the
+    visit; the surveyor can also add it to the property's photos."""
+
+    visit = models.ForeignKey(SiteVisit, on_delete=models.CASCADE, related_name="photos")
+    answer = models.ForeignKey(SiteVisitAnswer, on_delete=models.SET_NULL, null=True, blank=True,
+                               related_name="photos", verbose_name=_("about"))
+    image = models.ImageField(_("photo"), upload_to=_visit_photo_path)
+    caption = models.CharField(_("caption"), max_length=200, blank=True)
+    property_photo = models.ForeignKey("properties.PropertyPhoto", on_delete=models.SET_NULL, null=True, blank=True,
+                                       related_name="+", verbose_name=_("also on the property"))
+
+    class Meta:
+        ordering = ["pk"]
+        verbose_name = _("site visit photo")
+
+    def __str__(self):
+        return self.caption or f"Photo {self.pk}"
+
+    def save(self, *args, **kwargs):
+        from apps.core.files import process_image
+
+        if self.image and not getattr(self.image, "_committed", True):
+            self.image = process_image(self.image)
+        super().save(*args, **kwargs)

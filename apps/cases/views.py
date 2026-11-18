@@ -313,6 +313,8 @@ def case_detail(request, pk):
         "is_administrator": is_administrator(request.user),
         "valuation_report_property": case.main_property if case.case_type.group == "valuation" else None,
         "has_visit_sheet": case.main_property is not None,
+        "visits": list(case.visits.select_related("visited_by")) if case.main_property is not None else [],
+        "has_checklist": case.case_type.checklist_items.exists(),
         **_approval_context(request.user, case),
         **_leasing_context(case),
         **_challenge_context(case),
