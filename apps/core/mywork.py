@@ -98,6 +98,20 @@ def build(user, today=None, viewer=None):
                     p.get_absolute_url() + "#strategy", _("Review the holding purpose and asset strategy"))
         (now if p.purpose_review_date < today else ahead).append(item)
 
+    # Estate strategy: stand-alone actions they own, and objectives they own with no status for 90 days.
+    from apps.strategy.models import Action, Objective
+
+    for a in Action.objects.filter(owner=user, project__isnull=True, case__isnull=True,
+                                   status__in=("not_started", "in_progress"), target_date__isnull=False,
+                                   target_date__lte=horizon).select_related("objective"):
+        item = Item(a.target_date, _("Strategy action"), "estate", a.label, a.objective.get_absolute_url(),
+                    str(a.objective))
+        (now if a.target_date < today else ahead).append(item)
+    for o in Objective.objects.filter(owner=user, strategy__status="adopted").exclude(reported_status="done") \
+            .exclude(status_on__gte=today - timedelta(days=90)):
+        now.append(Item(None, _("Strategy objective"), "estate", str(o), o.get_absolute_url(),
+                        _("Report progress (none in the last 90 days)")))
+
     # Projects: tasks they own, and the projects they lead or are on (only those the viewer may see).
     from apps.projects import rules as project_rules
     from apps.projects.models import ProjectTask

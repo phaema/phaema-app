@@ -368,6 +368,9 @@ class Command(BaseCommand):
         from apps.projects import demo as project_demo
 
         project_demo.load(date.today())
+        from apps.strategy import demo as strategy_demo
+
+        strategy_demo.load()
 
         modules = ModuleSettings.load()
         if not modules.organisation_name:
@@ -500,6 +503,9 @@ class Command(BaseCommand):
         from apps.space import demo as space_demo
 
         space_demo.remove()
+        from apps.strategy import demo as strategy_demo
+
+        strategy_demo.remove()
         case_demo.remove()
         ledger_demo.remove()
         service_demo.remove()

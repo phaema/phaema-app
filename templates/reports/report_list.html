@@ -13,7 +13,8 @@
 {% if can_export_standard %}
 <h2 class="govuk-heading-l govuk-!-margin-top-6">{% translate "The whole estate" %}</h2>
 <ul class="govuk-list">
-  <li><a class="govuk-link" href="{% url 'properties:estate-strategy' %}">{% translate "Estate strategy" %}</a><br><span class="govuk-hint govuk-!-margin-bottom-0">{% translate "Holding purposes, asset strategies, reviews due, Asset Challenges in progress and suitability across the estate." %}</span></li>
+  <li><a class="govuk-link" href="{% url 'strategy:home' %}">{% translate "Estate strategy" %}</a><br><span class="govuk-hint govuk-!-margin-bottom-0">{% translate "The council's strategy, its objectives and action plan, and the board report on progress." %}</span></li>
+  <li><a class="govuk-link" href="{% url 'properties:estate-strategy' %}">{% translate "The estate at a glance" %}</a><br><span class="govuk-hint govuk-!-margin-bottom-0">{% translate "Holding purposes, asset strategies, reviews due, Asset Challenges in progress and suitability across the estate." %}</span></li>
   <li><a class="govuk-link" href="{% url 'properties:data-standard' %}">{% translate "Government Property Data Standard export" %}</a><br><span class="govuk-hint govuk-!-margin-bottom-0">{% translate "The estate in the layout of the government's property data standard, with how complete the records are." %}</span></li>
 </ul>
 {% endif %}

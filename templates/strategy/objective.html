@@ -1,0 +1,61 @@
+{% extends "base.html" %}{% load i18n %}
+{% block title %}{{ objective }}{% endblock %}
+{% block help_page %}estate-strategy{% endblock %}
+{% block breadcrumbs %}<nav class="govuk-breadcrumbs" aria-label="Breadcrumb"><ol class="govuk-breadcrumbs__list">
+  <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="{{ objective.strategy.get_absolute_url }}">{{ objective.strategy.title }}</a></li>
+  <li class="govuk-breadcrumbs__list-item">{% translate "Objective" %} {{ objective.number }}</li></ol></nav>{% endblock %}
+{% block content %}
+<span class="govuk-caption-l">{% translate "Objective" %} {{ objective.number }}</span>
+<h1 class="govuk-heading-l">{{ objective.title }}</h1>
+<div class="govuk-grid-row"><div class="govuk-grid-column-two-thirds">
+<p class="govuk-body">{% if state.shown %}{% for k, cls in rag_tag.items %}{% if k == state.shown %}<strong class="govuk-tag {{ cls }}">{% for w, words in rag_words.items %}{% if w == k %}{{ words }}{% endif %}{% endfor %}</strong>{% endif %}{% endfor %}{% endif %}
+  {% if objective.reported_status %}<span class="govuk-body-s">{% blocktranslate with d=objective.status_on|date:"j M Y" %}reported {{ d }}{% endblocktranslate %}{% if objective.status_by %} {% translate "by" %} {{ objective.status_by.get_full_name|default:objective.status_by.username }}{% endif %}</span>{% endif %}</p>
+{% if state.suggested %}<p class="govuk-body-s">{% translate "PHAEMA suggests:" %} {% for w, words in rag_words.items %}{% if w == state.suggested %}<strong>{{ words|lower }}</strong>{% endif %}{% endfor %} ({{ state.reason }}).{% if state.differs %} {% translate "This differs from the reported status." %}{% endif %}</p>{% endif %}
+{% if objective.progress_note %}<div class="govuk-inset-text">{{ objective.progress_note|linebreaksbr }}</div>{% endif %}
+
+<dl class="govuk-summary-list">
+  <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Owner" %}</dt><dd class="govuk-summary-list__value">{{ objective.owner.get_full_name|default:objective.owner.username|default:"–" }}</dd></div>
+  <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Target date" %}</dt><dd class="govuk-summary-list__value">{{ objective.target_date|date:"j F Y"|default:"–" }}</dd></div>
+  {% if objective.corporate_aim %}<div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Corporate aim it serves" %}</dt><dd class="govuk-summary-list__value">{{ objective.corporate_aim|linebreaksbr }}</dd></div>{% endif %}
+  {% if objective.outcomes %}<div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Expected outcomes" %}</dt><dd class="govuk-summary-list__value">{{ objective.outcomes|linebreaksbr }}</dd></div>{% endif %}
+  {% if objective.measures %}<div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "How success is measured" %}</dt><dd class="govuk-summary-list__value">{{ objective.measures|linebreaksbr }}</dd></div>{% endif %}
+  {% if objective.financial_effect %}<div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Financial effect" %}</dt><dd class="govuk-summary-list__value">{{ objective.financial_effect|linebreaksbr }}</dd></div>{% endif %}
+  {% if objective.risks %}<div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Risks and opportunities" %}</dt><dd class="govuk-summary-list__value">{{ objective.risks|linebreaksbr }}</dd></div>{% endif %}
+</dl>
+
+<h2 class="govuk-heading-m">{% translate "Action plan" %}</h2>
+{% if state.actions %}
+<table class="govuk-table">
+  <thead class="govuk-table__head"><tr class="govuk-table__row"><th scope="col" class="govuk-table__header">{% translate "Action" %}</th><th scope="col" class="govuk-table__header">{% translate "Target" %}</th><th scope="col" class="govuk-table__header">{% translate "Status" %}</th></tr></thead>
+  <tbody class="govuk-table__body">{% for s in state.actions %}<tr class="govuk-table__row">
+    <td class="govuk-table__cell">{% if s.url %}<a class="govuk-link" href="{{ s.url }}">{{ s.label }}</a>{% else %}{{ s.label }}{% endif %}
+      <br><span class="govuk-body-s">{% if s.action.project_id %}{% translate "Project" %}{% elif s.action.case_id %}{% translate "Case" %}{% else %}{% translate "Action" %}{% endif %}{% if s.action.owner %} · {{ s.action.owner.get_full_name|default:s.action.owner.username }}{% endif %}{% if s.action.notes %} · {{ s.action.notes }}{% endif %}</span></td>
+    <td class="govuk-table__cell">{{ s.action.target_date|date:"j M Y"|default:"–" }}</td>
+    <td class="govuk-table__cell">{% for k, cls in rag_tag.items %}{% if k == s.rag %}<strong class="govuk-tag {{ cls }}">{% for w, words in rag_words.items %}{% if w == k %}{{ words }}{% endif %}{% endfor %}</strong>{% endif %}{% endfor %}<br><span class="govuk-body-s">{{ s.reason }}{% for f in s.flags %}{% if f != s.reason %}; {{ f }}{% endif %}{% endfor %}</span>
+      {% if s.action.pk in can_change_action and not s.action.project_id and not s.action.case_id %}<form method="post" class="govuk-!-margin-top-2">{% csrf_token %}<input type="hidden" name="action" value="action_status"><input type="hidden" name="item" value="{{ s.action.pk }}"><label class="govuk-visually-hidden" for="st-{{ s.action.pk }}">{% translate "Status" %}</label><select class="govuk-select govuk-!-font-size-16" id="st-{{ s.action.pk }}" name="status">{% for v, l in action_statuses %}<option value="{{ v }}"{% if v == s.action.status %} selected{% endif %}>{{ l }}</option>{% endfor %}</select> <button class="govuk-button govuk-button--secondary govuk-!-margin-bottom-0" data-module="govuk-button">{% translate "Save" %}</button></form>{% endif %}
+      {% if can_update %}<form method="post" class="govuk-!-margin-top-1">{% csrf_token %}<input type="hidden" name="action" value="remove"><input type="hidden" name="item" value="{{ s.action.pk }}"><button class="govuk-button govuk-button--warning govuk-!-margin-bottom-0 govuk-!-font-size-16" data-module="govuk-button">{% translate "Remove" %}</button></form>{% endif %}</td>
+  </tr>{% endfor %}</tbody>
+</table>
+{% else %}<p class="govuk-body">{% translate "No actions yet." %}</p>{% endif %}
+
+{% if can_update %}
+<details class="govuk-details" data-module="govuk-details"><summary class="govuk-details__summary"><span class="govuk-details__summary-text">{% translate "Add to the action plan" %}</span></summary><div class="govuk-details__text">
+<form method="post">{% csrf_token %}<input type="hidden" name="action" value="add">
+  <div class="govuk-form-group"><label class="govuk-label govuk-label--s" for="link">{% translate "A project or case" %} <span class="govuk-body-s">({% translate "optional" %})</span></label><div class="govuk-hint" id="link-hint">{% translate "Its reference, for example PRJ-2026-001 or CAS-2026-0058. Its progress then shows here by itself." %}</div><input class="govuk-input govuk-input--width-20" id="link" name="link" aria-describedby="link-hint"></div>
+  <div class="govuk-form-group"><label class="govuk-label govuk-label--s" for="title">{% translate "Or describe the action" %}</label><input class="govuk-input" id="title" name="title" maxlength="200"></div>
+  <div class="govuk-form-group"><label class="govuk-label govuk-label--s" for="owner">{% translate "Owner" %}</label><select class="govuk-select" id="owner" name="owner"><option value="">–</option>{% for p in people %}<option value="{{ p.pk }}">{{ p.get_full_name|default:p.username }}</option>{% endfor %}</select></div>
+  <div class="govuk-form-group"><label class="govuk-label govuk-label--s" for="target">{% translate "Target date" %}</label><input class="govuk-input govuk-input--width-10" type="date" id="target" name="target_date"></div>
+  <div class="govuk-form-group"><label class="govuk-label govuk-label--s" for="notes">{% translate "Notes" %} <span class="govuk-body-s">({% translate "optional" %})</span></label><input class="govuk-input" id="notes" name="notes" maxlength="255"></div>
+  <button class="govuk-button" data-module="govuk-button">{% translate "Add" %}</button>
+</form></div></details>
+<h2 class="govuk-heading-m">{% translate "Report progress" %}</h2>
+<form method="post">{% csrf_token %}<input type="hidden" name="action" value="status">
+  <div class="govuk-form-group"><fieldset class="govuk-fieldset"><legend class="govuk-fieldset__legend govuk-fieldset__legend--s">{% translate "Status" %}</legend><div class="govuk-radios govuk-radios--small govuk-radios--inline">
+    {% for v, l in rag_choices %}<div class="govuk-radios__item"><input class="govuk-radios__input" id="rag-{{ v }}" name="reported_status" type="radio" value="{{ v }}"{% if v == objective.reported_status %} checked{% elif not objective.reported_status and v == state.suggested %} checked{% endif %}><label class="govuk-label govuk-radios__label" for="rag-{{ v }}">{{ l }}</label></div>{% endfor %}
+  </div></fieldset></div>
+  <div class="govuk-form-group"><label class="govuk-label govuk-label--s" for="progress">{% translate "Progress" %}</label><div class="govuk-hint">{% translate "What has happened since the last report, and what comes next. It goes into the board report." %}</div><textarea class="govuk-textarea" id="progress" name="progress_note" rows="4">{{ objective.progress_note }}</textarea></div>
+  <button class="govuk-button" data-module="govuk-button">{% translate "Save the status" %}</button>
+</form>
+{% endif %}
+</div></div>
+{% endblock %}
