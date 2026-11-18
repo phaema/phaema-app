@@ -22,9 +22,13 @@ def load(today=None):
     from apps.projects.models import Project
 
     today = today or date.today()
-    if EstateStrategy.objects.filter(title=TITLE).exists():
-        return
     users = {u.username: u for u in get_user_model().objects.filter(username__startswith="demo.")}
+    existing = EstateStrategy.objects.filter(title=TITLE).first()
+    if existing:  # loaded before: add anything added to the demonstration since
+        first = existing.objectives.order_by("order").first()
+        if first:
+            _health_checks(users, today, first)
+        return
     projects = {p.name: p for p in Project.objects.filter(name__in=NAMES)}
     start = date(today.year, 4, 1) if today.month >= 4 else date(today.year - 1, 4, 1)
     strategy = EstateStrategy.objects.create(
@@ -88,7 +92,64 @@ def load(today=None):
                           status="in_progress")
     Action.objects.create(objective=four, title="Bid to the Public Sector Decarbonisation Scheme",
                           owner=users.get("demo.ojones"), target_date=today + timedelta(days=200))
+    _health_checks(users, today, one)
+
+
+# Last year's finished check (answer, note) by question number, and this year's answers so far.
+LAST_YEAR = {1: ("yes", ""), 2: ("partly", "Purposes recorded; asset strategies only for the investment estate."),
+             3: ("no", "No rolling programme yet."), 4: ("partly", ""), 5: ("no", ""), 6: ("partly", ""),
+             7: ("partly", ""), 8: ("yes", ""), 9: ("no", ""), 10: ("partly", ""), 11: ("partly", ""),
+             12: ("partly", "Surveys for about half the buildings are over five years old."), 13: ("yes", ""),
+             14: ("yes", ""), 15: ("no", ""), 16: ("yes", ""), 17: ("yes", ""), 18: ("partly", ""), 19: ("partly", ""),
+             20: ("yes", ""), 21: ("partly", ""), 22: ("no", ""), 23: ("partly", ""), 24: ("partly", ""),
+             25: ("partly", ""), 26: ("partly", ""), 27: ("na", "First year of the check.")}
+THIS_YEAR = {1: ("yes", "Adopted by Cabinet, minute CAB/2026/14."), 2: ("yes", ""),
+             3: ("partly", "Asset Challenge started; reviews dated for every property."), 4: ("yes", ""),
+             5: ("partly", ""), 6: ("partly", "Running costs held for most buildings; capital charges not yet."),
+             7: ("yes", "Property events pipeline taken to the capital board."), 8: ("yes", ""), 9: ("partly", ""),
+             10: ("partly", ""), 11: ("yes", ""), 12: ("partly", ""), 13: ("yes", ""), 14: ("yes", ""),
+             15: ("partly", "Property board set up; terms of reference still in draft.")}
+
+
+def _health_checks(users, today, objective):
+    from apps.projects.models import financial_year_of
+
+    from . import health
+    from .models import Action, HealthCheck
+
+    head = users.get("demo.head")
+    if head is None:
+        return
+    year = financial_year_of(today)
+    if HealthCheck.objects.filter(year__in=(year - 1, year)).exists():
+        return
+    last = health.start(head, year - 1)
+    for n, a in enumerate(last.answers.order_by("order"), start=1):
+        a.answer, a.notes = LAST_YEAR.get(n, ("partly", ""))
+        a.answered_by, a.answered_on = head, today - timedelta(days=330)
+        a.save()
+    last.status, last.finished_on = "finished", today - timedelta(days=320)
+    last.summary = ("A first look at how the council manages its estate. Strong on lease management and "
+                    "compliance; the gaps are a rolling review of every property, a property board and the "
+                    "register's completeness.")
+    last.save()
+    now = health.start(head, year)
+    for n, a in enumerate(now.answers.order_by("order"), start=1):
+        if n in THIS_YEAR:
+            a.answer, a.notes = THIS_YEAR[n]
+            a.answered_by, a.answered_on = head, today - timedelta(days=5)
+            if n == 15:
+                a.action = Action.objects.create(objective=objective, title="Agree the property board's terms of "
+                                                 "reference", owner=head, target_date=today + timedelta(days=60),
+                                                 notes="From the health check")
+            a.save()
 
 
 def remove():
+    from apps.projects.models import financial_year_of
+
+    from .models import HealthCheck
+
+    year = financial_year_of(date.today())
+    HealthCheck.objects.filter(year__in=(year - 1, year), lead__username="demo.head").delete()
     EstateStrategy.objects.filter(title=TITLE).delete()

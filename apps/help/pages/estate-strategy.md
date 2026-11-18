@@ -175,16 +175,40 @@ Confidential projects appear only for people who can see them, and project budge
 budget. Choose a portfolio to see only its properties. Download the pipeline as Excel (one sheet per section) or as
 Word for a committee report.
 
+## The annual health check
+
+**Annual health check** (on Reports and the Estate strategy page) is a short self-assessment of how well the council
+manages its property, done once a year, usually by the head of estates. The questions are PHAEMA's own, grouped under
+the headings of the RICS guidance on strategic public sector property asset management: strategy, planning,
+financial planning, demand and change, operations, governance, intelligent client, policies, data and review. They
+are a prompt, not a standard.
+
+1. An administrator starts the year's check and chooses the lead who will answer it.
+2. The lead answers each question **Yes**, **Partly**, **No** or **Not applicable**, with notes and where the
+   evidence is (a link, document or committee report, one per line), saving each heading as they go.
+3. Colleagues can add notes on the check or on any question.
+4. Where an answer is no or partly, the lead can **add an improvement action** to the estate strategy's action plan,
+   under an objective of the adopted strategy. The action is linked to the answer.
+5. The lead writes a summary and finishes the check. An administrator can reopen it.
+
+The **report** (page, print or Word) gives the counts, a comparison with last year (better, worse or the same for
+each question), the gaps and their improvement actions, and every answer with its notes and evidence. My work
+reminds the lead while the check is in progress.
+
+Administrators change the questions in Manage data, **Health check questions**: reword, reorder, add or take out of
+use. Changes apply to checks started afterwards; past checks keep the wording they were answered with.
+
 ## Who can do what
 
 | Role | Can |
 |---|---|
-| Administrators | Everything: the strategy and its objectives, the sub-category and asset strategy lists, and correcting decisions in Manage data. |
+| Administrators | Everything: the strategy and its objectives, the sub-category and asset strategy lists, correcting decisions in Manage data, and starting, reopening and changing the questions of the health check. |
+| The health check's lead | Answer the year's check, add improvement actions from it and finish it. |
 | An objective's owner | Add to and remove from its action plan, and report its status and progress. |
 | An action's owner | Mark the action in progress, done or dropped. |
 | Surveyors | For the properties they manage: start an Asset Challenge, record an asset strategy already decided, and record suitability. |
 | Supervisors | Approve an Asset Challenge's recommendation, as for other cases. |
-| Others | Look. |
+| Others | Look, and add notes to the health check. |
 
 ## Worked example
 

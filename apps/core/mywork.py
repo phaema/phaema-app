@@ -111,6 +111,13 @@ def build(user, today=None, viewer=None):
             .exclude(status_on__gte=today - timedelta(days=90)):
         now.append(Item(None, _("Strategy objective"), "estate", str(o), o.get_absolute_url(),
                         _("Report progress (none in the last 90 days)")))
+    from apps.strategy.models import HealthCheck
+
+    for c in HealthCheck.objects.filter(lead=user, status="draft"):
+        open_count = c.answers.filter(answer="").count()
+        now.append(Item(None, _("Health check"), "estate", str(c), c.get_absolute_url(),
+                        _("%(n)s questions still to answer") % {"n": open_count} if open_count
+                        else _("All answered: finish the check")))
 
     # Projects: tasks they own, and the projects they lead or are on (only those the viewer may see).
     from apps.projects import rules as project_rules

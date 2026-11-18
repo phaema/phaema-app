@@ -10,7 +10,7 @@ class StrategyConfig(AppConfig):
     def ready(self):
         from apps.core import audit
 
-        from .models import Action, EstateStrategy, Objective
+        from .models import Action, EstateStrategy, HealthAnswer, HealthCheck, HealthQuestion, Objective
 
-        for model in (EstateStrategy, Objective, Action):
+        for model in (EstateStrategy, Objective, Action, HealthQuestion, HealthCheck, HealthAnswer):
             audit.register(model)
