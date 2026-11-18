@@ -11,6 +11,21 @@ class UsernameOrEmailBackend(ModelBackend):
     exactly one sign-in has it: if two people share an address, both must use their usernames.
     """
 
+    def user_can_authenticate(self, user):
+        from .outside import access_ended
+
+        return super().user_can_authenticate(user) and not access_ended(user)
+
+    def get_user(self, user_id):
+        # A session whose access has ended still finds its user, so the access-ended middleware can sign the
+        # person out and say why, rather than sending them to the sign-in page without explanation.
+        User = get_user_model()
+        try:
+            user = User._default_manager.get(pk=user_id)
+        except User.DoesNotExist:
+            return None
+        return user if super().user_can_authenticate(user) else None
+
     def authenticate(self, request, username=None, password=None, **kwargs):
         if username is None or password is None:
             return None

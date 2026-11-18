@@ -1,0 +1,34 @@
+{% extends "base.html" %}{% load i18n humanize %}
+{% block title %}{{ object.name }}{% endblock %}
+{% block help_page %}space{% endblock %}
+{% block breadcrumbs %}<div class="govuk-breadcrumbs"><ol class="govuk-breadcrumbs__list">
+  <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="{% url 'space:home' %}">{% translate "Space and costing" %}</a></li>
+  <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="{% url 'space:occupiers' %}">{% translate "Occupiers" %}</a></li></ol></div>{% endblock %}
+{% block content %}
+<span class="govuk-caption-l">{{ object.get_level_display }}{% if object.parent %}, {% translate "part of" %} {{ object.parent.name }}{% endif %}</span>
+<h1 class="govuk-heading-l">{{ object.name }}{% if object.is_external %} <strong class="govuk-tag govuk-tag--blue">{% translate "Outside organisation" %}</strong>{% endif %}</h1>
+<dl class="govuk-summary-list">
+  {% if object.head_of_service %}<div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Head of service" %}</dt><dd class="govuk-summary-list__value">{{ object.head_of_service }}</dd></div>{% endif %}
+  <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Property liaison" %}</dt><dd class="govuk-summary-list__value">{% if object.liaison %}{{ object.liaison.get_full_name|default:object.liaison.username }}{% if object.liaison.email %} (<a class="govuk-link" href="mailto:{{ object.liaison.email }}">{{ object.liaison.email }}</a>){% endif %}{% else %}{{ object.liaison_name|default:"–" }}{% endif %}</dd></div>
+  {% if object.cost_centre %}<div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Cost centre" %}</dt><dd class="govuk-summary-list__value">{{ object.cost_centre }}</dd></div>{% endif %}
+  <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Space held" %}</dt><dd class="govuk-summary-list__value">{% blocktranslate with a=area|floatformat:0|intcomma count n=places|length %}{{ a }} m² in {{ n }} building{% plural %}{{ a }} m² in {{ n }} buildings{% endblocktranslate %}{% if people %}, {% blocktranslate count n=people %}{{ n }} person{% plural %}{{ n }} people{% endblocktranslate %}{% endif %}</dd></div>
+  {% if children %}<div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Includes" %}</dt><dd class="govuk-summary-list__value">{% for c in children %}<a class="govuk-link" href="{{ c.get_absolute_url }}">{{ c.name }}</a>{% if not forloop.last %}, {% endif %}{% endfor %}</dd></div>{% endif %}
+</dl>
+{% if places %}
+<table class="govuk-table">
+  <thead class="govuk-table__head"><tr class="govuk-table__row">
+    <th scope="col" class="govuk-table__header">{% translate "Building" %}</th>
+    <th scope="col" class="govuk-table__header govuk-table__header--numeric">{% translate "Own space (m²)" %}</th>
+    <th scope="col" class="govuk-table__header govuk-table__header--numeric">{% translate "Share of shared (m²)" %}</th>
+    <th scope="col" class="govuk-table__header govuk-table__header--numeric">{% translate "People" %}</th>
+    <th scope="col" class="govuk-table__header govuk-table__header--numeric">{% translate "Use" %}</th></tr></thead>
+  <tbody class="govuk-table__body">{% for b, h in places %}<tr class="govuk-table__row">
+    <td class="govuk-table__cell"><a class="govuk-link" href="{% url 'space:building' b.pk %}">{{ b.reference }} {{ b.name }}</a></td>
+    <td class="govuk-table__cell govuk-table__cell--numeric">{{ h.area|floatformat:0|intcomma }}</td>
+    <td class="govuk-table__cell govuk-table__cell--numeric">{{ h.shared|floatformat:0|intcomma }}</td>
+    <td class="govuk-table__cell govuk-table__cell--numeric">{{ h.people|default:"–" }}</td>
+    <td class="govuk-table__cell govuk-table__cell--numeric">{% if h.utilisation is not None %}{{ h.utilisation }}%{% else %}–{% endif %}</td>
+  </tr>{% endfor %}</tbody>
+</table>
+{% else %}<p class="govuk-body">{% translate "Not recorded in any building at this date." %}</p>{% endif %}
+{% endblock %}

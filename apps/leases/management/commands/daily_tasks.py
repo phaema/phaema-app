@@ -11,6 +11,9 @@ class Command(BaseCommand):
             "and send reminders. Safe to run as often as you like.")
 
     def handle(self, *args, **options):
+        from apps.core.outside import close_ended
+
+        closed = close_ended()
         rents = sync_all()
         from apps.cases.workflow import auto_open
 
@@ -28,4 +31,4 @@ class Command(BaseCommand):
 
             jobs = auto_raise()
         self.stdout.write(f"Rents updated: {rents}. Cases opened: {cases}. Planned jobs raised: {jobs}. "
-                          f"Reminder emails sent: {emails}.")
+                          f"Reminder emails sent: {emails}. Accounts closed (access ended): {closed}.")

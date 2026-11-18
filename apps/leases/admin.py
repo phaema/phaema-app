@@ -8,12 +8,18 @@ from django.utils.html import format_html, format_html_join
 from apps.core.admin_roles import RoleAdminMixin, RoleInlineMixin
 from apps.core.roles import is_administrator
 
-from .models import BreakOption, Lease, LeaseDocument, LeaseEvent, Party, RentScheduleEntry
+from .models import BreakOption, Lease, LeaseDocument, LeaseEvent, LeaseOption, Party, RentScheduleEntry
 
 
 class BreakInline(RoleInlineMixin, admin.TabularInline):
     model = BreakOption
     extra = 0
+
+
+class OptionInline(RoleInlineMixin, admin.StackedInline):
+    model = LeaseOption
+    extra = 0
+    fields = (("option_type", "exercisable_by"), ("exercise_from", "exercise_by", "notice_months"), "terms")
 
 
 class RentScheduleInline(RoleInlineMixin, admin.TabularInline):
@@ -38,12 +44,12 @@ class LeaseAdmin(RoleAdminMixin, admin.ModelAdmin):
     search_fields = ("reference", "counterparty__name", "properties__reference", "properties__name")
     autocomplete_fields = ("counterparty", "guarantor", "properties")
     date_hierarchy = "term_end"
-    inlines = [BreakInline, RentScheduleInline, DocumentInline]
+    inlines = [BreakInline, OptionInline, RentScheduleInline, DocumentInline]
     fieldsets = (
         (None, {"fields": ("reference", "direction", "agreement_type", "status")}),
         ("Premises and parties", {"fields": ("properties", "premises_description", "counterparty", "guarantor")}),
         ("Term", {"fields": ("lease_date", "term_start", "term_end", "actual_end", "security_of_tenure")}),
-        ("Rent", {"fields": ("annual_rent", "rent_frequency", "vat_chargeable", "rates_excluded", "incentives",
+        ("Rent", {"fields": ("annual_rent", "rent_frequency", "vat_chargeable", "rates_excluded", "rent_free_until", "incentives",
                              "deposit", "deposit_held", "deposit_interest")}),
         ("Rent review", {"fields": ("review_basis", "review_interval_years", "next_review_date", "time_of_essence")}),
         ("Rent demands and arrears", {

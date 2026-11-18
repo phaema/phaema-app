@@ -47,6 +47,7 @@ class StaffProfileInline(admin.StackedInline):
     extra = 1
     verbose_name = verbose_name_plural = "Staff details"
     max_num = 1
+    fields = ("job_title", "supervisor", "is_external", "organisation", "access_ends")
     autocomplete_fields = ["supervisor"]
 
 
@@ -56,10 +57,10 @@ class PhaemaUserAdmin(UserAdmin):
     add_form = PhaemaUserCreationForm
     inlines = [StaffProfileInline]
     search_fields = ("username", "first_name", "last_name", "email")
-    list_display = ("username", "first_name", "last_name", "email", "role", "supervisor", "two_step", "is_active",
-                    "last_login")
+    list_display = ("username", "first_name", "last_name", "email", "role", "outside", "supervisor", "two_step",
+                    "is_active", "last_login")
     actions = ["reset_two_step"]
-    list_filter = ("groups", "is_active", "is_superuser")
+    list_filter = ("groups", "staff_profile__is_external", "is_active", "is_superuser")
     fieldsets = (
         (None, {"fields": ("username", "password")}),
         ("Personal details", {"fields": ("first_name", "last_name", "email")}),
@@ -74,13 +75,28 @@ class PhaemaUserAdmin(UserAdmin):
     )
     add_fieldsets = (
         (None, {"classes": ("wide",), "fields": ("username", "first_name", "last_name", "email",
-                                                 "password1", "password2", "groups", "access_areas")}),
+                                                 "password1", "password2", "groups", "access_areas"),
+                "description": "For an outside user (consultant, contractor, tenant's agent), tick "
+                               "\"Outside user\" under Staff details below. Their access ends automatically."}),
     )
 
     @admin.display(description="Supervisor")
     def supervisor(self, obj):
         boss = supervisor_of(obj)
         return (boss.get_full_name() or boss.username) if boss else "–"
+
+    @admin.display(description="Outside user", ordering="staff_profile__access_ends")
+    def outside(self, obj):
+        from .outside import ends_on, is_external
+
+        end = ends_on(obj)
+        if is_external(obj):
+            label = "Yes"
+            profile = obj.staff_profile
+            if profile.organisation:
+                label += f" ({profile.organisation})"
+            return f"{label}, until {end:%d %b %Y}" if end else label
+        return f"Until {end:%d %b %Y}" if end else "–"
 
     @admin.display(description="Two-step sign-in", boolean=True)
     def two_step(self, obj):

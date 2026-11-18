@@ -12,7 +12,7 @@ class ModuleSettingsAdmin(admin.ModelAdmin):
         (None, {"fields": ["organisation_name", "brand_colour"]}),
         ("Modules", {"fields": ["rent_ledger_enabled", "service_charges_enabled", "maintenance_enabled",
                                 "compliance_enabled", "golden_thread_enabled", "valuation_enabled",
-                                "open_data_enabled"]}),
+                                "space_enabled", "space_costing_enabled", "open_data_enabled"]}),
         ("Rent ledger", {"fields": ["invoicing", "invoice_prefix", "next_invoice_number", "vat_rate",
                                     "rent_income_code", "service_charge_income_code", "vat_code_standard",
                                     "vat_code_exempt"]}),
@@ -20,13 +20,13 @@ class ModuleSettingsAdmin(admin.ModelAdmin):
                                             "website"]}),
         ("Maintenance", {"fields": ["order_approval_limit"]}),
         ("Maps", {"fields": ["os_maps_api_key", "os_map_style"]}),
-        ("Security", {"fields": ["two_step_required"]}),
+        ("Security", {"fields": ["two_step_required", "outside_access_months"]}),
         ("Single sign-on", {"fields": ["sso_enabled", "sso_passwords", "sso_create_accounts"],
                             "description": "Sign in with Microsoft 365 or another sign-in service. See Help, "
                                            "Users and roles. Roles and access areas can follow the service's "
                                            "groups: add them under Sign-in group mappings."}),
         ("Reminders", {"fields": ["reminder_days_review", "reminder_days_notice", "reminder_days_break",
-                                  "reminder_days_expiry", "reminder_days_other", "overdue_reminders"]}),
+                                  "reminder_days_expiry", "reminder_days_option", "reminder_days_other", "overdue_reminders"]}),
     ]
 
     def has_add_permission(self, request):

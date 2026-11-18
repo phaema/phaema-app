@@ -45,6 +45,26 @@ class RoleRequiredMiddleware:
         return self.get_response(request)
 
 
+class AccessEndedMiddleware:
+    """Signs out anyone whose access end date has passed, at their next click."""
+
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        user = getattr(request, "user", None)
+        if user is not None and user.is_authenticated:
+            from .outside import access_ended
+
+            if access_ended(user):
+                from django.contrib.auth import logout
+                from django.shortcuts import render
+
+                logout(request)
+                return render(request, "core/access_ended.html", status=403)
+        return self.get_response(request)
+
+
 class TwoStepRequiredMiddleware:
     """People the council requires to use two-step sign-in must set it up before they can do anything else."""
 

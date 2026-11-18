@@ -1,0 +1,8 @@
+{% extends "base.html" %}{% load i18n %}
+{% block title %}{% translate "Your access has ended" %}{% endblock %}
+{% block help_page %}users-and-roles{% endblock %}
+{% block content %}
+<h1 class="govuk-heading-l">{% translate "Your access to PHAEMA has ended" %}</h1>
+<p class="govuk-body">{% translate "Your account had an end date, and that date has passed, so you have been signed out." %}</p>
+<p class="govuk-body">{% translate "If you still need access, ask the council officer you work with to have a PHAEMA administrator extend it." %}</p>
+{% endblock %}

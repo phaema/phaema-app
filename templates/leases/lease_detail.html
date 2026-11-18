@@ -57,6 +57,7 @@
   <h2 class="govuk-heading-m">{% translate "Rent" %}</h2>
   <dl class="govuk-summary-list">
     <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Current rent" %}</dt><dd class="govuk-summary-list__value">£{{ object.annual_rent|floatformat:2|intcomma }} {% translate "a year" %}{% if object.vat_chargeable %} {% translate "plus VAT" %}{% endif %}{% if not object.rates_excluded %}<br><span class="govuk-body-s">{% translate "Includes business rates" %}</span>{% endif %}</dd></div>
+    {% if object.rent_free_until %}<div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Rent-free until" %}</dt><dd class="govuk-summary-list__value">{{ object.rent_free_until|date:"j F Y" }}</dd></div>{% endif %}
     {% if object.incentives %}<div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Incentives" %}</dt><dd class="govuk-summary-list__value">{{ object.incentives|linebreaksbr }}</dd></div>{% endif %}
     <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Payable" %}</dt><dd class="govuk-summary-list__value">{{ object.get_rent_frequency_display }}</dd></div>
     <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Rent review" %}</dt><dd class="govuk-summary-list__value">{{ object.get_review_basis_display }}{% if object.review_interval_years %}, {% blocktranslate count n=object.review_interval_years %}every year{% plural %}every {{ n }} years{% endblocktranslate %}{% endif %}{% if object.next_review_date %}<br><span class="govuk-body-s">{% translate "Next" %}: {{ object.next_review_date|date:"j F Y" }}</span>{% endif %}{% if object.time_of_essence %}<br><strong class="govuk-tag govuk-tag--red">{% translate "Time is of the essence" %}</strong>{% endif %}</dd></div>
@@ -118,6 +119,11 @@
   <h2 class="govuk-heading-m">{% translate "Break options" %}</h2>
   {% include "core/_hint.html" with summary=_("How are break dates tracked?") text=_("Each break creates an event for the last date to serve notice and for the break date itself, assigned to the managing surveyor.") page="events" anchor="breaks" %}
   <ul class="govuk-list">{% for b in breaks %}<li><strong>{{ b.break_date|date:"j F Y" }}</strong> – {{ b.get_exercisable_by_display }}{% if b.notice_months %}, {% blocktranslate count n=b.notice_months %}{{ n }} month's notice{% plural %}{{ n }} months' notice{% endblocktranslate %} ({% translate "by" %} {{ b.notice_deadline|date:"j F Y" }}){% endif %}{% if b.conditions %}<br><span class="govuk-body-s">{{ b.conditions }}</span>{% endif %}</li>{% endfor %}</ul>
+  {% endif %}{% endwith %}
+
+  {% with options=object.options.all %}{% if options %}
+  <h2 class="govuk-heading-m">{% translate "Options" %}</h2>
+  <ul class="govuk-list">{% for o in options %}<li><strong>{{ o.get_option_type_display }}</strong> – {{ o.get_exercisable_by_display }}{% if o.exercise_from %}, {% translate "from" %} {{ o.exercise_from|date:"j F Y" }}{% endif %}{% if o.exercise_by %}, {% translate "by" %} {{ o.exercise_by|date:"j F Y" }}{% endif %}{% if o.notice_months %} ({% blocktranslate count n=o.notice_months %}{{ n }} month's notice{% plural %}{{ n }} months' notice{% endblocktranslate %}){% endif %}{% if o.terms %}<br><span class="govuk-body-s">{{ o.terms|linebreaksbr }}</span>{% endif %}</li>{% endfor %}</ul>
   {% endif %}{% endwith %}
   {% if doc_templates %}<p class="govuk-body-s">{% translate "Create a letter:" %} {% for t in doc_templates %}<a class="govuk-link" href="{% url 'documents:create' t.code %}?lease={{ object.pk }}">{{ t.name }}</a>{% if not forloop.last %} · {% endif %}{% endfor %} · <a class="govuk-link" href="{% url 'documents:library' %}">{% translate "Document library" %}</a></p>{% endif %}
   <h2 class="govuk-heading-m" id="documents">{% translate "Documents" %}</h2>

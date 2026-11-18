@@ -13,9 +13,9 @@ class LeasesConfig(AppConfig):
         from django.db.models.signals import m2m_changed, post_delete, post_save
 
         from . import workflow
-        from .models import BreakOption, Lease, LeaseDocument, LeaseEvent, Party, RentScheduleEntry
+        from .models import BreakOption, Lease, LeaseDocument, LeaseEvent, LeaseOption, Party, RentScheduleEntry
 
-        for model in (Party, Lease, BreakOption, LeaseDocument, LeaseEvent, RentScheduleEntry):
+        for model in (Party, Lease, BreakOption, LeaseOption, LeaseDocument, LeaseEvent, RentScheduleEntry):
             audit.register(model)
 
         def lease_saved(sender, instance, update_fields=None, **kwargs):
@@ -27,7 +27,7 @@ class LeasesConfig(AppConfig):
         def break_changed(sender, instance, **kwargs):
             origin = kwargs.get("origin")
             origin_model = getattr(origin, "model", type(origin)) if origin is not None else None
-            if origin is not None and origin_model is not BreakOption:
+            if origin is not None and origin_model is not sender:
                 return  # deleted along with its lease
             try:
                 lease = Lease.objects.get(pk=instance.lease_id)
@@ -51,6 +51,8 @@ class LeasesConfig(AppConfig):
         post_save.connect(lease_saved, sender=Lease, dispatch_uid="phaema_lease_sync", weak=False)
         post_save.connect(break_changed, sender=BreakOption, dispatch_uid="phaema_break_sync", weak=False)
         post_delete.connect(break_changed, sender=BreakOption, dispatch_uid="phaema_break_del_sync", weak=False)
+        post_save.connect(break_changed, sender=LeaseOption, dispatch_uid="phaema_option_sync", weak=False)
+        post_delete.connect(break_changed, sender=LeaseOption, dispatch_uid="phaema_option_del_sync", weak=False)
         m2m_changed.connect(premises_changed, sender=Lease.properties.through, dispatch_uid="phaema_premises", weak=False)
         post_save.connect(schedule_changed, sender=RentScheduleEntry, dispatch_uid="phaema_rent_saved", weak=False)
         post_delete.connect(schedule_changed, sender=RentScheduleEntry, dispatch_uid="phaema_rent_del", weak=False)

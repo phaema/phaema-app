@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
-from django.core.validators import RegexValidator
+from django.core.validators import MaxValueValidator, MinValueValidator, RegexValidator
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
@@ -76,6 +76,13 @@ class ModuleSettings(models.Model):
     compliance_enabled = models.BooleanField(_("compliance"), default=True)
     golden_thread_enabled = models.BooleanField(_("Golden Thread"), default=True)
     valuation_enabled = models.BooleanField(_("asset valuation"), default=False)
+    space_enabled = models.BooleanField(
+        _("space and costing"), default=False,
+        help_text=_("Record which departments and outside organisations occupy each building, floor and room, "
+                    "headcount and public use. Supports One Public Estate sharing."))
+    space_costing_enabled = models.BooleanField(
+        _("space and costing: show costs"), default=False,
+        help_text=_("Also share each building's costs between its occupiers. Needs space and costing on."))
     open_data_enabled = models.BooleanField(
         _("publish open data"), default=False,
         help_text=_("Publish the Transparency Code land and assets list and the available property list at "
@@ -122,6 +129,12 @@ class ModuleSettings(models.Model):
         default=SsoPasswords.UNLINKED,
         help_text=_("Applies once single sign-on is on. A person counts as having a council account from the "
                     "first time they sign in with it."))
+    outside_access_months = models.PositiveSmallIntegerField(
+        _("outside users' access lasts (months)"), default=6,
+        validators=[MinValueValidator(1), MaxValueValidator(60)],
+        help_text=_("When someone is marked as an outside user (for example a consultant or a tenant's agent) "
+                    "and no end date is given, their access ends this many months later. An administrator can "
+                    "change the date for each person."))
     sso_create_accounts = models.BooleanField(
         _("create a PHAEMA account at first council sign-in"), default=False,
         help_text=_("Off: only people an administrator has already added can sign in. On: anyone the sign-in "
@@ -148,6 +161,10 @@ class ModuleSettings(models.Model):
     reminder_days_expiry = models.CharField(
         _("lease expiry reminders (days before)"), max_length=60, default="365,180,90",
         validators=[days_list_validator])
+    reminder_days_option = models.CharField(
+        _("option deadline reminders (days before)"), max_length=60, default="180,90,30,7",
+        validators=[days_list_validator],
+        help_text=_("For options to renew, extend or purchase. Rent-free periods ending use the other events' days."))
     reminder_days_other = models.CharField(
         _("other event reminders (days before)"), max_length=60, default="30,7",
         validators=[days_list_validator])
@@ -156,7 +173,10 @@ class ModuleSettings(models.Model):
         help_text=_("Every Monday, remind people of their overdue events."))
 
     def reminder_days(self, event_type):
-        raw = getattr(self, f"reminder_days_{event_type}", "") or ""
+        raw = getattr(self, f"reminder_days_{event_type}", None)
+        if raw is None:
+            raw = self.reminder_days_other
+        raw = raw or ""
         return sorted({int(x) for x in raw.replace(" ", "").split(",") if x.isdigit()}, reverse=True)
 
     class Meta:
@@ -218,17 +238,34 @@ class StaffProfile(models.Model):
     """Extra details for a PHAEMA user: who supervises them and approves their work."""
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="staff_profile")
     job_title = models.CharField(_("job title"), max_length=100, blank=True)
+    is_external = models.BooleanField(
+        _("outside user"), default=False,
+        help_text=_("Tick for anyone who is not council staff, such as a consultant, contractor or tenant's "
+                    "agent. Their access ends automatically on the date below."))
+    organisation = models.CharField(_("organisation"), max_length=200, blank=True,
+                                    help_text=_("For an outside user, the firm or body they work for."))
+    access_ends = models.DateField(
+        _("access ends"), null=True, blank=True,
+        help_text=_("The last day this person can sign in. For outside users, left blank it is filled in from "
+                    "Module settings. For council staff it can be left blank."))
     supervisor = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name="supervisees",
         verbose_name=_("supervisor and approver"),
         help_text=_("Approves this person's work at the approval points in cases, such as decisions on consents."))
 
     class Meta:
-        verbose_name = _("supervisor and job title")
-        verbose_name_plural = _("supervisor and job title")
+        verbose_name = _("staff details")
+        verbose_name_plural = _("staff details")
 
     def __str__(self):
         return f"{self.user}"
+
+    def save(self, *args, **kwargs):
+        if self.is_external and not self.access_ends:
+            from .outside import default_end
+
+            self.access_ends = default_end()
+        super().save(*args, **kwargs)
 
 
 def supervisor_of(user):
@@ -244,7 +281,7 @@ class AccessArea(models.Model):
 
     MODULES = [("ledger", _("Rent ledger")), ("servicecharges", _("Service charges")),
                ("maintenance", _("Maintenance")), ("compliance", _("Compliance")),
-               ("valuations", _("Asset valuation"))]
+               ("valuations", _("Asset valuation")), ("space", _("Space and costing"))]
 
     code = models.SlugField(_("code"), max_length=30, unique=True)
     name = models.CharField(_("name"), max_length=60)

@@ -37,7 +37,9 @@ To add many agreements at once, see [importing leases](import-export.md#leases-a
 | Billing contact | Who rent demands go to. Leave blank to use the tenant's main contact; fill in only what differs (for example an accounts email). |
 | Service charge payable | Whether a service charge is due. |
 | Rent excludes business rates | Ticked unless the rent includes rates. |
-| Incentives | Any rent-free period or other incentive. |
+| Rent-free until | The last day of any rent-free period. PHAEMA adds an [event](events.md#options-and-rent-free-periods) for it, so the rent start is not missed. |
+| Incentives | Details of any rent-free period or other incentive, for example a fitting-out contribution. |
+| Guarantor | Under Premises and parties: the person or company guaranteeing the tenant. Shown on the agreement page and on the guarantor's own party record. |
 | Rent deposit, where held, interest | The amount, where it is held (for example the deposit account and the deed's date) and who the interest goes to and when. |
 | Alterations and reinstatement | What the tenant may alter, and whether they must reinstate at the end. |
 | Special rights | Parking, rights of way, telecoms access and so on. |
@@ -57,6 +59,14 @@ are not apportioned), and all key dates.
 Add break options in **Edit this agreement**. For each, record the break date, who can exercise it (tenant,
 landlord or either) and the notice period in months. PHAEMA works out the **last date to serve notice** and creates
 [events](events.md#breaks) for the notice deadline and the break date.
+
+## Options
+
+Options other than breaks also go in **Edit this agreement**, under **Options**: to renew, to extend the term, to
+purchase, a right of first refusal or pre-emption, to take more space, or any other. For each, record who can
+exercise it, the dates it can be exercised from and by, any notice period, and its terms (for example the new
+term and rent for a renewal, or the price for a purchase). An option with a "must be exercised by" date creates an
+[event](events.md#options-and-rent-free-periods), with its own reminder days in Module settings.
 
 ## Documents
 

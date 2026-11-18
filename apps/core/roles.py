@@ -20,7 +20,7 @@ CONTRIBUTORS = "Contributors"
 VIEWERS = "Viewers"
 ROLES = (ADMINISTRATORS, SURVEYORS, CONTRIBUTORS, VIEWERS)
 
-PHAEMA_APPS = ("core", "connectors", "properties", "leases", "ledger", "servicecharges", "cases", "maintenance", "compliance", "valuations", "documents", "projects")
+PHAEMA_APPS = ("core", "connectors", "properties", "leases", "ledger", "servicecharges", "cases", "maintenance", "compliance", "valuations", "documents", "projects", "space")
 
 # Permissions held by each role, as "app_label.codename". Object-level rules (only your
 # own properties) are applied on top of these by can_edit().
@@ -31,6 +31,7 @@ SURVEYOR_PERMISSIONS = {
     "properties.add_propertycost", "properties.change_propertycost", "properties.delete_propertycost",
     "leases.add_lease", "leases.change_lease",
     "leases.add_breakoption", "leases.change_breakoption", "leases.delete_breakoption",
+    "leases.add_leaseoption", "leases.change_leaseoption", "leases.delete_leaseoption",
     "leases.add_party", "leases.change_party",
     "leases.add_leasedocument", "leases.change_leasedocument", "leases.delete_leasedocument",
     "leases.add_leaseevent", "leases.change_leaseevent",
@@ -42,6 +43,12 @@ SURVEYOR_PERMISSIONS = {
     "compliance.add_requirement", "compliance.change_requirement", "compliance.add_certificate",
     "compliance.add_action", "compliance.change_action", "compliance.add_buildingdocument",
     "compliance.add_buildingsafety", "compliance.change_buildingsafety",
+    # Space and costing: surveyors record spaces, who occupies them, headcount and public use.
+    # The occupiers list and the use measures are administrators' (Manage data).
+    "space.add_space", "space.change_space", "space.delete_space",
+    "space.add_occupation", "space.change_occupation", "space.delete_occupation",
+    "space.add_headcount", "space.change_headcount", "space.delete_headcount",
+    "space.add_usefigure", "space.change_usefigure", "space.delete_usefigure",
 }
 ADMIN_EXTRA = {
     "auth.view_user", "auth.add_user", "auth.change_user",
@@ -114,7 +121,8 @@ def can_edit(user, obj):
         return True
     if role != SURVEYORS or obj is None:
         return False
-    from apps.leases.models import BreakOption, Lease, LeaseDocument, LeaseEvent, Party, RentScheduleEntry
+    from apps.leases.models import (BreakOption, Lease, LeaseDocument, LeaseEvent, LeaseOption, Party,
+                                    RentScheduleEntry)
     from apps.properties.models import Property, PropertyPhoto, PropertyPlan
 
     if isinstance(obj, Property):
@@ -123,7 +131,7 @@ def can_edit(user, obj):
         return manages(user, obj.property)
     if isinstance(obj, Lease):
         return obj.pk is None or obj.properties.filter(managing_surveyor=user).exists()
-    if isinstance(obj, (BreakOption, LeaseDocument, LeaseEvent, RentScheduleEntry)):
+    if isinstance(obj, (BreakOption, LeaseOption, LeaseDocument, LeaseEvent, RentScheduleEntry)):
         return can_edit(user, obj.lease)
     if isinstance(obj, Party):
         return True  # contact details are shared; changes are in the audit trail
@@ -143,6 +151,10 @@ def can_edit(user, obj):
         return can_edit(user, obj.requirement)
     if isinstance(obj, Action):
         return can_edit(user, obj.certificate)
+    from apps.space.models import Headcount, Occupation, Space, UseFigure
+
+    if isinstance(obj, (Space, Occupation, Headcount, UseFigure)):
+        return obj.pk is None or manages(user, obj.building)
     return False  # titles, documents, INSPIRE parcels and settings are for administrators
 
 
