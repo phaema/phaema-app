@@ -549,7 +549,7 @@ def _cases():
     from apps.cases.models import Case
 
     return Case.objects.select_related("case_type", "owner", "lease", "property", "party").prefetch_related(
-        "lease__properties")
+        "lease__properties", "visits")
 
 
 def _days_to_decision(case):
@@ -586,8 +586,52 @@ def _case_fields():
         Field("notice_served_on", "Notice given", "date", "notice_served_on"),
         Field("notice_date", "Date in the notice", "date", "notice_date"),
         Field("court_deadline", "Last day to apply to court", "date", getter=_court_deadline),
+        Field("last_visited", "Last site visit", "date", getter=_last_visited),
         Field("heads_covered", "Heads of terms covered", "number",
               getter=lambda c: len([v for v in (c.heads_of_terms or {}).values() if str(v).strip()])),
+    ]
+
+
+def _last_visited(case):
+    found = [v.visited_on for v in case.visits.all() if v.status == "finished"]
+    return max(found) if found else None
+
+
+def _visits():
+    from apps.cases.models import SiteVisit
+
+    return SiteVisit.objects.select_related("case", "case__case_type", "property", "visited_by").prefetch_related(
+        "answers", "photos")
+
+
+def _visit_differences(visit, open_only=False):
+    from apps.cases.visit import is_difference
+
+    return len([a for a in visit.answers.all() if is_difference(a) and not (open_only and a.resolution)])
+
+
+def _visit_fields():
+    from apps.cases.models import SiteVisit as V
+
+    return [
+        Field("case", "Case", getter=lambda v: v.case.display_reference, default=True),
+        Field("case_type", "Case type", path="case__case_type__name", default=True),
+        Field("property", "Property", path="property__reference", default=True),
+        Field("property_name", "Property name", path="property__name", default=True),
+        Field("visited_on", "Date of visit", "date", "visited_on", default=True),
+        Field("visited_by", "Visited by", "user", "visited_by", default=True),
+        Field("status", "Status", "choice", "status", choices=_choices(V, "status"), default=True),
+        Field("finished_on", "Finished", "date", "finished_on"),
+        Field("answered", "Items answered", "number",
+              getter=lambda v: len([a for a in v.answers.all() if a.value]), default=True),
+        Field("items", "Items", "number", getter=lambda v: len(v.answers.all())),
+        Field("photos", "Photos", "number", getter=lambda v: len(v.photos.all()), default=True),
+        Field("differences", "Differences from the record", "number", getter=_visit_differences, default=True),
+        Field("open_differences", "Differences still to decide", "number",
+              getter=lambda v: _visit_differences(v, open_only=True)),
+        Field("weather", "Weather", path="weather"),
+        Field("people_met", "People met", path="people_met"),
+        Field("follow_up", "To follow up", path="follow_up"),
     ]
 
 
@@ -1106,6 +1150,8 @@ def registry():
             Dataset("rent_accounts", "Rent accounts", "Each agreement's rent balance, overdue rent by age and "
                     "last payment.", _rent_accounts, _rent_account_fields()),
             Dataset("cases", "Cases", "Consents, lease events, enquiries and other estate work.", _cases, _case_fields()),
+            Dataset("site_visits", "Site visits", "Visits made for cases: who, when, how much of the checklist was "
+                    "answered, photos and differences from the property record.", _visits, _visit_fields()),
             Dataset("jobs", "Maintenance jobs", "Reactive and planned repairs, works orders and their costs.",
                     _jobs, _job_fields()),
             Dataset("components", "Components", "The component register: building elements, plant and systems.",

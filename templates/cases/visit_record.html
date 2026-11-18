@@ -11,6 +11,24 @@
   {% if can_fill_in %}<a class="govuk-link" href="{{ visit.get_absolute_url }}">{% translate "Carry on filling it in" %}</a>{% endif %}
   {% if is_admin and visit.is_finished %}<form method="post" action="{{ visit.get_absolute_url }}">{% csrf_token %}<button class="govuk-button govuk-button--warning" data-module="govuk-button" name="action" value="reopen">{% translate "Reopen" %}</button></form>{% endif %}
 </div></div>
+{% if differences and visit.is_finished %}
+<div class="govuk-!-display-none-print" id="differences">
+<h2 class="govuk-heading-m">{% translate "Differences from the record" %}</h2>
+<p class="govuk-body">{% translate "Where the visit found something other than the property record, decide for each one: update the record, or leave it as it was." %}</p>
+<table class="govuk-table govuk-!-font-size-16">
+  <thead class="govuk-table__head"><tr class="govuk-table__row"><th scope="col" class="govuk-table__header">{% translate "Item" %}</th><th scope="col" class="govuk-table__header">{% translate "Recorded" %}</th><th scope="col" class="govuk-table__header">{% translate "Found on site" %}</th><th scope="col" class="govuk-table__header"></th></tr></thead>
+  <tbody class="govuk-table__body">{% for a, editable in differences %}<tr class="govuk-table__row">
+    <td class="govuk-table__cell">{{ a.label }}<br><span class="govuk-body-s">{{ a.target.reference }} {{ a.target.name }}</span></td>
+    <td class="govuk-table__cell">{{ a.recorded|default:"–" }}</td>
+    <td class="govuk-table__cell">{{ a.shown }}{% if a.note %}<br><span class="govuk-body-s">{{ a.note }}</span>{% endif %}</td>
+    <td class="govuk-table__cell">{% if a.resolution %}<strong class="govuk-tag {% if a.resolution == 'applied' %}govuk-tag--green{% else %}govuk-tag--grey{% endif %}">{{ a.get_resolution_display }}</strong>{% elif editable %}
+      <a class="govuk-button govuk-!-margin-bottom-2" data-module="govuk-button" role="button" draggable="false" href="{% url 'cases:visit-update' case.pk visit.pk a.pk %}">{% translate "Update the record" %}</a>
+      <form method="post" action="{{ visit.get_absolute_url }}">{% csrf_token %}<input type="hidden" name="answer" value="{{ a.pk }}"><button class="govuk-button govuk-button--secondary govuk-!-margin-bottom-0" data-module="govuk-button" name="action" value="keep">{% translate "Leave as it was" %}</button></form>
+    {% else %}<span class="govuk-body-s">{% translate "To decide by the managing surveyor or an administrator" %}</span>{% endif %}</td>
+  </tr>{% endfor %}</tbody>
+</table>
+</div>
+{% endif %}
 <div class="phaema-report">{{ body }}</div>
 {% if photos %}<ul class="phaema-visit-photos">{% for p in photos %}<li><a href="{{ p.image.url }}"><img src="{{ p.image.url }}" alt="{{ p.caption|default:_('Site visit photo') }}" loading="lazy"></a><span class="govuk-body-s">{{ forloop.counter }}. {{ p.caption|default:"–" }}</span></li>{% endfor %}</ul>{% endif %}
 {% endblock %}

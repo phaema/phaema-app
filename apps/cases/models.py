@@ -545,6 +545,16 @@ class SiteVisitAnswer(models.Model):
     note = models.CharField(_("note"), max_length=500, blank=True)
     answered_at = models.DateTimeField(null=True, blank=True)
 
+    class Resolution(models.TextChoices):
+        APPLIED = "applied", _("Record updated")
+        KEPT = "kept", _("Record left as it was")
+
+    resolution = models.CharField(_("difference from the record"), max_length=8, choices=Resolution.choices,
+                                  blank=True)
+    resolved_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True,
+                                    related_name="+")
+    resolved_at = models.DateTimeField(null=True, blank=True)
+
     class Meta:
         ordering = ["order", "pk"]
         verbose_name = _("site visit answer")
@@ -554,6 +564,11 @@ class SiteVisitAnswer(models.Model):
 
     def choice_list(self):
         return [c.strip() for c in self.choices.split(",") if c.strip()]
+
+    @builtins.property
+    def target(self):
+        """The property this answer is about: its building, or the visit's property."""
+        return self.building if self.building_id else self.visit.property
 
     def shown(self):
         """The answer as text: "Checked", "Yes", the choice, or what was written."""

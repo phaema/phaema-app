@@ -1,0 +1,26 @@
+{% extends "base.html" %}{% load i18n %}
+{% block title %}{% translate "Update the record" %}: {{ target.reference }}{% endblock %}
+{% block help_page %}cases{% endblock %}
+{% block breadcrumbs %}<nav class="govuk-breadcrumbs" aria-label="Breadcrumb"><ol class="govuk-breadcrumbs__list">
+  <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="{{ case.get_absolute_url }}">{{ case.reference }}</a></li>
+  <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="{% url 'cases:visit-record' case.pk visit.pk %}#differences">{% translate "Site visit record" %}</a></li>
+  <li class="govuk-breadcrumbs__list-item">{% translate "Update the record" %}</li></ol></nav>{% endblock %}
+{% block content %}
+<span class="govuk-caption-l">{{ target.reference }} {{ target.name }}</span>
+<h1 class="govuk-heading-l">{% translate "Update the record" %}</h1>
+<div class="govuk-grid-row"><div class="govuk-grid-column-two-thirds">
+<dl class="govuk-summary-list">
+  <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Item" %}</dt><dd class="govuk-summary-list__value">{{ answer.label }}</dd></div>
+  <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Recorded" %}</dt><dd class="govuk-summary-list__value">{{ answer.recorded|default:"–" }}</dd></div>
+  <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Found on site" %}</dt><dd class="govuk-summary-list__value">{{ answer.shown }}{% if answer.note %}<br><span class="govuk-body-s">{{ answer.note }}</span>{% endif %}</dd></div>
+  <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Visit" %}</dt><dd class="govuk-summary-list__value">{{ visit.visited_on|date:"j F Y" }}, {{ visit.visited_by.get_full_name|default:visit.visited_by.username }}</dd></div>
+</dl>
+<p class="govuk-body">{% translate "Change the record to match what was found. The change is saved in the change log under your name." %}</p>
+<form method="post" novalidate>{% csrf_token %}
+  {% include "core/_form_errors.html" %}
+  {% for field in form %}{% include "core/_field.html" %}{% endfor %}
+  <button class="govuk-button" data-module="govuk-button">{% translate "Update the record" %}</button>
+  <a class="govuk-link govuk-!-margin-left-3" href="{% url 'cases:visit-record' case.pk visit.pk %}#differences">{% translate "Cancel" %}</a>
+</form>
+</div></div>
+{% endblock %}

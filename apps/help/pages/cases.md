@@ -162,7 +162,22 @@ with the value on the record beside each item that checks one, as it stands that
   visit generally) and give a caption. Photos are made smaller and their location data removed. They stay with
   the visit; tick **Also add to the property's photos** to add them to the building's (or property's) photos too.
 - **Finish the visit** when you are done. A finished visit cannot be changed, except by an administrator, who can
-  reopen it. A note is added to the case.
+  reopen it. A note is added to the case and the record is saved, as a Word document, to the case documents.
+
+**Differences from the record.** Where the visit found something other than the property record (a "no" to an
+item that checks the record, or an answer that is not what was recorded), the finished visit's record lists each
+one. For each, choose **Update the record**, which opens the matching details of that building or property to
+correct, or **Leave as it was**. Only someone who can edit that property (its managing surveyor or an
+administrator) can decide, and each change is in the change log under their name. Nothing on the record changes
+by itself.
+
+**Check-measures.** An item that checks the floor areas offers the measured areas, the standard and the source,
+with the source set to "Measured survey" and the date of the visit.
+
+My work lists your visits not yet finished and finished visits with differences still to decide. A
+**Site visits** report type in Reports lists visits with who, when, how much was answered, photos and
+differences; the Cases report has a **Last site visit** column. When someone leaves, their unfinished visits can
+be handed over with the rest of their work.
 
 The **record** of a visit (case page, Site visits, or **See the record so far**) shows each answer beside what was
 recorded, the notes, details and photos. Print it or download it as Word. Changing a checklist later does not change
