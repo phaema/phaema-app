@@ -1,14 +1,16 @@
 {% extends "base.html" %}{% load i18n humanize %}
-{% block title %}{% translate "Estate strategy" %}{% endblock %}
+{% block title %}{% translate "The estate at a glance" %}{% endblock %}
 {% block help_page %}estate-strategy{% endblock %}
 {% block breadcrumbs %}
 <nav class="govuk-breadcrumbs" aria-label="Breadcrumb"><ol class="govuk-breadcrumbs__list">
   <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="{% url 'reports:list' %}">{% translate "Reports" %}</a></li>
-  <li class="govuk-breadcrumbs__list-item">{% translate "Estate strategy" %}</li>
+  <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="{% url 'strategy:home' %}">{% translate "Estate strategy" %}</a></li>
+  <li class="govuk-breadcrumbs__list-item">{% translate "The estate at a glance" %}</li>
 </ol></nav>
 {% endblock %}
 {% block content %}
-<h1 class="govuk-heading-l">{% translate "Estate strategy" %}</h1>
+<span class="govuk-caption-l">{% translate "Estate strategy" %}</span>
+<h1 class="govuk-heading-l">{% translate "The estate at a glance" %}</h1>
 <p class="govuk-body">{% blocktranslate with n=total|intcomma %}The estate at a glance: {{ n }} properties held (disposals left out). Select a figure to see the properties.{% endblocktranslate %}</p>
 
 <div class="govuk-grid-row">

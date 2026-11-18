@@ -1,0 +1,36 @@
+{% extends "base.html" %}{% load i18n %}
+{% block title %}{% translate "Estate strategy" %}{% endblock %}
+{% block help_page %}estate-strategy{% endblock %}
+{% block content %}
+<h1 class="govuk-heading-l">{% translate "Estate strategy" %}</h1>
+{% if strategy %}
+<span class="govuk-caption-m">{{ strategy.starts_on|date:"Y" }} to {{ strategy.ends_on|date:"Y" }} · {{ strategy.get_status_display }}</span>
+<h2 class="govuk-heading-m govuk-!-margin-top-2">{{ strategy.title }}</h2>
+<p class="govuk-body-s">{% if strategy.approved_by or strategy.approved_on %}{% translate "Approved" %}{% if strategy.approved_by %} {% translate "by" %} {{ strategy.approved_by }}{% endif %}{% if strategy.approved_on %} {{ strategy.approved_on|date:"j F Y" }}{% endif %}{% if strategy.minute_reference %}, {{ strategy.minute_reference }}{% endif %}. {% endif %}{% if strategy.document_url %}<a class="govuk-link" href="{{ strategy.document_url }}" rel="noopener" target="_blank">{% translate "The published strategy" %}</a>{% endif %}</p>
+<div class="govuk-button-group">
+  <a class="govuk-button" data-module="govuk-button" role="button" draggable="false" href="{% url 'strategy:report' %}?strategy={{ strategy.pk }}">{% translate "Board report" %}</a>
+  <a class="govuk-link" href="{% url 'properties:estate-strategy' %}">{% translate "The estate at a glance: purposes, asset strategies, reviews and suitability" %}</a>
+  {% if is_admin %}<a class="govuk-link" href="{% url 'admin:strategy_estatestrategy_change' strategy.pk %}">{% translate "Change the strategy and its objectives" %}</a>{% endif %}
+</div>
+{% if principles %}<details class="govuk-details" data-module="govuk-details"><summary class="govuk-details__summary"><span class="govuk-details__summary-text">{% translate "Policy principles" %}</span></summary><div class="govuk-details__text"><ol class="govuk-list govuk-list--number">{% for p in principles %}<li>{{ p }}</li>{% endfor %}</ol></div></details>{% endif %}
+
+<h2 class="govuk-heading-m">{% translate "Objectives" %}</h2>
+{% if objectives %}
+<table class="govuk-table">
+  <thead class="govuk-table__head"><tr class="govuk-table__row"><th scope="col" class="govuk-table__header">{% translate "Objective" %}</th><th scope="col" class="govuk-table__header">{% translate "Owner" %}</th><th scope="col" class="govuk-table__header">{% translate "Target" %}</th><th scope="col" class="govuk-table__header">{% translate "Status" %}</th><th scope="col" class="govuk-table__header govuk-table__header--numeric">{% translate "Actions done" %}</th></tr></thead>
+  <tbody class="govuk-table__body">{% for o in objectives %}<tr class="govuk-table__row">
+    <td class="govuk-table__cell"><a class="govuk-link" href="{{ o.objective.get_absolute_url }}">{{ o.objective }}</a>{% if o.late %}<br><span class="govuk-body-s">{% blocktranslate count n=o.late|length %}{{ n }} action off track{% plural %}{{ n }} actions off track{% endblocktranslate %}</span>{% endif %}</td>
+    <td class="govuk-table__cell">{{ o.objective.owner.get_full_name|default:o.objective.owner.username|default:"–" }}</td>
+    <td class="govuk-table__cell">{{ o.objective.target_date|date:"M Y"|default:"–" }}</td>
+    <td class="govuk-table__cell">{% if o.shown %}{% for k, cls in rag_tag.items %}{% if k == o.shown %}<strong class="govuk-tag {{ cls }}">{% for w, words in rag_words.items %}{% if w == k %}{{ words }}{% endif %}{% endfor %}</strong>{% endif %}{% endfor %}{% if not o.objective.reported_status %}<br><span class="govuk-body-s">{% translate "suggested" %}</span>{% endif %}{% else %}–{% endif %}</td>
+    <td class="govuk-table__cell govuk-table__cell--numeric">{{ o.done_count }} / {{ o.actions|length }}</td>
+  </tr>{% endfor %}</tbody>
+</table>
+{% else %}<p class="govuk-body">{% translate "No objectives yet." %}{% if is_admin %} <a class="govuk-link" href="{% url 'admin:strategy_estatestrategy_change' strategy.pk %}">{% translate "Add them" %}</a>{% endif %}</p>{% endif %}
+{% else %}
+<p class="govuk-body">{% translate "No estate strategy has been recorded yet. Record the council's asset management strategy, its period and its objectives; then link projects, cases and other actions to each objective and report progress to the board." %}</p>
+{% if is_admin %}<p class="govuk-body"><a class="govuk-button" data-module="govuk-button" role="button" draggable="false" href="{% url 'admin:strategy_estatestrategy_add' %}">{% translate "Record the estate strategy" %}</a></p>{% endif %}
+<p class="govuk-body"><a class="govuk-link" href="{% url 'properties:estate-strategy' %}">{% translate "The estate at a glance: purposes, asset strategies, reviews and suitability" %}</a></p>
+{% endif %}
+{% if others %}<h2 class="govuk-heading-s">{% translate "Other strategies" %}</h2><ul class="govuk-list">{% for s in others %}<li><a class="govuk-link" href="{{ s.get_absolute_url }}">{{ s.title }}</a> <span class="govuk-body-s">({{ s.get_status_display|lower }})</span></li>{% endfor %}</ul>{% endif %}
+{% endblock %}

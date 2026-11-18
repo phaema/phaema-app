@@ -56,6 +56,7 @@ INSTALLED_APPS = [
     "apps.valuations",
     "apps.documents",
     "apps.projects",
+    "apps.strategy",
     "apps.space",
 ]
 
