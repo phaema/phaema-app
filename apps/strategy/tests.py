@@ -54,7 +54,7 @@ def test_suggested_status_follows_the_actions(plan, make_user):
     assert state.suggested == "red" and state.late and state.exceptions
     a.status = "done"
     a.save()
-    assert a.done_on == TODAY and progress.objective_state(obj).suggested == "done"
+    assert a.done_on == date.today() and progress.objective_state(obj).suggested == "done"
     obj.target_date = TODAY - timedelta(days=1)
     obj.save()
     Action.objects.create(objective=obj, title="Another", target_date=TODAY + timedelta(days=300))
@@ -92,7 +92,7 @@ def test_owner_updates_status_and_actions(client, plan, make_user):
     assert item.status == "done"
     client.post(url, {"action": "status", "reported_status": "amber", "progress_note": "Talks started"})
     obj.refresh_from_db()
-    assert obj.reported_status == "amber" and obj.status_by == plan["sue"] and obj.status_on == TODAY
+    assert obj.reported_status == "amber" and obj.status_by == plan["sue"] and obj.status_on == date.today()
     page = client.get(url).content.decode()
     assert "Talks started" in page and "differs" in page  # all done, so PHAEMA suggests achieved
 
