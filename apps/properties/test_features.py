@@ -180,13 +180,13 @@ def test_measurement_basis_is_recorded_and_imported(client, make_user, db):
     from apps.properties.models import Property
 
     csv = ("Reference,Name,Type,GEA m2,Measured to,Source of areas,Areas measured on\n"
-           "M-1,Measured unit,Lettable unit,250,IPMS: All Buildings,Measured survey,01/10/2026\n")
+           "M-1,Measured unit,Lettable unit,250,\"RICS Code of Measuring Practice, 6th edition\",Measured survey,01/10/2026\n")
     rows = importer.read_rows(SimpleUploadedFile("m.csv", csv.encode()))
     result, prepared = importer.validate(rows)
     assert result.ok, result.rows[0].errors
     importer.apply(prepared)
     unit = Property.objects.get(reference="M-1")
     assert (unit.gea_sqm, unit.area_standard, unit.area_source, str(unit.areas_measured_on)) == \
-        (250, "ipms", "survey", "2026-10-01")
+        (250, "comp6", "survey", "2026-10-01")
     client.force_login(make_user("viewer", "Viewers"))
-    assert "IPMS: All Buildings" in client.get(unit.get_absolute_url()).content.decode()
+    assert "RICS Code of Measuring Practice, 6th edition" in client.get(unit.get_absolute_url()).content.decode()

@@ -203,7 +203,14 @@ class PropertyAdmin(AdministratorOnlyEditingMixin, RoleAdminMixin, admin.GISMode
             "description": "For a property whose occupation status is Vacant. These are cleared when it is "
                            "occupied again."}),
         ("Areas", {"fields": ("gia_sqm", "nia_sqm", "gea_sqm", "site_area_ha", "site_area_sqm", "area_standard",
-                              "area_source", "areas_measured_on")}),
+                              "area_source", "areas_measured_on", "areas_measured_by", "areas_method"),
+                   "description": "Gross internal, net internal and gross external areas to the RICS Code of "
+                                  "Measuring Practice. Record IPMS figures in the IPMS section below, not here."}),
+        ("Floor areas to IPMS: All Buildings", {
+            "fields": ("ipms1_sqm", "ipms2_sqm", "ipms3_sqm", "ipms3_kind", "ipms_measured_on", "ipms_source",
+                       "ipms_measured_by", "ipms_method", "ipms_checked", "ipms_checked_how", "ipms_notes"),
+            "description": "Held beside the GIA, NIA and GEA, so both can be reported. Fill in what the measured "
+                           "survey gives; leave the rest blank."}),
         ("Site and buildings", {
             "fields": ("location_description", "building_description", "built", "built_year", "condition_grade",
                        "condition_surveyed_on", "construction_type",

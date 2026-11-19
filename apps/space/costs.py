@@ -84,7 +84,7 @@ def total_area(building, on):
     areas = [summary._area(f) for f in floors]
     if any(a is not None for a in areas):
         return sum((a or ZERO for a in areas), ZERO)
-    return building.nia_sqm or building.gia_sqm
+    return building.floor_area("net")[0] or building.floor_area("gross")[0]
 
 
 @dataclass

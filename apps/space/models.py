@@ -217,7 +217,7 @@ class Occupation(TimeStampedModel):
     def whole_area(self):
         if self.space_id:
             return self.space.area_sqm
-        return self.building.nia_sqm or self.building.gia_sqm
+        return self.building.floor_area("net")[0] or self.building.floor_area("gross")[0]
 
     def area(self):
         """Square metres this occupation covers, or None if the space has no area."""

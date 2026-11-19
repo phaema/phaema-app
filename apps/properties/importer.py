@@ -45,7 +45,8 @@ COLUMNS = [
     ("Notes", "notes", False, ""),
     # Added November 2026; at the end so earlier spreadsheets still line up.
     ("GEA m2", "gea_sqm", False, "Gross external area in square metres."),
-    ("Measured to", "area_standard", False, "RICS Code of Measuring Practice, 6th edition; IPMS: All Buildings; or Other."),
+    ("Measured to", "area_standard", False, "For the GIA, NIA and GEA: RICS Code of Measuring Practice, 6th edition; "
+                                            "or Other. IPMS figures go in the IPMS columns."),
     ("Source of areas", "area_source", False, "Measured survey, Taken from drawings, Lease or title plan, or Estimate."),
     ("Areas measured on", "areas_measured_on", False, "Date the areas were measured, dd/mm/yyyy."),
     ("Site hazards", "site_hazards", False, "What anyone visiting should know first: access, lone working, "
@@ -91,15 +92,31 @@ COLUMNS = [
     ("Asset strategy reason", "strategy_reason", False, "Why, with any committee and minute reference."),
     ("Suitability grade", "suitability_grade", False, "A, B, C or D."),
     ("Suitability assessed on", "suitability_on", False, "dd/mm/yyyy. Today if blank."),
+    # Floor areas to IPMS: All Buildings, added 19 November 2026.
+    ("Areas measured by", "areas_measured_by", False, "Who measured the GIA, NIA and GEA."),
+    ("Areas method", "areas_method", False, "How the GIA, NIA and GEA were measured, e.g. laser measure and CAD."),
+    ("IPMS 1 m2", "ipms1_sqm", False, "IPMS 1 in square metres."),
+    ("IPMS 2 m2", "ipms2_sqm", False, "IPMS 2 in square metres."),
+    ("IPMS 3 m2", "ipms3_sqm", False, "IPMS 3 in square metres."),
+    ("IPMS 3 measured", "ipms3_kind", False, "IPMS 3.1 (measured externally) or IPMS 3.2 (measured internally)."),
+    ("IPMS measured on", "ipms_measured_on", False, "Date the IPMS areas were measured, dd/mm/yyyy."),
+    ("Source of IPMS areas", "ipms_source", False, "Measured survey, Taken from drawings, Lease or title plan, "
+                                                   "or Estimate."),
+    ("IPMS measured by", "ipms_measured_by", False, "Who measured the IPMS areas."),
+    ("IPMS method", "ipms_method", False, "How the IPMS areas were measured."),
+    ("IPMS checked on site", "ipms_checked", False, "Yes or No."),
+    ("IPMS notes", "ipms_notes", False, "Areas stated separately and the use of each part."),
 ]
 # Columns that are not fields of the property itself: kept as a decision or an assessment with its history.
 EXTRA_FIELDS = {"purpose_category", "asset_strategy", "strategy_decided_on", "strategy_reason", "suitability_grade",
                 "suitability_on"}
 CHOICE_FIELDS = {"property_type", "holding_purpose", "tenure", "occupation", "area_standard", "area_source",
+                 "ipms3_kind", "ipms_source", "ipms_checked",
                  "construction_type", "roof_type", "roof_covering", "window_type", "mains_gas", "electricity",
                  "mains_water", "drainage", "solar_pv"}
-DECIMAL_FIELDS = {"gia_sqm", "nia_sqm", "site_area_ha", "gea_sqm", "solar_capacity_kwp"}
-DATE_FIELDS = {"areas_measured_on", "purpose_review_date"}
+DECIMAL_FIELDS = {"gia_sqm", "nia_sqm", "site_area_ha", "gea_sqm", "solar_capacity_kwp", "ipms1_sqm", "ipms2_sqm",
+                  "ipms3_sqm"}
+DATE_FIELDS = {"areas_measured_on", "purpose_review_date", "ipms_measured_on"}
 INTEGER_FIELDS = {"easting", "northing", "storeys", "basement_levels", "parking_spaces"}
 
 
@@ -181,6 +198,11 @@ def _choice(field_name, text):
     for value, label in choices:
         if t in (str(value).lower(), str(label).lower()):
             return value
+    if field_name == "ipms3_kind" and t in ("ipms 3.1", "ipms 3.2"):
+        return t[-3:]
+    if field_name == "area_standard" and t.startswith("ipms"):
+        raise ValueError("IPMS figures go in the IPMS columns (IPMS 1 m2, IPMS 2 m2, IPMS 3 m2), not in GIA, NIA "
+                         "and GEA. Leave Measured to blank, or use RICS Code of Measuring Practice, 6th edition.")
     raise ValueError(f"'{text}' is not a valid {Property._meta.get_field(field_name).verbose_name}. "
                      f"Use one of: {', '.join(str(label) for _v, label in choices)}.")
 

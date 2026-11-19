@@ -48,8 +48,7 @@ def _own(prop, key):
     if key == "solar_pv":
         return rows.get("Solar panels", "")
     if key == "floor_areas":
-        return ", ".join(f"{label} {value:,.0f} m²" for label, value in (
-            ("GIA", prop.gia_sqm), ("NIA", prop.nia_sqm), ("GEA", prop.gea_sqm)) if value is not None)
+        return ", ".join(f"{label} {value:,.0f} m²" for label, value in prop.area_lines())
     if key == "site_area_ha":
         return prop.site_area_text()
     if key == "site_hazards":
@@ -349,7 +348,10 @@ UPDATES = {
     "parking": ["parking_spaces", "parking"],
     "services": ["mains_gas", "electricity", "mains_water", "drainage", "services_notes"],
     "solar_pv": ["solar_pv", "solar_capacity_kwp"],
-    "floor_areas": ["gia_sqm", "nia_sqm", "gea_sqm", "area_standard", "area_source", "areas_measured_on"],
+    "floor_areas": ["gia_sqm", "nia_sqm", "gea_sqm", "area_standard", "area_source", "areas_measured_on",
+                    "areas_measured_by", "areas_method"],
+    "floor_areas_ipms": ["ipms1_sqm", "ipms2_sqm", "ipms3_sqm", "ipms3_kind", "ipms_measured_on", "ipms_source",
+                         "ipms_measured_by", "ipms_method", "ipms_checked", "ipms_checked_how"],
     "site_area_ha": ["site_area_ha"],
     "site_hazards": ["site_hazards"],
 }
@@ -379,18 +381,27 @@ def open_differences(visit):
     return [a for a in differences(visit) if not a.resolution]
 
 
-def update_form_class(key):
+def update_fields(key, target=None):
+    """The property fields offered for a difference. A check-measure offers the council's chosen basis: the
+    Code of Measuring Practice areas, or the IPMS areas."""
+    if key == "floor_areas" and target is not None and target.area_basis() == "ipms":
+        return UPDATES["floor_areas_ipms"]
+    return UPDATES[key]
+
+
+def update_form_class(key, target=None):
     from django import forms
 
     from apps.properties.models import Property
 
-    fields = UPDATES[key]
+    fields = update_fields(key, target)
 
     class UpdateForm(forms.ModelForm):
         class Meta:
             model = Property
-            fields = UPDATES[key]
-            widgets = {"areas_measured_on": forms.DateInput(attrs={"type": "date"})}
+            fields = update_fields(key, target)
+            widgets = {"areas_measured_on": forms.DateInput(attrs={"type": "date"}),
+                       "ipms_measured_on": forms.DateInput(attrs={"type": "date"})}
 
     UpdateForm.field_names = fields
     return UpdateForm
@@ -399,6 +410,8 @@ def update_form_class(key):
 def initial_for(a, visit):
     """Starting values for the update form: for a check-measure, the measured source and date of the visit."""
     if a.checks == "floor_areas":
+        if a.target.area_basis() == "ipms":
+            return {"ipms_source": "survey", "ipms_measured_on": visit.visited_on, "ipms_checked": "yes"}
         return {"area_source": "survey", "areas_measured_on": visit.visited_on}
     return {}
 
