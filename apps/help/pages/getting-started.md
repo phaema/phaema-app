@@ -70,10 +70,18 @@ on a page of their own. The page shows the name of the document and a link back 
 - **Download** saves a copy with a name you will recognise. **Print** opens the document in your browser's own
   PDF reader in a new tab, where you print it in the usual way.
 
-Find only works where the PDF holds real text. A scan is a picture of the page, so there is nothing to search
-unless the scanner made it searchable (often called OCR). A PDF protected with a password cannot be shown:
-download it and open it on your computer. Other files, such as Word documents, spreadsheets and drawings, still
-download.
+Find only works where the PDF holds text. A scan is a picture of the page, so when a scanned PDF is added PHAEMA
+reads the words in it (this is called OCR), on the council's own server, usually within a few minutes. The viewer
+then shows a searchable copy and says so above the document. The recognised text can contain mistakes, especially
+on faint or handwritten pages, so do not rely on Find to prove a word is absent. **Download** still gives the
+original scan, which stays the document of record; a link above the document downloads the searchable copy
+instead. Until a scan has been read, the viewer says Find cannot search it yet.
+
+A PDF protected with a password cannot be shown: download it and open it on your computer. Other files, such as
+Word documents, spreadsheets and drawings, still download.
+
+Administrators can switch OCR off in **Module settings**, **Scanned documents**, and see which documents have been
+read, and ask for one to be read again, under **Manage data**, **Scanned documents**.
 
 ## Making PHAEMA easier to read
 

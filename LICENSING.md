@@ -14,6 +14,7 @@ PHAEMA uses different open licences for different parts of the project.
 - **GOV.UK Frontend** (`static/vendor/govuk-frontend/`): MIT licence, © Crown copyright. Modified to remove the GDS Transport typeface, which is licensed only for GOV.UK services. PHAEMA does not use GOV.UK branding.
 - **Atkinson Hyperlegible** typeface (`static/vendor/fonts/atkinson-hyperlegible/`): SIL Open Font License 1.1, © Braille Institute of America. Used by the Clear style.
 - **PDF.js** (`static/vendor/pdfjs/`): Apache License 2.0, © Mozilla Foundation. Shows PDFs inside PHAEMA. It carries the Foxit and Liberation fonts and the JBIG2, OpenJPEG, qcms and QuickJS decoders under their own open-source licences, which are kept beside them.
+- **Tesseract OCR** (installed on the server from the operating system's packages, not in this repository): Apache License 2.0. Reads the text in scanned PDFs, through **OCRmyPDF** (MPL-2.0).
 - Python packages listed in `requirements.txt` are used under their own open-source licences.
 
 ## Licensed data and standards

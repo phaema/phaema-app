@@ -7,7 +7,7 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     PIP_NO_CACHE_DIR=1
 
 RUN apt-get update \
-    && apt-get install -y --no-install-recommends gdal-bin \
+    && apt-get install -y --no-install-recommends gdal-bin tesseract-ocr tesseract-ocr-eng tesseract-ocr-cym \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app

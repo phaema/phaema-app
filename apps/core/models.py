@@ -138,6 +138,11 @@ class ModuleSettings(models.Model):
         help_text=_("Which set of floor areas PHAEMA uses first on property pages, reports, space costs and the "
                     "data standard export. Where a property has only the other set, that is used, always labelled "
                     "with its basis."))
+    ocr_enabled = models.BooleanField(
+        _("recognise text in scanned PDFs"), default=True,
+        help_text=_("When a scanned PDF is added, PHAEMA reads the text in its pages in the background, on this "
+                    "server, so Find in the document viewer works on it. The original scan is kept as it was. "
+                    "Needs Tesseract on the server (it is in the standard installation)."))
     strategy_review_years = models.PositiveSmallIntegerField(
         _("asset strategies are reviewed every (years)"), default=5,
         validators=[MinValueValidator(1), MaxValueValidator(20)],
@@ -395,3 +400,38 @@ class RecoveryCode(models.Model):
 
     def __str__(self):
         return f"Recovery code for {self.user}"
+
+
+class TextCopy(models.Model):
+    """A searchable copy of a scanned PDF: the same pages with the recognised text laid invisibly under each page
+    image (OCR by Tesseract through OCRmyPDF). The original stays the document of record; the viewer shows this
+    copy so that Find works. Keyed by the stored name of the original, so it serves any document model."""
+
+    class Status(models.TextChoices):
+        WAITING = "waiting", _("Waiting")
+        DONE = "done", _("Text recognised")
+        HAS_TEXT = "has_text", _("Already has text")
+        TOO_BIG = "too_big", _("Too many pages")
+        FAILED = "failed", _("Could not be read")
+
+    source = models.CharField(_("original file"), max_length=255, unique=True)
+    status = models.CharField(_("status"), max_length=10, choices=Status.choices, default=Status.WAITING,
+                              db_index=True)
+    copy = models.CharField(_("searchable copy"), max_length=255, blank=True)
+    pages = models.PositiveIntegerField(_("pages"), null=True, blank=True)
+    pages_scanned = models.PositiveIntegerField(_("pages without text"), null=True, blank=True)
+    characters = models.PositiveIntegerField(_("characters recognised"), null=True, blank=True)
+    poor = models.BooleanField(_("hard to read"), default=False,
+                               help_text=_("Little text was found on the scanned pages: Find may miss words."))
+    error = models.TextField(_("what went wrong"), blank=True)
+    attempts = models.PositiveSmallIntegerField(default=0)
+    queued_at = models.DateTimeField(_("queued"), auto_now_add=True)
+    finished_at = models.DateTimeField(_("finished"), null=True, blank=True)
+
+    class Meta:
+        verbose_name = _("scanned document")
+        verbose_name_plural = _("scanned documents")
+        ordering = ["-queued_at"]
+
+    def __str__(self):
+        return self.source.rsplit("/", 1)[-1]

@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 from django.apps import AppConfig
-from django.db.models.signals import m2m_changed, post_migrate
+from django.db.models.signals import m2m_changed, post_migrate, post_save
 
 
 class CoreConfig(AppConfig):
@@ -32,6 +32,11 @@ class CoreConfig(AppConfig):
                     sync_staff_status(user)
 
         m2m_changed.connect(groups_changed, sender=User.groups.through, dispatch_uid="phaema_sync_staff", weak=False)
+
+        # Any PDF saved on any record is queued to have the text in its scanned pages recognised.
+        from .ocr import queue_record
+
+        post_save.connect(queue_record, dispatch_uid="phaema_ocr_queue", weak=False)
 
         # Access areas and cover go in the change log, so it is clear who could see what, and when.
         from . import audit

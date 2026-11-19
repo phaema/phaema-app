@@ -98,3 +98,35 @@ def placeholder_pdf(heading, lines, banner="FICTIONAL DEMONSTRATION DOCUMENT - N
         out.write(f"{off:010d} 00000 n \n".encode())
     out.write(f"trailer\n<< /Size {len(objects) + 1} /Root 1 0 R >>\nstartxref\n{xref}\n%%EOF\n".encode())
     return out.getvalue()
+
+
+def scanned_pdf(heading, lines, banner, more=()):
+    """A demonstration PDF that is only page images, like a document put through a scanner, so OCR can be seen at
+    work. Falls back to an ordinary PDF if the imaging packages are missing."""
+    try:
+        import img2pdf
+        from PIL import Image, ImageDraw, ImageFont
+    except ImportError:
+        return placeholder_pdf(heading, lines, banner, more=more)
+
+    def font(size):
+        try:
+            return ImageFont.load_default(size=size)
+        except TypeError:  # an old Pillow without scalable default font
+            return ImageFont.load_default()
+
+    pages = []
+    for title, body in [(heading, lines), *more]:
+        im = Image.new("L", (1240, 1754), 248)  # A4 at 150 dpi, slightly grey like a photocopy
+        draw = ImageDraw.Draw(im)
+        draw.text((110, 90), banner, fill=90, font=font(22))
+        draw.text((110, 170), title, fill=20, font=font(40))
+        y = 260
+        for line in body:
+            draw.text((110, y), line, fill=30, font=font(28))
+            y += 52
+        im = im.rotate(0.6, fillcolor=248)  # fed in a little crooked
+        out = BytesIO()
+        im.save(out, format="PNG", dpi=(150, 150))
+        pages.append(out.getvalue())
+    return img2pdf.convert(pages)

@@ -16,3 +16,4 @@ pytest-django>=4.9,<5
 Markdown>=3.7,<4
 extract-msg>=0.48,<1  # reads Outlook .msg emails filed on cases (GPL-3.0, compatible with AGPL-3.0)
 python-docx>=1.1,<2  # Word export of letters and notices (MIT)
+ocrmypdf>=17.14,<18  # recognises text in scanned PDFs, with Tesseract (MPL-2.0; Tesseract is Apache-2.0)
