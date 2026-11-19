@@ -293,6 +293,18 @@ def _documents():
                     "Landlord and Tenant Act 1954, section 25 (demonstration only).",
                     f"Tenant: {lease.counterparty.name}", "The landlord does not oppose a new tenancy."], banner),
                     name="s25.pdf"))
+    lease = Lease.objects.filter(reference="DL-0001").first()  # a scanned counterpart, to show OCR at work
+    if lease and not lease.documents.filter(document_type="counterpart").exists():
+        from apps.properties.demo_media import scanned_pdf
+
+        LeaseDocument.objects.create(
+            lease=lease, document_type="counterpart", description=f"Counterpart lease {lease.reference} (scanned)",
+            document_date=lease.lease_date,
+            file=ContentFile(scanned_pdf(f"Counterpart lease - {lease.counterparty.name}", [
+                f"Agreement reference {lease.reference}", "Landlord: Demonstration District Council",
+                f"Tenant: {lease.counterparty.name}", f"Term: {lease.term_description} from {lease.term_start:%d %B %Y}",
+                f"Rent: {lease.annual_rent:,.2f} pounds a year", "Signed by the tenant as counterpart."], banner,
+                more=_lease_pages(lease)[:2]), name="counterpart-scan.pdf"))
     lease = Lease.objects.filter(reference="DL-0021").first()  # the tenant insures: a certificate about to run out
     if lease and not lease.documents.filter(document_type="insurance").exists():
         today = date.today()

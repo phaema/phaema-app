@@ -183,6 +183,13 @@ PHAEMA_BASE_URL = env("PHAEMA_BASE_URL", default="http://localhost:8000")
 # How long a "forgotten your password" link works for, in minutes.
 PHAEMA_PASSWORD_RESET_MINUTES = env.int("PHAEMA_PASSWORD_RESET_MINUTES", default=60)
 
+# Recognising text in scanned PDFs (OCR), on this server: Tesseract language codes joined with "+" (Welsh: eng+cym,
+# with the tesseract-ocr-cym package), the largest document read, seconds allowed per page and pages read at once.
+PHAEMA_OCR_LANGUAGES = env("PHAEMA_OCR_LANGUAGES", default="eng")
+PHAEMA_OCR_MAX_PAGES = env.int("PHAEMA_OCR_MAX_PAGES", default=500)
+PHAEMA_OCR_PAGE_SECONDS = env.int("PHAEMA_OCR_PAGE_SECONDS", default=180)
+PHAEMA_OCR_JOBS = env.int("PHAEMA_OCR_JOBS", default=1)
+
 # Name of the organisation shown in the header, e.g. "Example District Council".
 PHAEMA_ORGANISATION_NAME = env("PHAEMA_ORGANISATION_NAME", default="Demonstration Council")
 # A public test site holding only fictional data. Turns on the reset banner and allows ./phaema.sh reset-demo.

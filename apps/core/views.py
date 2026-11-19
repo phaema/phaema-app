@@ -241,9 +241,16 @@ def protected_file(request, path):
     filename = path.rsplit("/", 1)[-1]
     if viewer.wants_viewer(request, content_type):
         handle.close()
-        return viewer.page(request, viewer.describe(path))
+        return viewer.page(request, viewer.describe(path), stored=path)
     if content_type == "application/pdf" and viewer.wants_download(request):
         filename = viewer.describe(path)["filename"]
+    if content_type == "application/pdf":
+        from . import ocr
+
+        served = ocr.serving_name(path, searchable=viewer.wants_searchable(request))
+        if served != path:
+            handle.close()
+            handle = default_storage.open(served, "rb")
     inline = content_type in ("application/pdf", "image/jpeg", "image/png") and not viewer.wants_download(request)
     response = FileResponse(handle, content_type=content_type, as_attachment=not inline, filename=filename)
     response["Cache-Control"] = "private, max-age=3600"

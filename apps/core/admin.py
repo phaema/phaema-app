@@ -3,7 +3,7 @@ from django import forms
 from django.contrib import admin
 
 from .admin_users import PhaemaUserAdmin
-from .models import AccessArea, AccountRequest, AuditEntry, Cover, ModuleSettings
+from .models import AccessArea, AccountRequest, AuditEntry, Cover, ModuleSettings, TextCopy
 
 
 @admin.register(ModuleSettings)
@@ -21,6 +21,8 @@ class ModuleSettingsAdmin(admin.ModelAdmin):
         ("Maintenance", {"fields": ["order_approval_limit"]}),
         ("Maps", {"fields": ["os_maps_api_key", "os_map_style"]}),
         ("Floor areas", {"fields": ["area_basis"]}),
+        ("Scanned documents", {"fields": ["ocr_enabled"],
+                               "description": "Progress is under Manage data, Scanned documents."}),
         ("Estate strategy", {"fields": ["strategy_review_years"],
                              "description": "The lists of holding purpose sub-categories and asset strategies are "
                                             "in Manage data."}),
@@ -139,3 +141,36 @@ class CoverAdmin(admin.ModelAdmin):
         if not obj.created_by_id:
             obj.created_by = request.user
         super().save_model(request, obj, form, change)
+
+
+@admin.register(TextCopy)
+class TextCopyAdmin(admin.ModelAdmin):
+    """Which scanned PDFs have had their text recognised. Read only, apart from asking for one to be read again."""
+
+    list_display = ["__str__", "status", "pages", "pages_scanned", "characters", "poor", "finished_at"]
+    list_filter = ["status", "poor"]
+    search_fields = ["source"]
+    readonly_fields = ["source", "status", "copy", "pages", "pages_scanned", "characters", "poor", "error",
+                       "attempts", "queued_at", "finished_at"]
+    actions = ["read_again"]
+
+    def has_add_permission(self, request):
+        return False
+
+    def changelist_view(self, request, extra_context=None):
+        from django.contrib import messages
+
+        from . import ocr
+
+        reason = ocr.missing()
+        if reason:
+            messages.warning(request, f"Scanned PDFs are not being read on this server: {reason} "
+                                      "See the technical manual, Scanned documents.")
+        elif not ocr.enabled():
+            messages.info(request, "Recognising text in scanned PDFs is switched off in Module settings.")
+        return super().changelist_view(request, extra_context)
+
+    @admin.action(description="Read the selected documents again", permissions=["change"])
+    def read_again(self, request, queryset):
+        count = queryset.update(status=TextCopy.Status.WAITING, attempts=0, error="")
+        self.message_user(request, f"{count} documents will be read again within a few minutes.")

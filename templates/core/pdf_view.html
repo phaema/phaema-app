@@ -40,6 +40,12 @@
       <a class="govuk-button govuk-button--secondary" href="{{ raw_url }}" target="_blank" rel="noopener">{% translate "Print" %}</a>
     </span>
   </div>
+  {% if scan %}<div class="govuk-inset-text govuk-!-margin-top-0 govuk-!-margin-bottom-2 govuk-body-s" data-scan="{{ scan.status }}">
+    {% if scan.done %}{% translate "This is a scanned document. Its text was recognised automatically on this server, so Find searches it, but the recognised text may contain mistakes." %}{% if scan.poor %} {% translate "The scan was hard to read, so Find may miss words." %}{% endif %} {% translate "Download gives the original scan;" %} <a class="govuk-link" href="{{ searchable_url }}">{% translate "download the searchable copy" %}</a>.
+    {% elif scan.status == "waiting" %}{% translate "This is a scanned document. Its text has not been recognised yet, so Find cannot search it; this usually takes a few minutes." %}
+    {% elif scan.status == "too_big" %}{% translate "This is a scanned document with too many pages for its text to be recognised, so Find cannot search it." %}
+    {% elif scan.status == "failed" %}{% translate "This is a scanned document whose text could not be recognised, so Find cannot search it." %}{% endif %}
+  </div>{% endif %}
   <p class="govuk-body" data-pdf="status" role="status">{% translate "Opening the document…" %}</p>
   <div class="govuk-error-summary" data-pdf="error" hidden role="alert">
     <h2 class="govuk-error-summary__title">{% translate "This document cannot be shown here" %}</h2>

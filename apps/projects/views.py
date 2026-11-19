@@ -575,11 +575,20 @@ def project_file(request, pk, kind, item):
             about["title"] = f"Gateway report: {project}"
             about["filename"] = "Gateway report.pdf"
         if viewer.wants_viewer(request, content_type):
-            return viewer.page(request, about)
+            return viewer.page(request, about, stored=field.name)
         filename = about["filename"]
     inline = content_type in ("application/pdf", "image/jpeg", "image/png") and not viewer.wants_download(request)
-    response = FileResponse(field.open("rb"), content_type=content_type, as_attachment=not inline,
-                            filename=filename)
+    handle = field.open("rb")
+    if content_type == "application/pdf":
+        from django.core.files.storage import default_storage
+
+        from apps.core import ocr
+
+        served = ocr.serving_name(field.name, searchable=viewer.wants_searchable(request))
+        if served != field.name:
+            handle.close()
+            handle = default_storage.open(served, "rb")
+    response = FileResponse(handle, content_type=content_type, as_attachment=not inline, filename=filename)
     response["Cache-Control"] = "private, max-age=0, no-store"
     response["X-Content-Type-Options"] = "nosniff"
     return response

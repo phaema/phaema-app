@@ -27,6 +27,12 @@ def wants_download(request):
     return "download" in request.GET
 
 
+def wants_searchable(request):
+    """The viewer and the browser's reader get the searchable copy of a scan; a download gets the original scan
+    unless the searchable copy is asked for."""
+    return not wants_download(request) or "searchable" in request.GET
+
+
 def _file_fields():
     """Every file field in PHAEMA (not photos), found once."""
     if not hasattr(_file_fields, "found"):
@@ -69,8 +75,9 @@ def describe(path=None, item=None):
     return {"title": title, "filename": filename, "record": _record_of(item)}
 
 
-def page(request, about):
-    """The viewer page for the PDF at this same address."""
+def page(request, about, stored=None):
+    """The viewer page for the PDF at this same address. `stored` is the stored file's name, to say whether the
+    text of a scanned document has been recognised."""
     record = about["record"]
     back, back_label = None, ""
     if record is not None:
@@ -82,7 +89,20 @@ def page(request, about):
             back = referer
     response = render(request, "core/pdf_view.html", {
         "title": about["title"], "back": back, "back_label": back_label,
-        "raw_url": request.path + "?raw=1", "download_url": request.path + "?download=1"})
+        "raw_url": request.path + "?raw=1", "download_url": request.path + "?download=1",
+        "searchable_url": request.path + "?download=1&searchable=1", "scan": scan_state(stored)})
     response["Cache-Control"] = "private, no-store"
     patch_vary_headers(response, ["Accept"])     # the same address gives the page or the file
     return response
+
+
+def scan_state(stored):
+    """What the viewer says about recognised text: None, or the TextCopy's status and whether it read poorly."""
+    if not stored:
+        return None
+    from . import ocr
+
+    item = ocr.lookup(stored)
+    if item is None or item.status == item.Status.HAS_TEXT:
+        return None
+    return {"status": item.status, "poor": item.poor, "done": item.status == item.Status.DONE and bool(item.copy)}
