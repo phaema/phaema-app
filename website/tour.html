@@ -171,7 +171,7 @@ p { margin: 0 0 .9em; max-width: 60ch; }
     ["lettings", "Lettings and renewals", "Heads of terms and the 1954 Act"],
     ["letters", "Letters and notices", "Thirty templates, filled in"],
     ["projects", "Projects", "Gateways, budgets, risks"],
-    ["strategy", "Estate strategy", "Asset strategies and the Asset Challenge"],
+    ["strategy", "Estate strategy", "Asset strategies, objectives and the pipeline"],
     ["rents", "Rents and arrears", "Demands, receipts and arrears", 1],
     ["service", "Service charges", "Budgets to year-end", 1],
     ["valuation", "Asset valuation", "The rolling programme", 1],
@@ -237,8 +237,14 @@ p { margin: 0 0 .9em; max-width: 60ch; }
       '<div class="scene"><div class="scene__text"><p class="eyebrow">Site visits</p><h2>One sheet to take on every visit</h2>' +
       '<p>Each case has a site visit sheet for a phone or to print: the case, the hazards and asbestos information to read before going, who occupies the property, the property details, and a checklist for that type of case.</p>' +
       '<p>The recorded construction, roof, services and occupation are printed beside each item to confirm or correct on site. Administrators set the checklist and the property details for each type of case.</p>' +
-      rel([["cases", "Cases"], ["register", "The property record"], ["compliance", "Before you visit"]]) + '</div>' +
+      rel([["site-visits", "Recording the visit"], ["cases", "Cases"], ["compliance", "Before you visit"]]) + '</div>' +
       shot("site-visit", "A site visit sheet: the checklist for a building, with the recorded construction, roof and services beside each item and boxes to tick.", "The checklist, with what the record says beside each item.") + '</div>'},
+    {id: "site-visits", ch: "work", t: 11, html:
+      '<div class="scene"><div class="scene__text"><p class="eyebrow">Site visits</p><h2>Record the visit on your phone</h2>' +
+      '<p>Start a visit from the case and answer the checklist on site, a section at a time so a dropped signal loses little, with photos straight from the camera. Finishing the visit saves its record to the case.</p>' +
+      '<p>Where the visit found something other than the property record, each difference is listed for the managing surveyor to update the record or leave it as it was. Nothing changes by itself, and every change is in the change log.</p>' +
+      rel([["site-visit", "The site visit sheet"], ["register", "The property record"], ["cases", "Cases"]]) + '</div>' +
+      shot("site-visits", "A finished site visit record listing two differences from the property record, each with Update the record and Leave as it was.", "Differences from the record, each decided by a person.") + '</div>'},
     {id: "lettings", ch: "work", t: 10, html:
       '<div class="scene"><div class="scene__text"><p class="eyebrow">Lettings and renewals</p><h2>Professional standards built in</h2>' +
       '<p>Heads of terms are checked against the 16 items in the RICS code for leasing business premises. Renewals track section 25 and 26 notices under the 1954 Act, with counter-notice and court deadlines.</p>' +
@@ -264,8 +270,26 @@ p { margin: 0 0 .9em; max-width: 60ch; }
       '<div class="scene"><div class="scene__text"><p class="eyebrow">Estate strategy</p><h2>Why we hold it, and what happens next</h2>' +
       '<p>Every property carries its holding purpose, its asset strategy (retain, invest, remodel or share, release, dispose) with who decided and the minute reference, and a suitability grade. Reviews fall due on the surveyor&#8217;s My work.</p>' +
       '<p>The Asset Challenge, the review process used by many councils, runs as a case: its approved outcome becomes the property&#8217;s strategy, and a disposal or investment project can start from it.</p>' +
-      rel([["projects", "Projects that follow"], ["space", "How well the space is used"], ["register", "The property record"]]) + '</div>' +
+      rel([["strategy-plan", "Objectives and the action plan"], ["projects", "Projects that follow"], ["space", "How well the space is used"]]) + '</div>' +
       shot("strategy", "A property&#8217;s Strategy section: asset strategy Retain as is decided by Cabinet, its review overdue, suitability grade C and an Asset Challenge in progress.", "A property&#8217;s strategy, review and suitability.") + '</div>'},
+    {id: "strategy-plan", ch: "work", t: 11, html:
+      '<div class="scene"><div class="scene__text"><p class="eyebrow">Estate strategy</p><h2>The strategy, its objectives and the action plan</h2>' +
+      '<p>The adopted strategy is recorded with its period and approval. Each objective can carry the corporate aim it serves, its financial effect, risks, outcomes and measures, and an action plan of projects, cases and actions with owners and dates.</p>' +
+      '<p>PHAEMA suggests each objective&#8217;s status from the work linked to it; the owner confirms it with a progress note, and the board report downloads as Word.</p>' +
+      rel([["pipeline", "The property events pipeline"], ["health-check", "The annual health check"], ["strategy", "Asset strategies"]]) + '</div>' +
+      shot("strategy-plan", "The Estate strategy page: an adopted five-year strategy approved by Cabinet, and its objectives with owner, target, status and actions done.", "Objectives, with a status for each.") + '</div>'},
+    {id: "pipeline", ch: "work", t: 10, html:
+      '<div class="scene"><div class="scene__text"><p class="eyebrow">Estate strategy</p><h2>Five years of property events</h2>' +
+      '<p>The pipeline lists, year by year, every lease review, break and expiry (with the council as tenant shown apart, as each is a decision to stay or leave), disposals with their expected receipts, acquisitions and strategy reviews, with anything overdue first.</p>' +
+      '<p>All from records already held. Download it as Excel or Word for the capital board.</p>' +
+      rel([["strategy-plan", "The strategy"], ["leases", "Lease key dates"], ["projects", "Projects"]]) + '</div>' +
+      shot("pipeline", "The property events pipeline key figures: lease events with the council as landlord and as tenant, disposals, acquisitions and strategy reviews by financial year, with values.", "Key figures by financial year.") + '</div>'},
+    {id: "health-check", ch: "work", t: 10, html:
+      '<div class="scene"><div class="scene__text"><p class="eyebrow">Estate strategy</p><h2>An annual health check</h2>' +
+      '<p>Once a year the head of estates answers short questions on how well the council manages its property, grouped under the headings of the RICS guidance on strategic public sector property asset management, which the check is organised around.</p>' +
+      '<p>Each answer carries notes and evidence and is compared with last year&#8217;s; a gap can go straight into the action plan.</p>' +
+      rel([["strategy-plan", "The action plan"], ["pipeline", "The pipeline"]]) + '</div>' +
+      shot("health-check", "The annual health check: questions under Strategy answered yes or partly, with notes, and last year&#8217;s answer marked Same or Better.", "Each answer beside last year&#8217;s.") + '</div>'},
     {id: "rents", ch: "money", t: 10, html:
       '<div class="scene"><div class="scene__text"><p class="eyebrow">Rents and arrears &middot; optional</p><h2>From demand to receipt</h2>' +
       '<p>Demand runs with VAT, credit notes, receipts imported from the finance system and aged arrears, with a statement for each tenant and an export file for finance. Surveyors see rent for their own patch.</p>' +

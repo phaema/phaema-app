@@ -48,8 +48,9 @@ BRINGS_TOGETHER = [
      "building."),
     ("Asset valuation", "The rolling programme, Red Book records and the year-end schedule for finance."),
     ("Projects, acquisitions and disposals", "Gateways, budgets, risks and the register changes completion needs."),
-    ("Estate strategy", "Each property's holding purpose, asset strategy and suitability, the Asset Challenge, and "
-     "reviews that fall due, organised around the RICS guidance on public sector asset management."),
+    ("Estate strategy", "Each property's holding purpose, asset strategy and suitability, the Asset Challenge, the "
+     "strategy's objectives and action plan, a five-year pipeline of property events and an annual health check, "
+     "organised around the RICS guidance on public sector asset management."),
     ("Space and occupation costs", "Who occupies each operational building, floor by floor, how well the space is "
      "used, and what occupation costs each department."),
     ("Rents and service charges, if wanted", "Optional ledgers that feed the council's finance system, or leave this "
@@ -114,7 +115,8 @@ CAPABILITIES = [
      "dates. Supervisors approve decisions, with conflicts of interest declared first. Documents and saved emails are filed by "
      "dragging them onto the case. Each case has a site visit "
      "sheet for a phone or to print: safety information, the property details and a checklist the council sets "
-     "for each type of case."),
+     "for each type of case. Visits are recorded on the phone with photos, and differences from the property "
+     "record are listed for the managing surveyor to apply."),
     ("Projects", "Developments, acquisitions, disposals and programmes taken through four gateways, with milestones, a "
      "budget by financial year, risks and a checklist of the register changes completion needs."),
     ("Document library", "Thirty letter and notice templates, from consent letters to section 25 notice particulars, "
@@ -131,7 +133,9 @@ CAPABILITIES = [
      "prompts, an initial valuation report drawn from the property record, and the year-end schedule for finance."),
     ("Estate strategy", "Holding purposes with the council's own sub-categories; an asset strategy for each property "
      "(retain, invest, remodel or share, release, dispose) with who decided and the minute reference; the Asset "
-     "Challenge run as a case; suitability grades; strategy reviews prompted on My work; and an estate-wide overview."),
+     "Challenge run as a case; suitability grades; strategy reviews prompted on My work; an estate-wide overview; the "
+     "adopted strategy with objectives, an action plan and a board report; a five-year property events pipeline; and "
+     "an annual asset management health check compared with the year before."),
     ("Space and occupiers", "Departments, teams and outside organisations such as the NHS in each building, floor "
      "and room, with a stacking plan, headcount and use of space, and each occupier's share of the building's "
      "costs, including a notional rent for freehold buildings. The property report sets it out for checking on "
@@ -170,6 +174,7 @@ ROADMAP = [
         "Asset valuation",
         "Space, occupation and costs by occupier",
         "Estate strategy: asset strategies, the Asset Challenge and suitability",
+        "Strategy objectives, action plan and board report; property events pipeline; annual health check",
         "Projects with gateways, budgets, risks and completion",
         "Access areas, cover and hand-over of work",
         "Reports, imports, open data and API",
@@ -179,6 +184,7 @@ ROADMAP = [
         "Two-step sign-in (multi-factor authentication) and a published security policy",
         "Single sign-on with the council's own accounts (Microsoft 365 and others), as an option",
         "Site and building details, floor plans, property and valuation reports, and site visit sheets",
+        "Site visits recorded on the phone, with photos and differences from the record to apply",
     ]),
     ("now", "Now: testing", [
         "A major test programme run by council staff",

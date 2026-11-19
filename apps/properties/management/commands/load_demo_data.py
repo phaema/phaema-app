@@ -371,6 +371,9 @@ class Command(BaseCommand):
         from apps.strategy import demo as strategy_demo
 
         strategy_demo.load()
+        from apps.cases import demo_visits
+
+        demo_visits.load()
 
         modules = ModuleSettings.load()
         if not modules.organisation_name:
