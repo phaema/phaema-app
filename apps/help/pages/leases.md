@@ -92,6 +92,15 @@ the certificate, check the cover and add it to the agreement's documents with it
 Record the outcome of the [expiry event](events.md#expiries), or set the status to Ended and fill in the
 **actual end** date. Open events for an ended agreement lapse automatically.
 
+## Rents payable
+
+Where the council holds property on a lease or licence (direction **Held by the council (council is tenant)**),
+**Finance**, **Rents payable** lists every current agreement with the rent paid, how often, the next payment and
+the total due over the next twelve months, then the total due in each month. Payments follow the agreement's rent
+schedule, so a stepped rent or a settled review is included, and none are shown before a rent-free period ends.
+Reviews, breaks and expiry are shown beside each one, so the team can plan ahead. **Download as Excel** gives the
+same as a spreadsheet for finance. PHAEMA does not pay these rents: finance does.
+
 ## Worked example
 
 **DL-0502** is Northfield Packaging Ltd's lease of Unit 2, Northfield Business Park: ten years, inside the 1954

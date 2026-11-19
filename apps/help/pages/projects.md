@@ -72,10 +72,26 @@ project reference, budget line and financial year.
 Record each risk with its likelihood and impact from 1 to 5; PHAEMA multiplies them into a score and shows it as low,
 medium or high, highest first. Give each risk an owner and a mitigation, and close it when it has passed.
 
-## Linked cases, jobs and valuations
+## Cases in the project
 
-Link work that is part of the project: a case or maintenance job by its reference, or an asset valuation. The case
-or job page then shows **Part of project**, to people who can see the project.
+A project can bring together several cases. A redevelopment, for example, might take in the acquisitions of the
+land, the demolition and building work, and then the lettings and disposals of the finished property. **Cases in
+this project** on the project page lists them in the order they started, with each case's type, property or
+agreement, stage and owner, so the whole sequence can be followed in one place.
+
+People who manage the project can:
+
+- select **Start a case for this project** to open a new case already part of it;
+- under **Add an existing case**, choose one of the open cases on the project's properties, or enter any case's
+  reference (for example CAS-2026-0012);
+- select **Take out** to remove a case from the project. The case itself is not changed.
+
+A case can be part of one project at a time. The case page shows **Part of project**, to people who can see the
+project.
+
+## Linked jobs and valuations
+
+Link a maintenance job by its reference, or an asset valuation of one of the project's properties.
 
 ## The proposed site and the map
 

@@ -5,7 +5,9 @@
 <h1 class="govuk-heading-l">{% translate "Start a case" %}</h1>
 <div class="govuk-grid-row"><div class="govuk-grid-column-two-thirds">
 <p class="govuk-body">{% translate "Cases for rent reviews, breaks and expiries open by themselves, or from the event's page. Use this for requests and other work." %}</p>
+{% if project %}<div class="govuk-inset-text">{% blocktranslate with name=project.name %}This case will be part of the project <strong>{{ name }}</strong>.{% endblocktranslate %}</div>{% endif %}
 <form method="post" novalidate>{% csrf_token %}
+  {% if project %}<input type="hidden" name="project" value="{{ project.pk }}">{% endif %}
   {% include "core/_form_errors.html" %}
   {% for field in form %}{% include "core/_field.html" %}{% endfor %}
   <button class="govuk-button" data-module="govuk-button">{% translate "Start the case" %}</button>

@@ -8,7 +8,7 @@ summary: Asset classes set by finance, the yearly valuation programme run as cas
 The asset valuation module manages the valuations the council needs for its accounts, following the CIPFA Code
 of Practice on Local Authority Accounting and the RICS Valuation – Global Standards (the Red Book) with its UK
 national supplement. It is an optional module: an administrator switches it on in **Module settings**. Find it
-under **Buildings**, **Asset valuation**.
+under **Finance**, **Asset valuation**.
 
 ## Finance's criteria
 

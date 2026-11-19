@@ -54,6 +54,7 @@ def load(today):
         if user:
             ProjectMember.objects.create(project=dev, user=user, role=role)
     _gate(dev, 1, 90, today, reference="DD/2026/88")
+    _cases(dev, lena, today)
     dev.tasks.filter(phase="idea").update(done_on=today - timedelta(days=95), done_by=lena)
     Milestone.objects.create(project=dev, name="Outline business case to Cabinet", order=0,
                              target_date=today + timedelta(days=35), forecast_date=today + timedelta(days=50))
@@ -117,3 +118,28 @@ def load(today):
     Risk.objects.create(project=disp, description="Offers below the Red Book valuation", likelihood=2, impact=4,
                         owner=alex, mitigation="Reserve price set from the valuation; best consideration report.")
     return Project.objects.filter(name__in=NAMES).count()
+
+
+def _cases(project, owner, today):
+    """The cases that make up the Hangar block redevelopment: getting vacant possession, a wayleave for the new
+    substation, and the lettings to follow. Marked DEMO like the other demonstration cases, so a reset removes them."""
+    from apps.cases import workflow as case_workflow
+    from apps.cases.models import Case, CaseType
+    from apps.properties.models import Property
+
+    site = Property.objects.get(reference="DM-N01-B01")
+    types = {t.code: t for t in CaseType.objects.filter(active=True)}
+    plan = [
+        ("surrender", "Surrender of the remaining Hangar block tenancies", 100, "DEMO-PRJ-1"),
+        ("wayleave", "Wayleave for a new electricity substation", 45, "DEMO-PRJ-2"),
+        ("new_letting", "Lettings of the twelve new units: early enquiries", 10, "DEMO-PRJ-3"),
+    ]
+    for code, title, days_ago, mark in plan:
+        if code not in types:
+            continue
+        case = Case.objects.filter(crm_reference=mark).first()
+        if case is None:
+            case = case_workflow.open_case(types[code], title=title, property=site, crm_reference=mark,
+                                           received_on=today - timedelta(days=days_ago))
+        case.project, case.owner = project, case.owner or owner
+        case.save(update_fields=["project", "owner"])

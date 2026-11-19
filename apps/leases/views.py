@@ -7,6 +7,8 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Count, DecimalField, Exists, IntegerField, OuterRef, Q, Subquery, Sum, Value
 from django.db.models.functions import Coalesce
 from django.utils.translation import gettext_lazy as _
+from django.http import HttpResponse
+from django.shortcuts import render
 from django.views.decorators.http import require_POST
 from django.views.generic import DetailView, ListView
 
@@ -330,3 +332,18 @@ def lease_files(request, pk):
     if not uploads:
         messages.error(request, _("Choose or drop at least one file."))
     return redirect(lease.get_absolute_url() + "#documents")
+
+
+@login_required
+def rents_payable(request):
+    """Rents the council pays for property it holds as tenant, with the payments due in the next twelve months."""
+    from . import payable
+
+    data = payable.gather()
+    if request.GET.get("format") == "xlsx":
+        response = HttpResponse(payable.to_xlsx(data),
+                                content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+        response["Content-Disposition"] = f'attachment; filename="Rents payable {data.today:%Y-%m-%d}.xlsx"'
+        return response
+    return render(request, "leases/rents_payable.html", {
+        "data": data, "months": list(zip(data.months, data.by_month))})

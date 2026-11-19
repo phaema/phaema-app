@@ -202,15 +202,46 @@
     </form></div></details>{% endif %}
 </div></section>
 
-<section class="phaema-panel" data-panel="project-linked"><h2 class="govuk-heading-m phaema-panel__title">{% translate "Linked cases, jobs and valuations" %}</h2><div class="phaema-panel__body">
-  {% if linked_cases %}<h3 class="govuk-heading-s">{% translate "Cases" %}</h3><ul class="govuk-list">{% for c in linked_cases %}<li><a class="govuk-link" href="{{ c.get_absolute_url }}">{{ c.display_reference }}</a> {{ c.title }} <span class="govuk-body-s">({{ c.get_stage_display|lower }}{% if c.status == "closed" %}, {% translate "closed" %}{% endif %})</span>{% if can_manage %} <form method="post" class="govuk-!-display-inline">{% csrf_token %}<input type="hidden" name="action" value="unlink"><input type="hidden" name="kind" value="case"><input type="hidden" name="id" value="{{ c.pk }}"><button class="phaema-link-button govuk-body-s">{% translate "Unlink" %}<span class="govuk-visually-hidden"> {{ c.display_reference }}</span></button></form>{% endif %}</li>{% endfor %}</ul>{% endif %}
+<section class="phaema-panel" data-panel="project-cases" id="cases"><h2 class="govuk-heading-m phaema-panel__title">{% translate "Cases in this project" %}</h2><div class="phaema-panel__body">
+  {% if linked_cases %}
+  <p class="govuk-body-s">{% with total=linked_cases|length %}{% blocktranslate count total=total %}{{ total }} case{% plural %}{{ total }} cases{% endblocktranslate %}{% endwith %}, {% translate "in the order they started" %}.</p>
+  <table class="govuk-table"><caption class="govuk-visually-hidden">{% translate "Cases in this project" %}</caption>
+    <thead class="govuk-table__head"><tr class="govuk-table__row">
+      <th scope="col" class="govuk-table__header">{% translate "Case" %}</th>
+      <th scope="col" class="govuk-table__header">{% translate "Type" %}</th>
+      <th scope="col" class="govuk-table__header">{% translate "Property or agreement" %}</th>
+      <th scope="col" class="govuk-table__header">{% translate "Started" %}</th>
+      <th scope="col" class="govuk-table__header">{% translate "Stage" %}</th>
+      <th scope="col" class="govuk-table__header">{% translate "Owner" %}</th>
+      {% if can_manage %}<th scope="col" class="govuk-table__header"><span class="govuk-visually-hidden">{% translate "Actions" %}</span></th>{% endif %}
+    </tr></thead>
+    <tbody class="govuk-table__body">{% for c in linked_cases %}<tr class="govuk-table__row">
+      <td class="govuk-table__cell"><a class="govuk-link" href="{{ c.get_absolute_url }}">{{ c.display_reference }}</a><br><span class="govuk-body-s">{{ c.title }}</span></td>
+      <td class="govuk-table__cell">{{ c.case_type.name }}</td>
+      <td class="govuk-table__cell">{% if c.lease %}<a class="govuk-link" href="{{ c.lease.get_absolute_url }}">{{ c.lease.reference }}</a>{% endif %}{% if c.lease and c.property %}<br>{% endif %}{% if c.property %}<a class="govuk-link" href="{{ c.property.get_absolute_url }}">{{ c.property.name }}</a>{% endif %}</td>
+      <td class="govuk-table__cell">{{ c.received_on|date:"j M Y" }}</td>
+      <td class="govuk-table__cell">{% if c.status == "closed" %}<strong class="govuk-tag govuk-tag--grey">{% translate "Closed" %}</strong>{% elif c.status == "on_hold" %}<strong class="govuk-tag govuk-tag--yellow">{% translate "On hold" %}</strong>{% else %}{{ c.get_stage_display }}{% endif %}</td>
+      <td class="govuk-table__cell">{{ c.owner|person }}</td>
+      {% if can_manage %}<td class="govuk-table__cell"><form method="post">{% csrf_token %}<input type="hidden" name="action" value="unlink"><input type="hidden" name="kind" value="case"><input type="hidden" name="id" value="{{ c.pk }}"><button class="phaema-link-button govuk-body-s">{% translate "Take out" %}<span class="govuk-visually-hidden"> {{ c.display_reference }}</span></button></form></td>{% endif %}
+    </tr>{% endfor %}</tbody></table>
+  {% else %}<p class="govuk-body">{% translate "No cases are part of this project yet. A project can bring together several cases, for example the acquisitions, demolition, building work, lettings and disposals of a redevelopment." %}</p>{% endif %}
+  {% if can_manage %}
+  <a class="govuk-button govuk-button--secondary" data-module="govuk-button" href="{% url 'cases:new' %}?project={{ project.pk }}{% if first_property %}&amp;property={{ first_property }}{% endif %}">{% translate "Start a case for this project" %}</a>
+  <details class="govuk-details" data-module="govuk-details"><summary class="govuk-details__summary"><span class="govuk-details__summary-text">{% translate "Add an existing case" %}</span></summary><div class="govuk-details__text">
+    {% if case_choices %}<form method="post" class="phaema-inline-fields govuk-!-margin-bottom-4">{% csrf_token %}<input type="hidden" name="action" value="link"><input type="hidden" name="kind" value="case">
+      <div><label class="govuk-label" for="l-case-pick">{% translate "Open cases on the project's properties" %}</label><select class="govuk-select" id="l-case-pick" name="reference">{% for c in case_choices %}<option value="id:{{ c.pk }}">{{ c.display_reference }} – {{ c.case_type.name }}: {{ c.title|truncatechars:60 }}</option>{% endfor %}</select></div>
+      <div><button class="govuk-button govuk-button--secondary govuk-!-margin-bottom-0" data-module="govuk-button">{% translate "Add the case" %}</button></div></form>{% endif %}
+    <form method="post" class="phaema-inline-fields">{% csrf_token %}<input type="hidden" name="action" value="link"><input type="hidden" name="kind" value="case">
+      <div><label class="govuk-label" for="l-case">{% translate "Or any case by its reference" %}</label><input class="govuk-input govuk-input--width-10" id="l-case" name="reference" placeholder="CAS-2026-0012"></div>
+      <div><button class="govuk-button govuk-button--secondary govuk-!-margin-bottom-0" data-module="govuk-button">{% translate "Add the case" %}</button></div></form>
+  </div></details>{% endif %}
+</div></section>
+
+<section class="phaema-panel" data-panel="project-linked"><h2 class="govuk-heading-m phaema-panel__title">{% translate "Linked jobs and valuations" %}</h2><div class="phaema-panel__body">
   {% if linked_jobs %}<h3 class="govuk-heading-s">{% translate "Maintenance jobs" %}</h3><ul class="govuk-list">{% for j in linked_jobs %}<li><a class="govuk-link" href="{{ j.get_absolute_url }}">{{ j.reference }}</a> {{ j.title }} <span class="govuk-body-s">({{ j.get_status_display|lower }})</span>{% if can_manage %} <form method="post" class="govuk-!-display-inline">{% csrf_token %}<input type="hidden" name="action" value="unlink"><input type="hidden" name="kind" value="job"><input type="hidden" name="id" value="{{ j.pk }}"><button class="phaema-link-button govuk-body-s">{% translate "Unlink" %}<span class="govuk-visually-hidden"> {{ j.reference }}</span></button></form>{% endif %}</li>{% endfor %}</ul>{% endif %}
   {% if linked_valuations %}<h3 class="govuk-heading-s">{% translate "Valuations" %}</h3><ul class="govuk-list">{% for v in linked_valuations %}<li><a class="govuk-link" href="{{ v.get_absolute_url }}">{{ v }}</a> <span class="govuk-body-s">({{ v.get_status_display|lower }})</span>{% if can_manage %} <form method="post" class="govuk-!-display-inline">{% csrf_token %}<input type="hidden" name="action" value="unlink"><input type="hidden" name="kind" value="valuation"><input type="hidden" name="id" value="{{ v.pk }}"><button class="phaema-link-button govuk-body-s">{% translate "Unlink" %}<span class="govuk-visually-hidden"> {{ v }}</span></button></form>{% endif %}</li>{% endfor %}</ul>{% endif %}
-  {% if not linked_cases and not linked_jobs and not linked_valuations %}<p class="govuk-body">{% translate "Nothing linked yet." %}</p>{% endif %}
-  {% if can_manage %}<details class="govuk-details" data-module="govuk-details"><summary class="govuk-details__summary"><span class="govuk-details__summary-text">{% translate "Link a case, job or valuation" %}</span></summary><div class="govuk-details__text">
-    <form method="post" class="phaema-inline-fields govuk-!-margin-bottom-4">{% csrf_token %}<input type="hidden" name="action" value="link"><input type="hidden" name="kind" value="case">
-      <div><label class="govuk-label" for="l-case">{% translate "Case reference" %}</label><input class="govuk-input govuk-input--width-10" id="l-case" name="reference" placeholder="CAS-2026-0012"></div>
-      <div><button class="govuk-button govuk-button--secondary govuk-!-margin-bottom-0" data-module="govuk-button">{% translate "Link the case" %}</button></div></form>
+  {% if not linked_jobs and not linked_valuations %}<p class="govuk-body">{% translate "Nothing linked yet." %}</p>{% endif %}
+  {% if can_manage and linked_jobs is not None or can_manage and valuation_choices %}<details class="govuk-details" data-module="govuk-details"><summary class="govuk-details__summary"><span class="govuk-details__summary-text">{% translate "Link a job or valuation" %}</span></summary><div class="govuk-details__text">
     {% if linked_jobs is not None %}<form method="post" class="phaema-inline-fields govuk-!-margin-bottom-4">{% csrf_token %}<input type="hidden" name="action" value="link"><input type="hidden" name="kind" value="job">
       <div><label class="govuk-label" for="l-job">{% translate "Job reference" %}</label><input class="govuk-input govuk-input--width-10" id="l-job" name="reference" placeholder="JOB-2026-0007"></div>
       <div><button class="govuk-button govuk-button--secondary govuk-!-margin-bottom-0" data-module="govuk-button">{% translate "Link the job" %}</button></div></form>{% endif %}

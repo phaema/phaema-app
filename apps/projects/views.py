@@ -254,7 +254,10 @@ def project_detail(request, pk):
         "budget_years": _year_choices(project),
         "risks": sorted(project.risks.select_related("owner"), key=lambda r: (r.status != "open", -r.score, r.pk)),
         "scale": Risk.SCALE,
-        "linked_cases": project.cases.select_related("case_type").order_by("-year", "-number"),
+        "linked_cases": project.cases.select_related("case_type", "property", "lease", "owner")
+        .order_by("received_on", "year", "number"),
+        "case_choices": _case_choices(project) if can_manage else [],
+        "first_property": project.property_links.order_by("pk").values_list("property_id", flat=True).first(),
         "linked_jobs": project.jobs.select_related("property").order_by("-pk") if can_use(request.user, "maintenance") else None,
         "linked_valuations": project.valuations.select_related("property").order_by("-valuation_date")
         if can_use(request.user, "valuations") else None,
@@ -266,6 +269,26 @@ def project_detail(request, pk):
         "access_log": project.access_log.select_related("user")[:20]
         if project.confidential and (is_administrator(request.user) or project.lead_id == request.user.pk) else None,
     })
+
+
+def _property_ids(project):
+    ids = set()
+    for link in project.property_links.select_related("property"):
+        ids.add(link.property_id)
+        ids.update(link.property._descendant_ids())
+    return ids
+
+
+def _case_choices(project):
+    """Open cases on the project's properties (or their agreements) that are not yet in any project."""
+    from apps.cases.models import Case
+
+    ids = _property_ids(project)
+    if not ids:
+        return Case.objects.none()
+    return (Case.objects.filter(Q(property__in=ids) | Q(lease__properties__in=ids), project__isnull=True,
+                                status__in=[Case.Status.OPEN, Case.Status.ON_HOLD])
+            .select_related("case_type").distinct().order_by("received_on")[:100])
 
 
 def _valuation_choices(project):
@@ -487,12 +510,17 @@ def _link(request, project, kind, value, add):
 
     if kind == "case":
         model, label = Case, _("Case")
-        if add:
-            text = value.upper().replace("CAS-", "")
+        if add and value.startswith("id:") and value[3:].isdigit():  # chosen from the project's properties' cases
+            item = Case.objects.filter(pk=int(value[3:])).first()
+        elif add:  # as shown on the case, which may end with the property, e.g. CAS-2026-0012/RD-1
+            text = value.upper().split("/")[0].strip().replace("CAS-", "")
             parts = text.split("-")
             if len(parts) != 2 or not all(p.isdigit() for p in parts):
                 raise ValueError(_("Enter the case reference, for example CAS-2026-0012."))
             item = Case.objects.filter(year=int(parts[0]), number=int(parts[1])).first()
+        if add and item is not None and item.project_id and item.project_id != project.pk:
+            raise ValueError(_("%(ref)s is already part of another project. Unlink it there first.")
+                             % {"ref": item.display_reference})
     elif kind in ("job", "valuation"):
         module = "maintenance" if kind == "job" else "valuations"
         if not can_use(request.user, module):
