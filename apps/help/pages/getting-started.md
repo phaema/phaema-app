@@ -34,8 +34,8 @@ The menu at the top of every page takes you to:
 | Cases | [Cases](cases.md): consents, requests and other work from start to outcome. |
 | Projects | [Projects](projects.md): developments, acquisitions, disposals and programmes, taken through gateways. |
 | Documents | The [document library](documents.md): letters and notices filled in from PHAEMA and downloaded to Word. |
-| Income | The [rent ledger](rent-ledger.md) (rents, arrears, receipts) and [service charges](service-charges.md). Shown when the council uses them and your [access areas](users-and-roles.md#access-areas) include them. |
-| Buildings | [Maintenance](maintenance.md), [compliance](compliance.md) and [asset valuation](valuations.md). Shown when the council uses them and your [access areas](users-and-roles.md#access-areas) include them. |
+| Finance | Rents receivable and arrears from the [rent ledger](rent-ledger.md), [rents payable](leases.md#rents-payable) on property the council holds as tenant, [service charges](service-charges.md) and [asset valuation](valuations.md). The ledger, service charges and valuation are shown when the council uses them and your [access areas](users-and-roles.md#access-areas) include them. |
+| Buildings | [Maintenance](maintenance.md), [compliance](compliance.md) and [space and occupiers](space.md). Shown when the council uses them and your [access areas](users-and-roles.md#access-areas) include them. |
 | Reports | Ready-made and your own [reports](reports.md), to view or download. |
 | Changes | The [change log](change-log.md): who changed what, and when. |
 | Import | Administrators, and finance officers for receipts, service charge spending and project spending: [import from spreadsheets](import-export.md). |

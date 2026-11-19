@@ -17,5 +17,6 @@ urlpatterns = [
     path("documents/", views.DocumentListView.as_view(), name="documents"),
     path("calendar/", event_views.calendar_settings, name="calendar"),
     path("parties/", views.PartyListView.as_view(), name="parties"),
+    path("rents-payable/", views.rents_payable, name="payable"),
     path("parties/<int:pk>/", views.PartyDetailView.as_view(), name="party"),
 ]

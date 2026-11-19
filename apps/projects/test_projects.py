@@ -383,3 +383,45 @@ def test_demo_projects_load(people, make_user):
     assert demo.load(date.today()) == 3  # loading again replaces them
     acquisition = Project.objects.get(name__startswith="Depot site")
     assert acquisition.confidential and acquisition.phase == Phase.DELIVERY
+
+
+def test_cases_in_a_project(people):
+    from apps.cases.models import Case, CaseType
+    from apps.projects.models import ProjectProperty
+    from apps.properties.models import Property
+
+    site = Property.objects.create(reference="RD-1", name="Mill Lane depot", property_type="site")
+    project = _project(people["lead"])
+    ProjectProperty.objects.create(project=project, property=site)
+    kind = CaseType.objects.filter(active=True).first()
+    first = Case.objects.create(case_type=kind, title="Buy the yard", property=site, received_on=date(2026, 1, 5))
+    second = Case.objects.create(case_type=kind, title="Demolish the sheds", property=site,
+                                 received_on=date(2026, 3, 1))
+    client = _client(people["lead"])
+    page = client.get(project.get_absolute_url()).content.decode()
+    assert "Cases in this project" in page and f'value="id:{first.pk}"' in page    # offered from the site
+    client.post(project.get_absolute_url(), {"action": "link", "kind": "case", "reference": f"id:{second.pk}"})
+    assert "/RD-1" in first.display_reference                                     # as shown on the case
+    client.post(project.get_absolute_url(), {"action": "link", "kind": "case", "reference": first.display_reference})
+    page = client.get(project.get_absolute_url()).content.decode()
+    section = page[page.index('data-panel="project-cases"'):page.index('data-panel="project-linked"')]
+    assert section.index("Buy the yard") < section.index("Demolish the sheds")    # in the order they started
+    assert "Mill Lane depot" in page and "Take out" in page
+
+    # a case already in another project is not moved silently
+    other = _project(people["lead"])
+    response = client.post(other.get_absolute_url(), {"action": "link", "kind": "case",
+                                                        "reference": first.display_reference}, follow=True)
+    assert "already part of another project" in response.content.decode()
+    first.refresh_from_db()
+    assert first.project == project
+
+    # start a new case from the project
+    page = client.get(f"/cases/new/?project={project.pk}&property={site.pk}").content.decode()
+    assert "will be part of the project" in page
+    client.post("/cases/new/", {"project": project.pk, "case_type": kind.pk, "title": "Let the new units",
+                                "property": site.pk, "how_received": Case.Received.choices[0][0],
+                                "received_on": "2026-06-01"})
+    assert Case.objects.get(title="Let the new units").project == project
+    # someone who cannot manage the project cannot add cases to it
+    assert _client(people["other"]).get(f"/cases/new/?project={project.pk}").status_code == 403

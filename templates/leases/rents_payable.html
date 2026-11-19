@@ -1,0 +1,53 @@
+{% extends "base.html" %}{% load i18n humanize %}
+{% block title %}{% translate "Rents payable" %}{% endblock %}
+{% block help_page %}leases#rents-payable{% endblock %}
+{% block content %}
+<h1 class="govuk-heading-l">{% translate "Rents payable" %}</h1>
+<p class="govuk-body">{% translate "Rent the council pays for property it holds on a lease or licence (the council is the tenant). Payments come from each agreement's rent, how often it is paid and its rent schedule; none are shown before a rent-free period ends. Finance makes the payments: this is for checking what is due and planning ahead." %}</p>
+<div class="govuk-button-group govuk-!-display-none-print">
+  <a class="govuk-button" data-module="govuk-button" role="button" draggable="false" href="?format=xlsx">{% translate "Download as Excel" %}</a>
+  <a class="govuk-button govuk-button--secondary" data-module="govuk-button" role="button" draggable="false" href="{% url 'leases:list' %}?direction=in">{% translate "All agreements held by the council" %}</a>
+</div>
+
+{% if data.rows %}
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-one-third"><p class="govuk-body govuk-!-margin-bottom-1">{% translate "Agreements" %}</p><p class="govuk-heading-l">{{ data.rows|length }}</p></div>
+  <div class="govuk-grid-column-one-third"><p class="govuk-body govuk-!-margin-bottom-1">{% translate "Annual rent payable" %}</p><p class="govuk-heading-l">£{{ data.annual_total|floatformat:0|intcomma }}</p></div>
+  <div class="govuk-grid-column-one-third"><p class="govuk-body govuk-!-margin-bottom-1">{% translate "Due in the next 12 months" %}</p><p class="govuk-heading-l">£{{ data.year_total|floatformat:0|intcomma }}</p></div>
+</div>
+
+<h2 class="govuk-heading-m">{% translate "Agreements" %}</h2>
+<div class="phaema-table-scroll">
+<table class="govuk-table"><caption class="govuk-visually-hidden">{% translate "Agreements held by the council and the rent paid on each" %}</caption>
+  <thead class="govuk-table__head"><tr class="govuk-table__row">
+    <th scope="col" class="govuk-table__header">{% translate "Agreement" %}</th>
+    <th scope="col" class="govuk-table__header">{% translate "Landlord and premises" %}</th>
+    <th scope="col" class="govuk-table__header govuk-table__header--numeric">{% translate "Annual rent" %}</th>
+    <th scope="col" class="govuk-table__header">{% translate "Paid" %}</th>
+    <th scope="col" class="govuk-table__header">{% translate "Next payment" %}</th>
+    <th scope="col" class="govuk-table__header govuk-table__header--numeric">{% translate "Next 12 months" %}</th>
+    <th scope="col" class="govuk-table__header">{% translate "Coming up" %}</th>
+  </tr></thead>
+  <tbody class="govuk-table__body">{% for r in data.rows %}<tr class="govuk-table__row">
+    <td class="govuk-table__cell"><a class="govuk-link" href="{{ r.lease.get_absolute_url }}">{{ r.lease.reference }}</a><br><span class="govuk-body-s">{{ r.lease.get_agreement_type_display }}{% if r.lease.status == "holding_over" %}, {% translate "holding over" %}{% endif %}</span></td>
+    <td class="govuk-table__cell">{{ r.lease.counterparty.name }}<br><span class="govuk-body-s">{% if r.lease.premises_description %}{{ r.lease.premises_description }}{% else %}{% for p in r.lease.properties.all %}{{ p.name }}{% if not forloop.last %}; {% endif %}{% endfor %}{% endif %}</span></td>
+    <td class="govuk-table__cell govuk-table__cell--numeric">£{{ r.annual_rent|floatformat:2|intcomma }}</td>
+    <td class="govuk-table__cell"><span class="govuk-body-s">{{ r.lease.get_rent_frequency_display }}</span></td>
+    <td class="govuk-table__cell">{% if r.next_payment %}{{ r.next_payment.0|date:"j M Y" }}<br><span class="govuk-body-s">£{{ r.next_payment.1|floatformat:2|intcomma }}</span>{% else %}–{% endif %}{% if r.lease.rent_free_until and r.lease.rent_free_until >= data.today %}<br><span class="govuk-body-s">{% blocktranslate with day=r.lease.rent_free_until|date:"j M Y" %}Rent free until {{ day }}{% endblocktranslate %}</span>{% endif %}</td>
+    <td class="govuk-table__cell govuk-table__cell--numeric">£{{ r.year_total|floatformat:2|intcomma }}</td>
+    <td class="govuk-table__cell"><span class="govuk-body-s">{% if r.lease.next_review_date %}{% translate "Review" %} {{ r.lease.next_review_date|date:"j M Y" }}<br>{% endif %}{% if r.next_break %}{% translate "Break" %} {{ r.next_break|date:"j M Y" }}<br>{% endif %}{% if r.lease.term_end %}{% translate "Expires" %} {{ r.lease.term_end|date:"j M Y" }}{% endif %}</span></td>
+  </tr>{% endfor %}</tbody>
+  <tfoot><tr class="govuk-table__row"><th scope="row" class="govuk-table__header" colspan="2">{% translate "Total" %}</th>
+    <td class="govuk-table__cell govuk-table__cell--numeric"><strong>£{{ data.annual_total|floatformat:2|intcomma }}</strong></td><td class="govuk-table__cell"></td><td class="govuk-table__cell"></td>
+    <td class="govuk-table__cell govuk-table__cell--numeric"><strong>£{{ data.year_total|floatformat:2|intcomma }}</strong></td><td class="govuk-table__cell"></td></tr></tfoot>
+</table></div>
+
+<h2 class="govuk-heading-m">{% translate "Due month by month" %}</h2>
+<table class="govuk-table"><caption class="govuk-visually-hidden">{% translate "Rent due in each of the next twelve months" %}</caption>
+  <thead class="govuk-table__head"><tr class="govuk-table__row"><th scope="col" class="govuk-table__header">{% translate "Month" %}</th><th scope="col" class="govuk-table__header govuk-table__header--numeric">{% translate "Due" %}</th></tr></thead>
+  <tbody class="govuk-table__body">{% for month, amount in months %}<tr class="govuk-table__row"><td class="govuk-table__cell">{{ month|date:"F Y" }}</td><td class="govuk-table__cell govuk-table__cell--numeric">{% if amount %}£{{ amount|floatformat:2|intcomma }}{% else %}–{% endif %}</td></tr>{% endfor %}</tbody>
+</table>
+{% else %}
+<p class="govuk-body">{% translate "There are no current agreements where the council is the tenant. Add one under Leases, choosing “Held by the council (council is tenant)”." %}</p>
+{% endif %}
+{% endblock %}

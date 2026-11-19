@@ -6,7 +6,7 @@ START = {
     "intro": "Find your way round: the menu, your dashboard, the page settings and the help.",
     "steps": [
         (T, "/?view=estate", ".phaema-header__nav", "The menu",
-         "Every area of PHAEMA is in the menu at the top. Income and Buildings open a short list of their own pages. Menu items you do not have access to are not shown."),
+         "Every area of PHAEMA is in the menu at the top. Finance and Buildings open a short list of their own pages. Menu items you do not have access to are not shown."),
         (L, "/?view=mine", ".phaema-tabs", "Two dashboards",
          "My work shows your own work; Whole estate shows the figures for the whole council. Surveyors start on My work. PHAEMA remembers the tab you last chose."),
         (L, "/?view=mine", "#attention", "Needs attention now",

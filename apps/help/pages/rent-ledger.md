@@ -7,7 +7,7 @@ summary: Raising rent, credit notes, receipts, arrears, statements and the finan
 
 The rent ledger charges rent on agreements the council lets out, records payments from the finance system,
 and shows what each tenant owes. It is an optional module: an administrator switches it on in
-[settings](settings.md#rent-ledger-settings). When it is on, **Rents** appears in the menu.
+[settings](settings.md#rent-ledger-settings). When it is on, **Rents receivable** appears in the **Finance** menu.
 
 ## Who can see and do what
 
@@ -30,7 +30,7 @@ Either way, the [finance export](#the-finance-export) is how charges reach the f
 
 ## Raising rent
 
-Administrators and finance officers: select **Rents**, then **Raise rent**.
+Administrators and finance officers: select **Finance**, **Rents receivable**, then **Raise rent**.
 
 1. Choose the range of **payment dates** to charge, for example the next quarter, and the **issue date**.
 2. Select **Preview the charges**. PHAEMA lists every charge due between the dates on current and holding-over
@@ -80,7 +80,7 @@ gets an invoice number in the same series and goes to finance in the next export
 
 ## Receipts
 
-Payments are recorded in the finance system and imported into PHAEMA. Administrators and finance officers: select **Rents**, then
+Payments are recorded in the finance system and imported into PHAEMA. Administrators and finance officers: select **Finance**, **Rents receivable**, then
 **Import receipts**, and follow the usual [import steps](import-export.md#how-every-import-works).
 
 Each payment is matched to an agreement by, in order:
@@ -94,7 +94,7 @@ A negative amount records a refund or a returned payment.
 
 ## Arrears
 
-**Rents**, then **Arrears**, lists every agreement with overdue rent, aged by how long it has been overdue:
+**Finance**, **Arrears**, lists every agreement with overdue rent, aged by how long it has been overdue:
 1–30 days, 31–60 days, 61–90 days and over 90 days. Download it to Excel for arrears meetings. The
 [dashboard](dashboard.md) shows the total arrears and the collection rate.
 
@@ -111,7 +111,7 @@ same period.
 
 ## The finance export
 
-**Rents**, then **Finance exports**, collects every charge and credit note not yet sent to finance into a numbered
+**Finance**, **Rents receivable**, then **Finance exports**, collects every charge and credit note not yet sent to finance into a numbered
 export. Download it as Excel or CSV and load it into the finance system. Each charge is only ever in one export,
 and earlier exports can be downloaded again.
 

@@ -155,18 +155,39 @@ def case_new(request):
     wanted = CaseType.objects.filter(code=request.GET.get("type", ""), active=True).first()
     if wanted:  # e.g. the lease page's "get the tenant's insurance certificate" link
         initial.update({"case_type": wanted.pk, "title": wanted.name})
+    project = _project_to_join(request)
     form = NewCaseForm(request.POST or None, initial=initial)
     if request.method == "POST" and form.is_valid():
         d = form.cleaned_data
         case = workflow.open_case(d["case_type"], title=d["title"], lease=d["lease"], property=d["property"],
                                   how_received=d["how_received"], received_on=d["received_on"],
                                   applicant_reference=d["applicant_reference"])
+        changed = []
         if not case.owner_id:
             case.owner = request.user
-            case.save(update_fields=["owner"])
+            changed.append("owner")
+        if project is not None:
+            case.project = project
+            changed.append("project")
+        if changed:
+            case.save(update_fields=changed)
         messages.success(request, _("Case %(ref)s opened.") % {"ref": case.display_reference})
         return redirect(case)
-    return render(request, "cases/case_new.html", {"form": form})
+    return render(request, "cases/case_new.html", {"form": form, "project": project})
+
+
+def _project_to_join(request):
+    """The project a new case is started from (?project=), when the person can manage that project."""
+    from apps.projects import rules
+    from apps.projects.models import Project
+
+    pk = request.GET.get("project") or request.POST.get("project")
+    if not (pk and str(pk).isdigit()):
+        return None
+    project = Project.objects.filter(pk=int(pk)).first()
+    if project is None or not rules.can_manage(request.user, project):
+        raise PermissionDenied
+    return project
 
 
 # ------------------------------------------------------------------ the case page
