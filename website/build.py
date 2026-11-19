@@ -103,8 +103,9 @@ BEFORE_LIVE = [
 ]
 
 CAPABILITIES = [
-    ("Property register", "Estates, sites, buildings and units in a tree, with UPRN and USRN, floor areas to the RICS "
-     "measurement codes, titles, photos, disposals and a map drawn from Land Registry INSPIRE parcels. Each site "
+    ("Property register", "Estates, sites, buildings and units in a tree, with UPRN and USRN, floor areas (GIA, NIA "
+     "and GEA to the RICS Code of Measuring Practice, and IPMS: All Buildings figures alongside, with the basis "
+     "stated), titles, photos, disposals and a map drawn from Land Registry INSPIRE parcels. Each site "
      "and building records its construction, roof, windows, services and floor plans, gathered into a property "
      "report. Designations, overall condition, vacancy, planned disposals and yearly running costs are recorded "
      "too."),
