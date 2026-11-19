@@ -67,3 +67,19 @@ def load(today=None):
                     running_cost=(p.gia_sqm * Decimal("62") * factor).quantize(Decimal("100")),
                     rates=(p.gia_sqm * Decimal("38") * factor).quantize(Decimal("100")),
                     notes="Estimate for the year so far" if back == 0 else "From the finance system (fictional)")
+    _ipms(today)
+
+
+def _ipms(today):
+    """The civic centre has a recent measured survey to IPMS: All Buildings beside its older GIA and NIA."""
+    p = Property.objects.filter(reference="DM-S30", ipms2_sqm__isnull=True).first()
+    if p is None:
+        return
+    p.area_standard = p.area_standard or "comp6"
+    p.area_source = p.area_source or "drawings"
+    p.ipms1_sqm, p.ipms2_sqm, p.ipms3_sqm, p.ipms3_kind = Decimal("3985"), Decimal("3690"), Decimal("3210"), "3.2"
+    p.ipms_measured_on, p.ipms_source = today - timedelta(days=150), "survey"
+    p.ipms_measured_by, p.ipms_method = "Example Measured Surveys Ltd (fictional)", "Laser scan and CAD"
+    p.ipms_checked, p.ipms_checked_how = "yes", "Check-measured on two floors"
+    p.ipms_notes = "Roof terrace of 85 m² stated separately; plant room on the roof is a limited use area (headroom)."
+    p.save()

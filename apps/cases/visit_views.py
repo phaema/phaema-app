@@ -193,7 +193,7 @@ def visit_update(request, pk, visit_pk, answer_pk):
     target = a.target
     if not visit.is_finished or not v.is_difference(a) or not can_edit(request.user, target):
         raise PermissionDenied
-    Form = v.update_form_class(a.checks)
+    Form = v.update_form_class(a.checks, target)
     if request.method == "POST":
         form = Form(request.POST, instance=target)
         if form.is_valid():

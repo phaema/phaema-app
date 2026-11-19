@@ -146,15 +146,41 @@ hectares. The property page shows how the floor area is made up:
 
 ### How areas were measured
 
-RICS asks for the measurement basis to be recorded. For each property, record in **Edit this property**:
+RICS asks for the measurement basis to be stated. For the GIA, NIA and GEA, record in **Edit this property**:
 
-- **measured to**: the RICS Code of Measuring Practice (6th edition) or IPMS: All Buildings;
+- **measured to**: the RICS Code of Measuring Practice (6th edition) or other;
 - the **source**: a measured survey, drawings, a lease or title plan, or an estimate;
-- the **date** the areas were measured.
+- the **date** the areas were measured, **who** measured them and the **method and tools**.
 
 Estimated areas are marked as estimates wherever they are shown. You can also record the **gross external area
-(GEA)**, used for planning, insurance and some valuations. The ready-made report **Floor areas with no measurement basis** lists
-properties still to be checked.
+(GEA)**, used for planning, insurance and some valuations. The ready-made report **Floor areas with no measurement
+basis** lists properties still to be checked.
+
+### IPMS: All Buildings
+
+Since RICS archived its 2018 measurement statement in June 2025, surveyors use either IPMS: All Buildings or the
+Code of Measuring Practice and say which. PHAEMA holds both sets side by side, so a property can be reported both
+ways. Under **Floor areas to IPMS: All Buildings** in **Edit this property**, record what the measured survey
+gives:
+
+| Figure | What it is, in brief | Nearest Code figure |
+|---|---|---|
+| IPMS 1 | To the outside of the external walls, including balconies and other external floor areas | GEA |
+| IPMS 2 | To the internal dominant face of the external walls | GIA |
+| IPMS 3 | An occupier's exclusive area, measured externally (3.1) or internally (3.2) | NIA |
+
+With them, record the date, the source, who measured, the method and tools, and whether the figures were
+**checked on site** and how, which IPMS asks a measurement report to state. Use **IPMS notes** for areas the
+standard says to state separately (balconies, roof terraces, mezzanines, limited use areas and why) and for the use
+of each part of a mixed-use building.
+
+Every area PHAEMA shows is labelled with its basis, for example "GIA 3,650 m²" or "IPMS 2 3,690 m²". In **Module
+settings**, **Floor areas: show first** chooses which set is used first on property pages, reports, space costs
+and the data standard export; where a property has only the other set, that one is used. Service charge
+apportionment still uses NIA.
+
+A site visit's check-measure offers the set the council shows first. Areas recorded before 19 November 2026 as
+"measured to IPMS" were moved from the GIA, NIA and GEA boxes into the IPMS boxes, with a note saying so.
 
 ## Site and buildings
 

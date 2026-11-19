@@ -185,7 +185,6 @@ class Property(TimeStampedModel):
 
     class AreaStandard(models.TextChoices):
         COMP6 = "comp6", _("RICS Code of Measuring Practice, 6th edition")
-        IPMS = "ipms", _("IPMS: All Buildings")
         OTHER = "other", _("Other")
 
     class AreaSource(models.TextChoices):
@@ -199,6 +198,41 @@ class Property(TimeStampedModel):
         help_text=_("The measurement standard the floor areas follow. RICS asks for the basis to be recorded."))
     area_source = models.CharField(_("source of areas"), max_length=10, choices=AreaSource.choices, blank=True)
     areas_measured_on = models.DateField(_("areas measured on"), null=True, blank=True)
+    areas_measured_by = models.CharField(_("measured by"), max_length=150, blank=True,
+                                         help_text=_("The person or firm who measured, for example a measured "
+                                                     "survey contractor."))
+    areas_method = models.CharField(_("method and tools"), max_length=200, blank=True,
+                                    help_text=_("For example laser measure and CAD, or scaled from drawings."))
+
+    # IPMS: All Buildings, held beside the Code of Measuring Practice figures (dual reporting).
+    class Ipms3Kind(models.TextChoices):
+        EXTERNAL = "3.1", _("IPMS 3.1 (measured externally)")
+        INTERNAL = "3.2", _("IPMS 3.2 (measured internally)")
+
+    class Checked(models.TextChoices):
+        YES = "yes", _("Yes")
+        NO = "no", _("No")
+
+    ipms1_sqm = models.DecimalField(
+        _("IPMS 1 (m²)"), max_digits=12, decimal_places=2, null=True, blank=True, validators=[MinValueValidator(0)],
+        help_text=_("Measured to the outside of the external walls, with balconies and other external floor areas."))
+    ipms2_sqm = models.DecimalField(
+        _("IPMS 2 (m²)"), max_digits=12, decimal_places=2, null=True, blank=True, validators=[MinValueValidator(0)],
+        help_text=_("Measured to the internal dominant face of the external walls."))
+    ipms3_sqm = models.DecimalField(
+        _("IPMS 3 (m²)"), max_digits=12, decimal_places=2, null=True, blank=True, validators=[MinValueValidator(0)],
+        help_text=_("The area in an occupier's exclusive use."))
+    ipms3_kind = models.CharField(_("IPMS 3 measured"), max_length=3, choices=Ipms3Kind.choices, blank=True,
+                                  help_text=_("Externally (3.1) or internally (3.2). Most lettings use 3.2."))
+    ipms_measured_on = models.DateField(_("IPMS areas measured on"), null=True, blank=True)
+    ipms_source = models.CharField(_("source of IPMS areas"), max_length=10, choices=AreaSource.choices, blank=True)
+    ipms_measured_by = models.CharField(_("IPMS measured by"), max_length=150, blank=True)
+    ipms_method = models.CharField(_("IPMS method and tools"), max_length=200, blank=True)
+    ipms_checked = models.CharField(_("IPMS checked on site"), max_length=3, choices=Checked.choices, blank=True)
+    ipms_checked_how = models.CharField(_("how it was checked"), max_length=200, blank=True)
+    ipms_notes = models.CharField(_("IPMS notes"), max_length=255, blank=True,
+                                  help_text=_("Areas stated separately (balconies, mezzanines, limited use areas "
+                                              "and why) and the use of each part of a mixed-use building."))
 
     # Disposal: once sold or let on a long lease, the property leaves the active register and open data.
     disposed_on = models.DateField(_("disposed of on"), null=True, blank=True,
@@ -511,6 +545,76 @@ class Property(TimeStampedModel):
             frontier = list(Property.objects.filter(parent_id__in=frontier).values_list("pk", flat=True))
             ids.update(frontier)
         return ids
+
+    # Floor areas: each kind has a Code of Measuring Practice figure and the nearest IPMS figure.
+    AREA_KINDS = {"gross": (("gia_sqm", "GIA"), ("ipms2_sqm", "IPMS 2")),
+                  "net": (("nia_sqm", "NIA"), ("ipms3_sqm", "")),
+                  "external": (("gea_sqm", "GEA"), ("ipms1_sqm", "IPMS 1"))}
+
+    @property
+    def ipms3_label(self):
+        return f"IPMS {self.ipms3_kind}" if self.ipms3_kind else "IPMS 3"
+
+    def area_basis(self):
+        if not hasattr(self, "_area_basis"):
+            from apps.core.models import ModuleSettings
+
+            self._area_basis = ModuleSettings.load().area_basis
+        return self._area_basis
+
+    def floor_area(self, kind="gross"):
+        """(value, label) for a kind of floor area ("gross", "net" or "external"): the figure on the council's
+        chosen basis, or else the other basis's, labelled with what it is, for example (1012, "IPMS 2")."""
+        comp, ipms = self.AREA_KINDS[kind]
+        for field, label in ((ipms, comp) if self.area_basis() == "ipms" else (comp, ipms)):
+            value = getattr(self, field)
+            if value is not None:
+                return value, label or self.ipms3_label
+        return None, ""
+
+    def area_lines(self):
+        """Every floor area recorded, as (label, value), the council's chosen basis first."""
+        comp = [("GIA", self.gia_sqm), ("NIA", self.nia_sqm), ("GEA", self.gea_sqm)]
+        ipms = [("IPMS 1", self.ipms1_sqm), ("IPMS 2", self.ipms2_sqm), (self.ipms3_label, self.ipms3_sqm)]
+        lines = ipms + comp if self.area_basis() == "ipms" else comp + ipms
+        return [(label, value) for label, value in lines if value is not None]
+
+    def area_groups(self):
+        """The floor areas in groups, each with how it was measured: the council's chosen basis first.
+        [{"lines": [(label, value)], "basis": text, "estimate": bool}]"""
+        comp = {"lines": [(l, v) for l, v in (("GIA", self.gia_sqm), ("NIA", self.nia_sqm), ("GEA", self.gea_sqm))
+                          if v is not None],
+                "basis": self.comp_basis_text(), "estimate": self.area_source == "estimate"}
+        ipms = {"lines": [(l, v) for l, v in (("IPMS 1", self.ipms1_sqm), ("IPMS 2", self.ipms2_sqm),
+                                              (self.ipms3_label, self.ipms3_sqm)) if v is not None],
+                "basis": self.ipms_basis_text(), "estimate": self.ipms_source == "estimate"}
+        groups = [ipms, comp] if self.area_basis() == "ipms" else [comp, ipms]
+        return [g for g in groups if g["lines"]]
+
+    def has_comp_areas(self):
+        return any(v is not None for v in (self.gia_sqm, self.nia_sqm, self.gea_sqm))
+
+    def has_ipms_areas(self):
+        return any(v is not None for v in (self.ipms1_sqm, self.ipms2_sqm, self.ipms3_sqm))
+
+    def comp_basis_text(self):
+        """How the GIA, NIA and GEA were measured, in one line, or "" if nothing is recorded."""
+        return "; ".join(str(x) for x in (
+            self.get_area_standard_display() if self.area_standard else "",
+            str(self.get_area_source_display()).lower() if self.area_source else "",
+            self.areas_measured_by, self.areas_method,
+            f"{self.areas_measured_on.day} {self.areas_measured_on:%B %Y}" if self.areas_measured_on else "") if x)
+
+    def ipms_basis_text(self):
+        """How the IPMS figures were measured, in one line (the standard is always named)."""
+        checked = {"yes": "checked on site", "no": "not checked on site"}.get(self.ipms_checked, "")
+        if checked and self.ipms_checked_how:
+            checked += f" ({self.ipms_checked_how})"
+        return "; ".join(str(x) for x in (
+            "IPMS: All Buildings",
+            str(self.get_ipms_source_display()).lower() if self.ipms_source else "",
+            self.ipms_measured_by, self.ipms_method, checked,
+            f"{self.ipms_measured_on.day} {self.ipms_measured_on:%B %Y}" if self.ipms_measured_on else "") if x)
 
     def area_breakdown(self):
         """How this property's floor area is made up from its parts.

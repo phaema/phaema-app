@@ -111,10 +111,10 @@ def gaps(prop, parts):
     if prop.property_type in (Property.PropertyType.ESTATE, Property.PropertyType.SITE, Property.PropertyType.LAND) \
             and prop.site_area_ha is None:
         out.append("Site area")
-    if not any((prop.gia_sqm, prop.nia_sqm, prop.gea_sqm)) and not parts \
+    if not prop.has_comp_areas() and not prop.has_ipms_areas() and not parts \
             and prop.property_type != Property.PropertyType.LAND:
         out.append("Floor areas")
-    elif any((prop.gia_sqm, prop.nia_sqm, prop.gea_sqm)) and not prop.area_standard:
+    elif prop.has_comp_areas() and not prop.area_standard:
         out.append("The measurement standard the floor areas follow")
     if not any((prop.mains_gas, prop.electricity, prop.mains_water, prop.drainage)) and not any(
             (b.mains_gas, b.electricity, b.mains_water, b.drainage) for b in buildings):
@@ -266,17 +266,18 @@ def _description(g, wanted):
 
 def _areas(g, wanted):
     prop, out = g.prop, []
-    own = [("Gross internal area (GIA)", _area(prop.gia_sqm)), ("Net internal area (NIA)", _area(prop.nia_sqm)),
-           ("Gross external area (GEA)", _area(prop.gea_sqm))]
-    own = [(label, value) for label, value in own if value]
+    names = {"GIA": "Gross internal area (GIA)", "NIA": "Net internal area (NIA)", "GEA": "Gross external area (GEA)"}
     breakdown = prop.area_breakdown()
+    rows = []
+    for g in prop.area_groups():
+        rows += [(names.get(label, label), _area(value)) for label, value in g["lines"]]
+        rows.append(("Basis of measurement", g["basis"] or MISSING))
     if breakdown and breakdown["gia"] and not prop.gia_sqm:
-        own.insert(0, ("Gross internal area (GIA), total of the buildings", _area(breakdown["gia"])))
-    if own:
-        basis = "; ".join(x for x in (
-            str(prop.get_area_standard_display()), str(prop.get_area_source_display()).lower(),
-            _date(prop.areas_measured_on)) if x)
-        out += _table(own + [("Basis of measurement", basis or MISSING)]) + [""]
+        rows.insert(0, ("Gross internal area (GIA), total of the buildings", _area(breakdown["gia"])))
+    if prop.ipms_notes and prop.has_ipms_areas():
+        rows.append(("IPMS notes", prop.ipms_notes))
+    if rows:
+        out += _table(rows) + [""]
     elif not breakdown:
         out += [MISSING, ""]
     if breakdown:

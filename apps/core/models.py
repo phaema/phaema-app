@@ -129,6 +129,15 @@ class ModuleSettings(models.Model):
         default=SsoPasswords.UNLINKED,
         help_text=_("Applies once single sign-on is on. A person counts as having a council account from the "
                     "first time they sign in with it."))
+    class AreaBasis(models.TextChoices):
+        COMP = "comp", _("RICS Code of Measuring Practice (GIA, NIA, GEA)")
+        IPMS = "ipms", _("IPMS: All Buildings (IPMS 1, 2 and 3)")
+
+    area_basis = models.CharField(
+        _("floor areas: show first"), max_length=4, choices=AreaBasis.choices, default=AreaBasis.COMP,
+        help_text=_("Which set of floor areas PHAEMA uses first on property pages, reports, space costs and the "
+                    "data standard export. Where a property has only the other set, that is used, always labelled "
+                    "with its basis."))
     strategy_review_years = models.PositiveSmallIntegerField(
         _("asset strategies are reviewed every (years)"), default=5,
         validators=[MinValueValidator(1), MaxValueValidator(20)],

@@ -20,6 +20,7 @@ class ModuleSettingsAdmin(admin.ModelAdmin):
                                             "website"]}),
         ("Maintenance", {"fields": ["order_approval_limit"]}),
         ("Maps", {"fields": ["os_maps_api_key", "os_map_style"]}),
+        ("Floor areas", {"fields": ["area_basis"]}),
         ("Estate strategy", {"fields": ["strategy_review_years"],
                              "description": "The lists of holding purpose sub-categories and asset strategies are "
                                             "in Manage data."}),

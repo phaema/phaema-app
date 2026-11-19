@@ -105,9 +105,13 @@ def _split_address(line):
 
 
 def _floor_area(prop):
-    """The floor area to report and what it is: gross internal first, as the measure most often held."""
-    for value, label in ((prop.gia_sqm, "GIA"), (prop.nia_sqm, "NIA"), (prop.gea_sqm, "GEA")):
+    """The floor area to report and what it is: gross internal first, as the measure most often held, on the
+    council's chosen basis (Code of Measuring Practice or IPMS), else the other."""
+    for kind in ("gross", "net", "external"):
+        value, label = prop.floor_area(kind)
         if value is not None:
+            if label.startswith("IPMS"):
+                return value, f"{label} (IPMS: All Buildings)"
             basis = prop.get_area_standard_display() if prop.area_standard else ""
             return value, f"{label} ({basis})" if basis else label
     return "", ""
@@ -276,7 +280,9 @@ def gather(user=None, today=None):
     for p in props:
         if p.occupation != "vacant" or p.pk in parents or p.disposed_on:
             continue
-        area, area_type = (p.nia_sqm, "NIA") if p.nia_sqm is not None else _floor_area(p)
+        area, area_type = p.floor_area("net")
+        if area is None:
+            area, area_type = _floor_area(p)
         vacant.append([
             p.reference, p.name, area if area is not None else "", area_type, p.vacant_since or "",
             p.available_from or "", p.available_until or "", VACANCY.get(p.vacancy_status, ""),
