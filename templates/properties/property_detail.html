@@ -52,7 +52,7 @@
       {% for g in groups %}<p class="govuk-body govuk-!-margin-bottom-2">{% for label, value in g.lines %}{{ label }} {{ value|floatformat:0|intcomma }} m²<br>{% endfor %}<span class="govuk-body-s">{% if g.basis %}{{ g.basis }}{% else %}{% translate "How these were measured is not recorded." %}{% endif %}</span>{% if g.estimate %} <strong class="govuk-tag govuk-tag--yellow">{% translate "Estimate" %}</strong>{% endif %}</p>{% endfor %}
       {% if object.site_area_ha %}{% translate "Site" %} {{ object.site_area_ha|floatformat:2 }} ha ({{ object.site_area_sqm|intcomma }} m²){% endif %}
       {% if not groups and not object.site_area_ha %}–{% endif %}
-      {% if object.ipms_notes and object.has_ipms_areas %}<br><span class="govuk-body-s">{{ object.ipms_notes }}</span>{% endif %}
+      {% if object.ipms_notes and object.has_ipms_areas %}<p class="govuk-body-s govuk-!-margin-bottom-0">{% translate "IPMS notes:" %} {{ object.ipms_notes }}</p>{% endif %}
       {% endwith %}</dd></div>
     <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Grid reference" %}</dt><dd class="govuk-summary-list__value">{% if object.easting %}{{ object.easting }}, {{ object.northing }}{% else %}–{% endif %}</dd></div>
     {% if designations %}<div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Designations" %}</dt><dd class="govuk-summary-list__value">{% for label, value in designations %}{{ label }}: {{ value }}{% if not forloop.last %}<br>{% endif %}{% endfor %}</dd></div>{% endif %}
