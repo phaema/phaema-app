@@ -111,7 +111,9 @@ CAPABILITIES = [
      "too."),
     ("Leases and key dates", "Leases, licences and wayleaves, let out or held. Rent reviews, breaks, expiries and "
      "notice deadlines become events with email reminders and a calendar feed. Leases, deeds and plans held as PDFs "
-     "open in a built-in reader, with search across the wording."),
+     "open in a built-in reader, with search across the wording; scanned documents are read on the council's own "
+     "server so they can be searched too. Rents the council pays as a tenant are listed with every payment due over "
+     "the next twelve months."),
     ("Cases and approvals", "Consents, renewals, dilapidations and enquiries with stages, tasks and statutory target "
      "dates. Supervisors approve decisions, with conflicts of interest declared first. Documents and saved emails are filed by "
      "dragging them onto the case. Each case has a site visit "
@@ -119,7 +121,8 @@ CAPABILITIES = [
      "for each type of case. Visits are recorded on the phone with photos, and differences from the property "
      "record are listed for the managing surveyor to apply."),
     ("Projects", "Developments, acquisitions, disposals and programmes taken through four gateways, with milestones, a "
-     "budget by financial year, risks and a checklist of the register changes completion needs."),
+     "budget by financial year, risks and a checklist of the register changes completion needs. The cases that make "
+     "up a project, from acquisitions to lettings, are listed on it in order."),
     ("Document library", "Thirty letter and notice templates, from consent letters to section 25 notice particulars, "
      "filled in from the case and downloaded to Word. Councils can adapt them and add their own."),
     ("Rents and arrears", "Demand runs, VAT, credit notes, receipts imported from finance, aged arrears and an export "

@@ -24,6 +24,8 @@ PHAEMA helps a council's estates team manage its land and property: the property
 - Leases, licences, wayleaves and other agreements, both let out and held by the council: parties, term, 1954 Act status, rent, reviews, breaks with notice deadlines, repairing and insurance terms
 - Key dates with red/amber/green warnings, and a lease register with filters (including expiring soon and overdue events) and sorting
 - Signed leases, notices and other agreement documents stored as PDFs against each lease
+- Scanned PDFs read on the server (OCR, with Tesseract) so they can be searched in the built-in reader; the original scan is kept
+- Rents payable on property the council holds as tenant, with every payment due over the next twelve months
 - Tenants and other parties: a searchable list, and for each party every agreement (as tenant, landlord or guarantor) and every property involved
 - Lease events: rent reviews, break dates, break notice deadlines and expiries generated from each lease, plus events added by hand; assigned to the managing surveyor; outcomes recorded on screen (a settled review updates the rent schedule and sets up the next review)
 - Email reminders at lead times set by the council (e.g. 180, 90 and 30 days), weekly overdue reminders, and a private calendar feed for Outlook
