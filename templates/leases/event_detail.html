@@ -26,6 +26,7 @@
     {% if blocked_case %}<br><strong class="govuk-tag govuk-tag--blue">{% translate "Approval needed" %}</strong> {% translate "The outcome can be recorded once the supervisor approves the recommendation on the case." %}{% endif %}</div>
   {% elif editable and event.is_open %}<form method="post" action="{% url 'cases:new' %}" class="govuk-!-margin-bottom-6">{% csrf_token %}<input type="hidden" name="event" value="{{ event.pk }}"><button class="govuk-button govuk-button--secondary" data-module="govuk-button">{% translate "Start a case for this event" %}</button></form>{% endif %}{% endwith %}
 
+  {% include "leases/_index_calculation.html" %}
   {% if outcome_form %}
   <h2 class="govuk-heading-m">{% translate "Record the outcome" %}</h2>
   {% include "core/_hint.html" with summary=_("What happens when I record the outcome?") text=_("PHAEMA updates the agreement for you: a review adds the new rent to the rent schedule and sets up the next review; an exercised break or a vacated expiry ends the agreement.") page="events" anchor="recording-the-outcome" %}

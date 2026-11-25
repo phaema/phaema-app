@@ -1,0 +1,33 @@
+{% extends "base.html" %}{% load i18n %}
+{% block title %}{% translate "Index figures" %}{% endblock %}
+{% block help_page %}rent-schedule#index-linked-reviews{% endblock %}
+{% block content %}
+<h1 class="govuk-heading-l">{% translate "Index figures" %}</h1>
+<p class="govuk-body">{% translate "The monthly price index figures used to work out index-linked rent reviews. Where a series has an ONS series ID, PHAEMA fetches new figures each month itself; otherwise, or if the server cannot reach the ONS website, upload the CSV file." %}</p>
+{% for s, latest, recent in rows %}
+<h2 class="govuk-heading-m">{{ s.code }} <span class="govuk-caption-m">{{ s.name }}</span></h2>
+<p class="govuk-body">{% if latest %}{% blocktranslate with month=latest.month|date:"F Y" value=latest.value %}Latest figure: {{ month }}, {{ value }}.{% endblocktranslate %}{% else %}{% translate "No figures held yet." %}{% endif %}{% if s.ons_series %} {% blocktranslate with id=s.ons_series %}ONS series {{ id }}.{% endblocktranslate %}{% endif %}</p>
+{% if recent %}
+<table class="govuk-table"><caption class="govuk-visually-hidden">{% blocktranslate with code=s.code %}Recent {{ code }} figures{% endblocktranslate %}</caption>
+  <thead class="govuk-table__head"><tr class="govuk-table__row"><th scope="col" class="govuk-table__header">{% translate "Month" %}</th><th scope="col" class="govuk-table__header govuk-table__header--numeric">{% translate "Index" %}</th></tr></thead>
+  <tbody class="govuk-table__body">{% for f in recent %}<tr class="govuk-table__row"><td class="govuk-table__cell">{{ f.month|date:"F Y" }}</td><td class="govuk-table__cell govuk-table__cell--numeric">{{ f.value }}</td></tr>{% endfor %}</tbody>
+</table>
+{% endif %}
+{% empty %}
+<p class="govuk-body">{% translate "No indices are set up." %}</p>
+{% endfor %}
+{% if can_change and series %}
+<h2 class="govuk-heading-m">{% translate "Add figures" %}</h2>
+<form method="post" enctype="multipart/form-data" novalidate>{% csrf_token %}
+  <div class="govuk-form-group"><label class="govuk-label" for="series">{% translate "Index" %}</label>
+    <select class="govuk-select" id="series" name="series">{% for s in series %}<option value="{{ s.pk }}">{{ s.code }}</option>{% endfor %}</select></div>
+  <div class="govuk-form-group"><label class="govuk-label" for="file">{% translate "CSV file" %}</label>
+    <div class="govuk-hint">{% translate "The ONS time series CSV download, or two columns: month (e.g. 2026-01) and value." %}</div>
+    <input class="govuk-file-upload" id="file" name="file" type="file" accept=".csv,text/csv"></div>
+  <div class="govuk-button-group">
+    <button class="govuk-button" data-module="govuk-button" name="upload" value="1">{% translate "Upload figures" %}</button>
+    <button class="govuk-button govuk-button--secondary" data-module="govuk-button" name="fetch" value="1">{% translate "Fetch from the ONS website now" %}</button>
+  </div>
+</form>
+{% endif %}
+{% endblock %}

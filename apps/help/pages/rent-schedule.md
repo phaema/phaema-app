@@ -16,7 +16,7 @@ stepped rent changes on the right date without anyone editing the lease.
 | Initial rent | Created from the rent when the agreement is first saved or imported. |
 | Rent review | Created when you [record a rent review outcome](events.md#rent-reviews). |
 | Fixed step | Added by hand, for stepped rents agreed in the lease. |
-| Index-linked increase | Added by hand, for RPI or CPI reviews. |
+| Index-linked increase | Created when you record an [index-linked review](#index-linked-reviews), or added by hand. |
 | Variation or concession | Added by hand, for a rent-free period, concession or deed of variation. |
 | Lease renewal | Added by hand. |
 
@@ -29,6 +29,30 @@ You can remove an entry that was added in error. An agreement always keeps at le
 
 > Rent changes are made on the rent schedule, not by editing the rent on the agreement or by
 > [importing](import-export.md#leases-and-licences). This keeps a full history of the rent.
+
+## Index-linked reviews
+
+For a lease whose rent follows RPI, CPI or CPIH, PHAEMA works out the new rent at each review. Enter the index
+terms on the agreement (**Manage data**, the agreement, **Index-linked reviews**):
+
+| Term | What to enter |
+|---|---|
+| Index | CPI, CPIH or RPI (administrators can add others). |
+| Base index month | The month of the figure the current rent is based on: the start of the lease, or the figure used at the last review. PHAEMA moves it on at each review. |
+| Index months before the review | Many leases use the figure for a month two or three months before the review date, because figures are published about a month late. 0 means the review month itself. |
+| Cap and collar | The most and least the rent may rise, as a percentage a year. Leave blank if there is none. |
+| Cap and collar compound | Ticked (the usual drafting): 4% a year over three years allows 12.49%. Unticked: 12%. |
+| Upwards only | The rent never falls. |
+
+The working is shown on the review: the two index figures, the change, the rent at the index, any cap or collar,
+and the new rent. The new rent is filled in for you; check it against the lease before you
+[record the outcome](events.md#rent-reviews). The rent schedule entry is marked **Index-linked increase**, and the
+figure used becomes the base for the next review.
+
+**Index figures.** Under **Finance**, **Index figures**, PHAEMA keeps the monthly figures. Each day it fetches new
+CPI, CPIH and RPI figures from the Office for National Statistics website once they are due. If the server cannot
+reach the internet, an administrator downloads the series as a CSV file from the ONS website and uploads it there.
+A plain file with two columns, month and value, also works.
 
 ## Payments
 

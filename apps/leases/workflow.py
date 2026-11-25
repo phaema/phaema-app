@@ -173,17 +173,23 @@ def _close(event, user, status, outcome):
 
 
 @transaction.atomic
-def complete_review(event, user, new_rent, effective_from, next_review_date, notes=""):
-    """Record a settled rent review: the new rent from its date, and when the next review is."""
+def complete_review(event, user, new_rent, effective_from, next_review_date, notes="", index_month=None):
+    """Record a settled rent review: the new rent from its date, and when the next review is.
+
+    For an index-linked review, `index_month` is the month of the index figure used: it becomes the base month
+    for the next review."""
     lease = event.lease
+    reason = RentScheduleEntry.Reason.INDEXATION if lease.is_index_linked else RentScheduleEntry.Reason.REVIEW
     RentScheduleEntry.objects.update_or_create(
         lease=lease, effective_from=effective_from,
-        defaults={"annual_rent": new_rent, "reason": RentScheduleEntry.Reason.REVIEW, "notes": notes[:255]},
+        defaults={"annual_rent": new_rent, "reason": reason, "notes": notes[:255]},
     )
     _close(event, user, LeaseEvent.Status.DONE,
            f"Review settled at £{new_rent:,.2f} a year from {effective_from:%d %B %Y}. {notes}".strip())
     lease.refresh_from_db()
     lease.next_review_date = next_review_date
+    if index_month and lease.is_index_linked:
+        lease.index_base_month = index_month.replace(day=1)
     lease.save()  # moves the open review event on to the next review
     refresh_current_rent(lease)
 

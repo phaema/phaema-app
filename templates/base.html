@@ -33,6 +33,7 @@
           {% if modules.rent_ledger_enabled %}<a href="{% url 'ledger:home' %}">{% translate "Rents receivable" %}</a>
           <a href="{% url 'ledger:arrears' %}">{% translate "Arrears" %}</a>{% endif %}
           <a href="{% url 'leases:payable' %}">{% translate "Rents payable" %}</a>
+          <a href="{% url 'leases:index-figures' %}">{% translate "Index figures" %}</a>
           {% if modules.service_charges_enabled %}<a href="{% url 'servicecharges:list' %}">{% translate "Service charges" %}</a>{% endif %}
           {% if modules.valuation_enabled %}<a href="{% url 'valuations:home' %}">{% translate "Asset valuation" %}</a>{% endif %}</div></details>
         {% if modules.maintenance_enabled or modules.compliance_enabled or modules.space_enabled %}<details class="phaema-menu"><summary>{% translate "Buildings" %}</summary><div class="phaema-menu__panel">

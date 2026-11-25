@@ -25,10 +25,16 @@ class Command(BaseCommand):
             from apps.servicecharges.deadlines import send_weekly
 
             emails += send_weekly(base_url=settings.PHAEMA_BASE_URL)
+        indices = 0
+        if getattr(settings, "PHAEMA_FETCH_INDICES", True):
+            from apps.leases.indexation import update_all
+
+            indices = update_all()
         jobs = 0
         if ModuleSettings.load().maintenance_enabled:
             from apps.maintenance.workflow import auto_raise
 
             jobs = auto_raise()
         self.stdout.write(f"Rents updated: {rents}. Cases opened: {cases}. Planned jobs raised: {jobs}. "
-                          f"Reminder emails sent: {emails}. Accounts closed (access ended): {closed}.")
+                          f"Reminder emails sent: {emails}. Accounts closed (access ended): {closed}. "
+                          f"Index figures added: {indices}.")

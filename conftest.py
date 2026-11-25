@@ -11,6 +11,7 @@ def pytest_configure(config):
 def _two_step_rule(request, settings):
     """Most tests sign people in without two-step sign-in. Tests marked two_step enforce the council's rule."""
     settings.PHAEMA_ENFORCE_TWO_STEP = bool(request.node.get_closest_marker("two_step"))
+    settings.PHAEMA_FETCH_INDICES = False  # tests never reach the internet
 
 
 @pytest.fixture(autouse=True)

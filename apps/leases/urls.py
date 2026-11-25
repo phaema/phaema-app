@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 from django.urls import path
 
-from . import event_views, views
+from . import event_views, index_views, views
 
 app_name = "leases"
 
@@ -18,5 +18,6 @@ urlpatterns = [
     path("calendar/", event_views.calendar_settings, name="calendar"),
     path("parties/", views.PartyListView.as_view(), name="parties"),
     path("rents-payable/", views.rents_payable, name="payable"),
+    path("index-figures/", index_views.index_figures, name="index-figures"),
     path("parties/<int:pk>/", views.PartyDetailView.as_view(), name="party"),
 ]
