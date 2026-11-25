@@ -143,7 +143,8 @@ def _ledger(today):
         account = billing.account(launderette, today)
         start = creditcontrol.episode_start(account, today)
         if start is not None:
-            for stage in ChaseStage.objects.filter(days_overdue__lte=(today - start).days, action__in=("letter", "case")):
+            letters = ChaseStage.objects.filter(days_overdue__lte=(today - start).days, action="letter")
+            for stage in letters:  # the arrears case is left as the next step
                 creditcontrol.take(launderette, stage, today=min(today, start + timedelta(days=stage.days_overdue)),
                                    account=account)
     pizza = Lease.objects.filter(reference="DL-0016").first()
