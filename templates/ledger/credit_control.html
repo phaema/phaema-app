@@ -1,0 +1,42 @@
+{% extends "base.html" %}{% load i18n humanize %}
+{% block title %}{% translate "Credit control" %}{% endblock %}
+{% block help_page %}rent-ledger#credit-control{% endblock %}
+{% block content %}
+<h1 class="govuk-heading-l">{% translate "Credit control" %}</h1>
+{% include "ledger/_nav.html" %}
+<p class="govuk-body">{% translate "Accounts with overdue rent and the next step in chasing it, oldest debt first. Accounts are left out while demands are on hold, after the debt is passed to debt collectors or legal, and while a payment plan is being kept." %}</p>
+<p class="govuk-body-s">{% translate "Stages:" %} {% for s in stages %}{{ s.name }} ({% blocktranslate count n=s.days_overdue %}{{ n }} day{% plural %}{{ n }} days{% endblocktranslate %}){% if not forloop.last %} · {% endif %}{% empty %}{% translate "none set up" %}{% endfor %}{% if perms.ledger.change_chasestage %} · <a class="govuk-link" href="{% url 'admin:ledger_chasestage_changelist' %}">{% translate "Change the stages" %}</a>{% endif %}</p>
+
+<h2 class="govuk-heading-m">{% blocktranslate count n=dues|length %}{{ n }} account to chase{% plural %}{{ n }} accounts to chase{% endblocktranslate %}</h2>
+{% if dues %}
+<div class="phaema-table-scroll"><table class="govuk-table"><caption class="govuk-visually-hidden">{% translate "Accounts to chase" %}</caption>
+  <thead class="govuk-table__head"><tr class="govuk-table__row">
+    <th scope="col" class="govuk-table__header">{% translate "Agreement" %}</th>
+    <th scope="col" class="govuk-table__header govuk-table__header--numeric">{% translate "Overdue" %}</th>
+    <th scope="col" class="govuk-table__header">{% translate "Oldest debt" %}</th>
+    <th scope="col" class="govuk-table__header">{% translate "Next step" %}</th></tr></thead>
+  <tbody class="govuk-table__body">{% for d in dues %}{% with lease=d.account.lease %}<tr class="govuk-table__row">
+    <td class="govuk-table__cell"><a class="govuk-link" href="{% url 'ledger:account' lease.pk %}">{{ lease.reference }}</a><br><span class="govuk-body-s">{{ lease.counterparty.name }}</span>{% if d.broken_plan %}<br><strong class="govuk-tag govuk-tag--red">{% translate "Payment plan broken" %}</strong>{% endif %}</td>
+    <td class="govuk-table__cell govuk-table__cell--numeric">£{{ d.account.overdue|floatformat:2|intcomma }}</td>
+    <td class="govuk-table__cell">{{ d.since|date:"j M Y" }}<br><span class="govuk-body-s">{% blocktranslate count n=d.days %}{{ n }} day{% plural %}{{ n }} days{% endblocktranslate %}</span></td>
+    <td class="govuk-table__cell"><strong>{{ d.stage.name }}</strong>
+      {% with t=d.stage.template %}{% if t %}<br><a class="govuk-link govuk-body-s" href="{% url 'documents:create' t.code %}?lease={{ lease.pk }}">{% translate "Create the letter" %}</a>{% endif %}{% endwith %}
+      <form method="post" class="govuk-!-margin-top-2" novalidate>{% csrf_token %}<input type="hidden" name="lease" value="{{ lease.pk }}"><input type="hidden" name="stage" value="{{ d.stage.pk }}">
+        <button class="govuk-button govuk-button--secondary govuk-!-margin-bottom-0" data-module="govuk-button">{% if d.stage.action == "case" %}{% translate "Open the case" %}{% elif d.stage.action == "letter" %}{% translate "Letter sent" %}{% else %}{% translate "Reviewed" %}{% endif %}</button></form></td>
+  </tr>{% endwith %}{% endfor %}</tbody></table></div>
+{% else %}<p class="govuk-body">{% translate "Nothing to chase today." %}</p>{% endif %}
+
+<h2 class="govuk-heading-m">{% translate "Payment plans" %}</h2>
+{% if plans %}
+<table class="govuk-table"><caption class="govuk-visually-hidden">{% translate "Active and broken payment plans" %}</caption>
+  <thead class="govuk-table__head"><tr class="govuk-table__row">
+    <th scope="col" class="govuk-table__header">{% translate "Agreement" %}</th><th scope="col" class="govuk-table__header">{% translate "Status" %}</th>
+    <th scope="col" class="govuk-table__header govuk-table__header--numeric">{% translate "Arrears covered" %}</th><th scope="col" class="govuk-table__header govuk-table__header--numeric">{% translate "Still owed" %}</th><th scope="col" class="govuk-table__header govuk-table__header--numeric">{% translate "Behind" %}</th></tr></thead>
+  <tbody class="govuk-table__body">{% for plan, state in plans %}<tr class="govuk-table__row">
+    <td class="govuk-table__cell"><a class="govuk-link" href="{{ plan.get_absolute_url }}">{{ plan.lease.reference }}</a> {{ plan.lease.counterparty.name }}</td>
+    <td class="govuk-table__cell"><strong class="govuk-tag {% if plan.status == 'broken' %}govuk-tag--red{% elif plan.status == 'active' %}govuk-tag--green{% else %}govuk-tag--grey{% endif %}">{{ plan.get_status_display }}</strong></td>
+    <td class="govuk-table__cell govuk-table__cell--numeric">£{{ plan.amount|floatformat:2|intcomma }}</td>
+    <td class="govuk-table__cell govuk-table__cell--numeric">£{{ state.remaining|floatformat:2|intcomma }}</td>
+    <td class="govuk-table__cell govuk-table__cell--numeric">{% if state.behind %}£{{ state.behind|floatformat:2|intcomma }}{% else %}–{% endif %}</td></tr>{% endfor %}</tbody></table>
+{% else %}<p class="govuk-body">{% translate "No payment plans in force." %}</p>{% endif %}
+{% endblock %}

@@ -62,5 +62,5 @@
 <h2 class="govuk-heading-m">{% translate "Overdue by age" %}</h2>
 <table class="govuk-table"><tbody class="govuk-table__body">{% for label, amount in account.aged %}{% if amount %}<tr class="govuk-table__row"><th scope="row" class="govuk-table__header">{{ label }}</th><td class="govuk-table__cell govuk-table__cell--numeric">£{{ amount|floatformat:2|intcomma }}</td></tr>{% endif %}{% endfor %}</tbody></table>
 {% endif %}
-{% if statement %}<p class="govuk-body-s">{% translate "Payments are set against the oldest amounts owed first." %}</p>{% endif %}
+{% if statement %}<p class="govuk-body-s">{% translate "Payments are set against the oldest amounts owed first. A credit note is set against the charge it credits." %}</p>{% else %}{% include "ledger/_account_extras.html" %}{% endif %}
 {% endblock %}

@@ -87,6 +87,15 @@ Where the tenant insures, the agreement page shows the latest **insurance certif
 there is none. Select **Start a case to get the tenant's insurance certificate**: the case has tasks to ask for
 the certificate, check the cover and add it to the agreement's documents with its expiry as the date for review.
 
+## Rent deposit
+
+Record the deposit the deed requires, where it is held, the deed's date and who the interest belongs to under
+**Rent** on the agreement. Then keep the **rent deposit account** (select **Start a rent deposit account** on the
+agreement page): each payment in (received, topped up, interest added) and out (drawn down, interest paid to the
+tenant, returned), with a reference and a note. The agreement page shows the balance held after each entry, and
+warns when the balance is below what the deed requires. A drawdown does not change the rent account: finance records
+the money applied, and it comes back in with the receipts.
+
 ## Dealings
 
 Assignments, underleases, sharing arrangements, charges and changes of control are recorded under **Dealings** on

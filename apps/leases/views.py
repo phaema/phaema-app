@@ -141,6 +141,9 @@ class LeaseDetailView(LoginRequiredMixin, DetailView):
             d.kind == "assignment" and d.status == "completed" for d in ctx["dealings"]) else []
         ctx["liable_former"] = dealings.liable_former_tenants(lease)
         ctx["underleases"] = list(lease.underleases.select_related("counterparty"))
+        from .models import deposit_account
+
+        ctx["deposit_rows"], ctx["deposit_balance"] = deposit_account(lease)
         if lease.is_let_out and any(d.kind == "assignment" and d.is_open for d in ctx["dealings"]):
             ctx["rent_owed"] = dealings.rent_owed(lease)
         if lease.insurance == Lease.Insurance.TENANT and lease.is_let_out:

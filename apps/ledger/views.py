@@ -154,9 +154,27 @@ def account(request, lease_pk):
         return xlsx_response(title, STATEMENT_COLUMNS, _statement_rows(acc))
     if fmt == "csv":
         return csv_response(title, STATEMENT_COLUMNS, _statement_rows(acc))
+    today = date.today()
+    extras = {}
+    if request.GET.get("print") != "1":
+        from . import creditcontrol
+
+        if lease.interest_basis:
+            from . import interest
+
+            extras["interest"] = interest.calculate(lease, today)
+        plan = creditcontrol.active_plan(lease) or lease.payment_plans.filter(status="broken").first()
+        if plan is not None:
+            extras["plan"], extras["plan_state"] = plan, creditcontrol.refresh_plan(plan, today, acc)
+        extras["chase_history"] = creditcontrol.history(lease, acc, today)
+        due = creditcontrol.due_actions(today, Lease.objects.filter(pk=lease.pk))
+        extras["chase_due"] = due[0] if due else None
+        extras["can_chase"] = _can_chase(request.user, lease)
+        if acc.overdue > 0:
+            extras["plan_first_due"] = today + timedelta(days=14)
     return render(request, "ledger/account.html", {
-        "lease": lease, "account": acc, "today": date.today(), "can_credit": can_do_finance(request.user),
-        "statement": request.GET.get("print") == "1",
+        "lease": lease, "account": acc, "today": today, "can_credit": can_do_finance(request.user),
+        "statement": request.GET.get("print") == "1", **extras,
     })
 
 
@@ -270,3 +288,119 @@ def export_download(request, pk):
     require_full(request)
     batch = get_object_or_404(ExportBatch, pk=pk)
     return finance.download(batch, "csv" if request.GET.get("format") == "csv" else "xlsx", ModuleSettings.load())
+
+
+# ------------------------------------------------------------------ credit control, payment plans and interest
+
+def _can_chase(user, lease):
+    """Take chasing steps and set up payment plans: finance users, and the surveyor who can edit the agreement."""
+    from apps.core.roles import can_edit
+
+    return can_do_finance(user) or can_edit(user, lease)
+
+
+def _in_patch(request, lease):
+    return request.access_scope != "patch" or lease_in_patch(request.user, lease)
+
+
+def _money(text):
+    try:
+        value = Decimal(str(text).replace(",", "").replace("£", "").strip())
+    except (InvalidOperation, ValueError):
+        return None
+    return value if value > 0 else None
+
+
+@ledger_view
+def credit_control(request):
+    from . import creditcontrol
+    from .models import ChaseStage, PaymentPlan
+
+    today = date.today()
+    leases = _patch(request)
+    if request.method == "POST":
+        lease = get_object_or_404(Lease, pk=request.POST.get("lease"))
+        stage = get_object_or_404(ChaseStage, pk=request.POST.get("stage"))
+        if not _can_chase(request.user, lease) or not _in_patch(request, lease):
+            raise PermissionDenied
+        action = creditcontrol.take(lease, stage, request.user, today, request.POST.get("notes", ""))
+        if action.case:
+            messages.success(request, _("%(stage)s recorded for %(lease)s, with case %(case)s.")
+                             % {"stage": stage.name, "lease": lease.reference, "case": action.case.display_reference})
+        else:
+            messages.success(request, _("%(stage)s recorded for %(lease)s.")
+                             % {"stage": stage.name, "lease": lease.reference})
+        return redirect("ledger:credit-control")
+    plans = PaymentPlan.objects.filter(status__in=[PaymentPlan.Status.ACTIVE, PaymentPlan.Status.BROKEN]) \
+        .select_related("lease", "lease__counterparty").prefetch_related("instalments")
+    if leases is not None:
+        plans = plans.filter(lease__in=leases)
+    plan_rows = []
+    for plan in plans:
+        state = creditcontrol.refresh_plan(plan, today)
+        plan_rows.append((plan, state))
+    return render(request, "ledger/credit_control.html", {
+        "dues": creditcontrol.due_actions(today, leases), "plans": plan_rows, "today": today,
+        "stages": ChaseStage.objects.all(), "section": "credit",
+    })
+
+
+@ledger_view
+@require_POST
+def plan_new(request, lease_pk):
+    from . import creditcontrol
+
+    lease = get_object_or_404(Lease, pk=lease_pk)
+    if not _can_chase(request.user, lease) or not _in_patch(request, lease):
+        raise PermissionDenied
+    amount = _money(request.POST.get("amount", ""))
+    first = _date(request.POST.get("first_due"), None)
+    try:
+        count = int(request.POST.get("count", "0"))
+    except ValueError:
+        count = 0
+    if amount is None or first is None or not 1 <= count <= 120:
+        messages.error(request, _("Enter the amount, the number of instalments (1 to 120) and the first date."))
+        return redirect("ledger:account", lease.pk)
+    plan = creditcontrol.make_plan(
+        lease, date.today(), amount, count, first, every="week" if request.POST.get("every") == "week" else "month",
+        notes=request.POST.get("notes", "")[:2000], also_current_rent=request.POST.get("also_current_rent") == "1")
+    messages.success(request, _("Payment plan set up: %(n)s instalments. Chasing pauses while it is kept.")
+                     % {"n": plan.instalments.count()})
+    return redirect(plan)
+
+
+@ledger_view
+@require_POST
+def plan_cancel(request, pk):
+    from .models import PaymentPlan
+
+    plan = get_object_or_404(PaymentPlan, pk=pk)
+    if not _can_chase(request.user, plan.lease) or not _in_patch(request, plan.lease):
+        raise PermissionDenied
+    plan.status = PaymentPlan.Status.CANCELLED
+    plan.save(update_fields=["status", "updated_at"])
+    messages.success(request, _("Payment plan cancelled. Chasing resumes."))
+    return redirect(plan)
+
+
+@finance_only
+@ledger_view
+@require_POST
+def raise_interest(request, lease_pk):
+    from . import interest
+
+    lease = get_object_or_404(Lease, pk=lease_pk)
+    if not _in_patch(request, lease):
+        raise PermissionDenied
+    until = _date(request.POST.get("until"), None)
+    if until is None or until > date.today():
+        messages.error(request, _("Enter the date to charge interest up to (today or earlier)."))
+        return redirect("ledger:account", lease.pk)
+    charge = interest.raise_charge(lease, until)
+    if charge is None:
+        messages.info(request, _("There is no interest to charge up to that date."))
+    else:
+        messages.success(request, _("Interest charge %(ref)s for £%(amount)s raised.")
+                         % {"ref": charge.reference, "amount": f"{charge.gross:,.2f}"})
+    return redirect("ledger:account", lease.pk)

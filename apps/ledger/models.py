@@ -6,6 +6,8 @@ time, setting payments against the oldest debt first, so the ledger can never dr
 """
 from decimal import Decimal
 
+from django.conf import settings
+from django.core.validators import MinValueValidator
 from django.db import models
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
@@ -51,6 +53,7 @@ class Charge(TimeStampedModel):
         RENT = "rent", _("Rent")
         SERVICE = "service", _("Service charge")
         CREDIT = "credit", _("Credit note")
+        INTEREST = "interest", _("Interest on late payment")
         OTHER = "other", _("Other charge")
 
     lease = models.ForeignKey(Lease, on_delete=models.PROTECT, related_name="charges")
@@ -119,3 +122,120 @@ class Receipt(TimeStampedModel):
 
     def get_absolute_url(self):
         return reverse("ledger:account", args=[self.lease_id]) + f"#receipt-{self.pk}"
+
+
+class BaseRate(models.Model):
+    """The Bank of England base rate from a date, for interest on late rent."""
+
+    effective_from = models.DateField(_("from"), unique=True)
+    rate = models.DecimalField(_("base rate (%)"), max_digits=5, decimal_places=2)
+
+    class Meta:
+        ordering = ["-effective_from"]
+        verbose_name = _("Bank of England base rate")
+        verbose_name_plural = _("Bank of England base rates")
+
+    def __str__(self):
+        return f"{self.rate}% from {self.effective_from:%d %b %Y}"
+
+
+class ChaseStage(models.Model):
+    """One step in chasing overdue rent, taken once the oldest unpaid charge is this many days overdue."""
+
+    class Action(models.TextChoices):
+        LETTER = "letter", _("Send a letter")
+        CASE = "case", _("Open a rent arrears recovery case")
+        REVIEW = "review", _("Review the account (for example refer to legal or debt collectors)")
+
+    order = models.PositiveSmallIntegerField(_("order"), default=1)
+    name = models.CharField(_("name"), max_length=100)
+    days_overdue = models.PositiveSmallIntegerField(_("days overdue"))
+    action = models.CharField(_("action"), max_length=8, choices=Action.choices, default=Action.LETTER)
+    template_code = models.SlugField(
+        _("letter template"), max_length=60, blank=True,
+        help_text=_("The code of the letter in the document library, for example arrears-reminder."))
+    minimum_overdue = models.DecimalField(
+        _("only if at least (£) is overdue"), max_digits=10, decimal_places=2, default=0,
+        help_text=_("Small debts below this are left for the next stage or the next demand."))
+
+    class Meta:
+        ordering = ["days_overdue", "order"]
+        verbose_name = _("credit control stage")
+        verbose_name_plural = _("credit control stages")
+
+    def __str__(self):
+        return f"{self.name} ({self.days_overdue} days)"
+
+    @property
+    def template(self):
+        if not self.template_code:
+            return None
+        from apps.documents.models import DocumentTemplate
+
+        return DocumentTemplate.objects.filter(code=self.template_code).first()
+
+
+class ChaseAction(TimeStampedModel):
+    """A chasing step taken on an account: a letter sent, a case opened or the account reviewed."""
+
+    lease = models.ForeignKey(Lease, on_delete=models.CASCADE, related_name="chase_actions")
+    stage = models.ForeignKey(ChaseStage, on_delete=models.PROTECT, related_name="actions")
+    taken_on = models.DateField(_("date"))
+    overdue = models.DecimalField(_("overdue then"), max_digits=12, decimal_places=2)
+    taken_by = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL,
+                                 related_name="+")
+    case = models.ForeignKey("cases.Case", null=True, blank=True, on_delete=models.SET_NULL, related_name="+")
+    notes = models.CharField(_("notes"), max_length=255, blank=True)
+
+    class Meta:
+        ordering = ["-taken_on", "-pk"]
+
+    def __str__(self):
+        return f"{self.stage.name} on {self.taken_on:%d %b %Y}"
+
+
+class PaymentPlan(TimeStampedModel):
+    """An agreement with a tenant to clear arrears by instalments. Chasing pauses while the plan is kept."""
+
+    class Status(models.TextChoices):
+        ACTIVE = "active", _("Active")
+        COMPLETED = "completed", _("Completed")
+        BROKEN = "broken", _("Broken")
+        CANCELLED = "cancelled", _("Cancelled")
+
+    lease = models.ForeignKey(Lease, on_delete=models.CASCADE, related_name="payment_plans")
+    agreed_on = models.DateField(_("agreed"))
+    amount = models.DecimalField(_("arrears covered (£)"), max_digits=12, decimal_places=2,
+                                 validators=[MinValueValidator(Decimal("0.01"))])
+    status = models.CharField(_("status"), max_length=10, choices=Status.choices, default=Status.ACTIVE)
+    grace_days = models.PositiveSmallIntegerField(
+        _("days allowed after each instalment"), default=7,
+        help_text=_("An instalment counts as missed this many days after its date."))
+    also_current_rent = models.BooleanField(
+        _("tenant also pays the current rent"), default=True,
+        help_text=_("Usual: instalments are on top of the rent as it falls due."))
+    case = models.ForeignKey("cases.Case", null=True, blank=True, on_delete=models.SET_NULL, related_name="+",
+                             verbose_name=_("arrears case"))
+    notes = models.TextField(_("notes"), blank=True)
+
+    class Meta:
+        ordering = ["-agreed_on", "-pk"]
+        verbose_name = _("payment plan")
+
+    def __str__(self):
+        return f"Payment plan £{self.amount} agreed {self.agreed_on:%d %b %Y}"
+
+    def get_absolute_url(self):
+        return reverse("ledger:account", args=[self.lease_id]) + "#plan"
+
+
+class Instalment(models.Model):
+    plan = models.ForeignKey(PaymentPlan, on_delete=models.CASCADE, related_name="instalments")
+    due_date = models.DateField(_("due"))
+    amount = models.DecimalField(_("amount (£)"), max_digits=12, decimal_places=2)
+
+    class Meta:
+        ordering = ["plan", "due_date"]
+
+    def __str__(self):
+        return f"£{self.amount} by {self.due_date:%d %b %Y}"

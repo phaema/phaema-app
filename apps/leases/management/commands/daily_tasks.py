@@ -25,6 +25,11 @@ class Command(BaseCommand):
             from apps.servicecharges.deadlines import send_weekly
 
             emails += send_weekly(base_url=settings.PHAEMA_BASE_URL)
+        chased = 0
+        if ModuleSettings.load().rent_ledger_enabled:
+            from apps.ledger.creditcontrol import auto_open_cases
+
+            chased = auto_open_cases()
         indices = 0
         if getattr(settings, "PHAEMA_FETCH_INDICES", True):
             from apps.leases.indexation import update_all
@@ -37,4 +42,4 @@ class Command(BaseCommand):
             jobs = auto_raise()
         self.stdout.write(f"Rents updated: {rents}. Cases opened: {cases}. Planned jobs raised: {jobs}. "
                           f"Reminder emails sent: {emails}. Accounts closed (access ended): {closed}. "
-                          f"Index figures added: {indices}.")
+                          f"Index figures added: {indices}. Arrears cases opened by credit control: {chased}.")

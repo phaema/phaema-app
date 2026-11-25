@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 """Leases, licences and other occupational agreements, and the parties to them."""
 from datetime import date, timedelta
+from decimal import Decimal
 
 import uuid
 
@@ -198,6 +199,10 @@ class Lease(TimeStampedModel):
         ABSOLUTE = "absolute", _("Not allowed (absolute bar)")
         FREE = "free", _("Allowed without consent")
 
+    class InterestBasis(models.TextChoices):
+        BASE_PLUS = "base_plus", _("Bank of England base rate plus a margin")
+        FIXED = "fixed", _("A fixed yearly rate")
+
     class ArrearsReferral(models.TextChoices):
         DEBT_COLLECTORS = "debt", _("External debt collectors")
         LEGAL = "legal", _("Legal")
@@ -243,6 +248,7 @@ class Lease(TimeStampedModel):
     deposit_interest = models.CharField(_("interest on the deposit"), max_length=200, blank=True,
                                         help_text=_("Who it belongs to and when it is paid, for example \"to the "
                                                     "tenant, yearly, at base rate\"."))
+    deposit_deed_date = models.DateField(_("deposit deed dated"), null=True, blank=True)
     rates_excluded = models.BooleanField(_("rent excludes business rates"), default=True,
                                          help_text=_("Untick if the rent includes business rates."))
     rent_free_until = models.DateField(
@@ -299,6 +305,17 @@ class Lease(TimeStampedModel):
     billing_email = models.EmailField(_("billing email"), blank=True)
     billing_phone = models.CharField(_("billing phone"), max_length=30, blank=True)
     billing_address = models.TextField(_("billing address"), blank=True)
+    interest_basis = models.CharField(
+        _("interest on late rent"), max_length=10, choices=InterestBasis.choices, blank=True,
+        help_text=_("As the lease says. PHAEMA works out the interest on overdue rent for you to check and charge."))
+    interest_margin_pct = models.DecimalField(
+        _("interest rate or margin (%)"), max_digits=5, decimal_places=2, null=True, blank=True,
+        validators=[MinValueValidator(0)],
+        help_text=_("The margin over base rate (e.g. 4 for base rate plus 4%), or the fixed yearly rate."))
+    interest_grace_days = models.PositiveSmallIntegerField(
+        _("interest if unpaid after (days)"), default=0,
+        help_text=_("Interest runs from the due date if the rent is still unpaid this many days after it (often "
+                    "14 or 21). 0: from the due date in every case."))
     arrears_referral = models.CharField(
         _("arrears passed to"), max_length=10, choices=ArrearsReferral.choices, blank=True,
         help_text=_("Set when the debt has been passed to external debt collectors or to legal."))
@@ -351,6 +368,8 @@ class Lease(TimeStampedModel):
         if (self.index_cap_pct is not None and self.index_collar_pct is not None
                 and self.index_collar_pct > self.index_cap_pct):
             raise ValidationError({"index_collar_pct": _("The collar cannot be more than the cap.")})
+        if self.interest_basis and self.interest_margin_pct is None:
+            raise ValidationError({"interest_margin_pct": _("Enter the margin or rate for interest on late rent.")})
         if self.arrears_referred_on and not self.arrears_referral:
             raise ValidationError({"arrears_referral": _("Choose who the arrears were passed to, or remove the date.")})
 
@@ -508,6 +527,55 @@ class Dealing(TimeStampedModel):
     @property
     def is_open(self):
         return self.status in (self.Status.PROPOSED, self.Status.CONSENTED)
+
+
+class DepositEntry(TimeStampedModel):
+    """Money in or out of a tenant's rent deposit. The balance held is worked out from these entries."""
+
+    class Kind(models.TextChoices):
+        RECEIVED = "received", _("Deposit received")
+        TOP_UP = "top_up", _("Topped up by the tenant")
+        INTEREST = "interest", _("Interest added")
+        DRAWDOWN = "drawdown", _("Drawn down by the council")
+        INTEREST_PAID = "interest_paid", _("Interest paid to the tenant")
+        RETURNED = "returned", _("Returned to the tenant")
+
+    IN = (Kind.RECEIVED, Kind.TOP_UP, Kind.INTEREST)
+
+    lease = models.ForeignKey(Lease, on_delete=models.CASCADE, related_name="deposit_entries")
+    date = models.DateField(_("date"))
+    kind = models.CharField(_("what happened"), max_length=14, choices=Kind.choices)
+    amount = models.DecimalField(_("amount (£)"), max_digits=12, decimal_places=2,
+                                 validators=[MinValueValidator(Decimal("0.01"))])
+    reference = models.CharField(_("reference"), max_length=60, blank=True,
+                                 help_text=_("For example the bank or finance reference."))
+    notes = models.CharField(_("notes"), max_length=255, blank=True,
+                             help_text=_("For a drawdown, what it paid for (for example the March quarter's rent)."))
+
+    class Meta:
+        ordering = ["lease", "date", "pk"]
+        verbose_name = _("deposit entry")
+        verbose_name_plural = _("rent deposit account")
+
+    def __str__(self):
+        return f"{self.get_kind_display()} £{self.amount} on {self.date:%d %b %Y}"
+
+    def get_absolute_url(self):
+        return self.lease.get_absolute_url() + "#deposit"
+
+    @property
+    def signed(self):
+        return self.amount if self.kind in self.IN else -self.amount
+
+
+def deposit_account(lease):
+    """(entries with a running balance, balance held). The balance can never be shown below zero silently: a
+    negative balance means more was paid out than was held."""
+    rows, balance = [], Decimal("0")
+    for entry in lease.deposit_entries.all():
+        balance += entry.signed
+        rows.append((entry, balance))
+    return rows, balance
 
 
 class BreakOption(TimeStampedModel):

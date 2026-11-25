@@ -1,0 +1,41 @@
+{% load i18n humanize %}
+{% if chase_due or chase_history %}
+<h2 class="govuk-heading-m">{% translate "Credit control" %}</h2>
+{% if chase_due %}<p class="govuk-body"><strong>{% translate "Next step:" %}</strong> {{ chase_due.stage.name }} ({% blocktranslate count n=chase_due.days %}oldest debt {{ n }} day overdue{% plural %}oldest debt {{ n }} days overdue{% endblocktranslate %}). <a class="govuk-link" href="{% url 'ledger:credit-control' %}">{% translate "Credit control" %}</a>{% with t=chase_due.stage.template %}{% if t %} · <a class="govuk-link" href="{% url 'documents:create' t.code %}?lease={{ lease.pk }}">{% translate "Create the letter" %}</a>{% endif %}{% endwith %}</p>{% endif %}
+{% if chase_history %}<ul class="govuk-list govuk-body-s">{% for a in chase_history %}<li>{{ a.taken_on|date:"j M Y" }}: {{ a.stage.name }} (£{{ a.overdue|floatformat:2|intcomma }} {% translate "overdue" %}){% if a.case %} – <a class="govuk-link" href="{{ a.case.get_absolute_url }}">{{ a.case.display_reference }}</a>{% endif %}{% if a.taken_by %} – {{ a.taken_by.get_full_name|default:a.taken_by.username }}{% endif %}</li>{% endfor %}</ul>{% endif %}
+{% endif %}
+
+{% if plan %}
+<h2 class="govuk-heading-m" id="plan">{% translate "Payment plan" %} <strong class="govuk-tag {% if plan.status == 'broken' %}govuk-tag--red{% else %}govuk-tag--green{% endif %}">{{ plan.get_status_display }}</strong></h2>
+<p class="govuk-body">{% blocktranslate with amount=plan.amount|floatformat:2|intcomma agreed=plan.agreed_on|date:"j F Y" %}£{{ amount }} of arrears, agreed {{ agreed }}.{% endblocktranslate %} {% if plan.also_current_rent %}{% translate "The tenant also pays the rent as it falls due." %}{% endif %}
+{% if plan_state.behind %}<br><strong class="govuk-tag govuk-tag--red">£{{ plan_state.behind|floatformat:2|intcomma }} {% translate "behind" %}</strong>{% endif %}</p>
+<table class="govuk-table"><caption class="govuk-visually-hidden">{% translate "Instalments" %}</caption><tbody class="govuk-table__body">{% for i in plan.instalments.all %}<tr class="govuk-table__row"><td class="govuk-table__cell">{{ i.due_date|date:"j M Y" }}</td><td class="govuk-table__cell govuk-table__cell--numeric">£{{ i.amount|floatformat:2|intcomma }}</td></tr>{% endfor %}</tbody></table>
+{% if plan.notes %}<p class="govuk-body-s">{{ plan.notes|linebreaksbr }}</p>{% endif %}
+{% if can_chase %}<form method="post" action="{% url 'ledger:plan-cancel' plan.pk %}">{% csrf_token %}<button class="govuk-button govuk-button--secondary" data-module="govuk-button">{% translate "Cancel the plan" %}</button></form>{% endif %}
+{% elif can_chase and account.overdue %}
+<details class="govuk-details" data-module="govuk-details"><summary class="govuk-details__summary"><span class="govuk-details__summary-text">{% translate "Set up a payment plan" %}</span></summary>
+<div class="govuk-details__text"><form method="post" action="{% url 'ledger:plan-new' lease.pk %}" novalidate>{% csrf_token %}
+  <div class="govuk-form-group"><label class="govuk-label" for="plan-amount">{% translate "Arrears to clear (£)" %}</label><input class="govuk-input govuk-input--width-10" id="plan-amount" name="amount" inputmode="decimal" value="{{ account.overdue|floatformat:2 }}"></div>
+  <div class="govuk-form-group"><label class="govuk-label" for="plan-count">{% translate "Number of instalments" %}</label><input class="govuk-input govuk-input--width-3" id="plan-count" name="count" inputmode="numeric" value="6"></div>
+  <div class="govuk-form-group"><label class="govuk-label" for="plan-every">{% translate "How often" %}</label><select class="govuk-select" id="plan-every" name="every"><option value="month">{% translate "Monthly" %}</option><option value="week">{% translate "Weekly" %}</option></select></div>
+  <div class="govuk-form-group"><label class="govuk-label" for="plan-first">{% translate "First instalment" %}</label><input class="govuk-input govuk-input--width-10" id="plan-first" name="first_due" type="date" value="{{ plan_first_due|date:'Y-m-d' }}"></div>
+  <div class="govuk-checkboxes govuk-checkboxes--small govuk-!-margin-bottom-4"><div class="govuk-checkboxes__item"><input class="govuk-checkboxes__input" id="plan-current" name="also_current_rent" type="checkbox" value="1" checked><label class="govuk-label govuk-checkboxes__label" for="plan-current">{% translate "The tenant also pays the rent as it falls due" %}</label></div></div>
+  <div class="govuk-form-group"><label class="govuk-label" for="plan-notes">{% translate "Notes" %}</label><textarea class="govuk-textarea" id="plan-notes" name="notes" rows="2"></textarea></div>
+  <button class="govuk-button" data-module="govuk-button">{% translate "Set up the plan" %}</button>
+</form></div></details>
+{% endif %}
+
+{% if interest %}
+<h2 class="govuk-heading-m">{% translate "Interest on late payment" %}</h2>
+<p class="govuk-body-s">{{ lease.get_interest_basis_display }}: {% if lease.interest_basis == "base_plus" %}{% translate "base rate plus" %} {% endif %}{{ lease.interest_margin_pct }}%{% if lease.interest_grace_days %}, {% blocktranslate count n=lease.interest_grace_days %}if unpaid {{ n }} day after the due date{% plural %}if unpaid {{ n }} days after the due date{% endblocktranslate %}{% endif %}.{% if interest.since %} {% blocktranslate with d=interest.since|date:"j F Y" %}Interest charged up to {{ d }}.{% endblocktranslate %}{% endif %}</p>
+{% if not interest.ok %}<div class="govuk-inset-text">{{ interest.problem }}</div>
+{% elif interest.lines %}
+<table class="govuk-table"><caption class="govuk-visually-hidden">{% translate "Interest on each late charge" %}</caption>
+  <thead class="govuk-table__head"><tr class="govuk-table__row"><th scope="col" class="govuk-table__header">{% translate "Charge" %}</th><th scope="col" class="govuk-table__header">{% translate "Due" %}</th><th scope="col" class="govuk-table__header govuk-table__header--numeric">{% translate "Days" %}</th><th scope="col" class="govuk-table__header govuk-table__header--numeric">{% translate "Interest" %}</th></tr></thead>
+  <tbody class="govuk-table__body">{% for line in interest.lines %}<tr class="govuk-table__row"><td class="govuk-table__cell">{{ line.charge.reference }}<br><span class="govuk-body-s">{{ line.charge.description }}{% if line.paid_on %}, {% translate "paid" %} {{ line.paid_on|date:"j M Y" }}{% endif %}</span></td><td class="govuk-table__cell">{{ line.charge.due_date|date:"j M Y" }}</td><td class="govuk-table__cell govuk-table__cell--numeric">{{ line.days }}</td><td class="govuk-table__cell govuk-table__cell--numeric">£{{ line.interest|floatformat:2|intcomma }}</td></tr>{% endfor %}
+  <tr class="govuk-table__row"><th scope="row" class="govuk-table__header" colspan="3">{% blocktranslate with d=interest.until|date:"j F Y" %}Total to {{ d }}{% endblocktranslate %}</th><td class="govuk-table__cell govuk-table__cell--numeric"><strong>£{{ interest.total|floatformat:2|intcomma }}</strong></td></tr></tbody></table>
+{% if can_credit %}<form method="post" action="{% url 'ledger:interest' lease.pk %}" novalidate>{% csrf_token %}<input type="hidden" name="until" value="{{ interest.until|date:'Y-m-d' }}">
+  <button class="govuk-button govuk-button--secondary" data-module="govuk-button">{% blocktranslate with amount=interest.total|floatformat:2|intcomma %}Charge £{{ amount }} interest{% endblocktranslate %}</button></form>
+<p class="govuk-body-s">{% translate "Check the figures against the lease first. Interest is simple, over a 365-day year, and is not charged on interest." %}</p>{% endif %}
+{% else %}<p class="govuk-body">{% translate "No interest is due." %}</p>{% endif %}
+{% endif %}
