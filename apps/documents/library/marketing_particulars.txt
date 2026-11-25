@@ -1,0 +1,59 @@
+name: Marketing particulars
+category: lettings
+source: case
+case_types: marketing
+letterhead: no
+description: Particulars of a vacant property to let or for sale, from the property record and the marketing case. Check every figure before publishing.
+fields: summary|Short description for the heading| ; description|The property: construction, condition, facilities|long| ; location|Location and transport|long| ; services|Services|long,optional| ; rates|Business rates (rateable value)|optional| ; epc|EPC rating| ; viewing|Viewing arrangements| ; legal_costs|Legal costs|optional|
+---
+# {{ property_name }}
+
+## {{ summary }}
+
+{{ property_address }}
+
+**{% if asking_price %}For sale{% else %}To let{% endif %}**{% if property_available_from %}, available from {{ property_available_from }}{% endif %}
+
+## Location
+
+{{ location }}
+
+## Description
+
+{{ description }}
+
+## Accommodation
+
+| Net internal area | {% if property_nia %}{{ property_nia }}{% else %}[Area]{% endif %} |{% if property_gia %}
+| Gross internal area | {{ property_gia }} |{% endif %}{% if property_use %}
+| Use | {{ property_use }} |{% endif %}
+
+## Terms
+
+{% if asking_rent %}Rent: **{{ asking_rent }} a year**, exclusive of business rates, service charge, insurance and VAT if applicable.
+
+{% endif %}{% if asking_price %}Price: **{{ asking_price }}**.
+
+{% endif %}{% if terms_offered %}{{ terms_offered }}
+
+{% endif %}{% if services %}## Services
+
+{{ services }}
+
+{% endif %}{% if rates %}## Business rates
+
+{{ rates }}. Interested parties should check the rates payable with the billing authority.
+
+{% endif %}## Energy performance
+
+EPC rating: {{ epc }}.
+
+{% if legal_costs %}## Legal costs
+
+{{ legal_costs }}
+
+{% endif %}## Viewing
+
+{{ viewing }}{% if agent_name %} Contact {{ agent_name }}.{% else %} Contact {{ department|default:council_name }}{% if council_phone %} on {{ council_phone }}{% endif %}{% if council_email %} or {{ council_email }}{% endif %}.{% endif %}
+
+These particulars are for guidance only and do not form part of any offer or contract. Areas are approximate. All terms are subject to contract and to the approval of {{ council_name }}.
