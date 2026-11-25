@@ -8,7 +8,8 @@ from django.utils.html import format_html, format_html_join
 from apps.core.admin_roles import RoleAdminMixin, RoleInlineMixin
 from apps.core.roles import is_administrator
 
-from .models import BreakOption, Lease, LeaseDocument, LeaseEvent, LeaseOption, Party, RentScheduleEntry
+from .models import (BreakOption, IndexFigure, IndexSeries, Lease, LeaseDocument, LeaseEvent, LeaseOption, Party,
+                     RentScheduleEntry)
 
 
 class BreakInline(RoleInlineMixin, admin.TabularInline):
@@ -52,6 +53,12 @@ class LeaseAdmin(RoleAdminMixin, admin.ModelAdmin):
         ("Rent", {"fields": ("annual_rent", "rent_frequency", "vat_chargeable", "rates_excluded", "rent_free_until", "incentives",
                              "deposit", "deposit_held", "deposit_interest")}),
         ("Rent review", {"fields": ("review_basis", "review_interval_years", "next_review_date", "time_of_essence")}),
+        ("Index-linked reviews", {
+            "fields": ("index_series", "index_base_month", "index_lag_months", ("index_cap_pct", "index_collar_pct"),
+                       "index_compounded", "index_upward_only"),
+            "classes": ("collapse",),
+            "description": "For RPI, CPI or CPIH reviews. PHAEMA works out the new rent at each review from these "
+                           "terms and the index figures, for the surveyor to check and record."}),
         ("Rent demands and arrears", {
             "fields": ("demands_on_hold", "demands_on_hold_reason", "arrears_referral", "arrears_referred_on",
                        "arrears_referral_reference"),
@@ -150,3 +157,22 @@ class LeaseEventAdmin(RoleAdminMixin, admin.ModelAdmin):
     date_hierarchy = "due_date"
     readonly_fields = ("source", "completed_by")
     autocomplete_fields = ("lease",)
+
+
+class IndexFigureInline(admin.TabularInline):
+    model = IndexFigure
+    extra = 1
+    fields = ("month", "value")
+    ordering = ("-month",)
+
+
+@admin.register(IndexSeries)
+class IndexSeriesAdmin(RoleAdminMixin, admin.ModelAdmin):
+    list_display = ("code", "name", "ons_series", "latest_figure")
+    fields = ("code", "name", "ons_series", "ons_dataset", "notes")
+    inlines = [IndexFigureInline]
+
+    @admin.display(description="Latest figure")
+    def latest_figure(self, obj):
+        latest = obj.latest
+        return f"{latest.month:%b %Y}: {latest.value}" if latest else "none"

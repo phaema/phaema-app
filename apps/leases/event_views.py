@@ -107,11 +107,22 @@ class EventListView(LoginRequiredMixin, ExportMixin, ListView):
         return ctx
 
 
-def _outcome_form(event, data=None):
+def _index_calculation(event):
+    """The index-linked rent for a review event, or None when the agreement is not index-linked."""
+    if event.event_type != LeaseEvent.EventType.REVIEW or not event.lease.is_index_linked:
+        return None
+    from . import indexation
+
+    return indexation.calculate(event.lease, event.due_date)
+
+
+def _outcome_form(event, data=None, calc=None):
     initial = {}
     if event.event_type == LeaseEvent.EventType.REVIEW:
         nxt = workflow.suggested_next_review(event)
         initial = {"new_rent": event.lease.annual_rent, "effective_from": event.due_date, "next_review_date": nxt}
+        if calc is not None and calc.ok:
+            initial.update(new_rent=calc.new_rent, notes=f"Index applied: {calc.summary()}.")
         return f.ReviewOutcomeForm(data, initial=initial)
     if event.event_type in (LeaseEvent.EventType.BREAK, LeaseEvent.EventType.BREAK_NOTICE):
         return f.BreakOutcomeForm(data, event=event)
@@ -125,7 +136,8 @@ def event_detail(request, pk):
     event = get_object_or_404(LeaseEvent.objects.select_related("lease", "lease__counterparty", "assigned_to",
                                                                 "completed_by"), pk=pk)
     editable = can_edit(request.user, event)
-    outcome_form = _outcome_form(event) if editable and event.is_open else None
+    calc = _index_calculation(event) if event.is_open else None
+    outcome_form = _outcome_form(event, calc=calc) if editable and event.is_open else None
     edit_form = f.EventEditForm(instance=event) if editable and event.is_open else None
 
     if request.method == "POST":
@@ -141,7 +153,7 @@ def event_detail(request, pk):
             from apps.cases.workflow import event_blocked
 
             blocked = event_blocked(event)
-            outcome_form = _outcome_form(event, request.POST)
+            outcome_form = _outcome_form(event, request.POST, calc=calc)
             if blocked:
                 messages.error(request, _("Case %(ref)s needs the supervisor's approval before the outcome is "
                                           "recorded. Ask for approval on the case.") % {"ref": blocked.display_reference})
@@ -149,7 +161,8 @@ def event_detail(request, pk):
                 d = outcome_form.cleaned_data
                 if event.event_type == LeaseEvent.EventType.REVIEW:
                     workflow.complete_review(event, request.user, d["new_rent"], d["effective_from"],
-                                             d["next_review_date"], d["notes"])
+                                             d["next_review_date"], d["notes"],
+                                             index_month=calc.review_month if calc is not None and calc.ok else None)
                 elif event.event_type in (LeaseEvent.EventType.BREAK, LeaseEvent.EventType.BREAK_NOTICE):
                     workflow.complete_break(event, request.user, d["outcome"], d["notes"])
                 elif event.event_type == LeaseEvent.EventType.EXPIRY:
@@ -160,7 +173,7 @@ def event_detail(request, pk):
                 return redirect(event.lease)
     return render(request, "leases/event_detail.html", {
         "event": event, "editable": editable, "outcome_form": outcome_form, "edit_form": edit_form,
-        "rag": event.rag(), "blocked_case": _blocked(event),
+        "rag": event.rag(), "blocked_case": _blocked(event), "index": calc,
     })
 
 

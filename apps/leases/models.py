@@ -78,6 +78,53 @@ class Party(TimeStampedModel):
         return sorted(seen.values(), key=lambda p: p.reference)
 
 
+class IndexSeries(TimeStampedModel):
+    """A published price index used for index-linked rent reviews, such as CPI, CPIH or RPI."""
+
+    code = models.CharField(_("code"), max_length=20, unique=True, help_text=_("Short name, e.g. CPI."))
+    name = models.CharField(_("name"), max_length=200)
+    ons_series = models.CharField(
+        _("ONS series ID"), max_length=10, blank=True,
+        help_text=_("The Office for National Statistics series, e.g. D7BT for CPI, L522 for CPIH or CHAW for RPI. "
+                    "With this set, PHAEMA fetches new monthly figures itself."))
+    ons_dataset = models.CharField(_("ONS dataset"), max_length=10, blank=True, default="mm23")
+    notes = models.TextField(_("notes"), blank=True)
+
+    class Meta:
+        ordering = ["code"]
+        verbose_name = _("price index")
+        verbose_name_plural = _("price indices")
+
+    def __str__(self):
+        return self.code
+
+    def value_for(self, month):
+        """The published figure for a month (any date in it), or None if not held."""
+        figure = self.figures.filter(month=month.replace(day=1)).first()
+        return figure.value if figure else None
+
+    @property
+    def latest(self):
+        return self.figures.order_by("-month").first()
+
+
+class IndexFigure(models.Model):
+    """One month's figure for a price index."""
+
+    series = models.ForeignKey(IndexSeries, on_delete=models.CASCADE, related_name="figures")
+    month = models.DateField(_("month"), help_text=_("The first day of the month the figure is for."))
+    value = models.DecimalField(_("index value"), max_digits=10, decimal_places=3)
+
+    class Meta:
+        ordering = ["series", "-month"]
+        constraints = [models.UniqueConstraint(fields=["series", "month"], name="one_index_figure_a_month")]
+        verbose_name = _("index figure")
+        verbose_name_plural = _("index figures")
+
+    def __str__(self):
+        return f"{self.series.code} {self.month:%b %Y}: {self.value}"
+
+
 class Lease(TimeStampedModel):
     """A lease, licence or other agreement under which land or property is occupied."""
 
@@ -120,6 +167,7 @@ class Lease(TimeStampedModel):
         OPEN_MARKET = "om", _("Open market, upwards or downwards")
         RPI = "rpi", _("RPI linked")
         CPI = "cpi", _("CPI linked")
+        CPIH = "cpih", _("CPIH linked")
         FIXED = "fixed", _("Fixed increases")
         TURNOVER = "turnover", _("Turnover")
         NONE = "none", _("No reviews")
@@ -200,6 +248,32 @@ class Lease(TimeStampedModel):
         help_text=_("Tick if the lease makes time of the essence for the rent review, so that a missed date in "
                     "the review timetable can lose the review. These reviews are highlighted on the dashboard."))
 
+    # Index-linked reviews
+    index_series = models.ForeignKey(
+        IndexSeries, verbose_name=_("index"), null=True, blank=True, on_delete=models.PROTECT, related_name="leases",
+        help_text=_("For index-linked reviews: the index the rent follows."))
+    index_base_month = models.DateField(
+        _("base index month"), null=True, blank=True,
+        help_text=_("The month of the index figure the current rent is based on (any day in the month). PHAEMA "
+                    "moves it on at each index-linked review."))
+    index_lag_months = models.PositiveSmallIntegerField(
+        _("index months before the review"), default=0,
+        help_text=_("Use the figure for the month this many months before the review date, as the lease says "
+                    "(often 2 or 3, because figures are published a month later). 0 means the review month."))
+    index_cap_pct = models.DecimalField(
+        _("cap (% a year)"), max_digits=5, decimal_places=2, null=True, blank=True,
+        validators=[MinValueValidator(0)], help_text=_("The most the rent may rise each year. Blank for no cap."))
+    index_collar_pct = models.DecimalField(
+        _("collar (% a year)"), max_digits=5, decimal_places=2, null=True, blank=True,
+        validators=[MinValueValidator(0)],
+        help_text=_("The least the rent must rise each year. Blank for no collar."))
+    index_compounded = models.BooleanField(
+        _("cap and collar compound"), default=True,
+        help_text=_("Ticked: the yearly cap and collar compound over the years since the last review (the usual "
+                    "drafting). Unticked: they are simply multiplied by the number of years."))
+    index_upward_only = models.BooleanField(_("upwards only"), default=True,
+                                            help_text=_("The rent never falls at an index-linked review."))
+
     # Rent account
     demands_on_hold = models.BooleanField(
         _("rent demands on hold"), default=False,
@@ -247,8 +321,17 @@ class Lease(TimeStampedModel):
             raise ValidationError({"guarantor": _("The guarantor cannot be the same party as the tenant.")})
         if self.next_review_date and self.review_basis == self.ReviewBasis.NONE:
             raise ValidationError({"review_basis": _("Choose a review basis, or remove the next review date.")})
+        if (self.index_cap_pct is not None and self.index_collar_pct is not None
+                and self.index_collar_pct > self.index_cap_pct):
+            raise ValidationError({"index_collar_pct": _("The collar cannot be more than the cap.")})
         if self.arrears_referred_on and not self.arrears_referral:
             raise ValidationError({"arrears_referral": _("Choose who the arrears were passed to, or remove the date.")})
+
+    INDEX_BASES = ("rpi", "cpi", "cpih")
+
+    @property
+    def is_index_linked(self):
+        return self.review_basis in self.INDEX_BASES
 
     @property
     def has_billing_contact(self):

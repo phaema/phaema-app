@@ -256,3 +256,7 @@ PHAEMA_SSO_CLIENT_ID = env("PHAEMA_SSO_CLIENT_ID", default="")
 PHAEMA_SSO_CLIENT_SECRET = env("PHAEMA_SSO_CLIENT_SECRET", default="")
 # The name on the sign-in button: "Sign in with Microsoft".
 PHAEMA_SSO_NAME = env("PHAEMA_SSO_NAME", default="Microsoft")
+
+# Fetch new monthly price index figures (CPI, CPIH, RPI) from the ONS website for index-linked rent reviews. Turn
+# off where the server cannot reach the internet, and upload the figures under Agreements, Index figures instead.
+PHAEMA_FETCH_INDICES = env.bool("PHAEMA_FETCH_INDICES", default=True)
