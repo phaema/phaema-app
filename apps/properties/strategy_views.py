@@ -91,3 +91,45 @@ def record_suitability(request, pk):
         "intro": _("How well the building suits the service in it today, whatever its condition: layout, "
                    "access, location, size and the impression it gives."),
         "button": _("Record suitability")})
+
+
+@login_required
+def itza_calculator(request, pk):
+    """Work out the area In Terms of Zone A, and keep it (with the workings) on the property."""
+    from django.utils import timezone
+
+    from . import itza
+
+    prop = get_object_or_404(Property, pk=pk)
+    editable = can_edit(request.user, prop)
+    if request.method == "POST":
+        spec = itza.spec_from_post(request.POST)
+        result = itza.calculate(spec)
+        if "save" in request.POST and result.ok:
+            if not editable:
+                raise PermissionDenied
+            prop.itza_sqm, prop.itza_zone_depth_m = result.total, result.zone_depth
+            prop.itza_workings = {k: v for k, v in spec.items() if k != "zone_a_rate"}
+            prop.itza_measured_on = timezone.localdate()
+            prop.itza_notes = request.POST.get("notes", "")[:255]
+            prop.save(update_fields=["itza_sqm", "itza_zone_depth_m", "itza_workings", "itza_measured_on",
+                                     "itza_notes", "updated_at"])
+            messages.success(request, _("ITZA of %(a)s m² saved on the property.") % {"a": f"{result.total:,.2f}"})
+            return redirect(prop.get_absolute_url() + "#areas")
+    else:
+        spec = dict(prop.itza_workings or {}) or {"zone_depth": str(prop.itza_zone_depth_m or itza.DEFAULT_ZONE_DEPTH),
+                                                  "mode": "rectangle"}
+        result = itza.calculate(spec) if prop.itza_workings else None
+    others = list(spec.get("others") or [])
+    others += [{}] * (itza.OTHER_ROWS - len(others))
+    zones = list(spec.get("zones") or []) + [""] * len(itza.ZONES)
+    rent = prop.zone_a_rent()
+    return render(request, "properties/itza.html", {
+        "object": prop, "spec": spec, "result": result, "editable": editable,
+        "zones": [(n, label, zones[n]) for n, (label, _w) in enumerate(itza.ZONES)],
+        "others": list(enumerate(others[:itza.OTHER_ROWS])), "divisors": itza.COMMON_DIVISORS,
+        "notes": request.POST.get("notes", prop.itza_notes) if request.method == "POST" else prop.itza_notes,
+        "result_sqft": itza.sqft(result.total) if result is not None and result.ok else None,
+        "rate_sqft": itza.per_sqft(result.zone_a_rate) if result is not None and result.zone_a_rate else None,
+        "rent": rent, "rent_sqft": itza.per_sqft(rent[1]) if rent else None,
+    })

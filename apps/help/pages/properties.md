@@ -182,6 +182,29 @@ apportionment still uses NIA.
 A site visit's check-measure offers the set the council shows first. Areas recorded before 19 November 2026 as
 "measured to IPMS" were moved from the GIA, NIA and GEA boxes into the IPMS boxes, with a note saying so.
 
+## Retail zoning (ITZA)
+
+Shops are often let and valued by **zoning**: the rent is compared as a rate per square metre of **Zone A**, the
+strip of the ground floor nearest the shop front. Select **Work out the ITZA (shops)** under **Areas** on a unit's
+page to use the calculator:
+
+1. **Zone depth.** 6.1 m (20 ft) is usual in England and Wales; some towns use 9.1 m or 15.2 m.
+2. **Ground floor sales area.** For a rectangular shop, enter the internal width and the depth from the front and
+   PHAEMA zones it. For an irregular shop, enter the measured area of each zone. Zone A counts in full, Zone B at a
+   half, Zone C at a quarter and the remainder at an eighth ("halving back").
+3. **Other areas.** Upper floor or basement sales, storage and staff areas, each at the fraction of Zone A agreed
+   locally or by the valuer (A/10 for storage, for example).
+4. Optionally, a **Zone A rate** to see the rent it gives.
+
+Select **Calculate and save to the property** to keep the figure, with the workings and a note, under the property's
+areas. Where the shop is let on a current agreement covering only that unit, the property page shows the **rent per m²
+Zone A** (and per sq ft): the rent divided by the ITZA. The ITZA also appears in the property report and in the
+marketing particulars.
+
+Adjustments for return frontage, masking, an unusual shape or a very deep shop are valuation judgements PHAEMA does
+not make: record them in the note, or enter a surveyed ITZA directly under **Retail zoning (ITZA)** in **Edit this
+property**.
+
 ## Site and buildings
 
 The **Site and buildings** section on a property's page describes what is physically there, so that whoever

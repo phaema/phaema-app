@@ -141,6 +141,12 @@ class LeaseDetailView(LoginRequiredMixin, DetailView):
             d.kind == "assignment" and d.status == "completed" for d in ctx["dealings"]) else []
         ctx["liable_former"] = dealings.liable_former_tenants(lease)
         ctx["underleases"] = list(lease.underleases.select_related("counterparty"))
+        props = list(lease.properties.all())
+        if len(props) == 1 and props[0].itza_sqm and lease.annual_rent:
+            from apps.properties import itza
+
+            rate = (lease.annual_rent / props[0].itza_sqm).quantize(Decimal("0.01"))
+            ctx["zone_a"] = {"rate": rate, "rate_sqft": itza.per_sqft(rate), "itza": props[0].itza_sqm}
         from .models import deposit_account
 
         ctx["deposit_rows"], ctx["deposit_balance"] = deposit_account(lease)

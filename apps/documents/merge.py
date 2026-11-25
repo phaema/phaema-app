@@ -34,6 +34,7 @@ FIELDS = OrderedDict([
     ("uprn", ("Premises", "UPRN")),
     ("property_nia", ("Premises", "Net internal area")),
     ("property_gia", ("Premises", "Gross internal area")),
+    ("property_itza", ("Premises", "Area in terms of Zone A (ITZA)")),
     ("property_use", ("Premises", "Use")),
     ("property_available_from", ("Premises", "Available from")),
     ("lease_reference", ("Agreement", "Agreement reference")),
@@ -94,7 +95,7 @@ FIELDS = OrderedDict([
 
 # Left blank (not highlighted) when unknown, so templates can test them with {% if %}.
 OPTIONAL = {"your_ref", "tenant_company_number", "guarantor_name", "guarantor_address", "uprn", "fee", "deposit",
-            "reasons", "statutory_1988", "property_nia", "property_gia", "property_use", "property_available_from",
+            "reasons", "statutory_1988", "property_nia", "property_gia", "property_itza", "property_use", "property_available_from",
             "asking_rent", "asking_price", "instruction_ends", "terms_offered"}
 
 HOT = ["premises", "rights", "term", "renewal_break", "security", "rent", "vat", "incentives", "review",
@@ -156,6 +157,7 @@ def _property(prop):
 
     return {"property_name": prop.name, "property_address": prop.address, "property_reference": prop.reference,
             "uprn": prop.uprn, "property_nia": area(prop.nia_sqm), "property_gia": area(prop.gia_sqm),
+            "property_itza": area(prop.itza_sqm),
             "property_use": prop.use_text(with_class=False) if hasattr(prop, "use_text") else "",
             "property_available_from": long_date(prop.available_from) if prop.available_from else ""}
 

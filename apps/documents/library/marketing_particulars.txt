@@ -25,7 +25,8 @@ fields: summary|Short description for the heading| ; description|The property: c
 ## Accommodation
 
 | Net internal area | {% if property_nia %}{{ property_nia }}{% else %}[Area]{% endif %} |{% if property_gia %}
-| Gross internal area | {{ property_gia }} |{% endif %}{% if property_use %}
+| Gross internal area | {{ property_gia }} |{% endif %}{% if property_itza %}
+| Area in terms of Zone A | {{ property_itza }} |{% endif %}{% if property_use %}
 | Use | {{ property_use }} |{% endif %}
 
 ## Terms

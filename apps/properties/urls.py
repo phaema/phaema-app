@@ -20,6 +20,7 @@ urlpatterns = [
     path("<int:pk>/report/", views.property_report, name="report"),
     path("<int:pk>/strategy/", strategy_views.record_strategy, name="record-strategy"),
     path("<int:pk>/suitability/", strategy_views.record_suitability, name="record-suitability"),
+    path("<int:pk>/itza/", strategy_views.itza_calculator, name="itza"),
     path("<int:pk>/files/", views.property_files, name="files"),
     path("<int:pk>/map.geojson", views.property_geojson, name="detail-geojson"),
     path("<int:pk>/boundary/", views.boundary_from_inspire, name="boundary"),
