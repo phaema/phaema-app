@@ -59,6 +59,9 @@ def open_case(case_type, **fields):
         CaseTask(case=case, stage=t.stage, description=t.description, order=t.order, owner=case.owner,
                  due_date=ack_due if t.description.startswith("Acknowledge") else None)
         for t in case_type.task_templates.all()])
+    from apps.leases import dealings
+
+    dealings.from_case(case)  # a consent to assign, underlet or share opens a dealing on the agreement
     return case
 
 

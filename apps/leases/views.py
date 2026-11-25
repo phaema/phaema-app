@@ -133,6 +133,16 @@ class LeaseDetailView(LoginRequiredMixin, DetailView):
         ctx["doc_templates"] = for_lease() if _can_create(self.request.user) else []
         ctx["today"] = today
         ctx["documents"] = list(lease.documents.all())
+        from . import dealings
+
+        ctx["dealings"] = list(lease.dealings.select_related("from_party", "to_party", "guarantor", "case",
+                                                            "underlease", "licence"))
+        ctx["tenant_history"] = dealings.tenants(lease) if any(
+            d.kind == "assignment" and d.status == "completed" for d in ctx["dealings"]) else []
+        ctx["liable_former"] = dealings.liable_former_tenants(lease)
+        ctx["underleases"] = list(lease.underleases.select_related("counterparty"))
+        if lease.is_let_out and any(d.kind == "assignment" and d.is_open for d in ctx["dealings"]):
+            ctx["rent_owed"] = dealings.rent_owed(lease)
         if lease.insurance == Lease.Insurance.TENANT and lease.is_let_out:
             ctx["tenant_insures"] = True
             ctx["insurance_certificate"] = lease.insurance_certificate()
@@ -347,3 +357,40 @@ def rents_payable(request):
         return response
     return render(request, "leases/rents_payable.html", {
         "data": data, "months": list(zip(data.months, data.by_month))})
+
+
+@require_POST
+@login_required
+def dealing_complete(request, pk):
+    """Record a dealing as completed. A completed assignment makes the assignee the tenant."""
+    from django.contrib import messages
+    from django.core.exceptions import PermissionDenied
+    from django.shortcuts import get_object_or_404, redirect
+    from django.utils.dateparse import parse_date
+
+    from apps.core.roles import can_edit
+
+    from . import dealings
+    from .models import Dealing
+
+    dealing = get_object_or_404(Dealing.objects.select_related("lease"), pk=pk)
+    if not can_edit(request.user, dealing.lease):
+        raise PermissionDenied
+    if not dealing.is_open:
+        messages.error(request, _("This dealing is already closed."))
+        return redirect(dealing)
+    when = parse_date(request.POST.get("completed_on", "") or "")
+    if when is None or when > date.today():
+        messages.error(request, _("Enter the date the dealing completed (not a future date)."))
+        return redirect(dealing)
+    try:
+        dealings.complete(dealing, completed_on=when)
+    except ValueError as err:
+        messages.error(request, _("%(err)s Add who the dealing is with under Add or change dealings.") % {"err": err})
+        return redirect(dealing)
+    if dealing.kind == Dealing.Kind.ASSIGNMENT:
+        messages.success(request, _("Assignment recorded: %(new)s is now the tenant. %(old)s is kept in the history.")
+                         % {"new": dealing.to_party, "old": dealing.from_party})
+    else:
+        messages.success(request, _("Dealing recorded as completed."))
+    return redirect(dealing)

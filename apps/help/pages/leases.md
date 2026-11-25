@@ -87,6 +87,31 @@ Where the tenant insures, the agreement page shows the latest **insurance certif
 there is none. Select **Start a case to get the tenant's insurance certificate**: the case has tasks to ask for
 the certificate, check the cover and add it to the agreement's documents with its expiry as the date for review.
 
+## Dealings
+
+Assignments, underleases, sharing arrangements, charges and changes of control are recorded under **Dealings** on
+the agreement page, from the application to completion.
+
+- **From a consent case.** Starting a *Consent to assign*, *Consent to underlet* or *Consent to share* case on an
+  agreement adds a dealing marked **Applied for**. The case's decision moves it on: **Consent given**, **Refused** or
+  **Withdrawn**.
+- **Adding by hand.** Select **Add or change dealings** to record the assignee or undertenant, any guarantor, whether
+  the outgoing tenant gave an authorised guarantee agreement (AGA), the part of the premises, the underlease term
+  and rent, the consent case and the signed licence (stored with the agreement's documents).
+- **Completing.** When the deed is completed, enter the date and select **Record the assignment** (or **Record
+  completion**). For an assignment, the assignee becomes the tenant on the agreement and their guarantor replaces the
+  old one. The former tenant is kept: the agreement shows **Who has held this agreement**, and a former tenant who
+  gave an AGA is shown as **still liable** on the agreement and on their own page until the next assignment.
+- **Arrears.** The rent account belongs to the agreement, not the tenant. If anything is owed, PHAEMA warns you before
+  you record an assignment: settle the arrears with the outgoing tenant first.
+
+The **Terms** section records whether assignment and underletting are allowed (with consent, not at all, or freely),
+whether dealings with part are allowed, and whether the council can require an AGA. The free-text clause is kept for
+the detail.
+
+**Lease chains.** Where the council holds a lease and lets the property on, set **Headlease** on the underlease (under
+**Premises and parties**). Each agreement then links to the other.
+
 ## Ending an agreement
 
 Record the outcome of the [expiry event](events.md#expiries), or set the status to Ended and fill in the

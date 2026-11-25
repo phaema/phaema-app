@@ -76,7 +76,7 @@
       {% elif user|can_edit:object %}<br><span class="govuk-body-s"><a class="govuk-link" href="{% url 'cases:new' %}?lease={{ object.pk }}&amp;type=insurance_certificate">{% translate "Start a case to get the tenant's insurance certificate" %}</a></span>{% endif %}{% endif %}</dd></div>
     <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Service charge" %}</dt><dd class="govuk-summary-list__value">{% if object.service_charge_payable %}{% translate "Payable" %}{% else %}{% translate "Not payable" %}{% endif %}</dd></div>
     <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Permitted use" %}</dt><dd class="govuk-summary-list__value">{{ object.permitted_use|default:"–" }}</dd></div>
-    <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Assignment and subletting" %}</dt><dd class="govuk-summary-list__value">{{ object.alienation|linebreaksbr|default:"–" }}</dd></div>
+    <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Assignment and subletting" %}</dt><dd class="govuk-summary-list__value">{% if object.assignment_terms or object.underletting_terms %}<span class="govuk-body-s">{% if object.assignment_terms %}{% translate "Assignment:" %} {{ object.get_assignment_terms_display }}<br>{% endif %}{% if object.underletting_terms %}{% translate "Underletting:" %} {{ object.get_underletting_terms_display }}<br>{% endif %}{% if object.dealings_with_part %}{% translate "Dealings with part allowed" %}<br>{% endif %}{% if object.aga_on_assignment %}{% translate "AGA can be required on assignment" %}<br>{% endif %}</span>{% endif %}{{ object.alienation|linebreaksbr|default:"–" }}</dd></div>
     <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Alterations" %}</dt><dd class="govuk-summary-list__value">{{ object.alterations|linebreaksbr|default:"–" }}</dd></div>
     {% if object.special_rights %}<div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Special rights" %}</dt><dd class="govuk-summary-list__value">{{ object.special_rights|linebreaksbr }}</dd></div>{% endif %}
   </dl>
@@ -125,6 +125,7 @@
   <h2 class="govuk-heading-m">{% translate "Options" %}</h2>
   <ul class="govuk-list">{% for o in options %}<li><strong>{{ o.get_option_type_display }}</strong> – {{ o.get_exercisable_by_display }}{% if o.exercise_from %}, {% translate "from" %} {{ o.exercise_from|date:"j F Y" }}{% endif %}{% if o.exercise_by %}, {% translate "by" %} {{ o.exercise_by|date:"j F Y" }}{% endif %}{% if o.notice_months %} ({% blocktranslate count n=o.notice_months %}{{ n }} month's notice{% plural %}{{ n }} months' notice{% endblocktranslate %}){% endif %}{% if o.terms %}<br><span class="govuk-body-s">{{ o.terms|linebreaksbr }}</span>{% endif %}</li>{% endfor %}</ul>
   {% endif %}{% endwith %}
+  {% include "leases/_dealings.html" %}
   {% if doc_templates %}<p class="govuk-body-s">{% translate "Create a letter:" %} {% for t in doc_templates %}<a class="govuk-link" href="{% url 'documents:create' t.code %}?lease={{ object.pk }}">{{ t.name }}</a>{% if not forloop.last %} · {% endif %}{% endfor %} · <a class="govuk-link" href="{% url 'documents:library' %}">{% translate "Document library" %}</a></p>{% endif %}
   <h2 class="govuk-heading-m" id="documents">{% translate "Documents" %}</h2>
   {% with docs=documents %}
@@ -177,6 +178,9 @@
     {% else %}{% translate "Same as the tenant's main contact" %}{% if b.name or b.email %}: {{ b.name }}{% if b.email %} ({{ b.email }}){% endif %}{% endif %}{% endif %}</p>
   {% endwith %}{% endif %}
   {% if object.guarantor %}<h2 class="govuk-heading-m">{% translate "Guarantor" %}</h2><p class="govuk-body"><a class="govuk-link" href="{{ object.guarantor.get_absolute_url }}">{{ object.guarantor.name }}</a></p>{% endif %}
+  {% if liable_former %}<h2 class="govuk-heading-m">{% translate "Former tenant still liable" %}</h2><p class="govuk-body">{% for p in liable_former %}<a class="govuk-link" href="{{ p.get_absolute_url }}">{{ p.name }}</a>{% endfor %}<br><span class="govuk-body-s">{% translate "Guarantees the current tenant under an authorised guarantee agreement (AGA)." %}</span></p>{% endif %}
+  {% if object.headlease %}<h2 class="govuk-heading-m">{% translate "Headlease" %}</h2><p class="govuk-body"><a class="govuk-link" href="{{ object.headlease.get_absolute_url }}">{{ object.headlease.reference }}</a> {{ object.headlease.counterparty.name }}</p>{% endif %}
+  {% if underleases %}<h2 class="govuk-heading-m">{% translate "Underleases" %}</h2><ul class="govuk-list">{% for u in underleases %}<li><a class="govuk-link" href="{{ u.get_absolute_url }}">{{ u.reference }}</a> {{ u.counterparty.name }} <span class="govuk-body-s">({{ u.get_status_display|lower }})</span></li>{% endfor %}</ul>{% endif %}
 </div>
 </div>
 {% endblock %}
