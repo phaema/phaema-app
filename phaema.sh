@@ -26,7 +26,7 @@ Usage: ./phaema.sh <command>
 EOF
 }
 
-compose() { docker compose "$@"; }
+compose() { ensure_secret_key; docker compose "$@"; }
 
 wait_ready() {
   for _ in $(seq 1 150); do
@@ -38,8 +38,18 @@ wait_ready() {
 
 env_value() { grep -E "^$1=" .env 2>/dev/null | tail -n 1 | cut -d= -f2-; }
 
+# PHAEMA will not start without a long random secret key. Make one in .env the first time.
+ensure_secret_key() {
+  if [ -z "$(env_value SECRET_KEY)" ]; then
+    [ -f .env ] || { touch .env; chmod 600 .env; }
+    echo "SECRET_KEY=$(LC_ALL=C tr -dc 'A-Za-z0-9' < /dev/urandom | head -c 60)" >> .env
+    echo "Made a secret key for this PHAEMA in .env (keep that file private)."
+  fi
+}
+
 case "${1:-}" in
   start)
+    ensure_secret_key
     compose up -d --build
     echo "Waiting for PHAEMA to start..."
     # The first start sets up the whole database, which takes a few minutes on a small server.

@@ -13,8 +13,23 @@ env = environ.Env(
 )
 environ.Env.read_env(BASE_DIR / ".env")
 
-SECRET_KEY = env("SECRET_KEY", default="insecure-development-key-change-me")
 DEBUG = env("DEBUG")
+# The secret key signs sessions, password reset links and two-step sign-in. A known key would let anyone forge
+# them, so PHAEMA refuses to start without a proper one unless DEBUG is on (development on a laptop).
+_DEV_KEYS = {"", "insecure-development-key-change-me", "local-development-only-change-me",
+             "change-me-to-a-long-random-string"}
+SECRET_KEY = env("SECRET_KEY", default="")
+if SECRET_KEY in _DEV_KEYS or len(SECRET_KEY) < 32:
+    import sys
+
+    if DEBUG or env.bool("PHAEMA_ALLOW_DEV_SECRET_KEY", default=False) or "pytest" in sys.modules:
+        SECRET_KEY = SECRET_KEY if len(SECRET_KEY) >= 32 else "insecure-development-key-change-me-0123456789"
+    else:
+        from django.core.exceptions import ImproperlyConfigured
+
+        raise ImproperlyConfigured(
+            "SECRET_KEY is missing, too short (under 32 characters) or a published example. Set a long random "
+            "SECRET_KEY in .env (deploy/install-server.sh does this), or set DEBUG=True on a development computer.")
 ALLOWED_HOSTS = env("ALLOWED_HOSTS")
 CSRF_TRUSTED_ORIGINS = env("CSRF_TRUSTED_ORIGINS")
 
@@ -22,7 +37,8 @@ CSRF_TRUSTED_ORIGINS = env("CSRF_TRUSTED_ORIGINS")
 # Set BEHIND_HTTPS_PROXY=True so it trusts the proxy's X-Forwarded-Proto header and treats requests
 # as secure. Only do this when PHAEMA can be reached through the proxy alone (docker-compose binds the
 # app to 127.0.0.1 for this reason), otherwise a client could claim HTTPS itself.
-if env.bool("BEHIND_HTTPS_PROXY", default=False):
+PHAEMA_BEHIND_HTTPS_PROXY = env.bool("BEHIND_HTTPS_PROXY", default=False)
+if PHAEMA_BEHIND_HTTPS_PROXY:
     SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
 # The public address is always a trusted origin for forms, so a correct PHAEMA_BASE_URL is enough.
@@ -71,6 +87,7 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "apps.core.middleware.CurrentUserMiddleware",
+    "apps.core.middleware.IdleTimeoutMiddleware",
     "apps.core.middleware.AccessEndedMiddleware",
     "apps.core.middleware.RoleRequiredMiddleware",
     "apps.core.middleware.TwoStepRequiredMiddleware",
@@ -102,6 +119,27 @@ DATABASES = {
     )
 }
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+# One cache shared by every web worker and the scheduler, kept in a database table (made by createcachetable,
+# which runs with the migrations). Sign-in and request limits rely on every worker seeing the same counts.
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.db.DatabaseCache",
+        "LOCATION": "phaema_cache",
+    }
+}
+
+# Sessions: signed out after a working day at most, and after a period without using PHAEMA. Someone whose
+# council account is closed therefore loses access within hours, not weeks.
+SESSION_COOKIE_AGE = env.int("PHAEMA_SESSION_HOURS", default=10) * 3600
+PHAEMA_IDLE_MINUTES = env.int("PHAEMA_IDLE_MINUTES", default=120)
+SESSION_COOKIE_HTTPONLY = True
+SESSION_COOKIE_SAMESITE = "Lax"
+
+# Wrong passwords allowed in the window before sign-in is paused, for one account and for one connection.
+PHAEMA_SIGNIN_WINDOW_SECONDS = env.int("PHAEMA_SIGNIN_WINDOW_MINUTES", default=15) * 60
+PHAEMA_SIGNIN_MAX_PER_ACCOUNT = env.int("PHAEMA_SIGNIN_MAX_PER_ACCOUNT", default=10)
+PHAEMA_SIGNIN_MAX_PER_ADDRESS = env.int("PHAEMA_SIGNIN_MAX_PER_ADDRESS", default=50)
 
 # Sign in with a username or an email address.
 AUTHENTICATION_BACKENDS = ["apps.core.auth_backends.UsernameOrEmailBackend", "apps.connectors.sso.SsoBackend"]
@@ -146,6 +184,15 @@ REST_FRAMEWORK = {
     ],
     "DEFAULT_PERMISSION_CLASSES": ["apps.core.api_permissions.PhaemaPermission"],
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
+    # Request limits, on top of the limit on wrong passwords (which also covers the API).
+    "DEFAULT_THROTTLE_CLASSES": [
+        "rest_framework.throttling.AnonRateThrottle",
+        "rest_framework.throttling.UserRateThrottle",
+    ],
+    "DEFAULT_THROTTLE_RATES": {
+        "anon": env("PHAEMA_API_ANON_RATE", default="30/minute"),
+        "user": env("PHAEMA_API_USER_RATE", default="1200/hour"),
+    },
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
     "PAGE_SIZE": 50,
 }

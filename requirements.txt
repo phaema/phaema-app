@@ -11,7 +11,7 @@ PyJWT[crypto]>=2.9,<3  # checks the signed sign-in token for single sign-on (MIT
 segno>=1.6,<2  # QR codes for setting up two-step sign-in (BSD-3-Clause)
 
 # Development and testing
-pytest>=8,<9
+pytest>=9.0.3,<10
 pytest-django>=4.9,<5
 Markdown>=3.7,<4
 extract-msg>=0.48,<1  # reads Outlook .msg emails filed on cases (GPL-3.0, compatible with AGPL-3.0)

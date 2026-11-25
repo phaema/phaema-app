@@ -29,6 +29,20 @@ class UsernameOrEmailBackend(ModelBackend):
     def authenticate(self, request, username=None, password=None, **kwargs):
         if username is None or password is None:
             return None
+        from . import throttle
+
+        if throttle.blocked(username, request):
+            if request is not None:
+                request.phaema_signin_blocked = True
+            return None
+        user = self._check(username, password)
+        if user is None:
+            throttle.record_failure(username, request)
+        else:
+            throttle.clear(username)
+        return user
+
+    def _check(self, username, password):
         User = get_user_model()
         user = User._default_manager.filter(username=username).first()
         if user is None and "@" in username:

@@ -92,3 +92,42 @@ class TwoStepRequiredMiddleware:
                     return JsonResponse({"detail": "Set up two-step sign-in before using the API."}, status=403)
                 return redirect("two-step")
         return self.get_response(request)
+
+
+class IdleTimeoutMiddleware:
+    """Signs out anyone who has not used PHAEMA for PHAEMA_IDLE_MINUTES (two hours by default)."""
+
+    KEY = "phaema_last_seen"
+    OPEN_PREFIXES = ("/static/", "/health/")
+
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        import time
+
+        from django.conf import settings
+
+        user = getattr(request, "user", None)
+        limit = getattr(settings, "PHAEMA_IDLE_MINUTES", 0) * 60
+        if (limit and user is not None and user.is_authenticated and hasattr(request, "session")
+                and not request.path.startswith(self.OPEN_PREFIXES)):
+            now = int(time.time())
+            last = request.session.get(self.KEY)
+            if last is not None and now - last > limit:
+                from django.contrib import messages
+                from django.contrib.auth import logout
+                from django.contrib.auth.views import redirect_to_login
+                from django.http import JsonResponse
+                from django.shortcuts import redirect
+
+                logout(request)
+                if request.path.startswith("/api/"):
+                    return JsonResponse({"detail": "Signed out after a period without use. Sign in again."},
+                                        status=401)
+                messages.info(request, "You were signed out after a period without using PHAEMA. Please sign in "
+                                       "again.")
+                return redirect_to_login(request.get_full_path()) if request.method == "GET" else redirect("login")
+            if last is None or now - last > 60:  # save at most once a minute
+                request.session[self.KEY] = now
+        return self.get_response(request)

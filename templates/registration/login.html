@@ -6,7 +6,7 @@
   {% if form.errors %}
   <div class="govuk-error-summary" data-module="govuk-error-summary"><div role="alert">
     <h2 class="govuk-error-summary__title">{% translate "There is a problem" %}</h2>
-    <div class="govuk-error-summary__body"><p class="govuk-body">{% translate "Enter a correct username or email address, and password." %}</p></div>
+    <div class="govuk-error-summary__body"><p class="govuk-body">{% if signin_paused %}{% blocktranslate with minutes=signin_paused %}Too many wrong passwords. Sign-in is paused for this account or connection: try again in {{ minutes }} minutes, or reset your password.{% endblocktranslate %}{% else %}{% translate "Enter a correct username or email address, and password." %}{% endif %}</p></div>
   </div></div>
   {% endif %}
   {% if sso_name %}

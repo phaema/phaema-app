@@ -18,7 +18,7 @@ COPY . .
 RUN useradd --create-home phaema && mkdir -p /app/media /app/staticfiles && chown -R phaema /app
 USER phaema
 
-RUN SECRET_KEY=build python manage.py collectstatic --noinput
+RUN PHAEMA_ALLOW_DEV_SECRET_KEY=True python manage.py collectstatic --noinput
 
 EXPOSE 8000
 CMD ["sh", "-c", "python manage.py migrate --noinput && gunicorn phaema.wsgi:application --bind 0.0.0.0:8000 --workers 3 --timeout 300"]

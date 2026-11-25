@@ -181,6 +181,33 @@ def test_unverified_email_is_not_used(client, provider, make_user):
     assert "_auth_user_id" not in client.session
 
 
+def test_administrator_is_not_linked_by_email(client, provider, make_user):
+    boss = make_user("boss", ADMINISTRATORS)
+    boss.email = "pat@council.example"
+    boss.save()
+    sign_in(client, provider)
+    assert "_auth_user_id" not in client.session and not SsoIdentity.objects.exists()
+
+
+def test_sign_in_name_is_not_taken_as_an_email_address(client, provider, make_user):
+    pat = make_user("pat", SURVEYORS)
+    pat.email = "pat@council.example"
+    pat.save()
+    del provider.claims["email"]
+    provider.claims["preferred_username"] = provider.claims["upn"] = "pat@council.example"
+    sign_in(client, provider)
+    assert "_auth_user_id" not in client.session and not SsoIdentity.objects.exists()
+
+
+def test_email_microsoft_says_is_unverified_is_not_used(client, provider, make_user):
+    pat = make_user("pat", SURVEYORS)
+    pat.email = "pat@council.example"
+    pat.save()
+    provider.claims["xms_edov"] = False
+    sign_in(client, provider)
+    assert "_auth_user_id" not in client.session
+
+
 # Things that must be refused
 
 def test_wrong_state_is_refused(client, provider, make_user):

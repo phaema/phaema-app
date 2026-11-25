@@ -18,7 +18,8 @@ def _settings_with(**env):
     """Load phaema.settings in a fresh Python with these environment variables."""
     code = ("import django, json; django.setup(); from django.conf import settings as s; "
             "print(json.dumps([s.CSRF_TRUSTED_ORIGINS, getattr(s, 'SECURE_PROXY_SSL_HEADER', None)]))")
-    environment = {**os.environ, "DJANGO_SETTINGS_MODULE": "phaema.settings", **env}
+    environment = {**os.environ, "DJANGO_SETTINGS_MODULE": "phaema.settings",
+                   "SECRET_KEY": os.environ.get("SECRET_KEY") or "test-only-" + "0" * 40, **env}
     for name in ("BEHIND_HTTPS_PROXY", "CSRF_TRUSTED_ORIGINS", "PHAEMA_BASE_URL"):
         if name not in env:
             environment.pop(name, None)
