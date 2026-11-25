@@ -205,6 +205,12 @@ class PropertyDetailView(LoginRequiredMixin, DetailView):
         ctx = super().get_context_data(**kwargs)
         obj = self.object
         ctx["children"] = obj.children.all()
+        if obj.itza_sqm:
+            from . import itza
+
+            rent = obj.zone_a_rent()
+            ctx["itza"] = {"sqft": itza.sqft(obj.itza_sqm), "rent": rent,
+                           "rate_sqft": itza.per_sqft(rent[1]) if rent else None}
         from apps.projects.rules import visible
 
         ids = [obj.pk, *[a.pk for a in obj.ancestors()]]  # a unit shows its building's and estate's projects too

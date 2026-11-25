@@ -206,6 +206,11 @@ class PropertyAdmin(AdministratorOnlyEditingMixin, RoleAdminMixin, admin.GISMode
                               "area_source", "areas_measured_on", "areas_measured_by", "areas_method"),
                    "description": "Gross internal, net internal and gross external areas to the RICS Code of "
                                   "Measuring Practice. Record IPMS figures in the IPMS section below, not here."}),
+        ("Retail zoning (ITZA)", {
+            "fields": ("itza_sqm", "itza_zone_depth_m", "itza_measured_on", "itza_notes"),
+            "classes": ("collapse",),
+            "description": "For shops let or valued by zoning. Use the ITZA calculator on the property page to work "
+                           "it out and keep the workings; or type a figure from a survey here."}),
         ("Floor areas to IPMS: All Buildings", {
             "fields": ("ipms1_sqm", "ipms2_sqm", "ipms3_sqm", "ipms3_kind", "ipms_measured_on", "ipms_source",
                        "ipms_measured_by", "ipms_method", "ipms_checked", "ipms_checked_how", "ipms_notes"),

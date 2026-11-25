@@ -204,6 +204,19 @@ class Property(TimeStampedModel):
     areas_method = models.CharField(_("method and tools"), max_length=200, blank=True,
                                     help_text=_("For example laser measure and CAD, or scaled from drawings."))
 
+    # Retail zoning: the area In Terms of Zone A (ITZA), for shops valued and let by zoning.
+    itza_sqm = models.DecimalField(
+        _("area in terms of Zone A (ITZA, m²)"), max_digits=10, decimal_places=2, null=True, blank=True,
+        validators=[MinValueValidator(0)],
+        help_text=_("For shops: the ground floor sales area zoned and halved back, plus other areas at their "
+                    "fractions of Zone A. Work it out with the ITZA calculator on the property page."))
+    itza_zone_depth_m = models.DecimalField(_("zone depth (m)"), max_digits=5, decimal_places=2, null=True,
+                                            blank=True)
+    itza_workings = models.JSONField(_("ITZA workings"), default=dict, blank=True, editable=False)
+    itza_measured_on = models.DateField(_("ITZA worked out on"), null=True, blank=True)
+    itza_notes = models.CharField(_("ITZA notes"), max_length=255, blank=True,
+                                  help_text=_("For example: zoned from the shop front; return frontage ignored."))
+
     # IPMS: All Buildings, held beside the Code of Measuring Practice figures (dual reporting).
     class Ipms3Kind(models.TextChoices):
         EXTERNAL = "3.1", _("IPMS 3.1 (measured externally)")
@@ -571,6 +584,23 @@ class Property(TimeStampedModel):
             if value is not None:
                 return value, label or self.ipms3_label
         return None, ""
+
+    def current_let(self):
+        """The one current agreement let out on this property alone, if there is exactly one."""
+        leases = [lease for lease in self.leases.filter(direction="out", status__in=("current", "holding_over"))
+                  if lease.properties.count() == 1]
+        return leases[0] if len(leases) == 1 else None
+
+    def zone_a_rent(self):
+        """(lease, rent per m² Zone A) from the current letting's rent and the ITZA, or None."""
+        if not self.itza_sqm:
+            return None
+        lease = self.current_let()
+        if lease is None or not lease.annual_rent:
+            return None
+        from decimal import Decimal
+
+        return lease, (lease.annual_rent / self.itza_sqm).quantize(Decimal("0.01"))
 
     def area_lines(self):
         """Every floor area recorded, as (label, value), the council's chosen basis first."""

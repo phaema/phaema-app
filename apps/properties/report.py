@@ -276,6 +276,11 @@ def _areas(g, wanted):
         rows.insert(0, ("Gross internal area (GIA), total of the buildings", _area(breakdown["gia"])))
     if prop.ipms_notes and prop.has_ipms_areas():
         rows.append(("IPMS notes", prop.ipms_notes))
+    if prop.itza_sqm:
+        rows.append(("Area in terms of Zone A (ITZA)", _area(prop.itza_sqm)))
+        rent = prop.zone_a_rent()
+        if rent:
+            rows.append(("Rent per m² Zone A", f"£{rent[1]:,.2f} (rent £{rent[0].annual_rent:,.0f} on {rent[0].reference})"))
     if rows:
         out += _table(rows) + [""]
     elif not breakdown:
