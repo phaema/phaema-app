@@ -140,11 +140,12 @@ def test_surveyor_leases_limited_to_own_properties(client, surveyor, own_and_oth
             "breaks-TOTAL_FORMS": "0", "breaks-INITIAL_FORMS": "0",
             "options-TOTAL_FORMS": "0", "options-INITIAL_FORMS": "0",
             "documents-TOTAL_FORMS": "0", "documents-INITIAL_FORMS": "0",
-            "rent_schedule-TOTAL_FORMS": "0", "rent_schedule-INITIAL_FORMS": "0"}
+            "rent_schedule-TOTAL_FORMS": "0", "rent_schedule-INITIAL_FORMS": "0", "index_lag_months": "0",
+            "dealings-TOTAL_FORMS": "0", "dealings-INITIAL_FORMS": "0"}
     resp = client.post(reverse("admin:leases_lease_add"), {**data, "properties": [other.pk]})
     assert resp.status_code == 200 and b"only add leases on properties you manage" in resp.content
     resp = client.post(reverse("admin:leases_lease_add"), {**data, "properties": [own.pk]})
-    assert resp.status_code == 302
+    assert resp.status_code == 302, [str(e) for e in resp.context["errors"]] if resp.context else resp.status_code
     lease = Lease.objects.get(reference="S-L1")
     assert can_edit(surveyor, lease)
     assert client.get(reverse("admin:leases_lease_change", args=[Lease.objects.get(reference="DL-0001").pk])
