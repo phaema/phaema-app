@@ -109,6 +109,51 @@ passed over, or only those still with the council; the download includes the sam
 The **collection rate** is the rent received in the last 12 months as a percentage of the rent that fell due in the
 same period.
 
+## Credit control
+
+**Finance**, **Rents receivable**, **Credit control** lists the accounts with overdue rent and the next step for
+each, oldest debt first. The steps are the council's credit control stages, taken in order once the oldest unpaid
+charge is old enough. By default:
+
+| Stage | When | What PHAEMA does |
+|---|---|---|
+| Reminder letter | 7 days overdue | Offers the *Rent arrears: reminder* letter; select **Letter sent** when it has gone. |
+| Final notice | 21 days | Offers the *Rent arrears: final notice* letter. |
+| Rent arrears recovery case | 35 days | Opens a *Rent arrears recovery* case for the managing surveyor (each night, by itself, if nobody has). |
+| Review | 60 days | Decide on a payment plan, debt collectors or legal action. |
+
+Administrators change the stages, their timing, the letters and a minimum debt under **Manage data**, **Credit
+control stages**. A stage is asked for once for each debt: when the account is clear, the next debt starts again
+from the first stage. The steps taken are listed on the rent account.
+
+Accounts are not chased while **rent demands are on hold**, after the debt is **passed to** debt collectors or legal,
+or while a **payment plan** is being kept.
+
+## Payment plans
+
+On a rent account with overdue rent, **Set up a payment plan** with the arrears to clear, the number of instalments,
+weekly or monthly, and the first date. Usually the tenant also pays the rent as it falls due; untick that if not.
+Setting up a plan replaces any earlier one.
+
+PHAEMA checks the plan against the payments received. If the tenant falls behind the instalments (or, where agreed,
+the current rent) by more than the days allowed (7 by default), the plan is marked **Broken**, it is flagged on the
+credit control list and chasing starts again. When the arrears covered are paid, the plan is **Completed**.
+
+## Interest on late payment
+
+Most leases charge interest on rent paid late. Record the terms on the agreement (**Manage data**, the agreement,
+**Rent demands and arrears**): Bank of England base rate plus a margin, or a fixed rate; and how many days late the
+rent must be before interest runs (it then runs from the due date).
+
+The rent account shows the interest on each late charge to today: the days it was unpaid and the interest. It is
+simple interest over a 365-day year, worked out on the amount actually unpaid each day (payments clear the oldest
+debt first; a credit note clears the charge it credits), and is never charged on interest. Someone with finance
+rights checks it against the lease and selects **Charge interest**. The interest charge goes to finance like any
+other charge, and the next calculation starts the day after it.
+
+For base rate leases, administrators keep the **Bank of England base rates** under **Manage data**, each with the
+date it took effect.
+
 ## The finance export
 
 **Finance**, **Rents receivable**, then **Finance exports**, collects every charge and credit note not yet sent to finance into a numbered

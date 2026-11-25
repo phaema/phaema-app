@@ -8,7 +8,7 @@ from django.utils.html import format_html, format_html_join
 from apps.core.admin_roles import RoleAdminMixin, RoleInlineMixin
 from apps.core.roles import is_administrator
 
-from .models import (BreakOption, Dealing, IndexFigure, IndexSeries, Lease, LeaseDocument, LeaseEvent, LeaseOption, Party,
+from .models import (BreakOption, Dealing, DepositEntry, IndexFigure, IndexSeries, Lease, LeaseDocument, LeaseEvent, LeaseOption, Party,
                      RentScheduleEntry)
 
 
@@ -50,6 +50,13 @@ class DealingInline(RoleInlineMixin, admin.StackedInline):
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
 
+class DepositInline(RoleInlineMixin, admin.TabularInline):
+    model = DepositEntry
+    extra = 0
+    fields = ("date", "kind", "amount", "reference", "notes")
+    verbose_name_plural = "Rent deposit account (money in and out)"
+
+
 class DocumentInline(RoleInlineMixin, admin.TabularInline):
     model = LeaseDocument
     extra = 1
@@ -65,14 +72,14 @@ class LeaseAdmin(RoleAdminMixin, admin.ModelAdmin):
     search_fields = ("reference", "counterparty__name", "properties__reference", "properties__name")
     autocomplete_fields = ("counterparty", "guarantor", "properties", "headlease")
     date_hierarchy = "term_end"
-    inlines = [BreakInline, OptionInline, RentScheduleInline, DocumentInline, DealingInline]
+    inlines = [BreakInline, OptionInline, RentScheduleInline, DocumentInline, DealingInline, DepositInline]
     fieldsets = (
         (None, {"fields": ("reference", "direction", "agreement_type", "status")}),
         ("Premises and parties", {"fields": ("properties", "premises_description", "counterparty", "guarantor",
                                              "headlease")}),
         ("Term", {"fields": ("lease_date", "term_start", "term_end", "actual_end", "security_of_tenure")}),
         ("Rent", {"fields": ("annual_rent", "rent_frequency", "vat_chargeable", "rates_excluded", "rent_free_until", "incentives",
-                             "deposit", "deposit_held", "deposit_interest")}),
+                             "deposit", "deposit_held", "deposit_deed_date", "deposit_interest")}),
         ("Rent review", {"fields": ("review_basis", "review_interval_years", "next_review_date", "time_of_essence")}),
         ("Index-linked reviews", {
             "fields": ("index_series", "index_base_month", "index_lag_months", ("index_cap_pct", "index_collar_pct"),
@@ -81,7 +88,8 @@ class LeaseAdmin(RoleAdminMixin, admin.ModelAdmin):
             "description": "For RPI, CPI or CPIH reviews. PHAEMA works out the new rent at each review from these "
                            "terms and the index figures, for the surveyor to check and record."}),
         ("Rent demands and arrears", {
-            "fields": ("demands_on_hold", "demands_on_hold_reason", "arrears_referral", "arrears_referred_on",
+            "fields": ("demands_on_hold", "demands_on_hold_reason", "interest_basis", "interest_margin_pct",
+                       "interest_grace_days", "arrears_referral", "arrears_referred_on",
                        "arrears_referral_reference"),
             "description": "Put demands on hold while a dispute or negotiation is sorted out, and record when the "
                            "debt has been passed to debt collectors or legal."}),
