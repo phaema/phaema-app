@@ -1,5 +1,6 @@
 {% load i18n humanize phaema_roles %}
 {% if dealings or user|can_edit:object %}
+<div id="dealings-section">
 <h2 class="govuk-heading-m" id="dealings">{% translate "Dealings" %}</h2>
 {% if tenant_history %}
 <h3 class="govuk-heading-s">{% translate "Who has held this agreement" %}</h3>
@@ -27,4 +28,5 @@
 {% if rent_owed %}<div class="govuk-warning-text"><span class="govuk-warning-text__icon" aria-hidden="true">!</span><strong class="govuk-warning-text__text"><span class="govuk-visually-hidden">{% translate "Warning" %}</span>{% blocktranslate with owed=rent_owed|floatformat:2|intcomma %}£{{ owed }} is owed on the rent account. Arrears stay with the agreement, so they would show on the new tenant's account after the assignment: settle them first.{% endblocktranslate %}</strong></div>{% endif %}
 {% else %}<p class="govuk-body-s">{% translate "No assignments, underleases or other dealings recorded." %}</p>{% endif %}
 {% if user|can_edit:object %}<p class="govuk-body-s"><a class="govuk-link" href="{% url 'admin:leases_lease_change' object.pk %}#dealings-group">{% translate "Add or change dealings" %}</a> · <a class="govuk-link" href="{% url 'cases:new' %}?lease={{ object.pk }}&amp;type=assignment">{% translate "Start a consent to assign case" %}</a></p>{% endif %}
+</div>
 {% endif %}

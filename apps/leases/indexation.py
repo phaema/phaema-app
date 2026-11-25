@@ -60,6 +60,13 @@ class Calculation:
     def ok(self):
         return not self.problem and self.new_rent is not None
 
+    @property
+    def years_text(self):
+        if self.years is None:
+            return ""
+        n = self.years.normalize()
+        return "1 year" if n == 1 else f"{n:f} years"
+
     def summary(self):
         """One line for the review outcome notes and the rent schedule."""
         if not self.ok:

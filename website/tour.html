@@ -172,7 +172,7 @@ p { margin: 0 0 .9em; max-width: 60ch; }
     ["letters", "Letters and notices", "Thirty templates, filled in"],
     ["projects", "Projects", "Gateways, budgets, risks"],
     ["strategy", "Estate strategy", "Asset strategies, objectives and the pipeline"],
-    ["rents", "Rents and arrears", "Demands, receipts and arrears", 1],
+    ["rents", "Rents and arrears", "Demands, receipts, arrears and credit control", 1],
     ["service", "Service charges", "Budgets to year-end", 1],
     ["valuation", "Asset valuation", "The rolling programme", 1],
     ["repairs", "Maintenance", "Repairs and works orders", 1],
@@ -210,11 +210,29 @@ p { margin: 0 0 .9em; max-width: 60ch; }
       '<p>Everything else, leases, cases, repairs, certificates and valuations, hangs off this one record.</p>' +
       rel([["leases", "Its leases"], ["compliance", "Its certificates"], ["projects", "Projects on it"]]) + '</div>' +
       shot("properties-2", "A property record showing its key facts, map and related records.", "The property record.") + '</div>'},
+    {id: "itza", ch: "work", t: 10, html:
+      '<div class="scene"><div class="scene__text"><p class="eyebrow">Retail zoning</p><h2>Compare shops by the rent per m&#178; Zone A</h2>' +
+      '<p>The ITZA calculator zones a shop from the front and halves back, adds upper floors and stores at a fraction of Zone A, and keeps the figure and its workings on the property.</p>' +
+      '<p>With the shop let, the property and the lease show the rent per m&#178; Zone A, and per square foot.</p>' +
+      rel([["register", "The property record"], ["marketing", "Marketing a vacant shop"]]) + '</div>' +
+      shot("itza", "The ITZA calculator for a shop: the zone depth, the shop&#8217;s width and depth, and the result zone by zone.", "The ITZA, zone by zone.") + '</div>'},
     {id: "leases", ch: "work", t: 10, html:
       '<div class="scene"><div class="scene__text"><p class="eyebrow">Leases and key dates</p><h2>Key dates become events, with reminders</h2>' +
       '<p>Leases, licences and wayleaves, let out or held. Rent reviews, breaks, expiries and notice deadlines become events with email reminders at the lead times the council sets, and a calendar feed.</p>' +
       rel([["pdf-reader", "Reading the lease"], ["cases", "Cases opened automatically"], ["rents", "The rent account"], ["lettings", "Renewals"]]) + '</div>' +
       shot("leases-2", "An agreement&#8217;s key dates listed as events with due dates and status.", "Key dates as events.") + '</div>'},
+    {id: "index-review", ch: "work", t: 10, html:
+      '<div class="scene"><div class="scene__text"><p class="eyebrow">Index-linked reviews</p><h2>CPI and RPI reviews worked out for you</h2>' +
+      '<p>CPI, CPIH and RPI figures come from the Office for National Statistics each month. Each lease records its index terms: the base month, the lag, any cap and collar, and whether the rent can fall.</p>' +
+      '<p>At the review, the working and the new rent are filled in for the surveyor to check against the lease and record.</p>' +
+      rel([["leases", "Key dates"], ["rents", "The rent account"]]) + '</div>' +
+      shot("index-review", "A rent review showing the base and review CPI figures, the change, the cap and the new rent.", "The working, ready to check.") + '</div>'},
+    {id: "dealings", ch: "work", t: 10, html:
+      '<div class="scene"><div class="scene__text"><p class="eyebrow">Dealings</p><h2>Assignments and underleases, from consent to completion</h2>' +
+      '<p>A consent case opens a dealing on the lease and its decision moves it on. Recording the assignment changes the tenant, keeps the former tenant in the history, and shows them as still liable where they gave an authorised guarantee agreement.</p>' +
+      '<p>Headleases and underleases link to each other, and rent deposits have their own account.</p>' +
+      rel([["cases", "The consent case"], ["leases", "The lease"]]) + '</div>' +
+      shot("dealings", "The dealings on a lease: who has held it, with dates, and a completed assignment.", "Who has held the lease.") + '</div>'},
     {id: "pdf-reader", ch: "work", t: 10, html:
       '<div class="scene"><div class="scene__text"><p class="eyebrow">Reading documents</p><h2>Read the lease without leaving PHAEMA</h2>' +
       '<p>Leases, deeds, notices and plans held as PDFs open in a built-in reader, with a strip of pages down the side, zoom and rotate.</p>' +
@@ -255,6 +273,12 @@ p { margin: 0 0 .9em; max-width: 60ch; }
       '<p>From consent letters to section 25 notice particulars: previewed with any blanks highlighted, then downloaded to Word for final checking. Councils add their own templates.</p>' +
       rel([["cases", "Back to the case"]]) + '</div>' +
       shot("letters-2", "A letter preview filled in from a case, with blanks highlighted.", "Check the preview, then download to Word.") + '</div>'},
+    {id: "marketing", ch: "work", t: 10, html:
+      '<div class="scene"><div class="scene__text"><p class="eyebrow">Void marketing</p><h2>Get empty property back into use</h2>' +
+      '<p>A marketing case records the agents instructed: the basis, the dates with a warning before a sole agency ends, the fee and the asking terms.</p>' +
+      '<p>The instruction letter and the particulars are filled in from the property record, ready to check.</p>' +
+      rel([["itza", "Zoning a shop"], ["lettings", "The new letting"], ["letters", "Letters and particulars"]]) + '</div>' +
+      shot("marketing", "A marketing case with an agent instructed on a sole agency, the fee, the asking rent and a warning that the instruction ends soon.", "Agents, fees and asking terms on the case.") + '</div>'},
     {id: "projects", ch: "work", t: 11, html:
       '<div class="scene"><div class="scene__text"><p class="eyebrow">Projects</p><h2>Developments, acquisitions and disposals</h2>' +
       '<p>Projects move through five phases and four gateways, each decision recorded with who made it. Milestones, a budget by financial year and a risk register sit alongside, and confidential acquisitions are seen only by their team.</p>' +
@@ -295,6 +319,12 @@ p { margin: 0 0 .9em; max-width: 60ch; }
       '<p>Demand runs with VAT, credit notes, receipts imported from the finance system and aged arrears, with a statement for each tenant and an export file for finance. Surveyors see rent for their own patch.</p>' +
       rel([["service", "Service charges"], ["leases", "The lease behind it"], ["people", "Who sees what"]]) + '</div>' +
       shot("rents-4", "A tenant&#8217;s rent account with charges, receipts and running balance.", "A tenant&#8217;s account.") + '</div>'},
+    {id: "credit-control", ch: "money", t: 10, html:
+      '<div class="scene"><div class="scene__text"><p class="eyebrow">Credit control &middot; optional</p><h2>Every debt chased in order</h2>' +
+      '<p>Overdue accounts are listed with their next step: a reminder letter, a final notice, then an arrears case, opened overnight if nobody has. Payment plans pause the chasing while they are kept.</p>' +
+      '<p>Interest on late rent is worked out to the lease, day by day, for someone with finance rights to check and charge.</p>' +
+      rel([["rents", "The rent account"], ["letters", "The letters"]]) + '</div>' +
+      shot("credit-control", "The credit control list: overdue accounts, the oldest debt and the next step for each.", "The next step for each account.") + '</div>'},
     {id: "service", ch: "money", t: 10, html:
       '<div class="scene"><div class="scene__text"><p class="eyebrow">Service charges &middot; optional</p><h2>Fair shares, on the RICS timetable</h2>' +
       '<p>Budgets by cost heading, apportionment by floor area with caps, spending entered or imported, and year-end reconciliation with balancing charges and statements, following the RICS service charge code.</p>' +

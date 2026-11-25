@@ -1,4 +1,5 @@
 {% load i18n humanize %}
+<div id="marketing-section">
 <h2 class="govuk-heading-m" id="marketing">{% translate "Marketing and agents" %}</h2>
 {% for i in expiring %}<div class="govuk-warning-text"><span class="govuk-warning-text__icon" aria-hidden="true">!</span><strong class="govuk-warning-text__text"><span class="govuk-visually-hidden">{% translate "Warning" %}</span>{% blocktranslate with who=i.agent.name|default:_("In-house marketing") d=i.expires_on|date:"j F Y" %}{{ who }}: the instruction ends on {{ d }}. Extend it, or end it.{% endblocktranslate %}</strong></div>{% endfor %}
 {% if instructions %}
@@ -35,3 +36,4 @@
   <button class="govuk-button" data-module="govuk-button">{% translate "Record the instruction" %}</button>
 </form></div></details>
 {% endif %}
+</div>
