@@ -1,12 +1,13 @@
 {% load i18n humanize %}
 {% if index %}
+<div id="index-linked">
 <h2 class="govuk-heading-m">{% translate "Index-linked rent" %}</h2>
 {% if index.ok %}
 <dl class="govuk-summary-list govuk-summary-list--no-border">
   <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Current rent" %}</dt><dd class="govuk-summary-list__value">£{{ index.current_rent|floatformat:2|intcomma }}</dd></div>
   <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Base figure" %}</dt><dd class="govuk-summary-list__value">{{ index.series.code }} {{ index.base_month|date:"F Y" }}: {{ index.base_value }}</dd></div>
   <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Review figure" %}</dt><dd class="govuk-summary-list__value">{{ index.series.code }} {{ index.review_month|date:"F Y" }}: {{ index.review_value }}</dd></div>
-  <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Change in the index" %}</dt><dd class="govuk-summary-list__value">{{ index.change_pct }}% {% blocktranslate with years=index.years|floatformat:"-2" %}over {{ years }} years{% endblocktranslate %}</dd></div>
+  <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Change in the index" %}</dt><dd class="govuk-summary-list__value">{{ index.change_pct }}% {% translate "over" %} {{ index.years_text }}</dd></div>
   <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Rent at the index" %}</dt><dd class="govuk-summary-list__value">£{{ index.indexed_rent|floatformat:2|intcomma }}</dd></div>
   {% if index.cap_rent is not None %}<div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Cap" %}</dt><dd class="govuk-summary-list__value">£{{ index.cap_rent|floatformat:2|intcomma }} ({{ index.lease.index_cap_pct }}% {% translate "a year" %}{% if index.lease.index_compounded %}, {% translate "compounded" %}{% endif %})</dd></div>{% endif %}
   {% if index.collar_rent is not None %}<div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Collar" %}</dt><dd class="govuk-summary-list__value">£{{ index.collar_rent|floatformat:2|intcomma }} ({{ index.lease.index_collar_pct }}% {% translate "a year" %}{% if index.lease.index_compounded %}, {% translate "compounded" %}{% endif %})</dd></div>{% endif %}
@@ -16,4 +17,5 @@
 {% else %}
 <div class="govuk-inset-text">{{ index.problem }} {% translate "Enter the new rent by hand, or add the missing figures under Index figures." %}<a class="govuk-link" href="{% url 'leases:index-figures' %}">{% translate "Index figures" %}</a></div>
 {% endif %}
+</div>
 {% endif %}

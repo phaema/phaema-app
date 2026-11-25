@@ -13,8 +13,8 @@ Your progress is saved in your browser.
 
 | Course | For | Modules |
 |---|---|---|
-| Estates surveyor | Surveyors and estates officers | Getting around; properties; leases and key dates; cases and approvals; lettings, renewals and dilapidations; letters and notices; projects |
-| Finance officer | Finance and income staff | Getting around; rents and arrears; service charges; valuations for the accounts; reports and exports |
+| Estates surveyor | Surveyors and estates officers | Getting around; properties; leases and key dates; cases and approvals; lettings, renewals and dilapidations; index reviews, dealings, deposits, zoning and marketing; letters and notices; projects; estate strategy; space and occupiers |
+| Finance officer | Finance and income staff | Getting around; rents and arrears; credit control, payment plans and interest; service charges; valuations for the accounts; occupation costs; reports and exports |
 | Maintenance and compliance | Building surveyors, facilities and compliance officers | Getting around; repairs and works orders; planned maintenance and components; compliance and the Golden Thread |
 | System administrator | Administrators | Getting around; users, roles, supervisors and handing over work; modules and settings; bringing data in; audit and the change log |
 | Viewer and contributor | Colleagues who look things up, and legal or other staff who add to cases | Getting around; finding information; contributing to a case |

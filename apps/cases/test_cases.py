@@ -219,11 +219,11 @@ def test_demo_cases(db):
     from django.core.management import call_command
 
     call_command("load_demo_data", verbosity=0)
-    assert Case.objects.filter(crm_reference__startswith="DEMO").count() == 21  # 7 Exampleton, 10 Northfield, 1 Asset Challenge, 3 in the Hangar block project
+    assert Case.objects.filter(crm_reference__startswith="DEMO").count() == 22  # 7 Exampleton, 10 Northfield, 1 Asset Challenge, 3 in the Hangar block project, 1 marketing
     assert Case.objects.filter(how_received="event").exists()
     assert Case.objects.get(crm_reference="DEMO-1").approvals.filter(status="pending").exists()
     call_command("load_demo_data", "--reset", verbosity=0)
-    assert Case.objects.filter(crm_reference__startswith="DEMO").count() == 21  # 7 Exampleton, 10 Northfield, 1 Asset Challenge, 3 in the Hangar block project
+    assert Case.objects.filter(crm_reference__startswith="DEMO").count() == 22  # 7 Exampleton, 10 Northfield, 1 Asset Challenge, 3 in the Hangar block project, 1 marketing
 
 
 def _supervise(user, supervisor):

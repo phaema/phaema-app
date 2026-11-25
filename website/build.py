@@ -79,6 +79,9 @@ SECURE_NOW = [
     ("Two-step sign-in", "A code from an authenticator app after the password, required for administrators by "
      "default and for everyone if the council chooses. Single-use recovery codes, and administrators can reset a "
      "lost phone."),
+    ("Limits on password guessing", "Sign-in pauses after repeated wrong passwords for one account or from one "
+     "connection, on the sign-in page, the administration pages and the API alike. Sessions end after a working day, "
+     "or two hours without use."),
     ("Single sign-on, if wanted", "Staff can sign in with the council's own accounts through Microsoft 365 (Entra "
      "ID) or another OpenID Connect service, so the council's own sign-in rules apply. Outside consultants can keep "
      "a PHAEMA sign-in. Tested against a stand-in service; not yet proved on a council's live tenant."),
@@ -108,25 +111,29 @@ CAPABILITIES = [
      "stated), titles, photos, disposals and a map drawn from Land Registry INSPIRE parcels. Each site "
      "and building records its construction, roof, windows, services and floor plans, gathered into a property "
      "report. Designations, overall condition, vacancy, planned disposals and yearly running costs are recorded "
-     "too."),
+     "too. Shops have an ITZA calculator, giving the rent per m² Zone A."),
     ("Leases and key dates", "Leases, licences and wayleaves, let out or held. Rent reviews, breaks, expiries and "
      "notice deadlines become events with email reminders and a calendar feed. Leases, deeds and plans held as PDFs "
      "open in a built-in reader, with search across the wording; scanned documents are read on the council's own "
      "server so they can be searched too. Rents the council pays as a tenant are listed with every payment due over "
-     "the next twelve months."),
+     "the next twelve months. Index-linked reviews are worked out from CPI, CPIH or RPI figures fetched from the "
+     "ONS, with caps and collars. Assignments and underleases are tracked from consent to completion, keeping every "
+     "former tenant, and rent deposits have their own account."),
     ("Cases and approvals", "Consents, renewals, dilapidations and enquiries with stages, tasks and statutory target "
      "dates. Supervisors approve decisions, with conflicts of interest declared first. Documents and saved emails are filed by "
      "dragging them onto the case. Each case has a site visit "
      "sheet for a phone or to print: safety information, the property details and a checklist the council sets "
      "for each type of case. Visits are recorded on the phone with photos, and differences from the property "
-     "record are listed for the managing surveyor to apply."),
+     "record are listed for the managing surveyor to apply. Vacant property is marketed through a marketing case, "
+     "with agents' instructions, fees and asking terms, and particulars filled in from the record."),
     ("Projects", "Developments, acquisitions, disposals and programmes taken through four gateways, with milestones, a "
      "budget by financial year, risks and a checklist of the register changes completion needs. The cases that make "
      "up a project, from acquisitions to lettings, are listed on it in order."),
     ("Document library", "Thirty letter and notice templates, from consent letters to section 25 notice particulars, "
      "filled in from the case and downloaded to Word. Councils can adapt them and add their own."),
     ("Rents and arrears", "Demand runs, VAT, credit notes, receipts imported from finance, aged arrears and an export "
-     "file for the finance system."),
+     "file for the finance system. Credit control takes each debt through reminder, final notice and an arrears case; "
+     "payment plans pause the chasing while they are kept; interest on late rent is worked out to the lease."),
     ("Service charges", "Budgets, apportionment by floor area with caps, actual costs and year-end reconciliation on "
      "the RICS service charge timetable."),
     ("Maintenance", "Repairs with target dates, who pays under the lease, works orders and their approval, recharges, "
@@ -189,6 +196,10 @@ ROADMAP = [
         "Single sign-on with the council's own accounts (Microsoft 365 and others), as an option",
         "Site and building details, floor plans, property and valuation reports, and site visit sheets",
         "Site visits recorded on the phone, with photos and differences from the record to apply",
+        "Index-linked rent reviews from ONS figures; dealings register; rent deposit accounts",
+        "Credit control, payment plans and interest on late rent",
+        "Void marketing with agent instructions; ITZA and rent per m² Zone A for shops",
+        "Limits on password guessing, shorter sessions, and code and dependency scanning on every change",
     ]),
     ("now", "Now: testing", [
         "A major test programme run by council staff",
@@ -363,7 +374,7 @@ BODY = r'''<div class="top"><div class="wrap top__inner">
 
   <div class="wrap band">
     <h2>Where the project is</h2>
-    <p class="band__lead">All fourteen modules are built and documented, with about 450 automated tests, a user manual, a technical manual and e-learning for five roles. A public test site is running. Next come testing by pilot councils, independent security and accessibility checks, and connectors to the systems councils already use.</p>
+    <p class="band__lead">All fourteen modules are built and documented, with nearly 600 automated tests, a user manual, a technical manual and e-learning for five roles. A public test site is running. Next come testing by pilot councils, independent security and accessibility checks, and connectors to the systems councils already use.</p>
     <p><a href="#roadmap">See the roadmap</a></p>
   </div>
 
