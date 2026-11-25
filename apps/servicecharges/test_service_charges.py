@@ -108,6 +108,21 @@ def test_reconciliation_with_cap_and_part_year(estate):
     assert all(c.invoice_number for c in made) and all(c.period_start is None for c in made)
 
 
+def test_credit_on_an_on_account_demand_counts_in_the_reconciliation(estate):
+    year = estate["year"]
+    Expenditure.objects.create(year=year, heading=CostHeading.objects.get(code="CLN"), spent_on=date(2025, 6, 1),
+                               description="Cleaning", amount=D("10000"))
+    billing.issue_run(date(2025, 3, 1), date(2026, 3, 31), date(2025, 3, 1), service=True, rent=False)
+    before = {line.share.member.lease_id: line.balance for line in apportion.reconcile(year).lines}
+    lease1 = estate["leases"][0]
+    demand = Charge.objects.filter(lease=lease1, service_year=year, kind="service").order_by("due_date")[1]
+    note = billing.credit(demand, "service not provided", D("100"))
+    assert note.service_year == year and note.period_start == demand.period_start
+    after = {line.share.member.lease_id: line.balance for line in apportion.reconcile(year).lines}
+    assert after[lease1.pk] == before[lease1.pk] + D("100")  # less was demanded, so more is due at the year end
+    assert after[estate["leases"][1].pk] == before[estate["leases"][1].pk]
+
+
 def test_finance_export_uses_service_charge_income_code(estate):
     s = ModuleSettings.load()
     s.rent_income_code, s.service_charge_income_code = "RENT-1", "SC-1"

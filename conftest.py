@@ -58,3 +58,14 @@ def make_user(db):
         return user
 
     return make
+
+
+@pytest.fixture(autouse=True)
+def _own_cache(request, settings):
+    """Each test gets an empty in-memory cache, so sign-in and request counts never carry over between tests (the
+    application itself uses a cache table in the database, shared by every worker)."""
+    settings.CACHES = {"default": {"BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+                                   "LOCATION": request.node.nodeid}}
+    from django.core.cache import cache
+
+    cache.clear()

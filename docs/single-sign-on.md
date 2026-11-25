@@ -9,7 +9,10 @@ addresses. It is optional and off until both steps below are done. With it off, 
 - A **Sign in with Microsoft** button appears on the sign-in page. The council's own password, multi-factor and
   conditional access rules apply, so PHAEMA's two-step sign-in is not asked for as well.
 - People are matched to their PHAEMA account by email address the first time, and by their fixed Microsoft ID
-  after that, so a later change of name or address does not matter.
+  after that, so a later change of name or address does not matter. Only the `email` claim is used for this, never
+  the sign-in name (`preferred_username` or `upn`), and an address marked as unverified is ignored.
+- Administrator accounts are never linked by email address. Administrators sign in with their PHAEMA password and
+  two-step code (or are given the Administrators role through a group mapping on an ordinary account).
 - Roles and access areas can follow Microsoft groups (optional).
 - People outside the council (consultants, valuers, solicitors) can keep a PHAEMA password, or be invited as
   guests in Microsoft Entra and use the button like staff.
@@ -27,7 +30,7 @@ mail, files or calendars, and keeps no Microsoft password or token.
 4. Select **Register**. Note the **Application (client) ID** and the **Directory (tenant) ID**.
 5. **Certificates & secrets**, **New client secret**. Note the secret's **Value** and its expiry date (put a
    reminder in a calendar: sign-in stops when it expires).
-6. **Token configuration**, **Add optional claim**, **ID** token, tick **email**, **given_name** and
+6. **Token configuration**, **Add optional claim**, **ID** token, tick **email**, **xms_edov**, **given_name** and
    **family_name**.
 7. For roles from groups (optional): **Token configuration**, **Add groups claim**, choose **Groups assigned to the
    application**, and for the ID token choose **Group ID**. Then in **Enterprise applications**, **PHAEMA**,

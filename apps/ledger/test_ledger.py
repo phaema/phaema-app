@@ -111,6 +111,30 @@ def test_credit_notes(ledger_on, tenant):
     assert billing.account(lease, today=date(2026, 4, 1)).balance == 0
 
 
+def test_credit_note_reduces_the_charge_it_credits_not_the_oldest(ledger_on, tenant):
+    lease = make_lease(tenant)
+    run = billing.issue_run(date(2026, 1, 1), date(2026, 9, 30), date(2026, 1, 1))  # 25/3, 24/6, 29/9: £3,000 each
+    march, june, september = run.charges.order_by("due_date")
+    note = billing.credit(september, "rent free", D("1000"))
+    assert (note.period_start, note.period_end) == (september.period_start, september.period_end)
+    acc = billing.account(lease, today=date(2026, 10, 15))
+    assert acc.balance == D("8000")
+    owed = {line.obj.pk: line.outstanding for line in acc.lines if line.kind == "charge" and line.debit > 0}
+    assert owed == {march.pk: D("3000"), june.pk: D("3000"), september.pk: D("2000")}
+    assert dict(acc.aged)["Over 90 days"] == D("6000") and dict(acc.aged)["1–30 days"] == D("2000")
+
+
+def test_credit_note_on_a_paid_charge_pays_off_the_oldest_debt(ledger_on, tenant):
+    lease = make_lease(tenant)
+    run = billing.issue_run(date(2026, 1, 1), date(2026, 6, 30), date(2026, 1, 1))
+    march, june = run.charges.order_by("due_date")
+    Receipt.objects.create(lease=lease, received_on=date(2026, 3, 25), amount=D("3000"), payment_reference="R1")
+    billing.credit(march, "overcharged", D("500"))  # March was already paid, so the credit is left over
+    acc = billing.account(lease, today=date(2026, 7, 30))
+    owed = {line.obj.pk: line.outstanding for line in acc.lines if line.kind == "charge" and line.debit > 0}
+    assert owed == {march.pk: D("0"), june.pk: D("2500")} and acc.balance == D("2500")
+
+
 def _receipts_file(rows):
     text = "Payment reference,Date received,Amount,Lease reference,Invoice reference,Customer reference\n"
     text += "".join(",".join(r) + "\n" for r in rows)

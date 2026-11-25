@@ -159,7 +159,10 @@ def credit(charge, reason, amount=None, issue_date=None):
     net = (gross * 100 / (100 + charge.vat_rate)).quantize(PENNY)
     note = Charge(lease=charge.lease, kind=Charge.Kind.CREDIT, credit_for=charge, issue_date=issue_date,
                   due_date=issue_date, net=-net, vat_rate=charge.vat_rate, vat=-(gross - net), gross=-gross,
-                  period_start=None, period_end=None,
+                  # The credit belongs to the same period and service charge year as the charge, so the year-end
+                  # reconciliation counts it against what was demanded for that year.
+                  period_start=charge.period_start, period_end=charge.period_end,
+                  service_year_id=charge.service_year_id,
                   description=f"Credit against {charge.reference}: {reason}"[:200])
     _number([note])
     note.save()
@@ -202,13 +205,27 @@ def account(lease, today=None, charges=None, receipts=None):
     for line in lines:
         balance += line.debit - line.credit
         line.balance = balance
-    # Oldest debt first: credits (receipts and credit notes) pay off positive charges in due-date order.
-    paying = sum((r.amount for r in receipts), Decimal("0")) + sum((-c.gross for c in charges if c.gross < 0),
-                                                                   Decimal("0"))
-    for line in sorted((x for x in lines if x.kind == "charge" and x.debit > 0),
-                       key=lambda x: (x.obj.due_date, x.obj.pk)):
-        used = min(paying, line.debit)
-        line.outstanding = line.debit - used
+    debts = sorted((x for x in lines if x.kind == "charge" and x.debit > 0), key=lambda x: (x.obj.due_date, x.obj.pk))
+    for line in debts:
+        line.outstanding = line.debit
+    # A credit note first reduces the charge it was raised against; only what is left over (or a credit note with no
+    # charge named) joins the receipts below.
+    by_charge = {line.obj.pk: line for line in debts}
+    paying = sum((r.amount for r in receipts), Decimal("0"))
+    for c in charges:
+        if c.gross >= 0:
+            continue
+        amount = -c.gross
+        target = by_charge.get(c.credit_for_id) if c.credit_for_id else None
+        if target is not None:
+            used = min(amount, target.outstanding)
+            target.outstanding -= used
+            amount -= used
+        paying += amount
+    # Oldest debt first: receipts and unallocated credits pay off what is still owed in due-date order.
+    for line in debts:
+        used = min(paying, line.outstanding)
+        line.outstanding -= used
         paying -= used
     owed = [x for x in lines if x.outstanding > 0]
     overdue = [x for x in owed if x.obj.due_date < today]

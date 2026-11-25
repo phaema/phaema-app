@@ -33,6 +33,14 @@ class PhaemaLoginView(LoginView):
             context["sso_name"] = sso.name()
         return context
 
+    def form_invalid(self, form):
+        context = self.get_context_data(form=form)
+        if getattr(self.request, "phaema_signin_blocked", False):
+            from . import throttle
+
+            context["signin_paused"] = throttle.minutes()
+        return self.render_to_response(context)
+
     def form_valid(self, form):
         user = form.get_user()
         if not two_step.has_two_step(user):

@@ -185,13 +185,26 @@ def read_id_token(token, nonce):
 # Matching the person to a PHAEMA account
 
 def email_of(claims):
-    if claims.get("email_verified") is False:
+    """The person's email address, for finding their PHAEMA account the first time.
+
+    Only the `email` claim is used. `preferred_username` and `upn` are sign-in names that can look like email
+    addresses without being one the person was checked to own, so they are never used to match an account. An
+    address the service says is not verified (`email_verified` false, or Microsoft's `xms_edov` false when the
+    council has asked for it) is not used either."""
+    if claims.get("email_verified") is False or claims.get("xms_edov") in (False, "false", "0", 0):
         return ""
-    for key in ("email", "preferred_username", "upn"):
-        value = str(claims.get(key) or "").strip()
-        if "@" in value and " " not in value:
-            return value
+    value = str(claims.get("email") or "").strip()
+    if "@" in value and " " not in value:
+        return value
     return ""
+
+
+def _never_linked_by_email(user):
+    """Accounts that can change anything in PHAEMA are linked to a council sign-in only by hand, never by a matching
+    email address: a mistake there would hand over the whole system."""
+    from apps.core.roles import is_administrator
+
+    return user.is_superuser or is_administrator(user)
 
 
 def _new_username(email):
@@ -224,6 +237,9 @@ def find_user(claims):
         if len(matches) > 1:
             raise SsoError(f"More than one PHAEMA account has the email address {email}. Ask your PHAEMA "
                            "administrator to correct this.")
+        if matches and _never_linked_by_email(matches[0]):
+            raise SsoError(f"The PHAEMA account for {email} is an administrator account, so it is not linked to "
+                           f"{name()} sign-in automatically. Sign in with your PHAEMA password and two-step code.")
         if matches:
             user = matches[0]
         elif User._default_manager.filter(email__iexact=email).exists():
