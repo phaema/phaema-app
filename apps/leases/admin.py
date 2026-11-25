@@ -87,6 +87,12 @@ class LeaseAdmin(RoleAdminMixin, admin.ModelAdmin):
             "classes": ("collapse",),
             "description": "For RPI, CPI or CPIH reviews. PHAEMA works out the new rent at each review from these "
                            "terms and the index figures, for the surveyor to check and record."}),
+        ("IFRS 16 (agreements the council holds)", {
+            "fields": ("ifrs16_treatment", "ifrs16_lease_end", "ifrs16_notes"),
+            "classes": ("collapse",),
+            "description": "For finance's lease accounting. The lease term for IFRS 16 includes periods covered by "
+                           "options the council is reasonably certain to use. These feed the IFRS 16 data pack under "
+                           "Finance, Rents payable."}),
         ("Rent demands and arrears", {
             "fields": ("demands_on_hold", "demands_on_hold_reason", "interest_basis", "interest_margin_pct",
                        "interest_grace_days", "arrears_referral", "arrears_referred_on",

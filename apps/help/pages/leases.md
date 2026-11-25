@@ -135,6 +135,39 @@ schedule, so a stepped rent or a settled review is included, and none are shown 
 Reviews, breaks and expiry are shown beside each one, so the team can plan ahead. **Download as Excel** gives the
 same as a spreadsheet for finance. PHAEMA does not pay these rents: finance does.
 
+### IFRS 16 data pack
+
+Since 1 April 2024 the CIPFA Code has required councils to account for leases they hold under IFRS 16: a
+right-of-use asset and a lease liability for each one, unless it is short-term or of low value. PHAEMA does not do
+the accounting. It gives finance the facts they need for it.
+
+On **Rents payable**, open **IFRS 16 data pack**, choose the financial year and select **Download the IFRS 16 data
+pack**. Only people with the Finance role (or an administrator) can download it. The workbook has four sheets:
+
+- **Leases**: every agreement the council held during the year, with its dates, the lease end used for IFRS 16,
+  the rent now and how often, rent-free period, review basis, breaks and options, the number of months left and
+  the total of all payments from 1 April to the lease end, undiscounted. The yellow columns, **Discount rate (%)**
+  and **Right-of-use asset value**, are left for finance to fill in.
+- **Payments**: each future payment, by date, at the rent in force on that date.
+- **Changes in the year**: new agreements, agreements that ended, rent changes from reviews, steps and indexation,
+  and changes to the term, end date or IFRS 16 treatment, from the audit trail.
+- **Notes**: how the figures were worked out.
+
+Payments are taken in advance on each payment date, from the rent schedule, and none fall before a rent-free
+period ends. Index-linked rents are shown at today's rent; finance remeasures the liability when the rent changes.
+A rent of £100 a year or less, or a peppercorn, is marked **Nominal**: these leases are still in scope under the
+Code and the asset is held at current value, so the row asks for one.
+
+Each agreement held by the council has an **IFRS 16** section in **Manage data**:
+
+- **Treatment**: right-of-use asset and lease liability (the default), short-term, low value, or not a lease.
+- **Lease end for IFRS 16**: the end of the lease term finance has assessed, taking into account breaks and
+  options the council is reasonably certain to use. Set it for a periodic tenancy or a holding over, which have no
+  contractual end date. If it is blank, PHAEMA uses the actual end, then the contractual term end.
+- **Notes**: the reason for the treatment or the lease end.
+
+The pack lists anything finance needs to check, such as an agreement with no end date.
+
 ## Worked example
 
 **DL-0502** is Northfield Packaging Ltd's lease of Unit 2, Northfield Business Park: ten years, inside the 1954

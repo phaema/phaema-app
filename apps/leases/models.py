@@ -203,6 +203,12 @@ class Lease(TimeStampedModel):
         BASE_PLUS = "base_plus", _("Bank of England base rate plus a margin")
         FIXED = "fixed", _("A fixed yearly rate")
 
+    class Ifrs16Treatment(models.TextChoices):
+        ON_BALANCE_SHEET = "", _("Right-of-use asset and lease liability")
+        SHORT_TERM = "short_term", _("Short-term lease (12 months or less): exempt")
+        LOW_VALUE = "low_value", _("Low-value asset: exempt")
+        NOT_A_LEASE = "not_lease", _("Not a lease under IFRS 16")
+
     class ArrearsReferral(models.TextChoices):
         DEBT_COLLECTORS = "debt", _("External debt collectors")
         LEGAL = "legal", _("Legal")
@@ -294,6 +300,18 @@ class Lease(TimeStampedModel):
     index_upward_only = models.BooleanField(_("upwards only"), default=True,
                                             help_text=_("The rent never falls at an index-linked review."))
 
+    # IFRS 16, for agreements the council holds (finance's lease accounting)
+    ifrs16_treatment = models.CharField(
+        _("IFRS 16 treatment"), max_length=12, choices=Ifrs16Treatment.choices, blank=True,
+        help_text=_("As finance has decided. Most leases the council holds go on the balance sheet."))
+    ifrs16_lease_end = models.DateField(
+        _("IFRS 16 lease term ends"), null=True, blank=True,
+        help_text=_("Leave blank to use the contractual expiry. Earlier if the council is reasonably certain to "
+                    "break; later if it is reasonably certain to renew or extend; for a periodic tenancy, the end "
+                    "finance expects."))
+    ifrs16_notes = models.CharField(_("IFRS 16 notes"), max_length=255, blank=True,
+                                    help_text=_("For example why an option is or is not reasonably certain."))
+
     # Rent account
     demands_on_hold = models.BooleanField(
         _("rent demands on hold"), default=False,
@@ -368,6 +386,8 @@ class Lease(TimeStampedModel):
         if (self.index_cap_pct is not None and self.index_collar_pct is not None
                 and self.index_collar_pct > self.index_cap_pct):
             raise ValidationError({"index_collar_pct": _("The collar cannot be more than the cap.")})
+        if self.ifrs16_lease_end and self.term_start and self.ifrs16_lease_end < self.term_start:
+            raise ValidationError({"ifrs16_lease_end": _("The IFRS 16 lease term must end after it starts.")})
         if self.interest_basis and self.interest_margin_pct is None:
             raise ValidationError({"interest_margin_pct": _("Enter the margin or rate for interest on late rent.")})
         if self.arrears_referred_on and not self.arrears_referral:

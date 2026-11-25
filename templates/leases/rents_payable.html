@@ -8,6 +8,18 @@
   <a class="govuk-button" data-module="govuk-button" role="button" draggable="false" href="?format=xlsx">{% translate "Download as Excel" %}</a>
   <a class="govuk-button govuk-button--secondary" data-module="govuk-button" role="button" draggable="false" href="{% url 'leases:list' %}?direction=in">{% translate "All agreements held by the council" %}</a>
 </div>
+{% if can_finance %}
+<details class="govuk-details govuk-!-display-none-print" data-module="govuk-details" id="ifrs16"><summary class="govuk-details__summary"><span class="govuk-details__summary-text">{% translate "IFRS 16 data pack for finance" %}</span></summary>
+<div class="govuk-details__text">
+  <p class="govuk-body">{% translate "A workbook for finance's lease accounting: every agreement the council holds that was in force in the financial year, with its lease term for IFRS 16, rent, options and review basis; every payment from the start of the year to the end of the term (undiscounted); and the year's changes. Finance adds the discount rate." %}</p>
+  <p class="govuk-body-s">{% translate "Set each agreement's IFRS 16 treatment and, where an option is reasonably certain or the tenancy is periodic, its IFRS 16 lease end, in Edit this agreement." %}</p>
+  <form method="get" action="{% url 'leases:ifrs16' %}" novalidate>
+    <div class="govuk-form-group"><label class="govuk-label" for="ifrs16-year">{% translate "Financial year" %}</label>
+      <select class="govuk-select" id="ifrs16-year" name="year">{% for y, label in ifrs16_years %}<option value="{{ y }}">{{ label }}</option>{% endfor %}</select></div>
+    <button class="govuk-button govuk-button--secondary" data-module="govuk-button">{% translate "Download the IFRS 16 data pack" %}</button>
+  </form>
+</div></details>
+{% endif %}
 
 {% if data.rows %}
 <div class="govuk-grid-row">
