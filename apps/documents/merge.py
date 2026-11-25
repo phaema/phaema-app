@@ -2,6 +2,7 @@
 """The merge fields: plain text worked out from PHAEMA's records. Templates see only these strings."""
 from collections import OrderedDict
 from datetime import date
+from decimal import Decimal
 
 from apps.core.models import ModuleSettings
 
@@ -31,6 +32,10 @@ FIELDS = OrderedDict([
     ("property_address", ("Premises", "Property address")),
     ("property_reference", ("Premises", "Asset reference")),
     ("uprn", ("Premises", "UPRN")),
+    ("property_nia", ("Premises", "Net internal area")),
+    ("property_gia", ("Premises", "Gross internal area")),
+    ("property_use", ("Premises", "Use")),
+    ("property_available_from", ("Premises", "Available from")),
     ("lease_reference", ("Agreement", "Agreement reference")),
     ("agreement_type", ("Agreement", "Type of agreement")),
     ("lease_date", ("Agreement", "Date of the agreement")),
@@ -64,6 +69,14 @@ FIELDS = OrderedDict([
     ("opposition_grounds", ("1954 Act", "Grounds of opposition")),
     ("arrears_total", ("Rent account", "Balance owed")),
     ("arrears_overdue", ("Rent account", "Overdue")),
+    ("agent_name", ("Marketing", "Agent")),
+    ("agent_address", ("Marketing", "Agent's address")),
+    ("agent_basis", ("Marketing", "Basis of instruction")),
+    ("agent_fee", ("Marketing", "Agent's fee")),
+    ("instruction_ends", ("Marketing", "Instruction ends")),
+    ("asking_rent", ("Marketing", "Asking rent a year")),
+    ("asking_price", ("Marketing", "Asking price")),
+    ("terms_offered", ("Marketing", "Terms offered")),
     ("valuation_date", ("Valuation", "Valuation date")),
     ("asset_class", ("Valuation", "Asset class")),
     ("valuation_basis", ("Valuation", "Basis of value")),
@@ -81,7 +94,8 @@ FIELDS = OrderedDict([
 
 # Left blank (not highlighted) when unknown, so templates can test them with {% if %}.
 OPTIONAL = {"your_ref", "tenant_company_number", "guarantor_name", "guarantor_address", "uprn", "fee", "deposit",
-            "reasons", "statutory_1988"}
+            "reasons", "statutory_1988", "property_nia", "property_gia", "property_use", "property_available_from",
+            "asking_rent", "asking_price", "instruction_ends", "terms_offered"}
 
 HOT = ["premises", "rights", "term", "renewal_break", "security", "rent", "vat", "incentives", "review",
        "service_insurance", "alienation", "repairs", "use", "alterations", "fit_out", "conditions"]
@@ -137,8 +151,13 @@ def _premises(prop):
 def _property(prop):
     if prop is None:
         return {}
+    def area(value):
+        return f"{value:,.1f} m² ({value * Decimal('10.7639'):,.0f} sq ft)" if value is not None else ""
+
     return {"property_name": prop.name, "property_address": prop.address, "property_reference": prop.reference,
-            "uprn": prop.uprn}
+            "uprn": prop.uprn, "property_nia": area(prop.nia_sqm), "property_gia": area(prop.gia_sqm),
+            "property_use": prop.use_text(with_class=False) if hasattr(prop, "use_text") else "",
+            "property_available_from": long_date(prop.available_from) if prop.available_from else ""}
 
 
 def _arrears(lease):
@@ -222,6 +241,9 @@ def context(user=None, case=None, lease=None, prop=None, valuation=None):
     data.update(_arrears(lease))
     if case is not None:
         data.update(_case(case))
+        from apps.cases import marketing
+
+        data.update(marketing.merge_fields(case))
     if valuation is not None:
         data.update(_valuation(valuation))
     if not data["premises"] and prop is not None:

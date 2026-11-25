@@ -95,6 +95,13 @@ TYPES = [
         (A, "Heads of terms covering every item the RICS Code for leasing business premises requires"),
         (A, "If the tenant is unrepresented, give them the Code and its supplemental guide"),
         (D, "Approval"), (C, "Instruct legal"), (C, "Set up the new agreement in PHAEMA")]),
+    ("marketing", "Marketing a vacant property", "management", None, False, None, "", None, [
+        (R, "Confirm the property is vacant and can be let, and record it as Available on the property"),
+        (I, "Check the floor areas (and the ITZA for a shop) and the EPC"),
+        (I, "Agree the asking terms and how it will be marketed"),
+        (A, "Instruct the agent, or prepare in-house marketing"), (A, "Particulars, board and listings"),
+        (A, "Viewings and offers"), (D, "Recommend the preferred offer"),
+        (C, "Open a new letting case for the heads of terms"), (C, "End the agent's instruction")]),
     ("wayleave", "Wayleave or easement request", "enquiry", 56, False, "", "", None, [
         ACK, (I, "Plans and route"), (A, "Terms and consideration"), (D, "Decision"), (C, "Instruct legal")]),
     ("land_purchase", "Request to buy or lease council land", "enquiry", None, False, None, "", None, [

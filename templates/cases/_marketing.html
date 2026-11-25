@@ -1,0 +1,37 @@
+{% load i18n humanize %}
+<h2 class="govuk-heading-m" id="marketing">{% translate "Marketing and agents" %}</h2>
+{% for i in expiring %}<div class="govuk-warning-text"><span class="govuk-warning-text__icon" aria-hidden="true">!</span><strong class="govuk-warning-text__text"><span class="govuk-visually-hidden">{% translate "Warning" %}</span>{% blocktranslate with who=i.agent.name|default:_("In-house marketing") d=i.expires_on|date:"j F Y" %}{{ who }}: the instruction ends on {{ d }}. Extend it, or end it.{% endblocktranslate %}</strong></div>{% endfor %}
+{% if instructions %}
+<div class="phaema-table-scroll"><table class="govuk-table"><caption class="govuk-visually-hidden">{% translate "Agents instructed" %}</caption>
+  <thead class="govuk-table__head"><tr class="govuk-table__row">
+    <th scope="col" class="govuk-table__header">{% translate "Agent" %}</th><th scope="col" class="govuk-table__header">{% translate "Instruction" %}</th>
+    <th scope="col" class="govuk-table__header">{% translate "Asking" %}</th><th scope="col" class="govuk-table__header">{% translate "Status" %}</th></tr></thead>
+  <tbody class="govuk-table__body">{% for i in instructions %}<tr class="govuk-table__row">
+    <td class="govuk-table__cell">{% if i.agent %}<a class="govuk-link" href="{{ i.agent.get_absolute_url }}">{{ i.agent.name }}</a>{% else %}{% translate "The council" %}{% endif %}</td>
+    <td class="govuk-table__cell">{{ i.get_basis_display }}<br><span class="govuk-body-s">{{ i.instructed_on|date:"j M Y" }}{% if i.expires_on %} {% translate "to" %} {{ i.expires_on|date:"j M Y" }}{% endif %}{% if i.fee_text %}<br>{% translate "Fee:" %} {{ i.fee_text }}{% endif %}{% if i.board %}<br>{% translate "Board up" %}{% endif %}</span></td>
+    <td class="govuk-table__cell">{% if i.asking_rent is not None %}£{{ i.asking_rent|floatformat:0|intcomma }} {% translate "a year" %}{% endif %}{% if i.asking_price is not None %}{% if i.asking_rent is not None %}<br>{% endif %}£{{ i.asking_price|floatformat:0|intcomma }}{% endif %}{% if i.terms %}<br><span class="govuk-body-s">{{ i.terms }}</span>{% endif %}</td>
+    <td class="govuk-table__cell">{{ i.get_status_display }}{% if i.ended_on %}<br><span class="govuk-body-s">{{ i.ended_on|date:"j M Y" }}</span>{% endif %}
+      {% if can_work and i.status == "active" %}<form method="post" class="govuk-!-margin-top-2">{% csrf_token %}<input type="hidden" name="action" value="end_instruction"><input type="hidden" name="instruction" value="{{ i.pk }}">
+        <select class="govuk-select govuk-!-width-full" name="status" aria-label="{% translate 'How it ended' %}"><option value="let">{% translate "Let or sold" %}</option><option value="withdrawn">{% translate "Withdrawn" %}</option><option value="expired">{% translate "Ended" %}</option></select>
+        <button class="govuk-button govuk-button--secondary govuk-!-margin-bottom-0 govuk-!-margin-top-1" data-module="govuk-button">{% translate "End instruction" %}</button></form>{% endif %}</td>
+  </tr>{% endfor %}</tbody></table></div>
+{% else %}<p class="govuk-body">{% translate "No agent instructed yet." %}</p>{% endif %}
+{% if can_work and case.is_open %}
+<details class="govuk-details" data-module="govuk-details"><summary class="govuk-details__summary"><span class="govuk-details__summary-text">{% translate "Instruct an agent" %}</span></summary><div class="govuk-details__text">
+<form method="post" novalidate>{% csrf_token %}<input type="hidden" name="action" value="save_instruction">
+  <div class="govuk-form-group"><label class="govuk-label govuk-label--s" for="basis">{% translate "Basis" %}</label><select class="govuk-select" id="basis" name="basis">{% for v, l in bases %}<option value="{{ v }}">{{ l }}</option>{% endfor %}</select></div>
+  <div class="govuk-form-group"><label class="govuk-label govuk-label--s" for="agent">{% translate "Agent" %}</label><select class="govuk-select" id="agent" name="agent"><option value="">{% translate "Choose…" %}</option>{% for a in agents %}<option value="{{ a.pk }}">{{ a.name }}</option>{% endfor %}</select></div>
+  <div class="govuk-form-group"><label class="govuk-label" for="new-agent">{% translate "Or a new agent's name" %}</label><input class="govuk-input govuk-input--width-20" id="new-agent" name="new_agent" maxlength="200"></div>
+  <div class="govuk-form-group"><label class="govuk-label govuk-label--s" for="instructed-on">{% translate "Instructed" %}</label><input class="govuk-input govuk-input--width-10" type="date" id="instructed-on" name="instructed_on" value="{{ today|date:'Y-m-d' }}"></div>
+  <div class="govuk-form-group"><label class="govuk-label govuk-label--s" for="expires-on">{% translate "Instruction ends" %}</label><div class="govuk-hint">{% translate "The end of any sole agency period. PHAEMA warns two weeks before." %}</div><input class="govuk-input govuk-input--width-10" type="date" id="expires-on" name="expires_on"></div>
+  <div class="govuk-form-group"><label class="govuk-label govuk-label--s" for="fee-pct">{% translate "Fee (% of the first year's rent or the price)" %}</label><input class="govuk-input govuk-input--width-4" id="fee-pct" name="fee_pct" inputmode="decimal"></div>
+  <div class="govuk-form-group"><label class="govuk-label govuk-label--s" for="fee-fixed">{% translate "Or a fixed fee (£)" %}</label><input class="govuk-input govuk-input--width-10" id="fee-fixed" name="fee_fixed" inputmode="decimal"></div>
+  <div class="govuk-form-group"><label class="govuk-label" for="fee-notes">{% translate "Fee terms" %}</label><input class="govuk-input" id="fee-notes" name="fee_notes" maxlength="255" placeholder="{% translate 'For example: plus VAT, on completion' %}"></div>
+  <div class="govuk-form-group"><label class="govuk-label govuk-label--s" for="asking-rent">{% translate "Asking rent a year (£)" %}</label><input class="govuk-input govuk-input--width-10" id="asking-rent" name="asking_rent" inputmode="decimal"></div>
+  <div class="govuk-form-group"><label class="govuk-label govuk-label--s" for="asking-price">{% translate "Asking price (£), if for sale" %}</label><input class="govuk-input govuk-input--width-10" id="asking-price" name="asking_price" inputmode="decimal"></div>
+  <div class="govuk-form-group"><label class="govuk-label" for="terms">{% translate "Terms offered" %}</label><input class="govuk-input" id="terms" name="terms" maxlength="255"></div>
+  <div class="govuk-checkboxes govuk-checkboxes--small govuk-!-margin-bottom-4"><div class="govuk-checkboxes__item"><input class="govuk-checkboxes__input" id="board" name="board" type="checkbox" value="1"><label class="govuk-label govuk-checkboxes__label" for="board">{% translate "Board up" %}</label></div></div>
+  <div class="govuk-form-group"><label class="govuk-label" for="instr-notes">{% translate "Notes" %}</label><textarea class="govuk-textarea" id="instr-notes" name="notes" rows="2"></textarea></div>
+  <button class="govuk-button" data-module="govuk-button">{% translate "Record the instruction" %}</button>
+</form></div></details>
+{% endif %}

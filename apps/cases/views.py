@@ -287,7 +287,8 @@ def _file_dropped(request, case, direction):
 
 ACTIONS_WORK = {"next_stage", "hold", "resume", "acknowledge", "complete_application", "decide", "close", "reopen",
                 "add_task", "task_done", "assign", "raise_fee", "links", "request_approval", "withdraw_approval",
-                "save_heads", "save_notice", "save_dilaps", "save_conflict", "save_proposal"}
+                "save_heads", "save_notice", "save_dilaps", "save_conflict", "save_proposal", "save_instruction",
+                "end_instruction"}
 ACTIONS_APPROVER = {"approve", "return", "reassign_approval"}
 ACTIONS_CONTRIBUTE = {"add_note", "add_correspondence", "add_document", "file_email", "file_dropped"}
 
@@ -338,6 +339,7 @@ def case_detail(request, pk):
         "has_checklist": case.case_type.checklist_items.exists(),
         **_approval_context(request.user, case),
         **_leasing_context(case),
+        **_marketing_context(case),
         **_challenge_context(case),
         **_standards_context(case),
     })
@@ -446,6 +448,12 @@ def _record_challenge_outcome(request, case, post):
         source=AssetStrategy.Source.CHALLENGE, case=case, recorded_by=request.user)
     case.proposed_strategy = case.proposed_strategy or option
     return True
+
+
+def _marketing_context(case):
+    from . import marketing
+
+    return marketing.context(case)
 
 
 def _leasing_context(case):
@@ -667,6 +675,18 @@ def _do(request, case, action):  # noqa: C901 - one branch per action keeps each
         case.conflict_by, case.conflict_on = request.user, date.today()
         case.save(update_fields=["conflict", "conflict_details", "conflict_by", "conflict_on", "updated_at"])
         messages.success(request, _("Conflict of interest declaration saved."))
+    elif action in ("save_instruction", "end_instruction"):
+        from . import marketing
+
+        try:
+            if action == "save_instruction":
+                marketing.save_instruction(case, post)
+                messages.success(request, _("Agent instruction recorded."))
+            else:
+                marketing.end_instruction(case, post)
+                messages.success(request, _("Instruction ended."))
+        except ValueError as err:
+            messages.error(request, str(err))
     elif action == "withdraw_approval":
         approval = workflow.pending_approval(case)
         if approval and approval.requested_by_id == request.user.pk:

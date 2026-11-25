@@ -88,6 +88,25 @@ Case, job and valuation pages show a **Before you visit** panel: site hazards re
 buildings it is part of, asbestos information, open compliance actions and whether it is a higher-risk building.
 This supports the RICS *Surveying safely* standard.
 
+## Marketing a vacant property
+
+Start a **Marketing a vacant property** case on the property. Its tasks run from confirming the property can be let,
+through the floor areas, EPC and asking terms, to instructing an agent, viewings and offers, and on to a new letting
+case for the heads of terms.
+
+Under **Marketing and agents** on the case, select **Instruct an agent** to record:
+
+- the agent (choose one, or type a new agent's name) and the basis: sole agency, joint sole agency, multiple agency,
+  sole letting rights, or marketed by the council itself;
+- when they were instructed and when any sole agency period ends (PHAEMA warns two weeks before);
+- the fee, as a percentage, a fixed amount or both, with the fee terms;
+- the asking rent or price, the terms offered, and whether a board is up.
+
+When the property is let or the instruction ends, select **End instruction** with how it ended. Two documents in the
+library are offered on marketing cases: **Instruction to a letting agent**, confirming the instruction, and
+**Marketing particulars**, filled in from the property (address, floor areas, use, date available) and the
+instruction (asking rent or price, terms, agent). Check every figure before anything is published.
+
 ## New lettings and renewals
 
 The **New letting** and **Lease renewal** case types follow the RICS *Code for leasing business premises*. Their

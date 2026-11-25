@@ -367,6 +367,76 @@ class CaseTask(models.Model):
         return self.description
 
 
+class AgentInstruction(TimeStampedModel):
+    """An agent instructed to market a vacant property, on a marketing case: the terms of the instruction, the fee and
+    the asking terms, from instruction to the end of it."""
+
+    class Basis(models.TextChoices):
+        SOLE = "sole", _("Sole agency")
+        JOINT = "joint", _("Joint sole agency")
+        MULTI = "multi", _("Multiple agency")
+        SOLE_RIGHTS = "sole_rights", _("Sole letting (or selling) rights")
+        IN_HOUSE = "in_house", _("Marketed by the council itself")
+
+    class Status(models.TextChoices):
+        ACTIVE = "active", _("Instructed")
+        LET = "let", _("Let or sold")
+        WITHDRAWN = "withdrawn", _("Withdrawn")
+        EXPIRED = "expired", _("Ended")
+
+    case = models.ForeignKey("Case", on_delete=models.CASCADE, related_name="instructions")
+    agent = models.ForeignKey(Party, verbose_name=_("agent"), null=True, blank=True, on_delete=models.PROTECT,
+                              related_name="instructions", help_text=_("Blank when the council markets it itself."))
+    basis = models.CharField(_("basis"), max_length=12, choices=Basis.choices, default=Basis.SOLE)
+    instructed_on = models.DateField(_("instructed"))
+    expires_on = models.DateField(_("instruction ends"), null=True, blank=True,
+                                  help_text=_("The end of any sole agency period."))
+    fee_pct = models.DecimalField(_("fee (% of first year's rent or price)"), max_digits=5, decimal_places=2,
+                                  null=True, blank=True)
+    fee_fixed = models.DecimalField(_("fixed fee (£)"), max_digits=10, decimal_places=2, null=True, blank=True)
+    fee_notes = models.CharField(_("fee terms"), max_length=255, blank=True,
+                                 help_text=_("For example: plus VAT, payable on completion, marketing costs capped."))
+    asking_rent = models.DecimalField(_("asking rent a year (£)"), max_digits=12, decimal_places=2, null=True,
+                                      blank=True)
+    asking_price = models.DecimalField(_("asking price (£)"), max_digits=14, decimal_places=2, null=True, blank=True)
+    terms = models.CharField(_("terms offered"), max_length=255, blank=True,
+                             help_text=_("For example: new full repairing lease, 5 years or more."))
+    board = models.BooleanField(_("board up"), default=False)
+    status = models.CharField(_("status"), max_length=10, choices=Status.choices, default=Status.ACTIVE)
+    ended_on = models.DateField(_("ended"), null=True, blank=True)
+    notes = models.TextField(_("notes"), blank=True)
+
+    class Meta:
+        ordering = ["case", "-instructed_on", "-pk"]
+        verbose_name = _("agent instruction")
+
+    def __str__(self):
+        who = self.agent.name if self.agent_id else _("in-house")
+        return f"{who}: {self.get_basis_display()} from {self.instructed_on:%d %b %Y}"
+
+    def get_absolute_url(self):
+        return self.case.get_absolute_url() + "#marketing"
+
+    def clean(self):
+        super().clean()
+        if self.basis != self.Basis.IN_HOUSE and not self.agent_id:
+            raise ValidationError({"agent": _("Choose the agent, or choose marketed by the council itself.")})
+
+    @property
+    def fee_text(self):
+        parts = []
+        if self.fee_pct is not None:
+            parts.append(f"{self.fee_pct.normalize():f}%")
+        if self.fee_fixed is not None:
+            parts.append(f"£{self.fee_fixed:,.2f}")
+        text = " or ".join(parts)
+        return f"{text} ({self.fee_notes})" if text and self.fee_notes else text or self.fee_notes
+
+    def expiring(self, today=None):
+        today = today or date.today()
+        return self.status == self.Status.ACTIVE and self.expires_on and self.expires_on <= today + timedelta(days=14)
+
+
 class CaseNote(TimeStampedModel):
     case = models.ForeignKey(Case, on_delete=models.CASCADE, related_name="notes")
     text = models.TextField(_("note"))

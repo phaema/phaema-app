@@ -1,0 +1,32 @@
+name: Instruction to a letting agent
+category: lettings
+source: case
+case_types: marketing
+description: Confirms an agent's instruction to market a vacant property: the basis, the fee and the asking terms. Record the instruction on the marketing case first.
+fields: viewing|Arrangements for viewings and keys|long| ; reporting|How often to report on interest and viewings| ; conditions|Other conditions|long,optional|
+---
+[[letter_start]]
+
+**{{ premises }}**
+**Instruction to market the property**
+
+Further to our discussions, the council instructs {{ agent_name }} to market the above property on the following terms.
+
+| Basis of instruction | {{ agent_basis }} |
+| Instruction ends | {% if instruction_ends %}{{ instruction_ends }}{% else %}[On notice from either side]{% endif %} |
+| Asking rent | {% if asking_rent %}{{ asking_rent }} a year, exclusive{% else %}[To be agreed]{% endif %} |{% if asking_price %}
+| Asking price | {{ asking_price }} |{% endif %}
+| Terms offered | {% if terms_offered %}{{ terms_offered }}{% else %}[Lease terms]{% endif %} |
+| Fee | {{ agent_fee }} |
+
+**Viewings and keys.** {{ viewing }}
+
+**Reporting.** Please report {{ reporting }} on enquiries, viewings and any offers, and send every offer to us in writing. The council is not bound to accept the highest or any offer, and any letting is subject to contract and to the council's approval.
+
+**Particulars and boards.** Please send us the draft particulars and any listing for approval before they are published. The floor areas are {% if property_nia %}{{ property_nia }} net internal{% else %}[floor areas]{% endif %}; please check them on site.
+
+{% if conditions %}{{ conditions }}
+
+{% endif %}Please confirm your acceptance of this instruction, with your terms of business, by return.
+
+[[signature]]
