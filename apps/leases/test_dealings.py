@@ -115,3 +115,11 @@ def test_headlease_and_underleases_show_on_both_agreements(lease, surveyor, clie
     client.force_login(surveyor)
     assert "Headlease" in client.get(lease.get_absolute_url()).content.decode()
     assert "Underleases" in client.get(head.get_absolute_url()).content.decode()
+
+
+def test_surveyors_can_add_dealings_in_manage_data(surveyor):
+    from apps.core.roles import ensure_roles
+
+    ensure_roles()
+    surveyor.refresh_from_db()
+    assert surveyor.has_perm("leases.add_dealing") and surveyor.has_perm("leases.change_dealing")

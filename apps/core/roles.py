@@ -39,6 +39,7 @@ SURVEYOR_PERMISSIONS = {
     "leases.add_leasedocument", "leases.change_leasedocument", "leases.delete_leasedocument",
     "leases.add_leaseevent", "leases.change_leaseevent",
     "leases.add_rentscheduleentry", "leases.change_rentscheduleentry", "leases.delete_rentscheduleentry",
+    "leases.add_dealing", "leases.change_dealing", "leases.delete_dealing",
     "cases.add_case", "cases.change_case",
     "maintenance.add_job", "maintenance.change_job", "maintenance.add_jobdocument",
     "maintenance.add_component", "maintenance.change_component",
