@@ -153,6 +153,7 @@ def test_credit_control_page_records_a_step(lease, surveyor, client, monkeypatch
     client.force_login(surveyor)
     page = client.get("/rents/credit-control/").content.decode()
     assert "L1" in page and "Reminder letter" in page
+    assert "/documents/arrears-reminder/create/" in page  # the stage finds its letter in the library
     stage = ChaseStage.objects.get(days_overdue=7)
     client.post("/rents/credit-control/", {"lease": lease.pk, "stage": stage.pk})
     assert ChaseAction.objects.filter(lease=lease, stage=stage).exists()

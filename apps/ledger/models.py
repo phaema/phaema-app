@@ -153,7 +153,7 @@ class ChaseStage(models.Model):
     action = models.CharField(_("action"), max_length=8, choices=Action.choices, default=Action.LETTER)
     template_code = models.SlugField(
         _("letter template"), max_length=60, blank=True,
-        help_text=_("The code of the letter in the document library, for example arrears_reminder."))
+        help_text=_("The code of the letter in the document library, for example arrears-reminder."))
     minimum_overdue = models.DecimalField(
         _("only if at least (£) is overdue"), max_digits=10, decimal_places=2, default=0,
         help_text=_("Small debts below this are left for the next stage or the next demand."))

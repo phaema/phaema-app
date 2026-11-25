@@ -84,7 +84,7 @@ class Migration(migrations.Migration):
                     "template_code",
                     models.SlugField(
                         blank=True,
-                        help_text="The code of the letter in the document library, for example arrears_reminder.",
+                        help_text="The code of the letter in the document library, for example arrears-reminder.",
                         max_length=60,
                         verbose_name="letter template",
                     ),

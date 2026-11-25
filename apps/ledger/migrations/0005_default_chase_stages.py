@@ -3,8 +3,8 @@
 from django.db import migrations
 
 STAGES = [
-    (1, "Reminder letter", 7, "letter", "arrears_reminder"),
-    (2, "Final notice", 21, "letter", "arrears_final"),
+    (1, "Reminder letter", 7, "letter", "arrears-reminder"),
+    (2, "Final notice", 21, "letter", "arrears-final"),
     (3, "Rent arrears recovery case", 35, "case", ""),
     (4, "Review: payment plan, debt collectors or legal", 60, "review", ""),
 ]
