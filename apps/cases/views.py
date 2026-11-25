@@ -562,9 +562,15 @@ def _do(request, case, action):  # noqa: C901 - one branch per action keeps each
             case.stage = Stage.DECISION
         case.save(update_fields=["decision", "reasons", "decision_on", "stage", "decided_by", "meeting_on",
                                  "minute_reference", "proposed_strategy", "updated_at"])
+        from apps.leases import dealings
+
+        dealing = dealings.from_case(case)
         if case.case_type.asset_challenge and case.strategies.exists():
             messages.success(request, _("Decision recorded. The asset strategy is now on the property, with the "
                                         "next review date."))
+        elif dealing is not None and dealing.status == dealing.Status.CONSENTED:
+            messages.success(request, _("Decision recorded. The dealing on the agreement is marked as consented: "
+                                        "record its completion there when the deed is completed."))
         else:
             messages.success(request, _("Decision recorded."))
     elif action == "close":

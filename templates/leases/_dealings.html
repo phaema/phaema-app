@@ -1,0 +1,30 @@
+{% load i18n humanize phaema_roles %}
+{% if dealings or user|can_edit:object %}
+<h2 class="govuk-heading-m" id="dealings">{% translate "Dealings" %}</h2>
+{% if tenant_history %}
+<h3 class="govuk-heading-s">{% translate "Who has held this agreement" %}</h3>
+<ul class="govuk-list">{% for party, start, end, aga in tenant_history %}<li><a class="govuk-link" href="{{ party.get_absolute_url }}">{{ party.name }}</a> <span class="govuk-body-s">{{ start|date:"j M Y" }} {% translate "to" %} {% if end %}{{ end|date:"j M Y" }}{% else %}{% translate "now" %}{% endif %}{% if aga %} · {% translate "gave an AGA" %}{% endif %}</span></li>{% endfor %}</ul>
+{% endif %}
+{% if dealings %}
+<div class="phaema-table-scroll"><table class="govuk-table"><caption class="govuk-visually-hidden">{% translate "Dealings with this agreement" %}</caption>
+  <thead class="govuk-table__head"><tr class="govuk-table__row">
+    <th scope="col" class="govuk-table__header">{% translate "Dealing" %}</th>
+    <th scope="col" class="govuk-table__header">{% translate "With" %}</th>
+    <th scope="col" class="govuk-table__header">{% translate "Status" %}</th>
+    <th scope="col" class="govuk-table__header">{% translate "Case and licence" %}</th></tr></thead>
+  <tbody class="govuk-table__body">{% for d in dealings %}<tr class="govuk-table__row">
+    <td class="govuk-table__cell">{{ d.get_kind_display }}{% if d.premises %}<br><span class="govuk-body-s">{{ d.premises }}</span>{% endif %}{% if d.kind == "underlease" and d.term_start %}<br><span class="govuk-body-s">{{ d.term_start|date:"j M Y" }}{% if d.term_end %} {% translate "to" %} {{ d.term_end|date:"j M Y" }}{% endif %}{% if d.annual_rent is not None %}, £{{ d.annual_rent|floatformat:0|intcomma }} {% translate "a year" %}{% endif %}</span>{% endif %}</td>
+    <td class="govuk-table__cell">{% if d.to_party %}<a class="govuk-link" href="{{ d.to_party.get_absolute_url }}">{{ d.to_party.name }}</a>{% else %}–{% endif %}{% if d.guarantor %}<br><span class="govuk-body-s">{% translate "Guarantor:" %} {{ d.guarantor.name }}</span>{% endif %}{% if d.underlease %}<br><a class="govuk-link govuk-body-s" href="{{ d.underlease.get_absolute_url }}">{{ d.underlease.reference }}</a>{% endif %}</td>
+    <td class="govuk-table__cell">{{ d.get_status_display }}{% if d.completed_on %}<br><span class="govuk-body-s">{{ d.completed_on|date:"j M Y" }}</span>{% elif d.consent_on %}<br><span class="govuk-body-s">{% translate "consent" %} {{ d.consent_on|date:"j M Y" }}</span>{% endif %}</td>
+    <td class="govuk-table__cell">{% if d.case %}<a class="govuk-link" href="{{ d.case.get_absolute_url }}">{{ d.case.display_reference }}</a>{% endif %}{% if d.licence %}<br><a class="govuk-link govuk-body-s" href="{{ d.licence.file.url }}" target="_blank" rel="noopener">{{ d.licence.description|default:d.licence.get_document_type_display }}</a>{% endif %}
+      {% if d.is_open and user|can_edit:object %}
+      <form method="post" action="{% url 'leases:dealing-complete' d.pk %}" class="govuk-!-margin-top-2" novalidate>{% csrf_token %}
+        <label class="govuk-label govuk-body-s" for="done-{{ d.pk }}">{% translate "Completed on" %}</label>
+        <input class="govuk-input govuk-input--width-10" id="done-{{ d.pk }}" name="completed_on" type="date" value="{{ today|date:'Y-m-d' }}">
+        <button class="govuk-button govuk-button--secondary govuk-!-margin-bottom-0" data-module="govuk-button">{% if d.kind == "assignment" %}{% translate "Record the assignment" %}{% else %}{% translate "Record completion" %}{% endif %}</button>
+      </form>{% endif %}</td>
+  </tr>{% endfor %}</tbody></table></div>
+{% if rent_owed %}<div class="govuk-warning-text"><span class="govuk-warning-text__icon" aria-hidden="true">!</span><strong class="govuk-warning-text__text"><span class="govuk-visually-hidden">{% translate "Warning" %}</span>{% blocktranslate with owed=rent_owed|floatformat:2|intcomma %}£{{ owed }} is owed on the rent account. Arrears stay with the agreement, so they would show on the new tenant's account after the assignment: settle them first.{% endblocktranslate %}</strong></div>{% endif %}
+{% else %}<p class="govuk-body-s">{% translate "No assignments, underleases or other dealings recorded." %}</p>{% endif %}
+{% if user|can_edit:object %}<p class="govuk-body-s"><a class="govuk-link" href="{% url 'admin:leases_lease_change' object.pk %}#dealings-group">{% translate "Add or change dealings" %}</a> · <a class="govuk-link" href="{% url 'cases:new' %}?lease={{ object.pk }}&amp;type=assignment">{% translate "Start a consent to assign case" %}</a></p>{% endif %}
+{% endif %}

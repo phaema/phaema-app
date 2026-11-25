@@ -8,7 +8,7 @@ from django.utils.html import format_html, format_html_join
 from apps.core.admin_roles import RoleAdminMixin, RoleInlineMixin
 from apps.core.roles import is_administrator
 
-from .models import (BreakOption, IndexFigure, IndexSeries, Lease, LeaseDocument, LeaseEvent, LeaseOption, Party,
+from .models import (BreakOption, Dealing, IndexFigure, IndexSeries, Lease, LeaseDocument, LeaseEvent, LeaseOption, Party,
                      RentScheduleEntry)
 
 
@@ -30,6 +30,26 @@ class RentScheduleInline(RoleInlineMixin, admin.TabularInline):
     verbose_name_plural = "Rent schedule (the current rent is taken from here)"
 
 
+class DealingInline(RoleInlineMixin, admin.StackedInline):
+    model = Dealing
+    fk_name = "lease"
+    extra = 0
+    autocomplete_fields = ("to_party", "guarantor", "underlease")
+    fields = (("kind", "status"), "to_party", "guarantor", "aga", "premises", ("consent_on", "completed_on"),
+              ("term_start", "term_end", "annual_rent"), "underlease", "case", "licence", "notes")
+    raw_id_fields = ("case",)
+    verbose_name_plural = "Dealings (assignments, underleases, sharing and charges)"
+
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        if db_field.name == "licence":
+            lease_id = request.resolver_match.kwargs.get("object_id") if request.resolver_match else None
+            from .models import LeaseDocument
+
+            kwargs["queryset"] = LeaseDocument.objects.filter(lease_id=lease_id) if lease_id else \
+                LeaseDocument.objects.none()
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
+
+
 class DocumentInline(RoleInlineMixin, admin.TabularInline):
     model = LeaseDocument
     extra = 1
@@ -43,12 +63,13 @@ class LeaseAdmin(RoleAdminMixin, admin.ModelAdmin):
     list_filter = ("direction", "agreement_type", "status", "security_of_tenure", "review_basis", "time_of_essence",
                    "demands_on_hold", "arrears_referral")
     search_fields = ("reference", "counterparty__name", "properties__reference", "properties__name")
-    autocomplete_fields = ("counterparty", "guarantor", "properties")
+    autocomplete_fields = ("counterparty", "guarantor", "properties", "headlease")
     date_hierarchy = "term_end"
-    inlines = [BreakInline, OptionInline, RentScheduleInline, DocumentInline]
+    inlines = [BreakInline, OptionInline, RentScheduleInline, DocumentInline, DealingInline]
     fieldsets = (
         (None, {"fields": ("reference", "direction", "agreement_type", "status")}),
-        ("Premises and parties", {"fields": ("properties", "premises_description", "counterparty", "guarantor")}),
+        ("Premises and parties", {"fields": ("properties", "premises_description", "counterparty", "guarantor",
+                                             "headlease")}),
         ("Term", {"fields": ("lease_date", "term_start", "term_end", "actual_end", "security_of_tenure")}),
         ("Rent", {"fields": ("annual_rent", "rent_frequency", "vat_chargeable", "rates_excluded", "rent_free_until", "incentives",
                              "deposit", "deposit_held", "deposit_interest")}),
@@ -68,8 +89,9 @@ class LeaseAdmin(RoleAdminMixin, admin.ModelAdmin):
             "fields": ("billing_contact_name", "billing_email", "billing_phone", "billing_address"),
             "description": "Who rent demands go to. Leave blank to use the tenant's main contact; fill in only "
                            "the details that differ."}),
-        ("Terms", {"fields": ("repairing", "insurance", "service_charge_payable", "permitted_use", "alienation",
-                              "alterations", "special_rights")}),
+        ("Terms", {"fields": ("repairing", "insurance", "service_charge_payable", "permitted_use",
+                              ("assignment_terms", "underletting_terms"), "dealings_with_part", "aga_on_assignment",
+                              "alienation", "alterations", "special_rights")}),
         ("Notes", {"fields": ("notes",)}),
     )
 
@@ -139,7 +161,8 @@ class PartyAdmin(RoleAdminMixin, admin.ModelAdmin):
              r["lease"].term_start.strftime("%d %b %Y"),
              r["lease"].term_end.strftime("%d %b %Y") if r["lease"].term_end else "periodic",
              f"{r['lease'].annual_rent:,.0f}", premises(r["properties"])) for r in rows))
-        current = [r for r in rows if r["lease"].status in ("current", "holding_over") and str(r["role"]) != "Guarantor"]
+        current = [r for r in rows if r["lease"].status in ("current", "holding_over")
+                   and not str(r["role"]).startswith(("Guarantor", "Former"))]
         total = sum(r["lease"].annual_rent for r in current)
         return format_html(
             "<table><thead><tr><th>Role</th><th>Agreement</th><th>Type</th><th>Status</th><th>Term</th>"

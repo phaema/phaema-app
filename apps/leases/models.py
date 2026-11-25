@@ -67,6 +67,15 @@ class Party(TimeStampedModel):
             else:
                 role = _("Tenant") if lease.agreement_type != Lease.AgreementType.LICENCE else _("Licensee")
             rows.append({"lease": lease, "role": role, "properties": list(lease.properties.all())})
+        seen = {row["lease"].pk for row in rows}
+        for dealing in (Dealing.objects.filter(from_party=self, kind=Dealing.Kind.ASSIGNMENT,
+                                               status=Dealing.Status.COMPLETED)
+                        .select_related("lease", "lease__counterparty").prefetch_related("lease__properties")):
+            if dealing.lease_id in seen:
+                continue
+            seen.add(dealing.lease_id)
+            role = _("Former tenant (guarantor under an AGA)") if dealing.aga else _("Former tenant")
+            rows.append({"lease": dealing.lease, "role": role, "properties": list(dealing.lease.properties.all())})
         return rows
 
     def properties_involved(self):
@@ -184,6 +193,11 @@ class Lease(TimeStampedModel):
         LANDLORD = "landlord", _("Landlord insures, not recharged")
         TENANT = "tenant", _("Tenant insures")
 
+    class AlienationTerms(models.TextChoices):
+        CONSENT = "consent", _("Allowed with consent (not to be unreasonably withheld)")
+        ABSOLUTE = "absolute", _("Not allowed (absolute bar)")
+        FREE = "free", _("Allowed without consent")
+
     class ArrearsReferral(models.TextChoices):
         DEBT_COLLECTORS = "debt", _("External debt collectors")
         LEGAL = "legal", _("Legal")
@@ -297,6 +311,19 @@ class Lease(TimeStampedModel):
     service_charge_payable = models.BooleanField(_("service charge payable"), default=False)
     permitted_use = models.CharField(_("permitted use"), max_length=255, blank=True)
     alienation = models.TextField(_("assignment and subletting"), blank=True)
+    assignment_terms = models.CharField(_("assignment"), max_length=10, choices=AlienationTerms.choices, blank=True)
+    underletting_terms = models.CharField(_("underletting"), max_length=10, choices=AlienationTerms.choices,
+                                          blank=True)
+    dealings_with_part = models.BooleanField(_("dealings with part allowed"), default=False,
+                                             help_text=_("Tick if part of the premises may be assigned or underlet."))
+    aga_on_assignment = models.BooleanField(
+        _("guarantee by the outgoing tenant (AGA) on assignment"), default=False,
+        help_text=_("Tick if the lease lets the landlord require an authorised guarantee agreement."))
+    headlease = models.ForeignKey(
+        "self", verbose_name=_("headlease"), null=True, blank=True, on_delete=models.SET_NULL,
+        related_name="underleases",
+        help_text=_("For an underlease: the superior lease it is granted out of, where PHAEMA holds it (for example "
+                    "the lease the council holds, for property it lets on)."))
     alterations = models.TextField(_("alterations and reinstatement"), blank=True)
     special_rights = models.TextField(_("special rights"), blank=True,
                                       help_text=_("For example parking spaces, rights of way, telecoms access."))
@@ -397,6 +424,90 @@ class Lease(TimeStampedModel):
         if self.term_end:
             dates.append((self.term_end, _("Contractual expiry"), "expiry"))
         return sorted(dates, key=lambda d: d[0])
+
+
+class Dealing(TimeStampedModel):
+    """A dealing with an agreement: an assignment, underlease, charge or sharing arrangement, from the application to
+    completion. A completed assignment changes the tenant on the agreement; the former tenant stays in the history."""
+
+    class Kind(models.TextChoices):
+        ASSIGNMENT = "assignment", _("Assignment")
+        UNDERLEASE = "underlease", _("Underlease")
+        SHARING = "sharing", _("Sharing occupation")
+        CHARGE = "charge", _("Charge or mortgage")
+        CHANGE_OF_CONTROL = "control", _("Change of control of the tenant")
+        OTHER = "other", _("Other")
+
+    class Status(models.TextChoices):
+        PROPOSED = "proposed", _("Applied for")
+        CONSENTED = "consented", _("Consent given")
+        COMPLETED = "completed", _("Completed")
+        REFUSED = "refused", _("Refused")
+        WITHDRAWN = "withdrawn", _("Withdrawn")
+        ENDED = "ended", _("Ended")
+
+    lease = models.ForeignKey(Lease, on_delete=models.CASCADE, related_name="dealings", verbose_name=_("agreement"))
+    kind = models.CharField(_("dealing"), max_length=12, choices=Kind.choices)
+    status = models.CharField(_("status"), max_length=10, choices=Status.choices, default=Status.PROPOSED)
+    from_party = models.ForeignKey(
+        Party, verbose_name=_("tenant (assignor or underlandlord)"), null=True, blank=True, on_delete=models.PROTECT,
+        related_name="dealings_from", help_text=_("Filled in from the agreement when left blank."))
+    to_party = models.ForeignKey(
+        Party, verbose_name=_("assignee, undertenant or chargee"), null=True, blank=True, on_delete=models.PROTECT,
+        related_name="dealings_to")
+    guarantor = models.ForeignKey(
+        Party, verbose_name=_("guarantor for the new tenant"), null=True, blank=True, on_delete=models.PROTECT,
+        related_name="dealing_guarantees")
+    aga = models.BooleanField(
+        _("outgoing tenant gave an AGA"), default=False,
+        help_text=_("The former tenant guarantees the new tenant under an authorised guarantee agreement, so stays "
+                    "liable until the next assignment."))
+    premises = models.CharField(_("premises"), max_length=255, blank=True,
+                                help_text=_("Leave blank for the whole; describe the part otherwise."))
+    consent_on = models.DateField(_("consent given"), null=True, blank=True)
+    completed_on = models.DateField(_("completed"), null=True, blank=True)
+    term_start = models.DateField(_("underlease from"), null=True, blank=True)
+    term_end = models.DateField(_("underlease to"), null=True, blank=True)
+    annual_rent = models.DecimalField(_("underlease rent a year (£)"), max_digits=12, decimal_places=2, null=True,
+                                      blank=True, validators=[MinValueValidator(0)])
+    underlease = models.ForeignKey(
+        Lease, verbose_name=_("underlease record"), null=True, blank=True, on_delete=models.SET_NULL,
+        related_name="dealing_records", help_text=_("Where the underlease is also an agreement in PHAEMA."))
+    case = models.ForeignKey("cases.Case", verbose_name=_("consent case"), null=True, blank=True,
+                             on_delete=models.SET_NULL, related_name="dealings")
+    licence = models.ForeignKey("LeaseDocument", verbose_name=_("licence or deed"), null=True, blank=True,
+                                on_delete=models.SET_NULL, related_name="dealings")
+    notes = models.TextField(_("notes"), blank=True)
+
+    class Meta:
+        ordering = ["lease", "-completed_on", "-created_at"]
+        verbose_name = _("dealing")
+        verbose_name_plural = _("dealings")
+
+    def __str__(self):
+        who = f" to {self.to_party}" if self.to_party_id else ""
+        return f"{self.get_kind_display()}{who} ({self.get_status_display().lower()})"
+
+    def get_absolute_url(self):
+        return self.lease.get_absolute_url() + "#dealings"
+
+    def clean(self):
+        super().clean()
+        if self.status == self.Status.COMPLETED and not self.to_party_id and self.kind != self.Kind.CHANGE_OF_CONTROL:
+            raise ValidationError({"to_party": _("Say who the dealing is with before recording it as completed.")})
+        if self.term_start and self.term_end and self.term_end < self.term_start:
+            raise ValidationError({"term_end": _("The underlease must end after it starts.")})
+        if self.underlease_id and self.underlease_id == self.lease_id:
+            raise ValidationError({"underlease": _("An agreement cannot be its own underlease.")})
+
+    def save(self, *args, **kwargs):
+        if not self.from_party_id and self.lease_id:
+            self.from_party_id = self.lease.counterparty_id
+        super().save(*args, **kwargs)
+
+    @property
+    def is_open(self):
+        return self.status in (self.Status.PROPOSED, self.Status.CONSENTED)
 
 
 class BreakOption(TimeStampedModel):

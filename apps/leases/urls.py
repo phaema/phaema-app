@@ -18,6 +18,7 @@ urlpatterns = [
     path("calendar/", event_views.calendar_settings, name="calendar"),
     path("parties/", views.PartyListView.as_view(), name="parties"),
     path("rents-payable/", views.rents_payable, name="payable"),
+    path("dealings/<int:pk>/complete/", views.dealing_complete, name="dealing-complete"),
     path("index-figures/", index_views.index_figures, name="index-figures"),
     path("parties/<int:pk>/", views.PartyDetailView.as_view(), name="party"),
 ]
