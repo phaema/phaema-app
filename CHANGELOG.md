@@ -51,6 +51,10 @@ Everything since 0.9.0 (10 to 26 November 2026).
 - Property portfolios (#46); lease management additions: dashboard flags, ERV, documents for review, demands on
   hold (#47).
 
+### Changed
+- Minimum versions raised to those PHAEMA is tested with: Django REST framework 3.18.3, drf-spectacular
+  0.30.0, python-docx 1.2.0 and pytest-django 4.14.0 (#107). Django stays on 5.2, the long-term support release.
+
 ### Fixed
 - The API description at `/api/schema/` builds without warnings: both sign-in methods are described, shared choice
   lists have one name, and break notice dates are typed; a test keeps it that way (#104).
