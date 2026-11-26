@@ -210,6 +210,7 @@ ROADMAP = [
         "Content Security Policy and a change log the database cannot alter",
         "A procurement and information governance pack for councils' assessments",
         "Scoped API tokens for other systems, with password sign-in to the API off",
+        "Letter templates in a limited language that cannot print other data or read files",
     ]),
     ("now", "Now: testing", [
         "A major test programme run by council staff",
