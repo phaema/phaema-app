@@ -91,10 +91,12 @@ These are known gaps, listed so councils can judge the risk. They are on the [ro
 - **API tokens** with limited scope, for systems that read PHAEMA's API.
 - **Automated dependency and code scanning** on every pull request.
 - **Independent accessibility audit** against WCAG 2.2 AA.
-- **Template documents for councils**: a data protection impact assessment (DPIA), a record of processing, and
-  answers to common security questionnaires.
 
 ## For councils assessing PHAEMA
+
+The [procurement and information governance pack](docs/procurement/README.md) has a one-page service definition,
+security questionnaire answers, and templates for the accessibility statement, DPIA, record of processing and
+retention schedule.
 
 The [technical manual](https://phaema.co.uk/docs/technical-manual.html) describes the architecture, data model,
 hosting and security in more detail. To arrange a security review or pilot, email stuart@phaema.co.uk.

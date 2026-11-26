@@ -53,7 +53,7 @@ PHAEMA helps a council's estates team manage its land and property: the property
 - Optional modules that each council switches on or off (rent ledger, service charges, maintenance, compliance, Golden Thread)
 - An open REST API with OpenAPI documentation at `/api/docs/`
 
-See the [roadmap](docs/roadmap.md) for what is coming next.
+See the [roadmap](docs/roadmap.md) for what is coming next. Councils assessing PHAEMA: the [procurement and information governance pack](docs/procurement/README.md) has a service definition, security answers and templates for the accessibility statement, DPIA, record of processing and retention schedule.
 
 ## Contact
 

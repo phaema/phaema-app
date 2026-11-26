@@ -37,7 +37,8 @@ What councils' procurement and IT security teams will ask for before the first l
 
 - **Done:** two-step sign-in (authenticator app, recovery codes, required for administrators by default); security policy and reporting route; limits on repeated wrong passwords; dependency and code scanning on every pull request.
 - **Next:** independent penetration test (CREST or CHECK); scoped API tokens; database-level protection of the audit trail; numbered releases with release notes.
-- **With pilot councils:** independent WCAG 2.2 AA accessibility audit; DPIA and record-of-processing templates; answers to common security questionnaires; published case studies.
+- **Done:** a [procurement and information governance pack](procurement/README.md): service definition, security answers, and templates for the accessibility statement, DPIA, record of processing and retention schedule.
+- **With pilot councils:** independent WCAG 2.2 AA accessibility audit; a retention tool that lists and removes records past their date; published case studies.
 
 ### Connectors: an optional module
 
