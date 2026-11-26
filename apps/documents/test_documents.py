@@ -119,3 +119,47 @@ def test_permissions_and_safety(client, make_user, setup):
     broken = DocumentTemplate(code="broken", name="Broken", body="{% if %}")
     with pytest.raises(ValidationError):
         broken.full_clean()
+
+
+def test_letter_language_is_limited(setup):
+    """Only {% if %}, {% for %}, {% comment %} and formatting filters: nothing that prints other data or files."""
+    from django.template import TemplateSyntaxError
+
+    for body in ("{% debug %}", "{% load static %}", "{% include 'base.html' %}", "{% now 'Y' %}",
+                 "{% templatetag openblock %}", "{{ tenant_name|pprint }}", "{% filter upper %}x{% endfilter %}"):
+        with pytest.raises(TemplateSyntaxError):
+            render.check(body)
+    render.check("{% if a %}{{ a|upper|default:'none' }}{% endif %}{% for x in y %}{{ x }}{% endfor %}"
+                 "{% comment %}note{% endcomment %}{{ d|date:'j F Y' }}")
+
+
+def test_template_that_bypassed_the_form_does_not_run(setup):
+    template = DocumentTemplate(code="sneaky", name="Sneaky", body="Dear {{ tenant_name }} {% debug %}")
+    text = render.fill(template, {"tenant_name": "Ann"})
+    assert text.startswith("[This template cannot be used")
+    assert "Ann" not in text
+
+
+def test_merge_values_are_plain(setup):
+    class Record:
+        secret = "hidden"
+
+        def __str__(self):
+            return "Record"
+
+    template = DocumentTemplate(code="t", name="T", body="{{ thing }} {{ thing.secret }}")
+    assert render.fill(template, {"thing": Record()}).strip() == "Record"
+
+
+def test_check_command_lists_templates_to_correct(setup):
+    from io import StringIO
+
+    from django.core.management import CommandError, call_command
+
+    out = StringIO()
+    call_command("check_document_templates", stdout=out)
+    assert "Every document template is fine." in out.getvalue()
+    DocumentTemplate.objects.create(code="old", name="Old letter", body="{% now 'Y' %}")
+    with pytest.raises(CommandError):
+        call_command("check_document_templates", stdout=out)
+    assert "Old letter (old)" in out.getvalue()

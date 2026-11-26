@@ -82,6 +82,11 @@ In the text:
 | `[[signature]]` | The signature block, with the author's name and job title |
 | `---` | A new page |
 | `{% if guarantor_name %} ... {% endif %}` | Text that only appears when there is a value |
+| `{{ agreement_type\|capfirst }}`, `{{ department\|default:council_name }}` | A field changed on the way in. Filters letters can use: `add`, `capfirst`, `cut`, `date`, `default`, `default_if_none`, `first`, `floatformat`, `join`, `last`, `length`, `linebreaks`, `lower`, `pluralize`, `slice`, `title`, `truncatewords`, `upper`, `wordwrap`, `yesno` |
+
+Templates can use `{% if %}`, `{% for %}` and `{% comment %}`, and no other tags. Anything else, such as
+`{% load %}` or `{% debug %}`, is refused when the template is saved, so a letter cannot print data it was not
+meant to or read other files.
 
 **Questions to ask** are extra details the person creating the document is asked for, such as
 `{"key": "conditions", "label": "Conditions", "long": true}`. Use them in the text as `{{ conditions }}`.

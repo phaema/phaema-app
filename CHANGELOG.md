@@ -17,6 +17,9 @@ Everything since 0.9.0 (10 to 26 November 2026).
   browser console.
 - The new database trigger means a retention purge of the change log needs `SET LOCAL phaema.audit_purge = 'on'`
   in the same transaction (technical manual, Audit trail).
+- Letter templates may now use only `{% if %}`, `{% for %}`, `{% comment %}` and the formatting filters listed in
+  Help, Documents. Run `python manage.py check_document_templates` to list any template your council changed that
+  uses something else; until it is corrected, its letters show a message instead of the text.
 - Signing in to the API with a username and password is now off. Give each script or system an API token
   (Manage data, API tokens), or set `PHAEMA_API_PASSWORD_SIGN_IN=True` while you move them over.
 
@@ -49,9 +52,14 @@ Everything since 0.9.0 (10 to 26 November 2026).
   hold (#47).
 
 ### Fixed
+- The API description at `/api/schema/` builds without warnings: both sign-in methods are described, shared choice
+  lists have one name, and break notice dates are typed; a test keeps it that way (#104).
 - Credit notes allocated to the right charges, and service charge credits (#78).
 
 ### Security
+- Letter templates run in a reduced template language: tags such as `{% debug %}`, `{% load %}` and `{% include %}`
+  and the `pprint` filter are not available, and merge data is plain text, so a template cannot print other data
+  or read files (#104).
 - Changes made through the API are now named in the change log under the account that made them, with how they
   arrived (an API token or a password); before, they showed as made by the system (#103).
 - Content-Security-Policy and Permissions-Policy headers on every page; report-only mode and extra map tile

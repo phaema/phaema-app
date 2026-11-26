@@ -87,5 +87,14 @@ try:  # describe the token in the API documentation (/api/docs/)
         def get_security_definition(self, auto_schema):
             return {"type": "http", "scheme": "bearer",
                     "description": "An API token made by an administrator in Manage data, API tokens."}
+
+    class PasswordScheme(OpenApiAuthenticationExtension):
+        target_class = "apps.core.api_auth.PasswordOnlyBasicAuthentication"
+        name = "password"
+
+        def get_security_definition(self, auto_schema):
+            return {"type": "http", "scheme": "basic",
+                    "description": "Username and password. Refused unless the server sets "
+                                   "PHAEMA_API_PASSWORD_SIGN_IN, and never for accounts with two-step sign-in."}
 except ImportError:  # pragma: no cover
     pass

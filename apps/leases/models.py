@@ -622,7 +622,7 @@ class BreakOption(TimeStampedModel):
         return self.lease.get_absolute_url()
 
     @property
-    def notice_deadline(self):
+    def notice_deadline(self) -> date | None:
         if not self.notice_months:
             return None
         year, month = self.break_date.year, self.break_date.month - self.notice_months
