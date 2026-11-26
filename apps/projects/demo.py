@@ -6,8 +6,18 @@ from decimal import Decimal
 from django.contrib.auth import get_user_model
 
 from . import workflow
-from .models import (BudgetLine, BudgetYear, Milestone, Project, ProjectMember, ProjectParty, ProjectProperty,
-                     ProjectType, Risk, financial_year_of)
+from .models import (
+    BudgetLine,
+    BudgetYear,
+    Milestone,
+    Project,
+    ProjectMember,
+    ProjectParty,
+    ProjectProperty,
+    ProjectType,
+    Risk,
+    financial_year_of,
+)
 
 NAMES = ("Northfield Business Park phase 2", "Depot site acquisition, Mill Lane",
          "Disposal of surplus land at Oak Street and Lower Farm")

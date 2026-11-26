@@ -6,14 +6,14 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Count, DecimalField, Exists, IntegerField, OuterRef, Q, Subquery, Sum, Value
 from django.db.models.functions import Coalesce
-from django.utils.translation import gettext_lazy as _
 from django.http import HttpResponse
 from django.shortcuts import render
+from django.utils.translation import gettext_lazy as _
 from django.views.decorators.http import require_POST
 from django.views.generic import DetailView, ListView
 
-from apps.core.tables import sortable
 from apps.core import places
+from apps.core.tables import sortable
 from apps.reports.mixins import ExportMixin
 
 from . import events

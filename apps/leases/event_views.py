@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 """Lease events: the list, each event's page with its action, the calendar feed and rent schedule changes."""
-from datetime import date, datetime, timedelta, timezone as dt_timezone
+from datetime import date, datetime, timedelta
+from datetime import timezone as dt_timezone
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required

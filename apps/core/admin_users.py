@@ -7,8 +7,9 @@ from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.forms import UserChangeForm, UserCreationForm
 from django.contrib.auth.models import Group
 
-from .roles import ROLES
 from apps.core.models import AccessArea, StaffProfile, supervisor_of
+
+from .roles import ROLES
 
 AREAS_HELP = ("Which optional modules this person can open. Everyone with a role can use properties, leases, events, "
               "cases and documents. The role still decides what they can change.")

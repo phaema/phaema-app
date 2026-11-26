@@ -27,8 +27,16 @@ DATE_MODES = [("", "Any date"), ("next", "In the next … days"), ("last", "In t
 def report_list(request):
     from apps.core.models import ModuleSettings
 
-    from .starter import (CATEGORIES, COMPLIANCE_CATEGORY, LEDGER_CATEGORY, MAINTENANCE_CATEGORY, SERVICE_CATEGORY,
-                          STARTERS, VALUATION_CATEGORY, category)
+    from .starter import (
+        CATEGORIES,
+        COMPLIANCE_CATEGORY,
+        LEDGER_CATEGORY,
+        MAINTENANCE_CATEGORY,
+        SERVICE_CATEGORY,
+        STARTERS,
+        VALUATION_CATEGORY,
+        category,
+    )
 
     visible = Report.objects.filter(Q(shared=True) | ~Q(starter="") | Q(owner=request.user))
     order = {s["starter"]: i for i, s in enumerate(STARTERS)}

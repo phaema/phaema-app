@@ -23,8 +23,6 @@ from dataclasses import dataclass, field
 from datetime import date, timedelta
 from decimal import Decimal
 
-from apps.core.dates import add_months
-
 from .models import Lease
 from .workflow import PERIODS, payment_dates, rent_on
 

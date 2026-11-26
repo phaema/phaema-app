@@ -10,8 +10,8 @@ from django.db.models import Max
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 
-from apps.core.dates import add_months, add_working_days
 from apps.cases.models import validate_case_file
+from apps.core.dates import add_months, add_working_days
 from apps.core.models import TimeStampedModel
 from apps.leases.models import Lease
 from apps.properties.models import Property

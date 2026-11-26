@@ -8,8 +8,19 @@ from django.utils.html import format_html, format_html_join
 from apps.core.admin_roles import RoleAdminMixin, RoleInlineMixin
 from apps.core.roles import is_administrator
 
-from .models import (BreakOption, Dealing, DepositEntry, IndexFigure, IndexSeries, Lease, LeaseDocument, LeaseEvent, LeaseOption, Party,
-                     RentScheduleEntry)
+from .models import (
+    BreakOption,
+    Dealing,
+    DepositEntry,
+    IndexFigure,
+    IndexSeries,
+    Lease,
+    LeaseDocument,
+    LeaseEvent,
+    LeaseOption,
+    Party,
+    RentScheduleEntry,
+)
 
 
 class BreakInline(RoleInlineMixin, admin.TabularInline):

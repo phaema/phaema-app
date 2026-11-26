@@ -1,0 +1,26 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# Ruff checks the Python code on every pull request (see .github/workflows/tests.yml).
+line-length = 120
+target-version = "py312"
+extend-exclude = ["*/migrations/*", "staticfiles", "website/docs"]
+
+[lint]
+# pycodestyle, Pyflakes, import order, likely bugs (bugbear) and security checks (Bandit rules).
+select = ["E", "F", "W", "I", "B", "S"]
+ignore = [
+    "E501",  # long lines: much of PHAEMA's text is user-facing sentences kept whole for translation
+    "B904",  # raise ... from err inside except (to review gradually)
+    "B905",  # zip() without strict=
+]
+
+[lint.per-file-ignores]
+"**/test*.py" = ["S101", "S105", "S106", "B017"]
+"conftest.py" = ["S101", "S105", "S106"]
+"apps/core/test_https_proxy.py" = ["S101", "S603"]
+"website/*.py" = ["S603", "S607"]
+"training/*.py" = ["S603", "S607"]
+"**/demo*.py" = ["S105", "S106"]
+"**/management/commands/*.py" = ["S105", "S106"]
+
+[lint.isort]
+known-first-party = ["apps", "phaema"]

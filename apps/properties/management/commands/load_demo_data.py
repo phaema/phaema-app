@@ -402,7 +402,7 @@ class Command(BaseCommand):
                 user.save()
             user.groups.add(Group.objects.get(name=SURVEYOR_ROLE))
             users[username] = user
-        for ref, prop in refs.items():
+        for _ref, prop in refs.items():
             # Use the nearest listed ancestor's surveyor, so units follow their estate.
             node, username = prop, None
             while node is not None and username is None:
@@ -490,14 +490,11 @@ class Command(BaseCommand):
             parcel(rect(dx, dy, w, h))
 
     def remove_demo_data(self):
+        from apps.cases import demo as case_demo
         from apps.leases import demo as lease_demo
         from apps.ledger import demo as ledger_demo
-
-        from apps.servicecharges import demo as service_demo
-
-        from apps.cases import demo as case_demo
-
         from apps.maintenance import demo as maintenance_demo
+        from apps.servicecharges import demo as service_demo
 
         maintenance_demo.remove()
         from apps.compliance import demo as compliance_demo

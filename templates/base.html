@@ -12,7 +12,7 @@
   {% if brand_colour %}<style>:root { --ph-brand: {{ brand_colour }}; }</style>{% endif %}
 </head>
 <body class="govuk-template__body">
-  <script>document.body.className += ' js-enabled' + ('noModule' in HTMLScriptElement.prototype ? ' govuk-frontend-supported' : '');</script>
+  <script nonce="{{ request.csp_nonce }}">document.body.className += ' js-enabled' + ('noModule' in HTMLScriptElement.prototype ? ' govuk-frontend-supported' : '');</script>
   <a href="#main-content" class="govuk-skip-link" data-module="govuk-skip-link">{% translate "Skip to main content" %}</a>
 
   <header class="phaema-header" role="banner">
@@ -124,6 +124,6 @@
     </div>
   </footer>
   <script type="module" src="{% static 'js/phaema.js' %}"></script>
-  <script type="module">import { initAll } from "{% static 'vendor/govuk-frontend/govuk-frontend.min.js' %}"; initAll();</script>
+  <script type="module" nonce="{{ request.csp_nonce }}">import { initAll } from "{% static 'vendor/govuk-frontend/govuk-frontend.min.js' %}"; initAll();</script>
 </body>
 </html>

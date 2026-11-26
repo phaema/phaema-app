@@ -326,7 +326,7 @@ def to_xlsx(pipe):
             for c in ws[ws.max_row][1:]:
                 c.number_format = "£#,##0"
     ws.column_dimensions["A"].width = 38
-    for key, title, _note in SECTIONS:
+    for key, _title, _note in SECTIONS:
         sheet = wb.create_sheet(SHEETS[key])
         sheet.append(["Period", "Date", "Event", "Property", "Record", VALUE_LABELS[key] or "Value", "Notes"])
         for c in sheet[1]:

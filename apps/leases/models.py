@@ -1,11 +1,9 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 """Leases, licences and other occupational agreements, and the parties to them."""
+import secrets
+import uuid
 from datetime import date, timedelta
 from decimal import Decimal
-
-import uuid
-
-import secrets
 
 from django.conf import settings
 from django.core.exceptions import ValidationError

@@ -13,7 +13,6 @@ from apps.properties.models import Property
 from .models import BuildingCost, CostLine, Headcount, Occupation, Occupier, Space, UseFigure, UseMeasure
 from .seed import ensure_cost_lines, ensure_measures
 
-
 CIVIC = "DM-S30"
 LIBRARY = "DM-N03"
 SOURCE = "Demonstration figures"

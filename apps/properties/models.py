@@ -612,10 +612,10 @@ class Property(TimeStampedModel):
     def area_groups(self):
         """The floor areas in groups, each with how it was measured: the council's chosen basis first.
         [{"lines": [(label, value)], "basis": text, "estimate": bool}]"""
-        comp = {"lines": [(l, v) for l, v in (("GIA", self.gia_sqm), ("NIA", self.nia_sqm), ("GEA", self.gea_sqm))
+        comp = {"lines": [(name, v) for name, v in (("GIA", self.gia_sqm), ("NIA", self.nia_sqm), ("GEA", self.gea_sqm))
                           if v is not None],
                 "basis": self.comp_basis_text(), "estimate": self.area_source == "estimate"}
-        ipms = {"lines": [(l, v) for l, v in (("IPMS 1", self.ipms1_sqm), ("IPMS 2", self.ipms2_sqm),
+        ipms = {"lines": [(name, v) for name, v in (("IPMS 1", self.ipms1_sqm), ("IPMS 2", self.ipms2_sqm),
                                               (self.ipms3_label, self.ipms3_sqm)) if v is not None],
                 "basis": self.ipms_basis_text(), "estimate": self.ipms_source == "estimate"}
         groups = [ipms, comp] if self.area_basis() == "ipms" else [comp, ipms]

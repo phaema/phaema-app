@@ -12,8 +12,18 @@ class SpaceConfig(AppConfig):
     def ready(self):
         from apps.core import audit
 
-        from .models import (BuildingCost, CostLine, CostSharing, FixedShare, Headcount, Occupation, Occupier, Space,
-                             UseFigure, UseMeasure)
+        from .models import (
+            BuildingCost,
+            CostLine,
+            CostSharing,
+            FixedShare,
+            Headcount,
+            Occupation,
+            Occupier,
+            Space,
+            UseFigure,
+            UseMeasure,
+        )
 
         for model in (Occupier, Space, Occupation, Headcount, UseMeasure, UseFigure, CostLine, BuildingCost,
                       CostSharing, FixedShare):

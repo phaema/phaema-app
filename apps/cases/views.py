@@ -13,8 +13,7 @@ from django.db.models import Count, Q
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils.translation import gettext as _
-from django.utils.translation import ngettext
-from django.utils.translation import gettext_lazy
+from django.utils.translation import gettext_lazy, ngettext
 from django.views.generic import ListView
 
 from apps.core.roles import ADMINISTRATORS, CONTRIBUTORS, SURVEYORS, is_administrator

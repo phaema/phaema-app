@@ -10,14 +10,13 @@ from django.utils.translation import gettext as _
 
 from apps.cases.models import validate_case_file
 from apps.core import places
-from apps.core.models import ModuleSettings
 from apps.core.access import module_view
+from apps.core.models import ModuleSettings
 from apps.core.roles import can_edit
 from apps.properties.models import Property
 
 from . import rules, workflow
 from .models import Action, BuildingDocument, BuildingSafety, Certificate, ComplianceType, Requirement
-
 
 compliance_view = module_view("compliance", "compliance/off.html")  # switched on for the council and opened by an access area
 

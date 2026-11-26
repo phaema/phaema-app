@@ -13,7 +13,8 @@ from apps.core.roles import is_administrator, role_of
 from apps.leases.models import Lease
 from apps.properties.models import Property
 
-from . import merge, render as docs
+from . import merge
+from . import render as docs
 from .models import DocumentTemplate
 
 DOCX = "application/vnd.openxmlformats-officedocument.wordprocessingml.document"

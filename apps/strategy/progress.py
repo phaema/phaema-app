@@ -3,7 +3,7 @@
 from dataclasses import dataclass, field
 from datetime import date, timedelta
 
-from .models import Action, EstateStrategy, Objective
+from .models import Action, Objective
 
 SOON_DAYS = 30
 RANK = {"red": 3, "amber": 2, "green": 1}

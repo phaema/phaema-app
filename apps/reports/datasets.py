@@ -319,7 +319,8 @@ def _events():
 
 
 def _event_fields():
-    from apps.leases.models import Lease, LeaseEvent as E
+    from apps.leases.models import Lease
+    from apps.leases.models import LeaseEvent as E
 
     return [
         Field("due_date", "Due", "date", "due_date", default=True),
@@ -352,7 +353,8 @@ def _lease_documents():
 
 
 def _lease_document_fields():
-    from apps.leases.models import Lease, LeaseDocument as D
+    from apps.leases.models import Lease
+    from apps.leases.models import LeaseDocument as D
 
     return [
         Field("lease", "Agreement", path="lease__reference", default=True),
@@ -568,7 +570,8 @@ def _days_to_decision(case):
 
 
 def _case_fields():
-    from apps.cases.models import Case as K, CaseType as T
+    from apps.cases.models import Case as K
+    from apps.cases.models import CaseType as T
 
     return [
         Field("reference", "Case", getter=lambda c: c.display_reference, default=True),
@@ -752,7 +755,8 @@ def _valuation_audit_fields():
 
 
 def _service_years():
-    from django.db.models import BooleanField, ExpressionWrapper, Q as DQ
+    from django.db.models import BooleanField, ExpressionWrapper
+    from django.db.models import Q as DQ
 
     from apps.servicecharges.models import ScheduleYear
 
@@ -1007,7 +1011,8 @@ def _compliance_kinds():
 
 
 def _actions():
-    from django.db.models import BooleanField, ExpressionWrapper, Q as DQ
+    from django.db.models import BooleanField, ExpressionWrapper
+    from django.db.models import Q as DQ
 
     from apps.compliance.models import Action
 
@@ -1085,7 +1090,8 @@ def _budget_total(project, kind, income=False):
 
 
 def _project_fields():
-    from apps.projects.models import Phase, Project as P
+    from apps.projects.models import Phase
+    from apps.projects.models import Project as P
 
     return [
         Field("reference", "Project", getter=lambda p: p.display_reference, default=True),

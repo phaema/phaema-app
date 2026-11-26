@@ -275,7 +275,7 @@ def esc(s):
 def link(key, text, cls=""):
     url = LINKS.get(key, "")
     if not url:
-        return f'<span class="soon">Coming soon</span>'
+        return '<span class="soon">Coming soon</span>'
     c = f' class="{cls}"' if cls else ""
     return f'<a{c} href="{esc(url)}">{esc(text)}</a>'
 

@@ -26,9 +26,28 @@ from apps.properties.views import map_config
 from apps.reports.mixins import ExportMixin
 
 from . import budget, completion, rules, workflow
-from .models import (GATEWAYS, PHASE_ORDER, BudgetLine, BudgetYear, CompletionStep, GatewayDecision, Milestone,
-                     Phase, Project, ProjectAccess, ProjectDocument, ProjectMember, ProjectNote, ProjectParty, ProjectProperty,
-                     ProjectTask, ProjectType, Risk, financial_year_label, financial_year_of)
+from .models import (
+    GATEWAYS,
+    PHASE_ORDER,
+    BudgetLine,
+    BudgetYear,
+    CompletionStep,
+    GatewayDecision,
+    Milestone,
+    Phase,
+    Project,
+    ProjectAccess,
+    ProjectDocument,
+    ProjectMember,
+    ProjectNote,
+    ProjectParty,
+    ProjectProperty,
+    ProjectTask,
+    ProjectType,
+    Risk,
+    financial_year_label,
+    financial_year_of,
+)
 
 User = get_user_model()
 

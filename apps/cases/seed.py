@@ -2,7 +2,7 @@
 """The case types PHAEMA ships with. Administrators can change them and add their own."""
 from decimal import Decimal
 
-R, I, A, D, C = "received", "information", "assessing", "decision", "completing"
+R, I, A, D, C = "received", "information", "assessing", "decision", "completing"  # noqa: E741 - stage initials
 ACK = (R, "Acknowledge the request")
 
 # code, name, group, target days, 1988 Act, fee, event type, open days before, tasks

@@ -9,8 +9,7 @@ from django.urls import reverse
 from apps.core.models import AccessArea, ModuleSettings
 from apps.properties.models import Property, PropertyCost
 from apps.space import costs
-from apps.space.models import (BuildingCost, CostLine, CostSharing, FixedShare, Headcount, Occupation, Occupier,
-                               Space)
+from apps.space.models import BuildingCost, CostLine, CostSharing, FixedShare, Headcount, Occupation, Occupier, Space
 from apps.space.seed import ensure_cost_lines
 
 PASSWORD = "a-long-test-password"

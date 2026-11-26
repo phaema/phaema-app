@@ -12,8 +12,8 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.utils.translation import gettext as _
 from django.views.decorators.http import require_POST
 
-from apps.core.models import ModuleSettings
 from apps.core.access import can_do_finance, finance_only, lease_in_patch, module_view, patch_leases, require_full
+from apps.core.models import ModuleSettings
 from apps.leases.models import Lease
 from apps.reports.export import csv_response, xlsx_response
 

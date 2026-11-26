@@ -209,8 +209,8 @@ def fetch_from_ons(series, timeout=20):
     """Download the series from the ONS website and save any new figures. Returns (added, changed)."""
     import urllib.request
 
-    request = urllib.request.Request(ons_url(series), headers={"User-Agent": "PHAEMA (estate management)"})
-    with urllib.request.urlopen(request, timeout=timeout) as response:  # noqa: S310 (fixed https address)
+    request = urllib.request.Request(ons_url(series), headers={"User-Agent": "PHAEMA (estate management)"})  # noqa: S310
+    with urllib.request.urlopen(request, timeout=timeout) as response:  # noqa: S310 - fixed https address
         text = response.read().decode("utf-8", "replace")
     figures = parse_figures(text)
     if not figures:

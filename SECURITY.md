@@ -62,9 +62,21 @@ releases with release notes and a security support period for each will start be
 **Data and the application**
 
 - Built on Django, which protects against SQL injection, cross-site scripting, cross-site request forgery and
-  clickjacking by default. Uploaded and generated files are served only to signed-in people with access.
+  clickjacking by default. Uploaded and generated files are served only to signed-in people with access, and are
+  checked by their content, not only their name.
+- A Content-Security-Policy on every page lets the browser run only PHAEMA's own scripts (each inline script carries
+  a nonce made for that request), refuses plug-ins and framing, and keeps forms posting to PHAEMA. A
+  Permissions-Policy turns off the camera, microphone, location and payment features. Councils can run the policy
+  in report-only mode first (`PHAEMA_CSP_REPORT_ONLY`) and add map tile addresses.
+- Sign-in attempts are limited after repeated wrong passwords, per account and per connection, on the sign-in page,
+  the admin site and the API.
 - A change log records who changed what, and when, across properties, leases, cases, finance, access areas, cover
-  for absence and two-step sign-in.
+  for absence and two-step sign-in. The database itself refuses to change or delete change log entries (a
+  trigger), so they cannot be altered even through a direct database connection. A database administrator carrying
+  out a lawful retention purge switches this off for one transaction (see the technical manual).
+- Every pull request runs the tests, a coverage minimum, Ruff (including its security rules), CodeQL code scanning
+  and a check of the Python packages against known vulnerabilities. The actions are pinned to commit hashes and
+  Dependabot proposes updates.
 - The code is open, so any council, supplier or security tester can review it.
 - Data stays where the council chooses: its own servers, or UK or EU hosting. PHAEMA sends nothing to the project or
   to third parties. Optional map tiles from Ordnance Survey or OpenStreetMap are loaded by the user's browser.
@@ -86,10 +98,7 @@ These are known gaps, listed so councils can judge the risk. They are on the [ro
   fixes will be summarised here.
 - **Single sign-on tested against a live council tenant.** The code is tested against a stand-in sign-in service;
   it has not yet been proved against a council's Microsoft Entra conditional access rules.
-- **Limits on repeated failed passwords** across sessions. Fail2ban on the installer's servers and two-step sign-in
-  reduce the risk today.
 - **API tokens** with limited scope, for systems that read PHAEMA's API.
-- **Automated dependency and code scanning** on every pull request.
 - **Independent accessibility audit** against WCAG 2.2 AA.
 - **Template documents for councils**: a data protection impact assessment (DPIA), a record of processing, and
   answers to common security questionnaires.
