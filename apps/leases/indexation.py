@@ -195,7 +195,9 @@ def save_figures(series, figures):
             IndexFigure.objects.create(series=series, month=month, value=value)
             added += 1
         elif held[month] != value:
-            IndexFigure.objects.filter(series=series, month=month).update(value=value)
+            from apps.core.audit import audited_update
+
+            audited_update(IndexFigure.objects.filter(series=series, month=month), value=value)
             changed += 1
     return added, changed
 

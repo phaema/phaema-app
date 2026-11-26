@@ -14,7 +14,8 @@ technical manual.
 | How is access controlled? | Roles and access areas, checked on the server for every page, download, report and API call; outside users have an access end date |
 | How do other systems use the API? | With API tokens made by an administrator: each is limited to read only or read and change, to parts of the API and to the role of the account it acts for, ends within two years, can be cancelled on its own, and is stored only as a hash. Password sign-in to the API is off by default |
 | How are leavers handled? | Hand over work blocks sign-in and reassigns their work in one step; with single sign-on, disabling the council account stops access |
-| Is there an audit trail? | Yes: who changed what and when, for every audited record; the database refuses to change or delete entries |
+| Is there an audit trail? | Yes: who changed what and when, for every audited record, including changes made in bulk; the database refuses to change or delete entries through the application. It is protected against alteration through the application, not against someone with administrator rights over the database server |
+| Can someone open a file if they know its address? | No. A file opens only for people who can open the record it belongs to, including the module it belongs to (valuations, compliance, maintenance) |
 | Is the application tested for vulnerabilities? | Automated on every change: CodeQL, Ruff security rules, a dependency vulnerability check and the test suite. An independent CREST penetration test is planned before 1.0; councils may commission their own |
 | How are security updates delivered? | As patch releases with notes ([docs/releasing.md](../releasing.md)); the installer applies operating system security updates automatically |
 | How are vulnerabilities reported? | To stuart@phaema.co.uk, as set out in SECURITY.md |

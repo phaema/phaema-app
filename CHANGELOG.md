@@ -61,6 +61,14 @@ Everything since 0.9.0 (10 to 26 November 2026).
 - Credit notes allocated to the right charges, and service charge credits (#78).
 
 ### Security
+- Uploaded files now open only for people who can open the record they belong to: files held by valuations,
+  compliance or maintenance need that module, and files that belong to no record are not served. Before, anyone
+  signed in could open a file whose address they knew (#108).
+- Records saved through the API now go through the model's own checks, so a property can no longer be made part of
+  itself, directly or round a loop; walking the property tree also stops if such a loop ever exists (#108).
+- Changes made in bulk (several records at once) are now written to the change log too: unlinking from a project,
+  finance export batches, cancelled payment plans, replaced estate strategies, acknowledged tasks, main photos,
+  strategy review dates, event assignments and ONS index corrections (#108).
 - Letter templates run in a reduced template language: tags such as `{% debug %}`, `{% load %}` and `{% include %}`
   and the `pprint` filter are not available, and merge data is plain text, so a template cannot print other data
   or read files (#104).

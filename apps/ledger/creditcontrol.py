@@ -68,8 +68,10 @@ def make_plan(lease, agreed_on, amount, count, first_due, every="month", notes="
 
     if count < 1 or amount <= 0:
         raise ValueError("A payment plan needs at least one instalment and an amount.")
-    PaymentPlan.objects.filter(lease=lease, status=PaymentPlan.Status.ACTIVE).update(
-        status=PaymentPlan.Status.CANCELLED)
+    from apps.core.audit import audited_update
+
+    audited_update(PaymentPlan.objects.filter(lease=lease, status=PaymentPlan.Status.ACTIVE),
+                   status=PaymentPlan.Status.CANCELLED)
     plan = PaymentPlan.objects.create(lease=lease, agreed_on=agreed_on, amount=amount, notes=notes, case=case,
                                       grace_days=grace_days, also_current_rent=also_current_rent)
     each = (amount / count).quantize(Decimal("0.01"))

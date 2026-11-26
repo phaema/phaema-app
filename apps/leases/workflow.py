@@ -160,7 +160,9 @@ def sync_events(lease, today=None):
                 e.save(update_fields=["status", "outcome", "completed_on", "updated_at"])
     # Events added by hand also get the surveyor if nobody was chosen.
     if assignee:
-        lease.events.filter(source="", assigned_to__isnull=True, status__in=OPEN).update(assigned_to=assignee)
+        from apps.core.audit import audited_update
+
+        audited_update(lease.events.filter(source="", assigned_to__isnull=True, status__in=OPEN), assigned_to=assignee)
 
 
 def _close(event, user, status, outcome):

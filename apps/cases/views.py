@@ -535,8 +535,10 @@ def _do(request, case, action):  # noqa: C901 - one branch per action keeps each
     elif action == "acknowledge":
         case.acknowledged_on = _date(post.get("date"))
         case.save(update_fields=["acknowledged_on", "updated_at"])
-        case.tasks.filter(description__startswith="Acknowledge", done_on__isnull=True).update(
-            done_on=case.acknowledged_on, done_by=request.user)
+        from apps.core.audit import audited_update
+
+        audited_update(case.tasks.filter(description__startswith="Acknowledge", done_on__isnull=True),
+                       done_on=case.acknowledged_on, done_by=request.user)
     elif action == "complete_application":
         case.application_complete_on = _date(post.get("date"))
         case.refresh_target()

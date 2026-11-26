@@ -228,6 +228,10 @@ def test_linking_cases_and_who_sees_the_link(people):
     client.post(project.get_absolute_url(), {"action": "unlink", "kind": "case", "id": case.pk})
     case.refresh_from_db()
     assert case.project is None
+    from apps.core.models import AuditEntry
+
+    taken_out = AuditEntry.objects.filter(object_id=str(case.pk), content_type__model="case", action="update").latest("pk")
+    assert taken_out.changes["project"] == [str(project.pk), None] and taken_out.user == people["lead"]
 
 
 def test_confidential_access_is_logged(people):

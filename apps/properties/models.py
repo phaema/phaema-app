@@ -530,8 +530,9 @@ class Property(TimeStampedModel):
         return self.suitability.order_by("-assessed_on", "-created_at").first()
 
     def ancestors(self):
-        chain, node = [], self.parent
-        while node is not None:
+        chain, node, seen = [], self.parent, {self.pk}
+        while node is not None and node.pk not in seen:  # stops even if bad data made a loop
+            seen.add(node.pk)
             chain.insert(0, node)
             node = node.parent
         return chain
@@ -544,8 +545,13 @@ class Property(TimeStampedModel):
             by_parent.setdefault(p.parent_id, []).append(p)
         result = []
 
+        visited = {self.pk}
+
         def walk(node_id, depth):
             for child in by_parent.get(node_id, []):
+                if child.pk in visited:  # a loop in bad data: list each part once
+                    continue
+                visited.add(child.pk)
                 result.append((child, depth))
                 walk(child.pk, depth + 1)
 
@@ -555,7 +561,8 @@ class Property(TimeStampedModel):
     def _descendant_ids(self):
         ids, frontier = set(), [self.pk]
         while frontier:
-            frontier = list(Property.objects.filter(parent_id__in=frontier).values_list("pk", flat=True))
+            frontier = [pk for pk in Property.objects.filter(parent_id__in=frontier).values_list("pk", flat=True)
+                        if pk not in ids and pk != self.pk]  # each property once, so a loop cannot run forever
             ids.update(frontier)
         return ids
 
@@ -898,7 +905,10 @@ class PropertyPhoto(TimeStampedModel):
         if self.image and not getattr(self.image, "_committed", True):
             self.image = process_image(self.image)
         if self.is_main:
-            PropertyPhoto.objects.filter(property_id=self.property_id, is_main=True).exclude(pk=self.pk).update(is_main=False)
+            from apps.core.audit import audited_update
+
+            audited_update(PropertyPhoto.objects.filter(property_id=self.property_id, is_main=True).exclude(pk=self.pk),
+                           is_main=False)
         super().save(*args, **kwargs)
 
 
@@ -1163,7 +1173,9 @@ class AssetStrategy(TimeStampedModel):
         super().save(*args, **kwargs)
         latest = self.property.strategies.order_by("-decided_on", "-created_at").first()
         if latest and latest.pk == self.pk:
-            Property.objects.filter(pk=self.property_id).update(purpose_review_date=self.review_on)
+            from apps.core.audit import audited_update
+
+            audited_update(Property.objects.filter(pk=self.property_id), purpose_review_date=self.review_on)
 
 
 class SuitabilityAssessment(TimeStampedModel):

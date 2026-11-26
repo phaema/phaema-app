@@ -79,9 +79,17 @@ releases with release notes and a security support period for each will start be
 - Sign-in attempts are limited after repeated wrong passwords, per account and per connection, on the sign-in page,
   the admin site and the API.
 - A change log records who changed what, and when, across properties, leases, cases, finance, access areas, cover
-  for absence and two-step sign-in. The database itself refuses to change or delete change log entries (a
-  trigger), so they cannot be altered even through a direct database connection. A database administrator carrying
-  out a lawful retention purge switches this off for one transaction (see the technical manual).
+  for absence and two-step sign-in, including changes made in bulk. A database trigger refuses to change or delete
+  change log entries, so they cannot be altered through PHAEMA or its ordinary database connection. This protects
+  the log against alteration through the application; it is not absolute: someone with administrator rights over the
+  database server can still change the data and its controls, so councils should restrict that access, keep
+  backups and keep the database server's own logs. A database administrator carrying out a lawful retention purge
+  switches the trigger off for one transaction (see the technical manual).
+- Uploaded files open only for people who can open the record they belong to: files held by valuations, compliance
+  or maintenance need that module. Knowing a file's address is not enough, and files that belong to no record are
+  never served.
+- Records saved through the API go through the same checks as on screen, such as "a property cannot be part of
+  itself".
 - Every pull request runs the tests, a coverage minimum, Ruff (including its security rules), CodeQL code scanning
   and a check of the Python packages against known vulnerabilities. The actions are pinned to commit hashes and
   Dependabot proposes updates.

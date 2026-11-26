@@ -2,12 +2,13 @@
 from rest_framework import serializers, viewsets
 from rest_framework.exceptions import PermissionDenied
 
+from apps.core.api_validation import ModelCleanSerializer
 from apps.core.roles import is_administrator
 
 from .models import BreakOption, Lease, Party
 
 
-class PartySerializer(serializers.ModelSerializer):
+class PartySerializer(ModelCleanSerializer):
     class Meta:
         model = Party
         exclude = ["created_by", "updated_by"]
@@ -20,7 +21,7 @@ class BreakOptionSerializer(serializers.ModelSerializer):
         fields = ["id", "break_date", "exercisable_by", "notice_months", "notice_deadline", "conditions"]
 
 
-class LeaseSerializer(serializers.ModelSerializer):
+class LeaseSerializer(ModelCleanSerializer):
     breaks = BreakOptionSerializer(many=True, read_only=True)
 
     class Meta:

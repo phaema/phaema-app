@@ -1,5 +1,11 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
-"""Audit trail: call register(Model) to record every create, change and delete."""
+"""Audit trail: call register(Model) to record every create, change and delete.
+
+The change log is written from Django's model signals, which QuerySet.update(), bulk_update() and bulk_create() do
+not send. For a registered model, use audited_update() and audited_create() below instead, so those changes are
+logged too. The database trigger (core.0023) then stops entries being changed or deleted through the application's
+database account; someone with administrator rights over the database server itself could still alter it.
+"""
 from decimal import Decimal
 
 from django.contrib.contenttypes.models import ContentType
@@ -68,7 +74,47 @@ def _post_delete(sender, instance, **kwargs):
     _record(instance, "delete", {})
 
 
+_REGISTERED = set()
+
+
+def is_registered(model):
+    return model in _REGISTERED
+
+
+def audited_update(queryset, **changes):
+    """QuerySet.update() that also writes a change log entry for each record whose values change."""
+    from django.db import transaction
+
+    model = queryset.model
+    if model not in _REGISTERED:
+        return queryset.update(**changes)
+    with transaction.atomic():
+        before = {item.pk: _snapshot(item) for item in queryset}
+        if not before:
+            return 0
+        count = model._default_manager.filter(pk__in=before).update(**changes)
+        names = {model._meta.get_field(name).name for name in changes}
+        for item in model._default_manager.filter(pk__in=before):
+            after = _snapshot(item)
+            diff = {k: [before[item.pk].get(k), v] for k, v in after.items()
+                    if k in names and before[item.pk].get(k) != v}
+            if diff:
+                _record(item, "update", diff)
+    return count
+
+
+def audited_create(model, items, **kwargs):
+    """bulk_create() that also writes a change log entry for each new record."""
+    created = model._default_manager.bulk_create(items, **kwargs)
+    if model in _REGISTERED:
+        for item in created:
+            if item.pk is not None:
+                _record(item, "create", {k: [None, v] for k, v in _snapshot(item).items() if v is not None})
+    return created
+
+
 def register(model):
+    _REGISTERED.add(model)
     uid = f"phaema_audit_{model._meta.label}"
     pre_save.connect(_pre_save, sender=model, dispatch_uid=uid + "_pre")
     post_save.connect(_post_save, sender=model, dispatch_uid=uid + "_post")

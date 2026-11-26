@@ -227,9 +227,12 @@ def _display(field, value):
 
 @login_required
 def protected_file(request, path):
-    """Serve uploaded photos and documents to signed-in users only. Project papers are served by the project pages,
-    which check that the person can see the project."""
-    if path.startswith("projects/"):
+    """Serve an uploaded photo or document to someone who may open the record it belongs to (see core/file_access.py).
+    Anyone else gets "not found", as for a file that does not exist, so the address reveals nothing. Project papers
+    are served by the project pages, which check that the person can see the project."""
+    from . import file_access
+
+    if path.startswith("projects/") or not file_access.may_open(request.user, path):
         raise Http404
     try:
         if not default_storage.exists(path):

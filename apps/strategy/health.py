@@ -97,6 +97,7 @@ def start(lead, year=None, today=None):
     check, created = HealthCheck.objects.get_or_create(year=year, defaults={"lead": lead})
     if created:
         ensure_questions()
+        # The check's creation is logged; its blank question rows are not, one by one. Answers given are.
         HealthAnswer.objects.bulk_create([
             HealthAnswer(health_check=check, question=q, heading=q.heading, wording=q.text, guidance=q.guidance,
                          order=q.order) for q in HealthQuestion.objects.filter(active=True)])
