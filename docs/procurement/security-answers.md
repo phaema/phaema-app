@@ -12,6 +12,7 @@ technical manual.
 | How do users sign in? | PHAEMA accounts with passwords of at least 12 characters and two-step sign-in, or single sign-on with the council's accounts (OpenID Connect) |
 | Is multi-factor authentication supported? | Yes: authenticator app codes with recovery codes, required for administrators by default and for everyone if the council chooses; or the council's own MFA through single sign-on |
 | How is access controlled? | Roles and access areas, checked on the server for every page, download, report and API call; outside users have an access end date |
+| How do other systems use the API? | With API tokens made by an administrator: each is limited to read only or read and change, to parts of the API and to the role of the account it acts for, ends within two years, can be cancelled on its own, and is stored only as a hash. Password sign-in to the API is off by default |
 | How are leavers handled? | Hand over work blocks sign-in and reassigns their work in one step; with single sign-on, disabling the council account stops access |
 | Is there an audit trail? | Yes: who changed what and when, for every audited record; the database refuses to change or delete entries |
 | Is the application tested for vulnerabilities? | Automated on every change: CodeQL, Ruff security rules, a dependency vulnerability check and the test suite. An independent CREST penetration test is planned before 1.0; councils may commission their own |

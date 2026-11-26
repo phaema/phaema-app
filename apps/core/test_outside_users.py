@@ -69,8 +69,10 @@ def test_signed_in_person_is_signed_out_when_access_ends(client, consultant):
     assert "_auth_user_id" not in client.session
 
 
-def test_api_refuses_ended_access(client, consultant):
+def test_api_refuses_ended_access(client, consultant, settings):
     import base64
+
+    settings.PHAEMA_API_PASSWORD_SIGN_IN = True
 
     _end(consultant, -1)
     token = base64.b64encode(f"consultant:{PASSWORD}".encode()).decode()

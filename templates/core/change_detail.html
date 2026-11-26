@@ -12,6 +12,7 @@
 <h1 class="govuk-heading-l">{{ entry.object_repr }}</h1>
 <dl class="govuk-summary-list">
   <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Changed by" %}</dt><dd class="govuk-summary-list__value">{% if entry.user %}{{ entry.user.get_full_name|default:entry.user.username }}{% if entry.user.email %} ({{ entry.user.email }}){% endif %}{% else %}{% translate "System (import or script)" %}{% endif %}</dd></div>
+  {% if entry.via %}<div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Made through" %}</dt><dd class="govuk-summary-list__value">{{ entry.via }}</dd></div>{% endif %}
   <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Date and time" %}</dt><dd class="govuk-summary-list__value">{{ entry.timestamp|date:"l j F Y, H:i:s" }}</dd></div>
   <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Record" %}</dt><dd class="govuk-summary-list__value">{% if target_url %}<a class="govuk-link" href="{{ target_url }}">{{ entry.object_repr }}</a>{% else %}{{ entry.object_repr }} {% if entry.action == "delete" %}({% translate "deleted" %}){% endif %}{% endif %}</dd></div>
 </dl>

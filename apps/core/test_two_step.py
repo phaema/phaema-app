@@ -186,11 +186,13 @@ def test_administrator_can_reset_a_lost_phone(client, make_user, sue_with_app):
     assert not TwoStepDevice.objects.filter(user=sue).exists()
 
 
-def test_api_password_sign_in_refused_with_two_step(client, sue, sue_with_app):
+def test_api_password_sign_in_refused_with_two_step(client, sue, sue_with_app, settings):
+    settings.PHAEMA_API_PASSWORD_SIGN_IN = True
     auth = "Basic " + base64.b64encode(f"sue:{PASSWORD}".encode()).decode()
     assert client.get("/api/properties/", HTTP_AUTHORIZATION=auth).status_code in (401, 403)
 
 
-def test_api_password_sign_in_still_works_without_two_step(client, sue):
+def test_api_password_sign_in_works_without_two_step_when_switched_on(client, sue, settings):
+    settings.PHAEMA_API_PASSWORD_SIGN_IN = True
     auth = "Basic " + base64.b64encode(f"sue:{PASSWORD}".encode()).decode()
     assert client.get("/api/properties/", HTTP_AUTHORIZATION=auth).status_code == 200

@@ -17,8 +17,12 @@ Everything since 0.9.0 (10 to 26 November 2026).
   browser console.
 - The new database trigger means a retention purge of the change log needs `SET LOCAL phaema.audit_purge = 'on'`
   in the same transaction (technical manual, Audit trail).
+- Signing in to the API with a username and password is now off. Give each script or system an API token
+  (Manage data, API tokens), or set `PHAEMA_API_PASSWORD_SIGN_IN=True` while you move them over.
 
 ### Added
+- API tokens for other systems: read only or read and change, limited to parts of the API, an end date of at most
+  two years, cancelled on their own, stored only as a hash and named in the change log (#103).
 - Welsh (Cymraeg) interface, as a draft awaiting review by a qualified translator. An administrator offers it in
   Module settings, under Language; each person then chooses English or Cymraeg at the top of the page.
 - IFRS 16 data pack for leases the council holds, with an IFRS 16 treatment, lease end and notes on each lease (#92).
@@ -48,6 +52,8 @@ Everything since 0.9.0 (10 to 26 November 2026).
 - Credit notes allocated to the right charges, and service charge credits (#78).
 
 ### Security
+- Changes made through the API are now named in the change log under the account that made them, with how they
+  arrived (an API token or a password); before, they showed as made by the system (#103).
 - Content-Security-Policy and Permissions-Policy headers on every page; report-only mode and extra map tile
   addresses can be set (`PHAEMA_CSP_*`).
 - The database refuses to change or delete change log entries (a trigger); deleting a user still clears their name

@@ -1,0 +1,21 @@
+{% extends "admin/base_site.html" %}
+{% load i18n %}
+{% block title %}{% translate "API token made" %} | {{ site_title }}{% endblock %}
+{% block breadcrumbs %}<div class="breadcrumbs"><a href="{% url 'admin:index' %}">{% translate "Home" %}</a> &rsaquo; <a href="{% url 'admin:core_apitoken_changelist' %}">{% translate "API tokens" %}</a> &rsaquo; {{ token.name }}</div>{% endblock %}
+{% block content %}
+<div id="content-main">
+  <h1>{% translate "Copy the token now" %}</h1>
+  <p>{% blocktranslate with name=token.name %}This is the only time the token for “{{ name }}” is shown. PHAEMA keeps only a scrambled copy, so it cannot show it again. If it is lost, cancel this token and make another.{% endblocktranslate %}</p>
+  <p><label for="api-token-key"><strong>{% translate "Token" %}</strong></label><br>
+    <input id="api-token-key" type="text" readonly value="{{ key }}" size="60" spellcheck="false" autocomplete="off" style="font-family:monospace"></p>
+  <p>{% translate "Give it to the person setting up the other system by a secure route, such as your password manager, not by email or chat. The other system sends it with every request:" %}</p>
+  <pre>Authorization: Bearer {{ token.prefix }}…</pre>
+  <ul>
+    <li>{% translate "Acts as" %}: {{ token.user.get_full_name|default:token.user.username }}</li>
+    <li>{% translate "Access" %}: {{ token.get_access_display }}</li>
+    <li>{% translate "Parts of the API" %}: {{ parts }}</li>
+    <li>{% translate "Ends on" %}: {{ token.expires_on|date:"j F Y" }}</li>
+  </ul>
+  <p><a class="button" href="{% url 'admin:core_apitoken_changelist' %}">{% translate "I have copied it" %}</a></p>
+</div>
+{% endblock %}

@@ -28,6 +28,7 @@ PHAEMA is in alpha (0.9.x). The first eight weeks built the core (below); the fe
 | 25 November 2026 | Index-linked rent reviews; dealings register; credit control, payment plans and interest on late rent; rent deposit account; void marketing and agent instructions; ITZA and rent per m² Zone A | Done |
 | 26 November 2026 | IFRS 16 data pack for finance on the leases the council holds | Done |
 | 26 November 2026 | Content Security Policy, HSTS and other browser protections; audit trail locked in the database; Ruff linting and a coverage floor in CI; changelog and release process; procurement and information governance pack; Welsh (Cymraeg) interface as a draft for review | Done |
+| 26 November 2026 | Scoped API tokens: read only or read and change, limited to parts of the API, end dates, cancelling, named in the change log; password sign-in to the API off by default | Done |
 | Before beta | Microsoft 365 email and calendar; property events pipeline; annual health check; site visit sheet level B; repository mirror | Planned |
 
 ## Future work
@@ -36,8 +37,8 @@ PHAEMA is in alpha (0.9.x). The first eight weeks built the core (below); the fe
 
 What councils' procurement and IT security teams will ask for before the first live use. See [SECURITY.md](../SECURITY.md).
 
-- **Done:** two-step sign-in (authenticator app, recovery codes, required for administrators by default); security policy and reporting route; limits on repeated wrong passwords; dependency and code scanning on every pull request; Content Security Policy, HSTS and other browser protections; the audit trail locked in the database; a [changelog](../CHANGELOG.md) and [release process](releasing.md).
-- **Next:** independent penetration test (CREST or CHECK); scoped API tokens; the first numbered release.
+- **Done:** two-step sign-in (authenticator app, recovery codes, required for administrators by default); security policy and reporting route; limits on repeated wrong passwords; dependency and code scanning on every pull request; Content Security Policy, HSTS and other browser protections; the audit trail locked in the database; a [changelog](../CHANGELOG.md) and [release process](releasing.md); scoped API tokens.
+- **Next:** independent penetration test (CREST or CHECK); the first numbered release.
 - **Done:** a [procurement and information governance pack](procurement/README.md): service definition, security answers, and templates for the accessibility statement, DPIA, record of processing and retention schedule.
 - **With pilot councils:** independent WCAG 2.2 AA accessibility audit; a retention tool that lists and removes records past their date; published case studies.
 

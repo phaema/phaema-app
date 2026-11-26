@@ -102,7 +102,39 @@ sign-in (lost phone)** from the actions list. The person then sets it up again. 
 superuser. Turning two-step sign-in on, off and resetting it are recorded in the [change log](change-log.md).
 
 **The API.** People with two-step sign-in cannot use the API with only their username and password; they use it
-from a signed-in browser.
+from a signed-in browser. Other systems use [API tokens](#api-tokens).
+
+## API tokens
+
+Other systems (a GIS server, a finance or reporting tool, a script) reach PHAEMA's API with an API token, not with
+a person's password. Only administrators make and cancel tokens, in **Manage data**, **API tokens**.
+
+To make one, select **Add API token** and fill in:
+
+- **Name:** what it is for, such as "GIS layers for QGIS".
+- **Acts as:** the account the token works for. It can never do more than that account's role allows. For a system
+  that only reads, make a separate account with the Viewer role, such as "gis.service", and choose that.
+- **Access:** **Read only**, or **Read and change** for a system that updates records.
+- **Parts of the API:** tick only what the system needs (properties, titles, leases and licences, parties). Leave
+  all unticked for every part.
+- **Ends on:** the last day it works, at most two years ahead (a year is suggested).
+
+Select **Save**. The token is shown **once**: copy it and give it to the person setting up the other system through
+your password manager, not by email or chat. PHAEMA keeps only a scrambled copy, so it cannot show it again. If it
+is lost, cancel the token and make another.
+
+**Cancelling.** Tick the token in the list and choose **Cancel the selected tokens**. It stops working at once.
+Cancelled tokens stay in the list so the change log can be traced; they cannot be deleted.
+
+**What is recorded.** The list shows when each token was last used and from where. Changes made with a token
+appear in the [change log](change-log.md) under the account it acts as, with "API token" and its name. Making,
+renaming and cancelling tokens are recorded too. A token also stops when its account is closed, loses its role or
+reaches its access end date. A month before a token ends, the administrator who made it sees it under **Coming up** on their
+dashboard, to make a new one in time.
+
+**Signing in to the API with a password** is off. Your IT team can switch it on
+(`PHAEMA_API_PASSWORD_SIGN_IN`) for older scripts while they move to tokens; it never works for accounts with
+two-step sign-in.
 
 ## Signing in with your council account
 

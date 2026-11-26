@@ -178,11 +178,16 @@ DATA_UPLOAD_MAX_MEMORY_SIZE = 5 * 1024 * 1024
 LOGIN_REDIRECT_URL = "dashboard"
 LOGOUT_REDIRECT_URL = "login"
 
+# The API signs in with API tokens (Manage data, API tokens). A username and password is refused unless this is on,
+# and then only for accounts without two-step sign-in; it is for scripts written before tokens existed.
+PHAEMA_API_PASSWORD_SIGN_IN = env.bool("PHAEMA_API_PASSWORD_SIGN_IN", default=False)
+
 REST_FRAMEWORK = {
     # Basic authentication (username and password) is refused for anyone with two-step sign-in, which a password
     # alone must not get round. They use the API from a signed-in browser session.
     "DEFAULT_AUTHENTICATION_CLASSES": [
         "rest_framework.authentication.SessionAuthentication",
+        "apps.core.api_auth.ApiTokenAuthentication",
         "apps.core.api_auth.PasswordOnlyBasicAuthentication",
     ],
     "DEFAULT_PERMISSION_CLASSES": ["apps.core.api_permissions.PhaemaPermission"],
