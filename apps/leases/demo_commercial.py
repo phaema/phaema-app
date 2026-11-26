@@ -1,7 +1,8 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 """Demonstration examples of the commercial features added on 25 November 2026: index terms on the CPI leases, a
 completed assignment with an AGA, rent deposit accounts, interest terms, a payment plan, ITZA on the shops in The
-Precinct and Market Square, and a marketing case with an agent instructed for a vacant shop.
+Precinct and Market Square, a marketing case with an agent instructed for a vacant shop, and IFRS 16 notes on the
+leases the council holds.
 
 All fictional. Index figures are not loaded: a test site fetches the real ones from the ONS each night."""
 from datetime import date, timedelta
@@ -43,6 +44,17 @@ def load(today=None):
     _deposits(today)
     _ledger(today)
     _marketing(today)
+    _ifrs16()
+
+
+def _ifrs16():
+    """IFRS 16 notes on the two leases the council holds, as finance would record them."""
+    from .models import Lease
+
+    Lease.objects.filter(reference="DL-0100").update(
+        ifrs16_notes="Peppercorn ground lease: right-of-use asset at current value, no lease liability.")
+    Lease.objects.filter(reference="DL-0530").update(
+        ifrs16_notes="Council not reasonably certain to use its break: full term used.")
 
 
 def _index_terms():

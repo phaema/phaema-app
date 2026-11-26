@@ -26,6 +26,7 @@ PHAEMA is in alpha (0.9.x). The first eight weeks built the core (below); the fe
 | November 2026 | Projects; estates strategy (Asset Challenge, suitability, objectives and action plans, board report); space and costing; site visit sheets; IPMS floor areas; outside users and access areas; single sign-on; scanned documents read by OCR; rents payable | Done |
 | 25 November 2026 | Security: limits on wrong passwords (web, admin and API), shorter sessions, refusing to start without a secret key, tighter single sign-on linking; credit notes and service charge credits fixed; dependency and code scanning in CI | Done |
 | 25 November 2026 | Index-linked rent reviews; dealings register; credit control, payment plans and interest on late rent; rent deposit account; void marketing and agent instructions; ITZA and rent per m² Zone A | Done |
+| 26 November 2026 | IFRS 16 data pack for finance on the leases the council holds | Done |
 | Before beta | Microsoft 365 email and calendar; property events pipeline; annual health check; site visit sheet level B; repository mirror | Planned |
 
 ## Future work
