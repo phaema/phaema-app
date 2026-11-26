@@ -2,6 +2,7 @@
 """Capture screenshots for the e-learning and the website tour from a running PHAEMA with the demonstration data.
 
     DATABASE_URL=... python training/capture.py http://localhost:8000 shots.json
+    DATABASE_URL=... python training/capture.py http://localhost:8000 course   (every step in course.py)
 
 shots.json is a list of {"name", "user", "url", "selector", "dest"} and an optional "click" (a part to click first,
 such as a details summary to open): dest is "training" (saved as
@@ -31,6 +32,100 @@ from playwright.sync_api import sync_playwright  # noqa: E402
 WIDTH, HEIGHT = 1280, 800
 
 
+def _record(kind, key):
+    """The database number of a demonstration record named by its reference, so the addresses in course.py work
+    on any copy of the demonstration data. {kind:key} in an address is replaced by the number (or, for leasefile,
+    by the file's whole address)."""
+    from django.contrib.auth import get_user_model
+
+    from apps.cases.models import Case, CaseType, SiteVisit
+    from apps.leases.models import Lease, LeaseDocument, LeaseEvent
+    from apps.maintenance.models import Job
+    from apps.projects.models import Project
+    from apps.properties.models import Property
+    from apps.reports.models import Report
+    from apps.servicecharges.models import Schedule, ScheduleYear
+    from apps.space.models import Occupier
+    from apps.strategy.models import HealthCheck, Objective
+    from apps.valuations.models import Valuation
+
+    def numbered(model, ref):  # CAS-2026-0033, PRJ-2026-001, JOB-2026-0014
+        _prefix, year, number = ref.split("-")[:3]
+        return model.objects.get(year=int(year), number=int(number)).pk
+
+    if kind == "property":
+        return Property.objects.get(reference=key).pk
+    if kind == "lease":
+        return Lease.objects.get(reference=key).pk
+    if kind == "event":  # DL-0501/review: the lease's next open event of that type
+        lease, event_type = key.split("/")
+        return (LeaseEvent.objects.filter(lease__reference=lease, event_type=event_type)
+                .order_by("status", "due_date").first().pk)
+    if kind == "leasefile":  # DL-0001/lease.pdf
+        lease, filename = key.split("/")
+        return LeaseDocument.objects.filter(lease__reference=lease, original_filename=filename).first().file.url
+    if kind == "case":
+        return numbered(Case, key)
+    if kind == "visit":
+        return SiteVisit.objects.filter(case_id=numbered(Case, key)).order_by("visited_on").first().pk
+    if kind == "project":
+        return numbered(Project, key)
+    if kind == "job":
+        return numbered(Job, key)
+    if kind == "objective":
+        return Objective.objects.filter(number=int(key)).order_by("-pk").first().pk
+    if kind == "health":
+        return HealthCheck.objects.get(year=int(key)).pk
+    if kind == "schedule":
+        return Schedule.objects.get(name=key).pk
+    if kind == "scyear":  # schedule name/the year it starts
+        name, year = key.split("/")
+        return ScheduleYear.objects.get(schedule__name=name, start__year=int(year)).pk
+    if kind == "occupier":
+        return Occupier.objects.get(cost_centre=key).pk
+    if kind == "valuation":  # the property's latest
+        return Valuation.objects.filter(property__reference=key).order_by("-pk").first().pk
+    if kind == "report":
+        return Report.objects.filter(name=key).order_by("pk").first().pk
+    if kind == "user":
+        return get_user_model().objects.get(username=key).pk
+    if kind == "casetype":
+        return CaseType.objects.get(code=key).pk
+    raise ValueError(f"Unknown record kind {kind}")
+
+
+def resolve(url):
+    import re
+
+    return re.sub(r"\{(\w+):([^}]+)\}", lambda m: str(_record(m.group(1), m.group(2))), url)
+
+
+# Steps that need a state the script cannot set up (text typed into the PDF viewer's Find, a scan with its text
+# recognised), so their pictures are kept as they are when every step is re-captured.
+KEEP = {"leases-5", "find-4", "find-5"}
+
+# Steps whose highlighted part is inside something closed, which is clicked open first.
+CLICKS = {"rents-6": "#ifrs16 summary"}
+
+
+def course_shots():
+    sys.path.insert(0, str(ROOT / "training"))
+    import course
+
+    modules = [course.START] + [m for c in course.COURSES for m in c["modules"]]
+    shots = []
+    for m in modules:
+        for i, (user, url, selector, _title, _text) in enumerate(m["steps"], 1):
+            name = f"{m['id']}-{i}"
+            if name in KEEP:
+                continue
+            shot = {"name": name, "user": user, "url": resolve(url), "selector": selector, "dest": "training"}
+            if name in CLICKS:
+                shot["click"] = CLICKS[name]
+            shots.append(shot)
+    return list({s["name"]: s for s in shots}.values())  # a module shared by two courses once
+
+
 def session_for(username):
     user = get_user_model().objects.get(username=username)
     store = SessionStore()
@@ -42,7 +137,8 @@ def session_for(username):
 
 
 def main(base, spec_path):
-    shots = json.loads(Path(spec_path).read_text())
+    shots = course_shots() if spec_path == "course" else json.loads(Path(spec_path).read_text())
+    problems = []
     boxes_path = ROOT / "training" / "boxes.json"
     boxes = json.loads(boxes_path.read_text())
     sessions = {user: session_for(user) for user in {shot["user"] for shot in shots}}  # before the browser starts
@@ -53,7 +149,15 @@ def main(base, spec_path):
             context = browser.new_context(viewport={"width": WIDTH, "height": HEIGHT}, device_scale_factor=1)
             context.add_cookies([{"name": settings.SESSION_COOKIE_NAME, "value": sessions[user], "url": base}])
             page = context.new_page()
-            page.goto(base + shot["url"], wait_until="networkidle")
+            response = page.goto(base + shot["url"], wait_until="networkidle")
+            if response is None or response.status >= 400:
+                problems.append(f"{shot['name']}: {shot['url']} answered {response.status if response else 'nothing'}")
+                context.close()
+                continue
+            if shot.get("selector") and page.locator(shot["selector"]).count() == 0:
+                problems.append(f"{shot['name']}: {shot['selector']} not found on {shot['url']}")
+                context.close()
+                continue
             if shot.get("click"):  # open a closed panel first, such as a details summary
                 page.locator(shot["click"]).first.click()
                 page.evaluate("document.activeElement && document.activeElement.blur()")
@@ -81,6 +185,8 @@ def main(base, spec_path):
             context.close()
         browser.close()
     boxes_path.write_text(json.dumps(boxes))
+    for problem in problems:  # the old picture is kept for these
+        print("NOT CAPTURED", problem)
 
 
 if __name__ == "__main__":

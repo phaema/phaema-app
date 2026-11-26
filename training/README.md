@@ -12,6 +12,8 @@ learner's browser.
   give it the address of a running PHAEMA (same `DATABASE_URL`) and a JSON list of shots (name, user, page, the part to
   highlight, and whether it is for the training or the website tour). It needs Playwright and Chrome.
 - Each step in `course.py` gives the demonstration user, the page address, the part of the page to highlight
-  (a CSS selector), a title and the text. Record numbers in the addresses are those of the copy the screenshots
-  were taken from, so look them up again before re-capturing. Screenshots are 1280 by 800, and the highlight box
+  (a CSS selector), a title and the text. Addresses name records by their reference, such as
+  `/properties/{property:DM-N01}/`, and `capture.py` looks up the numbers in whichever copy of the demonstration
+  data it runs against. `python training/capture.py <address> course` re-captures every step; any it cannot
+  capture are listed at the end, and their old pictures are kept. Screenshots are 1280 by 800, and the highlight box
   is the selected element's position as fractions of that.
