@@ -564,7 +564,9 @@ def _link(request, project, kind, value, add):
     else:
         raise Http404
     if not add:
-        model.objects.filter(pk=value if str(value).isdigit() else 0, project=project).update(project=None)
+        from apps.core.audit import audited_update
+
+        audited_update(model.objects.filter(pk=value if str(value).isdigit() else 0, project=project), project=None)
         return _("%(what)s unlinked.") % {"what": label}
     if item is None:
         raise ValueError(_("No %(what)s with that reference.") % {"what": str(label).lower()})

@@ -89,7 +89,7 @@ SECURE_NOW = [
     ("Access by role and area", "Roles decide what people can change and access areas decide what they can open, "
      "checked on the server for every page, download, report and API call."),
     ("A log of every change", "Who changed what and when, across properties, leases, cases, finance, access and "
-     "sign-in. The database itself refuses to alter or delete the log."),
+     "sign-in. The database refuses changes to the log made through the application."),
     ("API tokens for other systems", "Each system gets its own key, limited to reading or changing, to the parts "
      "of the API it needs and to an end date, and cancelled on its own. No passwords in scripts."),
     ("Browser protections", "A strict Content Security Policy, HSTS and other headers on every page limit what a "
@@ -207,7 +207,7 @@ ROADMAP = [
         "Limits on password guessing, shorter sessions, and code and dependency scanning on every change",
         "IFRS 16 data pack for finance on the leases the council holds",
         "Welsh (Cymraeg) interface, chosen by each person, as a draft for review",
-        "Content Security Policy and a change log the database cannot alter",
+        "Content Security Policy and a change log protected by the database",
         "A procurement and information governance pack for councils' assessments",
         "Scoped API tokens for other systems, with password sign-in to the API off",
         "Letter templates in a limited language that cannot print other data or read files",

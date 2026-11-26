@@ -15,7 +15,7 @@ that choice, it says so.
 | Data location | Wherever the council installs it. PHAEMA sends nothing to the project or to third parties. Map tiles (OpenStreetMap, or Ordnance Survey with the council's key) are loaded by the user's browser |
 | Sign-in | PHAEMA accounts with two-step sign-in (required for administrators by default), or single sign-on with the council's accounts (OpenID Connect: Microsoft Entra ID, Keycloak and others) |
 | Access control | Roles (administrator, surveyor, contributor, viewer) and access areas (ledger, service charges, valuations, compliance, maintenance), enforced on every page, download, report and API call; outside users have an access end date |
-| Audit | A change log of who changed what and when, which the database refuses to alter or delete |
+| Audit | A change log of who changed what and when, which the database refuses to alter or delete through the application; database server administrators remain able to alter data, so access to the database server should be restricted and logged |
 | Security testing | Automated on every change: tests with a coverage minimum, CodeQL, Ruff security rules and a dependency vulnerability check. Independent CREST penetration test planned before 1.0. Certifications such as Cyber Essentials Plus and ISO 27001 belong to whoever hosts it, usually the council |
 | Accessibility | Built with the GOV.UK Design System and aimed at WCAG 2.2 AA; not yet independently audited. See the [accessibility statement](accessibility-statement.md) |
 | Browsers | Current Edge, Chrome, Firefox and Safari, on desktop, tablet and phone |

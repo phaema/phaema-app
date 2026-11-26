@@ -55,7 +55,9 @@ def open_case(case_type, **fields):
     case.refresh_target()
     case.save()
     ack_due = case.acknowledge_due
-    CaseTask.objects.bulk_create([
+    from apps.core.audit import audited_create
+
+    audited_create(CaseTask, [
         CaseTask(case=case, stage=t.stage, description=t.description, order=t.order, owner=case.owner,
                  due_date=ack_due if t.description.startswith("Acknowledge") else None)
         for t in case_type.task_templates.all()])

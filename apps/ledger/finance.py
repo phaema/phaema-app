@@ -37,7 +37,9 @@ def create_batch():
     if not ids:
         return None
     batch = ExportBatch.objects.create()
-    Charge.objects.filter(pk__in=ids).update(export=batch)
+    from apps.core.audit import audited_update
+
+    audited_update(Charge.objects.filter(pk__in=ids), export=batch)
     return batch
 
 

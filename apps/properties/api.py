@@ -2,12 +2,13 @@
 from rest_framework import serializers, viewsets
 from rest_framework.exceptions import PermissionDenied
 
+from apps.core.api_validation import ModelCleanSerializer
 from apps.core.roles import is_administrator
 
 from .models import Property, Title
 
 
-class PropertySerializer(serializers.ModelSerializer):
+class PropertySerializer(ModelCleanSerializer):
     portfolio_name = serializers.CharField(source="portfolio.name", read_only=True, default=None,
                                            help_text="The portfolio's name (portfolio is its id).")
     boundary = serializers.SerializerMethodField(help_text="Boundary as GeoJSON (EPSG:27700).")
@@ -23,7 +24,7 @@ class PropertySerializer(serializers.ModelSerializer):
         return json.loads(obj.boundary.geojson) if obj.boundary else None
 
 
-class TitleSerializer(serializers.ModelSerializer):
+class TitleSerializer(ModelCleanSerializer):
     class Meta:
         model = Title
         exclude = ["created_by", "updated_by"]

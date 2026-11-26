@@ -14,7 +14,7 @@ PHAEMA helps a council's estates team manage its land and property: the property
 - Property pages with a photo gallery, and a breakdown of how the floor area (GIA and NIA) is made up from the parts
 - Title records with stored PDF documents (official copies, plans, deeds, leases)
 - Dashboard: lettable units, vacant floor space (NIA and GIA), vacancy rate, and links into filtered lists
-- A full, tamper-proof audit trail, with a change log showing who changed what and when, field by field
+- A full audit trail, with a change log showing who changed what and when, field by field, protected by the database against alteration through the application
 - Maps on every property and a register map, with OpenStreetMap or Ordnance Survey background mapping (OS Maps API key under the PSGA)
 - HM Land Registry INSPIRE polygons: import for your area, show on maps, and set property boundaries from them
 - Spreadsheet import of properties, parties, and leases with their break options (Excel templates with drop-downs and guidance; a preview with row-by-row checks; nothing is saved unless every row is clean)

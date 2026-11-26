@@ -8,7 +8,9 @@ summary: The permanent record of who changed what, and when.
 Every time a record is added, changed or deleted, PHAEMA records who did it, when, and the old and new values.
 This includes changes made in **Manage data**, by outcomes on events, and by [imports](import-export.md).
 
-The change log cannot be edited or deleted, by anyone. It supports the council's audit trail, and the
+The change log cannot be edited or deleted through PHAEMA, and the database refuses changes to it through
+PHAEMA's own connection. Only someone with administrator rights over the database server itself could alter it,
+which is why your IT team restricts that access and keeps backups. It supports the council's audit trail, and the
 Golden Thread of information for buildings.
 
 ## Seeing changes

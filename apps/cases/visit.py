@@ -248,6 +248,7 @@ def start_visit(case, user, today=None):
                 visit=visit, item=item, building=building, heading=item.heading, label=item.label,
                 guidance=item.guidance, kind=item.kind, choices=item.choices, checks=item.checks,
                 recorded=(value or "")[:400], order=n))
+    # The visit's creation is logged; its blank question rows are not, one by one. Answers people record are.
     SiteVisitAnswer.objects.bulk_create(answers)
     return visit
 

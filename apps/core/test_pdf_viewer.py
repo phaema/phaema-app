@@ -99,14 +99,12 @@ def test_titles_and_the_way_back(plan):
 
 
 @pytest.mark.django_db
-def test_no_record_goes_back_where_you_came_from(make_user, settings):
-    from django.core.files.storage import default_storage
-
-    name = default_storage.save("misc/loose.pdf", ContentFile(PDF))
-    client = _client(make_user("v.sam", "Surveyors"))
-    page = client.get(f"/files/{name}", HTTP_REFERER="http://localhost/cases/", **BROWSER).content.decode()
+def test_no_record_goes_back_where_you_came_from(rf):
+    request = rf.get("/files/misc/loose.pdf", HTTP_REFERER="http://localhost/cases/", HTTP_HOST="localhost")
+    page = viewer.page(request, viewer.describe("misc/loose.pdf")).content.decode()
     assert 'href="http://localhost/cases/"' in page
-    page = client.get(f"/files/{name}", HTTP_REFERER="https://elsewhere.example/x", **BROWSER).content.decode()
+    request = rf.get("/files/misc/loose.pdf", HTTP_REFERER="https://elsewhere.example/x", HTTP_HOST="localhost")
+    page = viewer.page(request, viewer.describe("misc/loose.pdf")).content.decode()
     assert "elsewhere.example" not in page and "govuk-back-link" not in page
 
 

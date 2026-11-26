@@ -57,8 +57,10 @@ class EstateStrategy(TimeStampedModel):
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
         if self.status == self.Status.ADOPTED:
-            EstateStrategy.objects.filter(status=self.Status.ADOPTED).exclude(pk=self.pk).update(
-                status=self.Status.REPLACED)
+            from apps.core.audit import audited_update
+
+            audited_update(EstateStrategy.objects.filter(status=self.Status.ADOPTED).exclude(pk=self.pk),
+                           status=self.Status.REPLACED)
 
     @classmethod
     def current(cls):
