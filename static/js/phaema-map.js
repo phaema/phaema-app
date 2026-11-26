@@ -2,6 +2,9 @@
 // PHAEMA maps, built on OpenLayers (vendored, BSD licence).
 // Background mapping: Ordnance Survey (if the council has set an OS Maps API key) or OpenStreetMap.
 /* global ol */
+// Words shown by this script, translated on the server (base.html puts them in #phaema-text).
+const PHAEMA_TEXT = (() => { try { return JSON.parse(document.getElementById("phaema-text").textContent); } catch (e) { return {}; } })();
+const t = (text, values = {}) => (PHAEMA_TEXT[text] || text).replace(/%\((\w+)\)s/g, (_, k) => values[k] ?? "");
 (function () {
   "use strict";
 
@@ -106,7 +109,7 @@
       if (bases.length > 1) {
         const label = document.createElement("label");
         label.className = "govuk-label govuk-!-display-inline-block govuk-!-margin-right-2";
-        label.textContent = "Background map";
+        label.textContent = t("Background map");
         label.htmlFor = el.id + "-base";
         const select = document.createElement("select");
         select.className = "govuk-select govuk-!-margin-right-4";

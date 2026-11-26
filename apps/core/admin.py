@@ -21,6 +21,9 @@ class ModuleSettingsAdmin(admin.ModelAdmin):
         ("Maintenance", {"fields": ["order_approval_limit"]}),
         ("Maps", {"fields": ["os_maps_api_key", "os_map_style"]}),
         ("Floor areas", {"fields": ["area_basis"]}),
+        ("Language", {"fields": ["welsh_enabled"],
+                      "description": "Welsh Language Standards: councils in Wales provide Welsh interfaces for "
+                                     "software where one exists."}),
         ("Scanned documents", {"fields": ["ocr_enabled"],
                                "description": "Progress is under Manage data, Scanned documents."}),
         ("Estate strategy", {"fields": ["strategy_review_years"],

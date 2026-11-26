@@ -143,6 +143,11 @@ class ModuleSettings(models.Model):
         help_text=_("When a scanned PDF is added, PHAEMA reads the text in its pages in the background, on this "
                     "server, so Find in the document viewer works on it. The original scan is kept as it was. "
                     "Needs Tesseract on the server (it is in the standard installation)."))
+    welsh_enabled = models.BooleanField(
+        _("offer Welsh (Cymraeg)"), default=False,
+        help_text=_("Shows an English | Cymraeg choice at the top of every page, so each person can use PHAEMA in "
+                    "Welsh. The Welsh text is a draft awaiting review by a qualified translator: check it with "
+                    "your council's translation service before relying on it."))
     strategy_review_years = models.PositiveSmallIntegerField(
         _("asset strategies are reviewed every (years)"), default=5,
         validators=[MinValueValidator(1), MaxValueValidator(20)],

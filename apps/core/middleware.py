@@ -27,7 +27,7 @@ class CurrentUserMiddleware:
 class RoleRequiredMiddleware:
     """Signed-in users must have a PHAEMA role (or be a superuser) to see anything."""
 
-    OPEN_PREFIXES = ("/login/", "/logout/", "/health/", "/static/", "/text-size/", "/theme/", "/no-access/", "/help/",
+    OPEN_PREFIXES = ("/login/", "/logout/", "/health/", "/static/", "/text-size/", "/theme/", "/language/", "/no-access/", "/help/",
                      "/open-data/", "/request-account/")
 
     def __init__(self, get_response):
@@ -68,7 +68,7 @@ class AccessEndedMiddleware:
 class TwoStepRequiredMiddleware:
     """People the council requires to use two-step sign-in must set it up before they can do anything else."""
 
-    OPEN_PREFIXES = ("/account/two-step/", "/login/", "/logout/", "/health/", "/static/", "/text-size/", "/theme/",
+    OPEN_PREFIXES = ("/account/two-step/", "/login/", "/logout/", "/health/", "/static/", "/text-size/", "/theme/", "/language/",
                      "/style/", "/help/", "/open-data/", "/no-access/")
 
     def __init__(self, get_response):

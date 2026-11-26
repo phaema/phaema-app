@@ -1,6 +1,9 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // Photo gallery: clicking a thumbnail shows it as the main photo.
 // Without JavaScript the thumbnails simply open the full-size photo.
+// Words shown by this script, translated on the server (base.html puts them in #phaema-text).
+const PHAEMA_TEXT = (() => { try { return JSON.parse(document.getElementById("phaema-text").textContent); } catch (e) { return {}; } })();
+const t = (text, values = {}) => (PHAEMA_TEXT[text] || text).replace(/%\((\w+)\)s/g, (_, k) => values[k] ?? "");
 for (const gallery of document.querySelectorAll("[data-phaema-gallery]")) {
   const main = gallery.querySelector("[data-gallery-main]");
   const caption = gallery.querySelector("[data-gallery-caption]");
@@ -12,7 +15,7 @@ for (const gallery of document.querySelectorAll("[data-phaema-gallery]")) {
       main.src = thumb.href;
       main.alt = thumb.dataset.alt;
       link.href = thumb.href;
-      caption.textContent = `Photo ${index + 1} of ${thumbs.length}` + (thumb.dataset.caption ? `: ${thumb.dataset.caption}` : "");
+      caption.textContent = t("Photo %(n)s of %(total)s", { n: index + 1, total: thumbs.length }) + (thumb.dataset.caption ? `: ${thumb.dataset.caption}` : "");
       thumbs.forEach((t) => t.removeAttribute("aria-current"));
       thumb.setAttribute("aria-current", "true");
     });
@@ -46,7 +49,7 @@ function setPanel(panel, open, store) {
   const button = panel.querySelector(".phaema-panel__toggle");
   const body = panel.querySelector(".phaema-panel__body");
   button.setAttribute("aria-expanded", String(open));
-  button.querySelector(".phaema-panel__state").textContent = open ? "Hide" : "Show";
+  button.querySelector(".phaema-panel__state").textContent = open ? t("Hide") : t("Show");
   body.hidden = !open;
   panel.classList.toggle("phaema-panel--closed", !open);
   if (store) {
@@ -81,11 +84,12 @@ if (panelsControl && panels.length > 1) {
   const all = document.createElement("button");
   all.type = "button";
   all.className = "phaema-link-button govuk-body-s govuk-!-margin-0";
+  const allOpen = () => panels.every((p) => !p.classList.contains("phaema-panel--closed"));
   const refresh = () => {
-    all.textContent = panels.every((p) => !p.classList.contains("phaema-panel--closed")) ? "Hide all" : "Show all";
+    all.textContent = allOpen() ? t("Hide all") : t("Show all");
   };
   all.addEventListener("click", () => {
-    const open = all.textContent === "Show all";
+    const open = !allOpen();
     panels.forEach((p) => setPanel(p, open, true));
     refresh();
   });

@@ -1,9 +1,23 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 from django.conf import settings
 from django.db import DatabaseError
+from django.utils.translation import gettext as gettext_now
+from django.utils.translation import gettext_lazy as _
+from django.utils.translation import gettext_noop
 
 from .models import ModuleSettings
 from .views import SKINS, TEXT_SIZES, THEMES
+
+# How each role is shown beside the person's name in the header.
+ROLE_LABELS = {"Administrators": _("administrator"), "Surveyors": _("surveyor"), "Contributors": _("contributor"),
+               "Viewers": _("viewer")}
+
+# Words the page scripts show, translated on the server and read by static/js from the page (see base.html).
+SCRIPT_TEXT = [
+    gettext_noop("Hide"), gettext_noop("Show"), gettext_noop("Hide all"), gettext_noop("Show all"),
+    gettext_noop("Background map"), gettext_noop("Not found"), gettext_noop("Photo %(n)s of %(total)s"),
+    gettext_noop("%(n)s of %(total)s"),
+]
 
 
 def phaema(request):
@@ -34,6 +48,9 @@ def phaema(request):
         "skin": request.COOKIES.get("phaema_skin") if request.COOKIES.get("phaema_skin") in SKINS else "classic",
         "skins": SKINS,
         "brand_colour": getattr(modules, "brand_colour", "") if modules else "",
+        "welsh_offered": bool(getattr(modules, "welsh_enabled", False)),
+        "role_label": ROLE_LABELS.get(role, ""),
+        "script_text": {key: gettext_now(key) for key in SCRIPT_TEXT},
         "demo_site": settings.PHAEMA_DEMO_SITE,
         "demo_reset_hours": settings.PHAEMA_DEMO_RESET_HOURS,
         "access_ends_soon": _ends_soon(user),
