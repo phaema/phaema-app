@@ -22,6 +22,7 @@ technical manual.
 | Which third parties receive data? | None. Map tiles are fetched by the user's browser from OpenStreetMap or Ordnance Survey without personal data; email goes through the council's own mail server |
 | Are cookies used? | Only those needed to run the service: the session cookie (Secure, HttpOnly), the CSRF cookie (Secure) and preference cookies for theme, text size and dashboard view. No analytics or advertising cookies |
 | What browser protections are set? | Content-Security-Policy (only PHAEMA's own scripts), Permissions-Policy, X-Frame-Options DENY, nosniff, same-origin referrer |
+| Can administrators run code through letter templates? | No. Templates may use merge fields, if, for and formatting filters only; merge data is plain text, so a template cannot print other data, load code or read files |
 | How are uploads checked? | Size limits and a check of each file's content type by its first bytes (PDF, images, drawings); files are served only to signed-in users with access |
 | Backups and recovery? | Nightly database and file backups kept 14 days by the installer; restore with one command. Recovery time and point objectives are set by the council's hosting |
 | Is PHAEMA certified (Cyber Essentials, ISO 27001)? | Certification applies to organisations and their systems, so it belongs to whoever hosts PHAEMA, normally the council within its own Cyber Essentials Plus and PSN scope |
