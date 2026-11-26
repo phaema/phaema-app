@@ -36,8 +36,7 @@ def _policy(nonce):
     return "; ".join(f"{name} {' '.join(values)}" for name, values in parts.items())
 
 
-PERMISSIONS = ("camera=(), microphone=(), geolocation=(), payment=(), usb=(), serial=(), bluetooth=(), "
-               "interest-cohort=()")
+PERMISSIONS = "camera=(), microphone=(), geolocation=(), payment=(), usb=(), serial=()"
 
 
 class SecurityHeadersMiddleware:
