@@ -133,7 +133,9 @@ CAPABILITIES = [
      "filled in from the case and downloaded to Word. Councils can adapt them and add their own."),
     ("Rents and arrears", "Demand runs, VAT, credit notes, receipts imported from finance, aged arrears and an export "
      "file for the finance system. Credit control takes each debt through reminder, final notice and an arrears case; "
-     "payment plans pause the chasing while they are kept; interest on late rent is worked out to the lease."),
+     "payment plans pause the chasing while they are kept; interest on late rent is worked out to the lease. "
+     "For the leases the council holds, finance gets an IFRS 16 data pack: every future payment, the lease term "
+     "and the changes in the year, ready for the discount rate."),
     ("Service charges", "Budgets, apportionment by floor area with caps, actual costs and year-end reconciliation on "
      "the RICS service charge timetable."),
     ("Maintenance", "Repairs with target dates, who pays under the lease, works orders and their approval, recharges, "

@@ -325,6 +325,12 @@ p { margin: 0 0 .9em; max-width: 60ch; }
       '<p>Interest on late rent is worked out to the lease, day by day, for someone with finance rights to check and charge.</p>' +
       rel([["rents", "The rent account"], ["letters", "The letters"]]) + '</div>' +
       shot("credit-control", "The credit control list: overdue accounts, the oldest debt and the next step for each.", "The next step for each account.") + '</div>'},
+    {id: "ifrs16", ch: "money", t: 10, html:
+      '<div class="scene"><div class="scene__text"><p class="eyebrow">Leases the council holds</p><h2>The IFRS 16 data pack, ready for finance</h2>' +
+      '<p>For the year-end accounts, finance downloads one workbook: every lease the council holds, its lease term for IFRS 16, every future payment undiscounted and the changes in the year.</p>' +
+      '<p>Finance adds the discount rate and does the accounting. Peppercorn rents and leases with no end date are flagged.</p>' +
+      rel([["rents", "Rents"], ["valuation", "Asset valuation"]]) + '</div>' +
+      shot("ifrs16", "The IFRS 16 data pack panel on the rents payable page, with the financial year to choose.", "The IFRS 16 data pack.") + '</div>'},
     {id: "service", ch: "money", t: 10, html:
       '<div class="scene"><div class="scene__text"><p class="eyebrow">Service charges &middot; optional</p><h2>Fair shares, on the RICS timetable</h2>' +
       '<p>Budgets by cost heading, apportionment by floor area with caps, spending entered or imported, and year-end reconciliation with balancing charges and statements, following the RICS service charge code.</p>' +

@@ -3,7 +3,8 @@
 
     DATABASE_URL=... python training/capture.py http://localhost:8000 shots.json
 
-shots.json is a list of {"name", "user", "url", "selector", "dest"}: dest is "training" (saved as
+shots.json is a list of {"name", "user", "url", "selector", "dest"} and an optional "click" (a part to click first,
+such as a details summary to open): dest is "training" (saved as
 static/training/img/<name>.jpg, with the highlight box in training/boxes.json) or "website" (website/img/<name>.jpg).
 The script signs each user in by making a Django session for them (so it needs the same DATABASE_URL and settings as
 the server), opens the page at 1280 by 800, scrolls the selected part into view and records where it is.
@@ -53,6 +54,10 @@ def main(base, spec_path):
             context.add_cookies([{"name": settings.SESSION_COOKIE_NAME, "value": sessions[user], "url": base}])
             page = context.new_page()
             page.goto(base + shot["url"], wait_until="networkidle")
+            if shot.get("click"):  # open a closed panel first, such as a details summary
+                page.locator(shot["click"]).first.click()
+                page.evaluate("document.activeElement && document.activeElement.blur()")
+                page.wait_for_timeout(200)
             box = None
             if shot.get("selector"):
                 element = page.locator(shot["selector"]).first

@@ -141,7 +141,7 @@ Since 1 April 2024 the CIPFA Code has required councils to account for leases th
 right-of-use asset and a lease liability for each one, unless it is short-term or of low value. PHAEMA does not do
 the accounting. It gives finance the facts they need for it.
 
-On **Rents payable**, open **IFRS 16 data pack**, choose the financial year and select **Download the IFRS 16 data
+On **Rents payable**, open **IFRS 16 data pack for finance**, choose the financial year and select **Download the IFRS 16 data
 pack**. Only people with the Finance role (or an administrator) can download it. The workbook has four sheets:
 
 - **Leases**: every agreement the council held during the year, with its dates, the lease end used for IFRS 16,

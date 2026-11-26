@@ -308,6 +308,8 @@ COURSES = [
              "Charges and receipts with a running balance. Payments are set against the oldest amounts first. Credit a charge here, with a reason."),
             (T, "/leases/rents-payable/", "table.govuk-table >> nth=0", "Rents payable",
              "Finance, Rents payable lists the rent the council pays on property it holds as tenant: each payment, the next one and the total for the coming twelve months, following the rent schedule and any rent-free period. Download it as Excel for the payments team."),
+            (T, "/leases/rents-payable/", "#ifrs16", "IFRS 16 data pack",
+             "For the year-end accounts, open IFRS 16 data pack for finance, choose the financial year and download the workbook. It lists each lease the council held, its IFRS 16 lease end, every future payment undiscounted and the changes in the year, with yellow columns for your discount rate and the right-of-use asset value. PHAEMA gives the data; finance does the accounting."),
         ],
         "exercise": {"q": "Open the rent account for DL-0506 Northfield Joinery Workshop. How many monthly charges are unpaid?",
                      "options": ["2", "1", "4", "None"], "answer": 0,
@@ -315,6 +317,8 @@ COURSES = [
         "quiz": [
             {"q": "Where do you see the rent the council pays as a tenant?", "options": ["Finance, Rents payable", "Finance, Rents receivable", "It is not recorded"], "answer": 0,
              "why": "Rents payable covers agreements held by the council; rents receivable is the ledger for agreements it lets out."},
+            {"q": "The council holds a periodic tenancy with no end date. What does the IFRS 16 data pack need?", "options": ["A lease end for IFRS 16 on the agreement", "Nothing, it is left out", "A discount rate typed into PHAEMA"], "answer": 0,
+             "why": "Set the lease end finance has assessed in the agreement's IFRS 16 section; the pack flags any lease without one. The discount rate goes in the workbook."},
             {"q": "You run the same demand run twice. What happens?", "options": ["Charges are only raised once", "Every tenant is charged twice", "PHAEMA crashes"], "answer": 0,
              "why": "Demand runs never charge the same period twice."},
             {"q": "How do receipts get into PHAEMA?", "options": ["Imported from the finance system", "Typed by tenants", "They are not recorded"], "answer": 0,
