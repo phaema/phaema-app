@@ -26,6 +26,6 @@ that choice, it says so.
 | Backups | The installer takes a nightly database and files backup, keeping 14 days; councils copy them off the server or use their own backup service |
 | Support | Documentation, e-learning and a test site are free. Help for early adopters from the maintainer; paid support, hosting and change from support partners (being arranged). Security reports to stuart@phaema.co.uk |
 | Training | Built-in help on every page, a user manual with worked examples, e-learning for five roles, a self-running tour and a test programme |
-| Welsh | The interface is prepared for translation; Welsh text is not yet available |
+| Welsh | A full Welsh (Cymraeg) interface, chosen by each person once the council offers it. The Welsh is a draft awaiting review by a qualified translator; records, council-kept lists, the manual and letters stay as entered |
 | Price | Software free. Costs are hosting (a single Linux server; 2 cores and 4 GB of memory runs a test site, and a live site with OCR wants more), any support or change from a supplier, and the council's own staff time to set up and migrate data |
 | Contact | stuart@phaema.co.uk · [phaema.co.uk](https://phaema.co.uk) · [github.com/phaema/phaema-app](https://github.com/phaema/phaema-app) |

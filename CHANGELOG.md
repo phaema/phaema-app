@@ -19,6 +19,8 @@ Everything since 0.9.0 (10 to 26 November 2026).
   in the same transaction (technical manual, Audit trail).
 
 ### Added
+- Welsh (Cymraeg) interface, as a draft awaiting review by a qualified translator. An administrator offers it in
+  Module settings, under Language; each person then chooses English or Cymraeg at the top of the page.
 - IFRS 16 data pack for leases the council holds, with an IFRS 16 treatment, lease end and notes on each lease (#92).
 - Index-linked rent reviews worked out from CPI, CPIH or RPI figures fetched from the ONS (#86).
 - Dealings register: assignments, underleases, sharing, charges, AGAs and lease chains (#87).

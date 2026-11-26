@@ -50,7 +50,7 @@
         <a href="{% url 'help:index' %}">{% translate "Help" %}</a>
         {% if user.is_staff %}<a href="{% url 'admin:index' %}">{% translate "Manage data" %}</a>{% endif %}
         {% if is_administrator %}<a href="{% url 'hand-over' %}">{% translate "Hand over work" %}</a>{% endif %}
-        <span class="phaema-header__user">{{ user.get_full_name|default:user.get_username }} ({{ role|lower|slice:":-1" }})</span>
+        <span class="phaema-header__user">{{ user.get_full_name|default:user.get_username }} ({{ role_label }})</span>
         <a href="{% url 'change-password' %}">{% translate "Change password" %}</a>
         <a href="{% url 'two-step' %}">{% translate "Two-step sign-in" %}</a>
         <form method="post" action="{% url 'logout' %}" class="phaema-header__logout">
@@ -86,6 +86,12 @@
         {% else %}<a class="govuk-link govuk-body-s" href="{% url 'theme' key %}?next={{ request.get_full_path|urlencode }}">{{ label }}</a>{% endif %}
       {% endfor %}
     </nav>
+    {% if welsh_offered %}<nav class="phaema-text-size" aria-label="Language / Iaith">
+      {% if LANG == "cy" %}<a class="govuk-link govuk-body-s" href="{% url 'language' 'en' %}?next={{ request.get_full_path|urlencode }}" lang="en" hreflang="en">English</a>
+      <span class="govuk-body-s phaema-text-size__current" aria-current="true" lang="cy">Cymraeg</span>
+      {% else %}<span class="govuk-body-s phaema-text-size__current" aria-current="true" lang="en">English</span>
+      <a class="govuk-link govuk-body-s" href="{% url 'language' 'cy' %}?next={{ request.get_full_path|urlencode }}" lang="cy" hreflang="cy">Cymraeg</a>{% endif %}
+    </nav>{% endif %}
     <nav class="phaema-text-size" aria-label="{% translate 'Text size' %}">
       <span class="govuk-body-s">{% translate "Text size:" %}</span>
       {% for key, label in text_sizes.items %}
@@ -123,6 +129,7 @@
       </p>
     </div>
   </footer>
+  {{ script_text|json_script:"phaema-text" }}
   <script type="module" src="{% static 'js/phaema.js' %}"></script>
   <script type="module" nonce="{{ request.csp_nonce }}">import { initAll } from "{% static 'vendor/govuk-frontend/govuk-frontend.min.js' %}"; initAll();</script>
 </body>

@@ -41,6 +41,25 @@ For each kind of event, list how many days before the date to send reminders, se
 `180,90,30`. Tick or untick **Weekly overdue reminders** to turn
 Monday reminders about overdue events on or off. See [reminders and calendar](reminders.md).
 
+## Welsh (Cymraeg)
+
+Councils in Wales provide Welsh interfaces for software where one exists, under the Welsh Language Standards. To
+offer Welsh, an administrator opens **Manage data**, **Module settings**, and ticks **Offer Welsh (Cymraeg)** under
+**Language**. Each person then sees **English | Cymraeg** at the top of every page and chooses for themselves; the
+choice is remembered on that computer. PHAEMA does not switch to Welsh just because a browser is set to Welsh.
+
+The Welsh covers the screens, messages, menus, form labels and help hints. Three things stay as they are:
+
+- Records you or your colleagues have typed, such as property names, notes and case titles.
+- Lists the council keeps in **Manage data**, such as case types, holding purposes and asset strategies. Rename
+  them there, or add a Welsh name in brackets, if you want them in both languages.
+- This manual, letters and notices from the document library, and emails. Letter templates can be copied and
+  translated in **Manage data**, **Document templates**.
+
+**The Welsh text is a draft.** It has not yet been checked by a qualified translator. Ask your council's translation
+service to review it before relying on it; the project's [translation guide](https://github.com/phaema/phaema-app/blob/main/docs/translating.md)
+explains how corrections are made.
+
 ## Themes and accessibility
 
 Each person can choose how PHAEMA looks, using the links under the menu. Your choice is remembered on that computer.

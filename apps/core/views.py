@@ -3,6 +3,7 @@ import mimetypes
 from datetime import date
 from decimal import Decimal
 
+from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied, SuspiciousFileOperation
@@ -14,6 +15,7 @@ from django.http import FileResponse, Http404, HttpResponseRedirect, JsonRespons
 from django.shortcuts import get_object_or_404, render
 from django.utils.cache import patch_vary_headers
 from django.utils.http import url_has_allowed_host_and_scheme
+from django.utils.translation import gettext_lazy as _
 
 from apps.leases import events as lease_events
 from apps.leases.models import LeaseEvent
@@ -21,9 +23,9 @@ from apps.properties.models import Property
 
 from .models import AuditEntry, ModuleSettings
 
-TEXT_SIZES = {"smaller": "Smaller", "standard": "Standard", "large": "Large", "largest": "Largest"}
-THEMES = {"standard": "Standard", "dark": "Dark", "contrast": "High contrast", "auto": "Match my device"}
-SKINS = {"classic": "Classic", "clear": "Clear", "compact": "Compact"}
+TEXT_SIZES = {"smaller": _("Smaller"), "standard": _("Standard"), "large": _("Large"), "largest": _("Largest")}
+THEMES = {"standard": _("Standard"), "dark": _("Dark"), "contrast": _("High contrast"), "auto": _("Match my device")}
+SKINS = {"classic": _("Classic"), "clear": _("Clear"), "compact": _("Compact")}
 DASHBOARDS = ("mine", "estate")
 
 
@@ -267,6 +269,12 @@ def _remember(request, cookie, value):
     response = HttpResponseRedirect(target)
     response.set_cookie(cookie, value, max_age=365 * 24 * 3600, samesite="Lax")
     return response
+
+
+def set_language(request, code):
+    if code not in dict(settings.LANGUAGES):
+        raise Http404
+    return _remember(request, settings.LANGUAGE_COOKIE_NAME, code)
 
 
 def set_text_size(request, size):

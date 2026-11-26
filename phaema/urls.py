@@ -52,6 +52,7 @@ urlpatterns = [
     path("changes/<int:pk>/", core_views.change_detail, name="change"),
     path("text-size/<str:size>/", core_views.set_text_size, name="text-size"),
     path("theme/<str:theme>/", core_views.set_theme, name="theme"),
+    path("language/<str:code>/", core_views.set_language, name="language"),
     path("style/<str:skin>/", core_views.set_skin, name="skin"),
     path("files/<path:path>", core_views.protected_file, name="file"),
     path("properties/", include("apps.properties.urls")),

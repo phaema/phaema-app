@@ -19,7 +19,8 @@ def test_pages_carry_a_content_security_policy_with_a_nonce(client):
     nonce = policy.split("'nonce-")[1].split("'")[0]
     page = response.content.decode()
     assert f'nonce="{nonce}"' in page
-    assert page.count("<script") == page.count("nonce=") + page.count("src=")  # no inline script without a nonce
+    data_blocks = page.count('type="application/json"')  # data blocks, never run
+    assert page.count("<script") - data_blocks == page.count("nonce=") + page.count("src=")  # inline code has a nonce
     assert response["Permissions-Policy"].startswith("camera=()")
 
 

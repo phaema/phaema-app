@@ -1,6 +1,9 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // Shows a PDF inside PHAEMA with PDF.js (static/vendor/pdfjs). The page works without this file: it then offers
 // the document to open in the browser or download.
+// Words shown by this script, translated on the server (base.html puts them in #phaema-text).
+const PHAEMA_TEXT = (() => { try { return JSON.parse(document.getElementById("phaema-text").textContent); } catch (e) { return {}; } })();
+const t = (text, values = {}) => (PHAEMA_TEXT[text] || text).replace(/%\((\w+)\)s/g, (_, k) => values[k] ?? "");
 const root = document.querySelector("[data-pdf-view]");
 if (root) start(root).catch((err) => fail(root, err));
 
@@ -80,8 +83,8 @@ async function start(root) {
   const showCount = (evt) => {
     const m = evt.matchesCount || {};
     if (!find.value.trim()) count.textContent = "";
-    else if (m.total) count.textContent = `${m.current} of ${m.total}`;
-    else if (evt.state === 1 || evt.state === undefined) count.textContent = "Not found";   // 1 = FindState.NOT_FOUND
+    else if (m.total) count.textContent = t("%(n)s of %(total)s", { n: m.current, total: m.total });
+    else if (evt.state === 1 || evt.state === undefined) count.textContent = t("Not found");   // 1 = FindState.NOT_FOUND
   };
   eventBus.on("updatefindmatchescount", showCount);
   eventBus.on("updatefindcontrolstate", showCount);

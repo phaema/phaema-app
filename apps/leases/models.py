@@ -11,6 +11,7 @@ from django.core.validators import MinValueValidator
 from django.db import models
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
+from django.utils.translation import ngettext
 
 from apps.core.files import validate_pdf
 from apps.core.models import TimeStampedModel
@@ -435,9 +436,9 @@ class Lease(TimeStampedModel):
         years, rem = divmod(max(months, 0), 12)
         parts = []
         if years:
-            parts.append(f"{years} year{'s' if years != 1 else ''}")
+            parts.append(ngettext("%(n)s year", "%(n)s years", years) % {"n": years})
         if rem:
-            parts.append(f"{rem} month{'s' if rem != 1 else ''}")
+            parts.append(ngettext("%(n)s month", "%(n)s months", rem) % {"n": rem})
         return " ".join(parts) or _("Less than a month")
 
     def key_dates(self, today=None):

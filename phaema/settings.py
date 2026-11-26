@@ -81,7 +81,7 @@ MIDDLEWARE = [
     "apps.core.security_headers.SecurityHeadersMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
-    "django.middleware.locale.LocaleMiddleware",
+    "apps.core.language.LanguageMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
@@ -155,6 +155,8 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalisation: English now, Welsh (cy) structure in place for Welsh councils.
 LANGUAGE_CODE = "en-gb"
 LANGUAGES = [("en", "English"), ("cy", "Cymraeg")]
+# Each person chooses English or Welsh at the top of the page (when the council offers Welsh); see apps/core/language.py.
+LANGUAGE_COOKIE_NAME = "phaema_language"
 LOCALE_PATHS = [BASE_DIR / "locale"]
 TIME_ZONE = "Europe/London"
 USE_I18N = True
