@@ -40,7 +40,8 @@ def test_report_only_and_off(client, settings):
 
 def test_extra_map_sources(client, settings):
     settings.PHAEMA_CSP_IMG_SOURCES = ["https://tiles.example.gov.uk"]
-    assert "https://tiles.example.gov.uk" in client.get("/login/")["Content-Security-Policy"]
+    directives = dict(part.split(" ", 1) for part in client.get("/login/")["Content-Security-Policy"].split("; "))
+    assert directives["img-src"].split()[-1] == "https://tiles.example.gov.uk"
 
 
 def _entry(user=None):
