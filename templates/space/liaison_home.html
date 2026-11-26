@@ -1,0 +1,27 @@
+{% extends "base.html" %}{% load i18n humanize %}
+{% block title %}{% translate "Your buildings" %}{% endblock %}
+{% block help_page %}occupier-contacts{% endblock %}
+{% block content %}
+<h1 class="govuk-heading-l">{% translate "Your buildings" %}</h1>
+<p class="govuk-body">{% blocktranslate with names=named|join:", " %}The council buildings used by {{ names }}, from the estates team's records.{% endblocktranslate %}
+  {% if can_record %}{% translate "Open a building to record how many people are based there." %}{% else %}{% translate "You can see these figures; your property liaison keeps them up to date." %}{% endif %}</p>
+{% if rows %}
+<table class="govuk-table">
+  <caption class="govuk-table__caption govuk-visually-hidden">{% translate "Your buildings" %}</caption>
+  <thead class="govuk-table__head"><tr class="govuk-table__row">
+    <th scope="col" class="govuk-table__header">{% translate "Building" %}</th>
+    <th scope="col" class="govuk-table__header">{% translate "Occupier" %}</th>
+    <th scope="col" class="govuk-table__header govuk-table__header--numeric">{% translate "Space (m²)" %}</th>
+    <th scope="col" class="govuk-table__header govuk-table__header--numeric">{% translate "People" %}</th>
+    <th scope="col" class="govuk-table__header govuk-table__header--numeric">{% translate "Capacity" %}</th></tr></thead>
+  <tbody class="govuk-table__body">{% for r in rows %}<tr class="govuk-table__row">
+    <td class="govuk-table__cell"><a class="govuk-link" href="{% url 'occupier:building' r.building.pk %}">{{ r.building.name }}</a><br><span class="govuk-body-s">{{ r.building.reference }}</span></td>
+    <td class="govuk-table__cell">{% for h in r.holdings %}{{ h.occupier.name }}{% if not forloop.last %}<br>{% endif %}{% endfor %}</td>
+    <td class="govuk-table__cell govuk-table__cell--numeric">{% for h in r.holdings %}{{ h.total|floatformat:0|intcomma }}{% if not forloop.last %}<br>{% endif %}{% endfor %}</td>
+    <td class="govuk-table__cell govuk-table__cell--numeric">{{ r.people|default:"–" }}</td>
+    <td class="govuk-table__cell govuk-table__cell--numeric">{{ r.capacity|floatformat:0|default:"–" }}</td></tr>{% endfor %}</tbody>
+</table>
+{% else %}
+<div class="govuk-inset-text">{% translate "The estates team has not recorded your department in any building yet. Contact them if this is wrong." %}</div>
+{% endif %}
+{% endblock %}

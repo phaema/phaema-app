@@ -1,0 +1,17 @@
+{% extends "base.html" %}{% load i18n %}
+{% block title %}{% translate "Check a headcount" %}{% endblock %}
+{% block help_page %}occupier-contacts{% endblock %}
+{% block content %}
+<span class="govuk-caption-l">{{ item.building.reference }} {{ item.building.name }}</span>
+<h1 class="govuk-heading-l">{% translate "Check a headcount from a department" %}</h1>
+<dl class="govuk-summary-list">
+  <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Occupier" %}</dt><dd class="govuk-summary-list__value">{{ item.occupier.name }}</dd></div>
+  <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "People" %}</dt><dd class="govuk-summary-list__value">{{ item.people }}{% if item.fte %} ({{ item.fte }} FTE){% endif %}, {% blocktranslate with d=item.counted_on|date:"j F Y" %}as at {{ d }}{% endblocktranslate %}</dd></div>
+  <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Before that" %}</dt><dd class="govuk-summary-list__value">{% if earlier %}{{ earlier.people }}, {% blocktranslate with d=earlier.counted_on|date:"j F Y" %}as at {{ d }}{% endblocktranslate %}{% else %}{% translate "No earlier figure" %}{% endif %}</dd></div>
+  <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Entered by" %}</dt><dd class="govuk-summary-list__value">{{ item.source }}{% if item.created_by.email %}, <a class="govuk-link" href="mailto:{{ item.created_by.email }}">{{ item.created_by.email }}</a>{% endif %}</dd></div>
+</dl>
+{% if item.checked_on %}<p class="govuk-body">{% blocktranslate with who=item.checked_by.get_full_name d=item.checked_on|date:"j F Y" %}Checked by {{ who }} on {{ d }}.{% endblocktranslate %}</p>
+{% else %}<form method="post">{% csrf_token %}<button class="govuk-button" data-module="govuk-button">{% translate "Mark as checked" %}</button></form>
+<p class="govuk-body-s">{% translate "If the figure looks wrong, contact the person who entered it. The figure is already in use; an administrator can correct it in Manage data, Headcounts." %}</p>{% endif %}
+{% if can_open_space %}<p class="govuk-body"><a class="govuk-link" href="{% url 'space:building' item.building_id %}">{% translate "Space and occupiers for this building" %}</a></p>{% endif %}
+{% endblock %}

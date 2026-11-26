@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 from django.urls import path
 
-from . import views
+from . import liaison_views, views
 
 app_name = "space"
 
@@ -11,4 +11,5 @@ urlpatterns = [
     path("occupiers/", views.occupiers, name="occupiers"),
     path("occupiers/<int:pk>/", views.occupier, name="occupier"),
     path("costs/", views.estate_costs, name="costs"),
+    path("headcount/<int:pk>/check/", liaison_views.check, name="headcount-check"),
 ]

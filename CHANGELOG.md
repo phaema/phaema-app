@@ -24,6 +24,10 @@ Everything since 0.9.0 (10 to 26 November 2026).
   (Manage data, API tokens), or set `PHAEMA_API_PASSWORD_SIGN_IN=True` while you move them over.
 
 ### Added
+- Departments can see their own buildings: a department's property liaison, and read-only people such as the head of
+  service, sign in without a role and see the buildings their department uses, the stacking plan and their own
+  space, people and capacity. The liaison records headcount, which the building's managing surveyor checks from
+  their dashboard (#109).
 - API tokens for other systems: read only or read and change, limited to parts of the API, an end date of at most
   two years, cancelled on their own, stored only as a hash and named in the change log (#103).
 - Welsh (Cymraeg) interface, as a draft awaiting review by a qualified translator. An administrator offers it in

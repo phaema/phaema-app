@@ -53,7 +53,8 @@ BRINGS_TOGETHER = [
      "strategy's objectives and action plan, a five-year pipeline of property events and an annual health check, "
      "organised around the RICS guidance on public sector asset management."),
     ("Space and occupation costs", "Who occupies each operational building, floor by floor, how well the space is "
-     "used, and what occupation costs each department."),
+     "used, and what occupation costs each department. Departments see their own buildings and keep their "
+     "headcount up to date."),
     ("Rents and service charges, if wanted", "Optional ledgers that feed the council's finance system, or leave this "
      "to the systems it already has."),
 ]

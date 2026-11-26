@@ -30,6 +30,9 @@ PHAEMA is in alpha (0.9.x). The first eight weeks built the core (below); the fe
 | 26 November 2026 | Content Security Policy, HSTS and other browser protections; audit trail locked in the database; Ruff linting and a coverage floor in CI; changelog and release process; procurement and information governance pack; Welsh (Cymraeg) interface as a draft for review | Done |
 | 26 November 2026 | Scoped API tokens: read only or read and change, limited to parts of the API, end dates, cancelling, named in the change log; password sign-in to the API off by default | Done |
 | 26 November 2026 | Letter templates limited to merge fields, if, for and formatting filters; API description builds without warnings | Done |
+| 26 November 2026 | External review fixes: file access by record, API model checks, bulk changes in the change log | Done |
+| 27 November 2026 | Departments see their own buildings: property liaisons record headcount for the managing surveyor to check | Done |
+| Before beta | Tenant portal with GOV.UK Notify e-billing; then repair reports and requests shared by tenants and departments | Planned |
 | Before beta | Microsoft 365 email and calendar; property events pipeline; annual health check; site visit sheet level B; repository mirror | Planned |
 
 ## Future work

@@ -1,0 +1,60 @@
+{% extends "base.html" %}{% load i18n humanize %}
+{% block title %}{{ object.name }}{% endblock %}
+{% block help_page %}occupier-contacts{% endblock %}
+{% block breadcrumbs %}<div class="govuk-breadcrumbs"><ol class="govuk-breadcrumbs__list">
+  <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="{% url 'occupier:home' %}">{% translate "Your buildings" %}</a></li></ol></div>{% endblock %}
+{% block content %}
+{% if messages %}{% for m in messages %}<div class="govuk-{% if m.tags == 'error' %}error-summary{% else %}notification-banner govuk-notification-banner--success{% endif %}" role="alert"><p class="govuk-body govuk-!-margin-bottom-0">{{ m }}</p></div>{% endfor %}{% endif %}
+<span class="govuk-caption-l">{{ object.reference }}</span>
+<h1 class="govuk-heading-l">{{ object.name }}</h1>
+<dl class="govuk-summary-list">
+  <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Address" %}</dt><dd class="govuk-summary-list__value">{{ object.address|default:"–" }}</dd></div>
+  <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Estates contact" %}</dt><dd class="govuk-summary-list__value">{% if surveyor %}{{ surveyor.get_full_name|default:surveyor.get_username }}{% if surveyor.email %}, <a class="govuk-link" href="mailto:{{ surveyor.email }}">{{ surveyor.email }}</a>{% endif %}{% else %}{% translate "The estates team" %}{% endif %}</dd></div>
+</dl>
+
+{% include "space/_stacking.html" %}
+
+<h2 class="govuk-heading-m">{% translate "Your space and people" %}</h2>
+{% if holdings %}
+<table class="govuk-table">
+  <thead class="govuk-table__head"><tr class="govuk-table__row">
+    <th scope="col" class="govuk-table__header">{% translate "Occupier" %}</th>
+    <th scope="col" class="govuk-table__header govuk-table__header--numeric">{% translate "Own space (m²)" %}</th>
+    <th scope="col" class="govuk-table__header govuk-table__header--numeric">{% translate "Share of shared (m²)" %}</th>
+    <th scope="col" class="govuk-table__header govuk-table__header--numeric">{% translate "People" %}</th>
+    <th scope="col" class="govuk-table__header govuk-table__header--numeric">{% translate "Capacity" %}</th>
+    <th scope="col" class="govuk-table__header govuk-table__header--numeric">{% translate "Use" %}</th></tr></thead>
+  <tbody class="govuk-table__body">{% for h in holdings %}<tr class="govuk-table__row">
+    <td class="govuk-table__cell"><span class="phaema-stack__swatch" style="background: {{ h.colour }};" aria-hidden="true"></span>{{ h.occupier.name }}</td>
+    <td class="govuk-table__cell govuk-table__cell--numeric">{{ h.area|floatformat:0|intcomma }}</td>
+    <td class="govuk-table__cell govuk-table__cell--numeric">{{ h.shared|floatformat:0|intcomma }}</td>
+    <td class="govuk-table__cell govuk-table__cell--numeric">{% if h.people is not None %}{{ h.people }}<br><span class="govuk-body-s">{% blocktranslate with d=h.people_on|date:"j M Y" %}as at {{ d }}{% endblocktranslate %}</span>{% else %}–{% endif %}</td>
+    <td class="govuk-table__cell govuk-table__cell--numeric">{{ h.capacity|floatformat:0|default:"–" }}</td>
+    <td class="govuk-table__cell govuk-table__cell--numeric">{% if h.utilisation is not None %}{{ h.utilisation }}%{% else %}–{% endif %}</td></tr>{% endfor %}</tbody>
+</table>
+<p class="govuk-body-s">{% translate "Capacity is the desks or places in the space you hold, recorded by the estates team. If it looks wrong, tell your estates contact." %}</p>
+{% endif %}
+
+{% if recordable %}
+<h2 class="govuk-heading-m">{% translate "Record how many people are based here" %}</h2>
+<form method="post" novalidate>{% csrf_token %}
+  {% if recordable|length > 1 %}<div class="govuk-form-group"><label class="govuk-label" for="occupier">{% translate "Occupier" %}</label>
+    <select class="govuk-select" id="occupier" name="occupier">{% for o in recordable %}<option value="{{ o.pk }}">{{ o.name }}</option>{% endfor %}</select></div>
+  {% else %}<input type="hidden" name="occupier" value="{{ recordable.0.pk }}">{% endif %}
+  <div class="govuk-form-group"><label class="govuk-label" for="people">{% translate "People based in this building" %}</label>
+    <div class="govuk-hint" id="people-hint">{% translate "Everyone whose usual place of work is here, whether or not they come in every day. A count only: no names." %}</div>
+    <input class="govuk-input govuk-input--width-5" id="people" name="people" type="text" inputmode="numeric" aria-describedby="people-hint" required></div>
+  <div class="govuk-form-group"><label class="govuk-label" for="fte">{% translate "Full-time equivalent (optional)" %}</label>
+    <input class="govuk-input govuk-input--width-5" id="fte" name="fte" type="text" inputmode="decimal"></div>
+  <div class="govuk-form-group"><label class="govuk-label" for="counted_on">{% translate "As at" %}</label>
+    <input class="govuk-input govuk-input--width-10" id="counted_on" name="counted_on" type="date" value="{{ today|date:'Y-m-d' }}" max="{{ today|date:'Y-m-d' }}"></div>
+  <button class="govuk-button" data-module="govuk-button">{% translate "Record headcount" %}</button>
+</form>
+<p class="govuk-body-s">{% translate "The figure is used at once. Your estates contact checks it and may ask you about it." %}</p>
+{% endif %}
+
+{% if history %}
+<h2 class="govuk-heading-m">{% translate "Earlier headcounts" %}</h2>
+<ul class="govuk-list">{% for c in history %}<li>{{ c.counted_on|date:"j M Y" }}: {{ c.occupier.name }}, {{ c.people }}{% if c.fte %} ({{ c.fte }} FTE){% endif %}{% if c.from_department and not c.checked_on %} <strong class="govuk-tag govuk-tag--yellow">{% translate "Waiting to be checked" %}</strong>{% endif %}</li>{% endfor %}</ul>
+{% endif %}
+{% endblock %}
