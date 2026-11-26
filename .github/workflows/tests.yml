@@ -6,6 +6,7 @@ on:
   pull_request:
 
 # The workflow only reads the code. Nothing here can write to the repository.
+# Actions are pinned to a commit hash (the version in the comment); Dependabot proposes updates.
 permissions:
   contents: read
 
@@ -32,10 +33,10 @@ jobs:
       # A throwaway key for the tests only (PHAEMA refuses to start without a long one).
       SECRET_KEY: ci-only-not-secret-0000000000000000000000000000000000
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262  # v4.4.0
         with:
           persist-credentials: false
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065  # v5.6.0
         with:
           python-version: "3.12"
           cache: pip
@@ -46,17 +47,36 @@ jobs:
         env:
           DEBUG: "False"
           SECURE_COOKIES: "True"
-      - run: python -m pytest
+      - run: pip install pytest-cov
+      # COVERAGE_CORE=sysmon keeps the coverage overhead small on Python 3.12 and later.
+      - run: python -m pytest --cov=apps --cov-report=term:skip-covered --cov-fail-under="$COVERAGE_MINIMUM"
+        env:
+          COVERAGE_CORE: sysmon
+          COVERAGE_MINIMUM: "90"  # measured 95% on 26 November 2026
+
+  # Style and common mistakes (Ruff, configured in ruff.toml).
+  lint:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262  # v4.4.0
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065  # v5.6.0
+        with:
+          python-version: "3.12"
+      - run: pip install "ruff>=0.15,<1"
+      - run: ruff check --output-format github .
 
   # Known vulnerabilities in the Python packages PHAEMA uses.
   dependencies:
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262  # v4.4.0
         with:
           persist-credentials: false
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065  # v5.6.0
         with:
           python-version: "3.12"
       - run: pip install pip-audit
@@ -67,7 +87,7 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262  # v4.4.0
         with:
           persist-credentials: false
       - run: docker build --tag phaema:ci .

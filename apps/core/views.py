@@ -19,7 +19,7 @@ from apps.leases import events as lease_events
 from apps.leases.models import LeaseEvent
 from apps.properties.models import Property
 
-from .models import ModuleSettings, AuditEntry
+from .models import AuditEntry, ModuleSettings
 
 TEXT_SIZES = {"smaller": "Smaller", "standard": "Standard", "large": "Large", "largest": "Largest"}
 THEMES = {"standard": "Standard", "dark": "Dark", "contrast": "High contrast", "auto": "Match my device"}
@@ -200,7 +200,7 @@ def change_detail(request, pk):
                 field = model._meta.get_field(name)
                 label = str(field.verbose_name)
                 before_txt, after_txt = _display(field, before), _display(field, after)
-            except Exception:  # field removed since the change was made
+            except Exception:  # noqa: S110 - field removed since the change was made: show the raw name
                 pass
         rows.append((label, before_txt, after_txt))
     return render(request, "core/change_detail.html", {"entry": entry, "rows": rows, "target_url": _target(entry)})

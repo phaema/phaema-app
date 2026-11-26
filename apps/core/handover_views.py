@@ -33,7 +33,7 @@ def hand_over(request):
     if old and request.method == "POST":
         choices, wrong = {}, []
         rows = handover.summary(old, building)
-        for item, count, receivers in rows:
+        for item, _count, receivers in rows:
             pick = _int(request.POST.get(f"to_{item.key}"))
             if pick:
                 match = next((u for u in receivers if u.pk == pick), None)

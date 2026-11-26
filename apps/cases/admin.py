@@ -3,7 +3,6 @@ from django import forms
 from django.contrib import admin
 
 from apps.core.admin_roles import RoleAdminMixin
-
 from apps.properties.report import PARTS
 
 from .models import STAGE_ORDER, Case, CaseType, CaseTypeChecklistItem, CaseTypeTask, SiteVisit, SiteVisitAnswer, Stage

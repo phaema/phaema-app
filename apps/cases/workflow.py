@@ -4,7 +4,7 @@ from datetime import date, timedelta
 
 from django.db import transaction
 
-from apps.core.roles import CONTRIBUTORS, is_administrator, role_of, SURVEYORS
+from apps.core.roles import CONTRIBUTORS, SURVEYORS, is_administrator, role_of
 from apps.leases.models import LeaseEvent
 
 from .models import STAGE_ORDER, Case, CaseTask, CaseType

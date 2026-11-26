@@ -17,8 +17,7 @@ from apps.properties.models import Property
 from apps.reports.export import csv_response, xlsx_response
 
 from . import programme, workflow
-from .models import (AssetClass, AuditReview, Classification, Valuation, ValuationComponent, ValuationSettings,
-                     Valuer)
+from .models import AssetClass, AuditReview, Classification, Valuation, ValuationComponent, ValuationSettings, Valuer
 from .seed import FROM_PURPOSE
 
 Col = namedtuple("Col", "label type")

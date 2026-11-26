@@ -92,9 +92,9 @@ def _fetch_json(url, data=None):
     if not url.startswith("https://") and not (settings.DEBUG and url.startswith("http://")):
         raise SsoError("The sign-in service address must start with https://.")
     body = urllib.parse.urlencode(data).encode() if data is not None else None
-    request = urllib.request.Request(url, data=body, headers={"Accept": "application/json"})
+    request = urllib.request.Request(url, data=body, headers={"Accept": "application/json"})  # noqa: S310
     try:
-        with urllib.request.urlopen(request, timeout=TIMEOUT) as response:  # noqa: S310 (scheme checked above)
+        with urllib.request.urlopen(request, timeout=TIMEOUT) as response:  # noqa: S310 - scheme checked above
             return json.loads(response.read().decode("utf-8"))
     except urllib.error.HTTPError as err:
         detail = err.read().decode("utf-8", "replace")[:500]

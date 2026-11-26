@@ -16,7 +16,7 @@ from django.views.decorators.debug import sensitive_post_parameters
 from . import two_step
 
 PENDING = "two_step_pending"
-SETUP_SECRET = "two_step_setup_secret"
+SETUP_SECRET = "two_step_setup_secret"  # noqa: S105 - a session key name, not a secret
 SHOW_CODES = "two_step_show_codes"
 MAX_ATTEMPTS = 5
 PENDING_SECONDS = 5 * 60

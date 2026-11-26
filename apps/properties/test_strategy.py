@@ -8,12 +8,11 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from django.urls import reverse
 
 from apps.cases import workflow
-from apps.cases.models import Case, CaseType
+from apps.cases.models import CaseType
 from apps.core.models import ModuleSettings
 from apps.core.roles import SURVEYORS, VIEWERS
 from apps.properties import importer, strategy
-from apps.properties.models import (AssetStrategy, AssetStrategyOption, Property, PurposeCategory,
-                                    SuitabilityAssessment)
+from apps.properties.models import AssetStrategy, AssetStrategyOption, Property, PurposeCategory, SuitabilityAssessment
 
 PASSWORD = "a-long-test-password"
 TODAY = date.today()

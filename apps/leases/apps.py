@@ -8,9 +8,9 @@ class LeasesConfig(AppConfig):
     verbose_name = "Leases and licences"
 
     def ready(self):
-        from apps.core import audit
-
         from django.db.models.signals import m2m_changed, post_delete, post_save
+
+        from apps.core import audit
 
         from . import workflow
         from .models import BreakOption, Lease, LeaseDocument, LeaseEvent, LeaseOption, Party, RentScheduleEntry

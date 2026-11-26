@@ -3,8 +3,19 @@ from django.contrib import admin
 
 from apps.core.admin_roles import RoleAdminMixin
 
-from .models import (BUILDING_TYPES, BuildingCost, CostLine, CostSharing, FixedShare, Headcount, Occupation,
-                     Occupier, Space, UseFigure, UseMeasure)
+from .models import (
+    BUILDING_TYPES,
+    BuildingCost,
+    CostLine,
+    CostSharing,
+    FixedShare,
+    Headcount,
+    Occupation,
+    Occupier,
+    Space,
+    UseFigure,
+    UseMeasure,
+)
 
 
 class _BuildingChoices:

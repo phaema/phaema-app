@@ -10,12 +10,23 @@ class CasesConfig(AppConfig):
 
     def ready(self):
         from apps.core import audit
+        from apps.core.models import StaffProfile
         from apps.leases.models import LeaseEvent
 
-        from apps.core.models import StaffProfile
-
-        from .models import (Approval, Case, CaseDocument, CaseNote, CaseTask, CaseType, CaseTypeChecklistItem,
-                             CaseTypeTask, Correspondence, SiteVisit, SiteVisitAnswer, SiteVisitPhoto)
+        from .models import (
+            Approval,
+            Case,
+            CaseDocument,
+            CaseNote,
+            CaseTask,
+            CaseType,
+            CaseTypeChecklistItem,
+            CaseTypeTask,
+            Correspondence,
+            SiteVisit,
+            SiteVisitAnswer,
+            SiteVisitPhoto,
+        )
 
         for model in (Approval, Case, CaseDocument, CaseNote, CaseTask, CaseType, CaseTypeChecklistItem, CaseTypeTask,
                       Correspondence, SiteVisit, SiteVisitAnswer, SiteVisitPhoto,

@@ -7,8 +7,7 @@ from apps.core.models import ModuleSettings
 from apps.properties.models import Property
 
 from . import programme, workflow
-from .models import (AssetClass, Classification, IndexPoint, Valuation, ValuationComponent, ValuationSettings,
-                     Valuer)
+from .models import AssetClass, Classification, IndexPoint, Valuation, ValuationComponent, ValuationSettings, Valuer
 from .seed import FROM_PURPOSE
 
 MARK = "DEMO"
@@ -49,7 +48,7 @@ def load(today=None):
         IndexPoint.objects.get_or_create(index=index, on=date(year, 3, 31), defaults={
             "value": D(value), "source": "Fictional demonstration values, not the published index"})
     props = {p.reference: p for p in Property.objects.filter(reference__startswith="DM-", parent__isnull=True)}
-    for ref, prop in props.items():
+    for prop in props.values():
         code = FROM_PURPOSE.get(prop.holding_purpose)
         if code in classes:
             Classification.objects.create(property=prop, asset_class=classes[code], effective_from=date(2021, 4, 1),

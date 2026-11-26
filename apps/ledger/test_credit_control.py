@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 """Interest on late rent, credit control stages, payment plans and the rent deposit account."""
-from datetime import date, timedelta
+from datetime import date
 from decimal import Decimal
 
 import pytest

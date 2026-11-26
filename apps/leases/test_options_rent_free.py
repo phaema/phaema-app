@@ -10,7 +10,6 @@ from django.urls import reverse
 
 from apps.core.models import ModuleSettings
 from apps.core.roles import ADMINISTRATORS
-from apps.leases import workflow
 from apps.leases.models import Lease, LeaseEvent, LeaseOption, Party
 from apps.properties.models import Property
 

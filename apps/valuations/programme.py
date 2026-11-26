@@ -156,7 +156,7 @@ def open_review(prop, reasons, user=None):
 def schedule(year_end):
     """Every classified asset with its latest accepted valuation at the year end (VA-09)."""
     rows = []
-    for pid, c in sorted(current_classes(year_end).items(), key=lambda i: i[1].property.reference):
+    for _pid, c in sorted(current_classes(year_end).items(), key=lambda i: i[1].property.reference):
         v = last_accepted(c.property, year_end)
         rows.append((c.property, c.asset_class, v))
     return rows

@@ -48,7 +48,7 @@ def test_payments_run_from_the_year_start_to_the_lease_end(landlord):
 
 
 def test_ifrs16_lease_end_overrides_the_contract_and_runs_past_it(landlord):
-    lease = held(landlord, "H2", date(2020, 1, 1), date(2027, 6, 30), freq="annually",
+    held(landlord, "H2", date(2020, 1, 1), date(2027, 6, 30), freq="annually",
                  ifrs16_lease_end=date(2030, 12, 31), ifrs16_notes="Renewal reasonably certain")
     (row,) = ifrs16.gather(2026).rows
     assert row.lease_end == date(2030, 12, 31) and "set on the agreement" in row.lease_end_source

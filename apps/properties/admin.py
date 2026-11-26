@@ -8,9 +8,21 @@ from django.core.exceptions import ValidationError
 from apps.core.admin_roles import AdministratorOnlyEditingMixin, RoleAdminMixin, RoleInlineMixin
 from apps.core.roles import is_administrator
 
-from .models import (AssetStrategy, AssetStrategyOption, InspireParcel, Portfolio, Property, PropertyCost,
-                     PropertyPhoto, PropertyPlan, PropertyUse, PurposeCategory, SuitabilityAssessment, Title,
-                     TitleDocument)
+from .models import (
+    AssetStrategy,
+    AssetStrategyOption,
+    InspireParcel,
+    Portfolio,
+    Property,
+    PropertyCost,
+    PropertyPhoto,
+    PropertyPlan,
+    PropertyUse,
+    PurposeCategory,
+    SuitabilityAssessment,
+    Title,
+    TitleDocument,
+)
 
 
 class TitleInline(admin.TabularInline):

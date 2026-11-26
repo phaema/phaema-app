@@ -130,8 +130,7 @@ def can_edit(user, obj):
         return True
     if role != SURVEYORS or obj is None:
         return False
-    from apps.leases.models import (BreakOption, Lease, LeaseDocument, LeaseEvent, LeaseOption, Party,
-                                    RentScheduleEntry)
+    from apps.leases.models import BreakOption, Lease, LeaseDocument, LeaseEvent, LeaseOption, Party, RentScheduleEntry
     from apps.properties.models import Property, PropertyPhoto, PropertyPlan
 
     if isinstance(obj, Property):

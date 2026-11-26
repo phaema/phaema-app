@@ -17,8 +17,8 @@ from django.views.decorators.http import require_POST
 from django.views.generic import ListView
 
 from apps.core import places
-from apps.core.models import ModuleSettings, supervisor_of
 from apps.core.access import module_view
+from apps.core.models import ModuleSettings, supervisor_of
 from apps.core.roles import SURVEYORS, can_edit, is_administrator
 from apps.core.tables import sortable
 from apps.properties.models import Property
@@ -27,7 +27,6 @@ from apps.reports.mixins import ExportMixin
 
 from . import library, responsibility, workflow
 from .models import Category, Component, Contract, Contractor, Job, JobDocument, PlannedTask, Responsibility
-
 
 maintenance_view = module_view("maintenance", "maintenance/off.html")  # switched on for the council and opened by an access area
 

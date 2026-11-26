@@ -106,7 +106,8 @@ def test_lease_documents(client, make_user, db, tmp_path):
 
     # The managing surveyor of the premises can add documents; others cannot.
     owner = lease.properties.first().managing_surveyor
-    owner.set_password("a-long-test-password"); owner.save()
+    owner.set_password("a-long-test-password")
+    owner.save()
     client.force_login(owner)
     assert "Add documents" in client.get(lease.get_absolute_url()).content.decode()
     other = make_user("sue", "Surveyors")

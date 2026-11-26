@@ -8,12 +8,21 @@ class PropertiesConfig(AppConfig):
     verbose_name = "Property register"
 
     def ready(self):
-        from apps.core import audit
-
         from django.db.models.signals import post_delete
 
-        from .models import (AssetStrategy, AssetStrategyOption, Property, PropertyPhoto, PropertyPlan, PurposeCategory,
-                             SuitabilityAssessment, Title, TitleDocument)
+        from apps.core import audit
+
+        from .models import (
+            AssetStrategy,
+            AssetStrategyOption,
+            Property,
+            PropertyPhoto,
+            PropertyPlan,
+            PurposeCategory,
+            SuitabilityAssessment,
+            Title,
+            TitleDocument,
+        )
 
         for model in (Property, Title, PropertyPhoto, TitleDocument, PropertyPlan, AssetStrategy, AssetStrategyOption,
                       PurposeCategory, SuitabilityAssessment):

@@ -1,23 +1,13 @@
-# Weekly pull requests for updated Python packages, GitHub Actions and container images.
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# Dependabot proposes updates as pull requests; nothing merges without review.
 version: 2
 updates:
-  - package-ecosystem: pip
-    directory: /
-    schedule:
-      interval: weekly
-    open-pull-requests-limit: 5
-    groups:
-      minor-and-patch:
-        update-types: [minor, patch]
   - package-ecosystem: github-actions
     directory: /
     schedule:
-      interval: weekly
-  - package-ecosystem: docker
+      interval: monthly
+  - package-ecosystem: pip
     directory: /
     schedule:
-      interval: weekly
-  - package-ecosystem: docker
-    directory: /docker/db
-    schedule:
-      interval: weekly
+      interval: monthly
+    open-pull-requests-limit: 5

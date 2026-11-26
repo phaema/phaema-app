@@ -78,6 +78,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    "apps.core.security_headers.SecurityHeadersMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.locale.LocaleMiddleware",
@@ -206,12 +207,26 @@ SPECTACULAR_SETTINGS = {
     "LICENSE": {"name": "AGPL-3.0-or-later"},
 }
 
+# Content-Security-Policy (apps/core/security_headers.py): on by default. Report-only mode sends the policy without
+# enforcing it, to find anything it would block; extra map tile or API addresses can be listed.
+PHAEMA_CSP_ENABLED = env.bool("PHAEMA_CSP_ENABLED", default=True)
+PHAEMA_CSP_REPORT_ONLY = env.bool("PHAEMA_CSP_REPORT_ONLY", default=False)
+PHAEMA_CSP_IMG_SOURCES = env.list("PHAEMA_CSP_IMG_SOURCES", default=[])
+PHAEMA_CSP_CONNECT_SOURCES = env.list("PHAEMA_CSP_CONNECT_SOURCES", default=[])
+PHAEMA_CSP_FORM_ACTIONS = env.list("PHAEMA_CSP_FORM_ACTIONS", default=[])
+
 # Security settings for production (DEBUG off).
 if not DEBUG:
     SESSION_COOKIE_SECURE = env.bool("SECURE_COOKIES", default=True)
     CSRF_COOKIE_SECURE = env.bool("SECURE_COOKIES", default=True)
     SECURE_CONTENT_TYPE_NOSNIFF = True
     X_FRAME_OPTIONS = "DENY"
+    # HTTPS only, remembered by browsers for a year. The Caddy proxy also sends this; a council using its own proxy
+    # gets it from here. Leave the redirect to the proxy unless PHAEMA is reached directly.
+    SECURE_HSTS_SECONDS = env.int("SECURE_HSTS_SECONDS", default=31536000)
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = env.bool("SECURE_HSTS_INCLUDE_SUBDOMAINS", default=False)
+    SECURE_SSL_REDIRECT = env.bool("SECURE_SSL_REDIRECT", default=False)
+    SECURE_REDIRECT_EXEMPT = [r"^health/$"]
 
 # Email (reminders). Without EMAIL_HOST, emails are written to the log instead of being sent.
 if env("EMAIL_HOST", default=""):
