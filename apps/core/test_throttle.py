@@ -54,6 +54,7 @@ def test_one_connection_trying_many_accounts_is_paused(client, make_user, settin
 
 def test_api_password_guessing_is_limited_too(client, make_user, settings):
     settings.PHAEMA_SIGNIN_MAX_PER_ACCOUNT = 3
+    settings.PHAEMA_API_PASSWORD_SIGN_IN = True
 
     def api(password):
         token = base64.b64encode(f"pat:{password}".encode()).decode()

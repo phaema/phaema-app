@@ -3,6 +3,7 @@
 from contextvars import ContextVar
 
 _current_user = ContextVar("phaema_current_user", default=None)
+_current_via = ContextVar("phaema_current_via", default="")
 
 
 def get_current_user():
@@ -12,15 +13,28 @@ def get_current_user():
     return None
 
 
+def get_current_via():
+    return _current_via.get()
+
+
+def set_api_user(user, via):
+    """Called by the API's sign-in, which happens after the middleware has run, so that the change log names
+    the account and how the change arrived. The middleware resets both at the end of the request."""
+    _current_user.set(user)
+    _current_via.set(via[:120])
+
+
 class CurrentUserMiddleware:
     def __init__(self, get_response):
         self.get_response = get_response
 
     def __call__(self, request):
         token = _current_user.set(getattr(request, "user", None))
+        via = _current_via.set("")
         try:
             return self.get_response(request)
         finally:
+            _current_via.reset(via)
             _current_user.reset(token)
 
 

@@ -5,9 +5,9 @@ from decimal import Decimal
 from django.contrib.contenttypes.models import ContentType
 from django.db.models.signals import post_delete, post_save, pre_save
 
-from .middleware import get_current_user
+from .middleware import get_current_user, get_current_via
 
-_EXCLUDED = {"created_at", "updated_at", "created_by", "updated_by"}
+_EXCLUDED = {"created_at", "updated_at", "created_by", "updated_by", "key_hash"}
 
 
 def _snapshot(instance):
@@ -33,6 +33,7 @@ def _record(instance, action, changes):
         object_repr=str(instance)[:255],
         action=action,
         changes=changes,
+        via=get_current_via(),
     )
 
 

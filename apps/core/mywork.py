@@ -161,6 +161,16 @@ def build(user, today=None, viewer=None):
         now.append(Item(None, _("Approve"), "cases", f"{c.display_reference} {c.title}", c.get_absolute_url(),
                         _("Waiting for your approval")))
 
+    # API tokens the person made that end soon, so the other system does not stop without warning.
+    if is_administrator(user):
+        from .models import ApiToken
+
+        for tok in ApiToken.objects.filter(created_by=user, revoked_at__isnull=True, expires_on__gte=today,
+                                           expires_on__lte=today + timedelta(days=30)):
+            ahead.append(Item(tok.expires_on, _("API token ends"), "estate", tok.name,
+                              reverse("admin:core_apitoken_change", args=[tok.pk]),
+                              _("Make a new token and give it to the other system before this date")))
+
     data = {"today": today, "horizon": horizon, "cases": cases, "approvals": approvals,
             "property_count": len(props), "jobs": None, "compliance": None, "arrears": None}
 

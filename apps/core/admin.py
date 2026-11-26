@@ -3,7 +3,7 @@ from django import forms
 from django.contrib import admin
 
 from .admin_users import PhaemaUserAdmin
-from .models import AccessArea, AccountRequest, AuditEntry, Cover, ModuleSettings, TextCopy
+from .models import AccessArea, AccountRequest, ApiToken, AuditEntry, Cover, ModuleSettings, TextCopy
 
 
 @admin.register(ModuleSettings)
@@ -47,7 +47,7 @@ class ModuleSettingsAdmin(admin.ModelAdmin):
 
 @admin.register(AuditEntry)
 class AuditEntryAdmin(admin.ModelAdmin):
-    list_display = ("timestamp", "user", "action", "content_type", "object_repr")
+    list_display = ("timestamp", "user", "action", "content_type", "object_repr", "via")
     list_filter = ("action", "content_type")
     search_fields = ("object_repr", "object_id")
     readonly_fields = [f.name for f in AuditEntry._meta.fields]
@@ -177,3 +177,130 @@ class TextCopyAdmin(admin.ModelAdmin):
     def read_again(self, request, queryset):
         count = queryset.update(status=TextCopy.Status.WAITING, attempts=0, error="")
         self.message_user(request, f"{count} documents will be read again within a few minutes.")
+
+
+class ApiTokenForm(forms.ModelForm):
+    resources = forms.MultipleChoiceField(
+        label="Parts of the API", choices=ApiToken.RESOURCES, required=False, widget=forms.CheckboxSelectMultiple,
+        help_text="Tick only what the other system needs. Leave all unticked for every part.")
+
+    class Meta:
+        model = ApiToken
+        fields = ["name", "user", "access", "resources", "expires_on"]
+
+    def __init__(self, *args, **kwargs):
+        from datetime import date, timedelta
+
+        from django.contrib.auth import get_user_model
+
+        from .roles import ROLES
+
+        super().__init__(*args, **kwargs)
+        if "user" in self.fields:
+            self.fields["user"].queryset = (get_user_model()._default_manager
+                                            .filter(is_active=True, groups__name__in=ROLES).distinct()
+                                            .order_by("username"))
+        if "expires_on" in self.fields and not self.initial.get("expires_on"):
+            self.initial["expires_on"] = date.today() + timedelta(days=365)
+
+    def clean_expires_on(self):
+        from datetime import date, timedelta
+
+        value = self.cleaned_data["expires_on"]
+        today = date.today()
+        if value < today:
+            raise forms.ValidationError("The end date must be today or later.")
+        if value > today + timedelta(days=ApiToken.MAX_DAYS):
+            raise forms.ValidationError("A token can last at most two years. Make a new one when it ends.")
+        return value
+
+
+@admin.register(ApiToken)
+class ApiTokenAdmin(admin.ModelAdmin):
+    """Administrators only: tokens are made here, shown once, and cancelled rather than deleted."""
+
+    form = ApiTokenForm
+    list_display = ("name", "prefix_shown", "user", "access", "parts", "expires_on", "last_used_at", "state")
+    list_filter = ("access",)
+    search_fields = ("name", "prefix", "user__username")
+    actions = ["cancel_tokens"]
+
+    def _admin(self, request):
+        from .roles import is_administrator
+
+        return is_administrator(request.user)
+
+    def has_module_permission(self, request):
+        return self._admin(request)
+
+    def has_view_permission(self, request, obj=None):
+        return self._admin(request)
+
+    def has_add_permission(self, request):
+        return self._admin(request)
+
+    def has_change_permission(self, request, obj=None):
+        return self._admin(request)
+
+    def has_delete_permission(self, request, obj=None):
+        return False  # cancelled tokens stay listed, so the change log can be traced back
+
+    def get_fields(self, request, obj=None):
+        if obj is None:
+            return ["name", "user", "access", "resources", "expires_on"]
+        return ["name", "prefix_shown", "user", "access", "parts", "expires_on", "created_at", "created_by",
+                "last_used_at", "last_used_from", "state", "revoked_by"]
+
+    def get_readonly_fields(self, request, obj=None):
+        if obj is None:
+            return []
+        return [f for f in self.get_fields(request, obj) if f != "name"]
+
+    @admin.display(description="Key starts")
+    def prefix_shown(self, obj):
+        return f"{obj.prefix}…"
+
+    @admin.display(description="Parts of the API")
+    def parts(self, obj):
+        labels = dict(ApiToken.RESOURCES)
+        return ", ".join(str(labels.get(r, r)) for r in obj.resources) or "All"
+
+    @admin.display(description="State")
+    def state(self, obj):
+        if obj.revoked_at:
+            return f"Cancelled {obj.revoked_at:%d %b %Y}"
+        return "Working" if obj.is_live() else "Ended"
+
+    def render_change_form(self, request, context, add=False, change=False, form_url="", obj=None):
+        context.update(show_save_and_add_another=False, show_save_and_continue=False)  # the key page comes next
+        return super().render_change_form(request, context, add, change, form_url, obj)
+
+    def save_model(self, request, obj, form, change):
+        if not change:
+            obj.created_by = request.user
+            request._phaema_api_key = obj.issue()
+        super().save_model(request, obj, form, change)
+
+    def response_add(self, request, obj, post_url_continue=None):
+        from django.template.response import TemplateResponse
+
+        key = getattr(request, "_phaema_api_key", None)
+        if not key:
+            return super().response_add(request, obj, post_url_continue)
+        context = {**self.admin_site.each_context(request), "token": obj, "key": key, "parts": self.parts(obj),
+                   "title": "API token made", "opts": self.model._meta}
+        response = TemplateResponse(request, "admin/core/apitoken/issued.html", context)
+        response["Cache-Control"] = "no-store"
+        return response
+
+    @admin.action(description="Cancel the selected tokens")
+    def cancel_tokens(self, request, queryset):
+        from django.utils import timezone
+
+        count = 0
+        for token in queryset.filter(revoked_at__isnull=True):
+            token.revoked_at = timezone.now()
+            token.revoked_by = request.user
+            token.save(update_fields=["revoked_at", "revoked_by"])
+            count += 1
+        self.message_user(request, f"{count} token{'s' if count != 1 else ''} cancelled. They stop working at once.")

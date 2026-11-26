@@ -19,7 +19,7 @@ that choice, it says so.
 | Security testing | Automated on every change: tests with a coverage minimum, CodeQL, Ruff security rules and a dependency vulnerability check. Independent CREST penetration test planned before 1.0. Certifications such as Cyber Essentials Plus and ISO 27001 belong to whoever hosts it, usually the council |
 | Accessibility | Built with the GOV.UK Design System and aimed at WCAG 2.2 AA; not yet independently audited. See the [accessibility statement](accessibility-statement.md) |
 | Browsers | Current Edge, Chrome, Firefox and Safari, on desktop, tablet and phone |
-| Integrations | Open REST API with an OpenAPI description; spreadsheet import; finance export (CSV or Excel) and receipts import; calendar feed; Government Property Data Standard export; open data publishing |
+| Integrations | Open REST API with an OpenAPI description, reached with scoped API tokens; spreadsheet import; finance export (CSV or Excel) and receipts import; calendar feed; Government Property Data Standard export; open data publishing |
 | Data export | Every list and report downloads as Excel or CSV; the whole estate exports in the Government Property Data Standard layout; the database is standard PostgreSQL, so a full copy can be taken at any time |
 | Exit | Nothing to hand back: the council already holds the database and files. Exports above, or a database dump, move the data to another system |
 | Availability | Set by the hosting. The installer's single-server set-up suits most councils; a supplier can run it with a service level agreement |

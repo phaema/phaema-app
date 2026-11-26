@@ -561,6 +561,8 @@ COURSES = [
              "Each case type has its own site visit checklist and choice of property details for the sheet. Change them here and every case of that type follows."),
             (T, "/admin/core/modulesettings/1/change/", "fieldset:has(h2:has-text('Language'))", "Welsh (Cymraeg)",
              "Tick Offer Welsh (Cymraeg) and an English | Cymraeg choice appears at the top of every page. Each person chooses for themselves, and PHAEMA keeps to English until they do. The Welsh is a draft until a qualified translator has reviewed it."),
+            (T, "/admin/core/apitoken/add/", "#apitoken_form", "API tokens",
+             "Other systems use the API with a token, not a password. Name it, choose the account it acts as (never more than that account's role), read only or read and change, the parts it needs and an end date. The token is shown once: copy it into your password manager. Cancel it from the list when it is no longer needed."),
         ],
         "exercise": {"q": "Where do you switch the rent ledger on?", "options": ["Manage data, Module settings", "Reports", "The dashboard"], "answer": 0,
                      "hint": "Manage data lists every setting."},
@@ -571,6 +573,8 @@ COURSES = [
              "why": "Branding is in Module settings."},
             {"q": "Approvals are needed before Decision for a case type. Who sets that?", "options": ["An administrator, in Case types", "Each surveyor", "Nobody"], "answer": 0,
              "why": "It is set per case type."},
+            {"q": "A GIS server needs to read property boundaries. What do you give it?", "options": ["A read-only API token limited to Properties", "Your own username and password", "An administrator account"], "answer": 0,
+             "why": "A token gives only what the system needs, has an end date and can be cancelled on its own."},
             {"q": "Welsh is switched on. Which language does a surveyor see?", "options": ["English, until they choose Cymraeg", "Welsh for everyone", "Whatever their browser is set to"], "answer": 0,
              "why": "Each person chooses; PHAEMA ignores the browser's language."},
         ]}, {

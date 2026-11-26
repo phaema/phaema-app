@@ -40,10 +40,11 @@ class CoreConfig(AppConfig):
 
         # Access areas and cover go in the change log, so it is clear who could see what, and when.
         from . import audit
-        from .models import AccessArea, Cover
+        from .models import AccessArea, ApiToken, Cover
 
         audit.register(Cover)
         audit.register(AccessArea)
+        audit.register(ApiToken)  # made, renamed and cancelled; the key's hash and last use are not logged
 
         def members_changed(sender, instance, action, reverse, pk_set, **kwargs):
             if action not in ("post_add", "post_remove") or not pk_set:

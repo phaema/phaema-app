@@ -240,6 +240,8 @@ class AuditEntry(models.Model):
     object_repr = models.CharField(max_length=255)
     action = models.CharField(max_length=10, choices=Action.choices)
     changes = models.JSONField(default=dict, blank=True)
+    via = models.CharField(_("made through"), max_length=120, blank=True, default="",
+                           help_text=_("How the change arrived when not through the screens, such as an API token."))
 
     class Meta:
         ordering = ["-timestamp"]
@@ -440,3 +442,74 @@ class TextCopy(models.Model):
 
     def __str__(self):
         return self.source.rsplit("/", 1)[-1]
+
+
+class ApiToken(models.Model):
+    """A key for another system to use the API: limited to what it may do and which records it may reach, with an
+    end date, and cancellable on its own. It acts as its account, so it never has more than that account's role.
+    Only a hash of the key is kept; the key itself is shown once, when it is made."""
+
+    class Access(models.TextChoices):
+        READ = "read", _("Read only")
+        CHANGE = "change", _("Read and change")
+
+    RESOURCES = [  # the API router's names for each part
+        ("property", _("Properties")),
+        ("title", _("Titles")),
+        ("lease", _("Leases and licences")),
+        ("party", _("Parties")),
+    ]
+    MAX_DAYS = 731  # two years
+
+    name = models.CharField(_("name"), max_length=80,
+                            help_text=_("What it is for, such as \"GIS layers for QGIS\" or \"Nightly export to finance\"."))
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="api_tokens",
+                             verbose_name=_("acts as"),
+                             help_text=_("The account the token acts for. It can never do more than this account's "
+                                         "role allows. A separate account with the Viewer role is best for "
+                                         "read-only systems."))
+    access = models.CharField(_("access"), max_length=10, choices=Access.choices, default=Access.READ)
+    resources = models.JSONField(_("parts of the API"), default=list, blank=True,
+                                 help_text=_("Leave all unticked for every part."))
+    expires_on = models.DateField(_("ends on"), help_text=_("The last day it works. At most two years ahead."))
+    prefix = models.CharField(_("key starts"), max_length=16, editable=False)
+    key_hash = models.CharField(max_length=64, unique=True, editable=False)
+    created_at = models.DateTimeField(_("made"), auto_now_add=True)
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True, editable=False,
+                                   on_delete=models.SET_NULL, related_name="+", verbose_name=_("made by"))
+    last_used_at = models.DateTimeField(_("last used"), null=True, blank=True, editable=False)
+    last_used_from = models.CharField(_("last used from"), max_length=45, blank=True, editable=False)
+    revoked_at = models.DateTimeField(_("cancelled"), null=True, blank=True, editable=False)
+    revoked_by = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True, editable=False,
+                                   on_delete=models.SET_NULL, related_name="+", verbose_name=_("cancelled by"))
+
+    class Meta:
+        verbose_name = _("API token")
+        verbose_name_plural = _("API tokens")
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"{self.name} ({self.prefix}…)"
+
+    @staticmethod
+    def hash(key):
+        import hashlib
+
+        return hashlib.sha256(key.encode()).hexdigest()
+
+    def issue(self):
+        """Make a new key, keep its hash and return the key. Call before the first save."""
+        import secrets
+
+        key = "phaema_" + secrets.token_urlsafe(32)
+        self.prefix = key[:12]
+        self.key_hash = self.hash(key)
+        return key
+
+    def is_live(self, today=None):
+        from datetime import date
+
+        return self.revoked_at is None and self.expires_on >= (today or date.today())
+
+    def allows(self, resource):
+        return not self.resources or resource in self.resources

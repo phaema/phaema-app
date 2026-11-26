@@ -39,8 +39,13 @@ releases with release notes and a security support period for each will start be
 - Two-step sign-in (multi-factor authentication) with any standard authenticator app (TOTP, RFC 6238), with
   single-use recovery codes. Councils choose whether it is required for administrators (the default), for everyone,
   or optional. Codes cannot be reused, and five wrong codes end the sign-in attempt.
-- The admin site signs in through the same page, so two-step sign-in cannot be bypassed there. The API refuses a
-  username and password for anyone with two-step sign-in.
+- The admin site signs in through the same page, so two-step sign-in cannot be bypassed there.
+- Other systems use the API with API tokens made by administrators. Each token acts for one account and never has
+  more than that account's role; it can be limited to read only and to parts of the API, ends on a set date (at
+  most two years), and can be cancelled on its own. Only a SHA-256 hash of the key is stored, the key is shown
+  once, and changes made with a token are named in the change log. Signing in to the API with a username and
+  password is off unless the council switches it on (`PHAEMA_API_PASSWORD_SIGN_IN`), and never works for anyone
+  with two-step sign-in.
 - People sign in with their username or their email address. An email address only works when exactly one
   account has it, and the sign-in page gives the same answer whether the name or the password was wrong.
 - Passwords are at least 12 characters, checked against common passwords and the person's own details, and stored
@@ -98,7 +103,6 @@ These are known gaps, listed so councils can judge the risk. They are on the [ro
   fixes will be summarised here.
 - **Single sign-on tested against a live council tenant.** The code is tested against a stand-in sign-in service;
   it has not yet been proved against a council's Microsoft Entra conditional access rules.
-- **API tokens** with limited scope, for systems that read PHAEMA's API.
 - **Independent accessibility audit** against WCAG 2.2 AA.
 
 ## For councils assessing PHAEMA

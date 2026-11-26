@@ -40,7 +40,7 @@ PHAEMA has three roles. Give each person one role in **Manage data > Users** (ti
 | Add and change document templates | ✓ | – | – |
 | Module settings (OS Maps key, reminder lead times, brand colour, rent ledger) | ✓ | – | – |
 | Add users and give them roles | ✓ (not superusers) | – | – |
-| Use the API | Read and write | Read; change what they can change on screen | Read only |
+| Use the API (through an API token made by an administrator) | Read and write | Read; change what they can change on screen | Read only |
 
 Notes:
 
