@@ -70,10 +70,12 @@ class DocumentTemplate(TimeStampedModel):
     def clean(self):
         if FORBIDDEN_TAGS.search(self.body or ""):
             raise ValidationError({"body": _("Templates may use {{ fields }}, {% if %} and {% for %} only.")})
-        from django.template import Engine, TemplateSyntaxError
+        from django.template import TemplateSyntaxError
+
+        from .render import check
 
         try:
-            Engine(string_if_invalid="").from_string(self.body or "")
+            check(self.body)
         except TemplateSyntaxError as exc:
             raise ValidationError({"body": _("The text has a mistake in its merge fields: %(e)s") % {"e": exc}})
         if not isinstance(self.extra_fields, list) or any(

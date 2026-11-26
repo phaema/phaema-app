@@ -73,6 +73,9 @@ releases with release notes and a security support period for each will start be
   a nonce made for that request), refuses plug-ins and framing, and keeps forms posting to PHAEMA. A
   Permissions-Policy turns off the camera, microphone, location and payment features. Councils can run the policy
   in report-only mode first (`PHAEMA_CSP_REPORT_ONLY`) and add map tile addresses.
+- Letter templates, which administrators can edit, run in a reduced template language: merge fields, `if`, `for`,
+  `comment` and formatting filters only. Merge data is plain text, so a template cannot reach other fields of a
+  record, print debugging data, load code or read files.
 - Sign-in attempts are limited after repeated wrong passwords, per account and per connection, on the sign-in page,
   the admin site and the API.
 - A change log records who changed what, and when, across properties, leases, cases, finance, access areas, cover

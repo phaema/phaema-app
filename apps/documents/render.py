@@ -12,13 +12,50 @@ Blank lines separate paragraphs. Text in [square brackets] is highlighted for co
 """
 import io
 import re
+from decimal import Decimal
 from html import escape
 
-from django.template import Context, Engine
+from django.template import Context, Engine, Library, TemplateSyntaxError, defaultfilters, defaulttags
 
 from .merge import FIELDS, OPTIONAL
 
-ENGINE = Engine(string_if_invalid="", autoescape=False)
+# Letter templates are written by administrators, so they get a small language: merge fields, {% if %}, {% for %}
+# and {% comment %}, and formatting filters. Tags such as {% debug %}, {% load %} and {% include %}, and filters such
+# as pprint, are not there at all, so a template cannot print the rest of the merge data, read other files or load
+# code, even if it reached the database without passing the form's check.
+ALLOWED_TAGS = ("if", "for", "comment")
+ALLOWED_FILTERS = ("add", "capfirst", "cut", "date", "default", "default_if_none", "first", "floatformat", "join",
+                   "last", "length", "linebreaks", "lower", "pluralize", "slice", "title", "truncatewords", "upper",
+                   "wordwrap", "yesno")
+
+
+def _engine():
+    library = Library()
+    for name in ALLOWED_TAGS:
+        library.tags[name] = defaulttags.register.tags[name]
+    for name in ALLOWED_FILTERS:
+        library.filters[name] = defaultfilters.register.filters[name]
+    engine = Engine(string_if_invalid="", autoescape=False, libraries={})
+    engine.builtins = []
+    engine.template_builtins = [library]  # in place of Django's built-in tags and filters
+    return engine
+
+
+ENGINE = _engine()
+
+
+def check(body):
+    """Raise TemplateSyntaxError if the text uses anything outside the letter template language."""
+    ENGINE.from_string(body or "")
+
+
+def _plain(value):
+    """Merge data holds text, numbers, dates and lists of them, never records whose other fields could be reached."""
+    if value is None or isinstance(value, (str, int, float, Decimal, bool)) or hasattr(value, "isoformat"):
+        return value
+    if isinstance(value, (list, tuple)):
+        return [_plain(v) for v in value]
+    return str(value)
 BRACKETS = re.compile(r"(\[[^\[\]\n]{1,120}\])")
 BOLD = re.compile(r"\*\*(.+?)\*\*")
 ITALIC = re.compile(r"(?<![*\w])\*(?!\*)([^*\n]+?)\*(?![*\w])")
@@ -35,7 +72,13 @@ def fill(template, values, extras=()):
     for key, value in list(data.items()):
         if key.startswith("hot_") and not str(value).strip():
             data[key] = "[to be agreed]"
-    return ENGINE.from_string(template.body).render(Context(data, autoescape=False))
+    data = {key: _plain(value) for key, value in data.items()}
+    try:
+        compiled = ENGINE.from_string(template.body)
+    except TemplateSyntaxError as exc:
+        return (f"[This template cannot be used until an administrator corrects it in Manage data, Document "
+                f"templates: {exc}]")
+    return compiled.render(Context(data, autoescape=False))
 
 
 def blocks(text):

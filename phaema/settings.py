@@ -212,6 +212,12 @@ SPECTACULAR_SETTINGS = {
     "DESCRIPTION": "Property Holding and Estate Management Application: open API.",
     "VERSION": PHAEMA_VERSION,
     "LICENSE": {"name": "AGPL-3.0-or-later"},
+    # One name for each set of choices used by several fields, so the schema does not invent one per field.
+    "ENUM_NAME_OVERRIDES": {
+        "AreaSourceEnum": "apps.properties.models.Property.AreaSource",
+        "YesNoEnum": "apps.properties.models.Property.YesNo",
+        "AlienationTermsEnum": "apps.leases.models.Lease.AlienationTerms",
+    },
 }
 
 # Content-Security-Policy (apps/core/security_headers.py): on by default. Report-only mode sends the policy without
