@@ -52,6 +52,7 @@
     <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Term" %}</dt><dd class="govuk-summary-list__value">{{ object.term_description }}<br><span class="govuk-body-s">{{ object.term_start|date:"j F Y" }} {% translate "to" %} {{ object.term_end|date:"j F Y"|default:"–" }}</span></dd></div>
     {% if object.actual_end %}<div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Ended" %}</dt><dd class="govuk-summary-list__value">{{ object.actual_end|date:"j F Y" }}</dd></div>{% endif %}
     <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Security of tenure" %}</dt><dd class="govuk-summary-list__value">{{ object.get_security_of_tenure_display }}</dd></div>
+    {% if object.direction == "in" %}<div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "IFRS 16" %}</dt><dd class="govuk-summary-list__value">{{ object.get_ifrs16_treatment_display }}{% if object.ifrs16_lease_end %}<br><span class="govuk-body-s">{% translate "Lease term for IFRS 16 ends" %} {{ object.ifrs16_lease_end|date:"j F Y" }}</span>{% elif not object.term_end %}<br><strong class="govuk-tag govuk-tag--yellow">{% translate "Set the IFRS 16 lease term end" %}</strong>{% endif %}{% if object.ifrs16_notes %}<br><span class="govuk-body-s">{{ object.ifrs16_notes }}</span>{% endif %}</dd></div>{% endif %}
   </dl>
 
   <h2 class="govuk-heading-m">{% translate "Rent" %}</h2>

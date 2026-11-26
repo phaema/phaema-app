@@ -364,8 +364,14 @@ def rents_payable(request):
                                 content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
         response["Content-Disposition"] = f'attachment; filename="Rents payable {data.today:%Y-%m-%d}.xlsx"'
         return response
+    from apps.core.access import can_do_finance
+
+    from . import ifrs16
+
+    this_year = ifrs16.current_year()
     return render(request, "leases/rents_payable.html", {
-        "data": data, "months": list(zip(data.months, data.by_month))})
+        "data": data, "months": list(zip(data.months, data.by_month)), "can_finance": can_do_finance(request.user),
+        "ifrs16_years": [(y, ifrs16.year_label(y)) for y in range(this_year, this_year - 3, -1)]})
 
 
 @require_POST
@@ -403,3 +409,27 @@ def dealing_complete(request, pk):
     else:
         messages.success(request, _("Dealing recorded as completed."))
     return redirect(dealing)
+
+
+@login_required
+def ifrs16_pack(request):
+    """The IFRS 16 data pack for one financial year, as an Excel workbook, for finance."""
+    from django.core.exceptions import PermissionDenied
+
+    from apps.core.access import can_do_finance
+    from apps.core.models import ModuleSettings
+
+    from . import ifrs16
+
+    if not can_do_finance(request.user):
+        raise PermissionDenied
+    try:
+        year = int(request.GET.get("year") or ifrs16.current_year())
+    except ValueError:
+        year = ifrs16.current_year()
+    year = min(max(year, 2020), ifrs16.current_year() + 1)
+    pack = ifrs16.gather(year)
+    content = ifrs16.to_xlsx(pack, ModuleSettings.load().organisation_name)
+    response = HttpResponse(content, content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+    response["Content-Disposition"] = f'attachment; filename="IFRS 16 data pack {ifrs16.year_label(year).replace("/", "-")}.xlsx"'
+    return response
