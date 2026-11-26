@@ -60,7 +60,8 @@ Everything since 0.9.0 (10 to 26 November 2026).
 
 ### Documentation
 - Manuals, test programme, e-learning, tour and website brought up to date with each feature (#55, #60, #66, #72,
-  #74, #77, #91, #93).
+  #74, #77, #91, #93, #102).
+- Test programme: new tests for browser protections (U11), the locked change log (U12) and Welsh (CY1 to CY5).
 
 ## 0.9.0 (10 November 2026)
 
