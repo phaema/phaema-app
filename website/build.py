@@ -34,6 +34,7 @@ LINKS = {
     "integrations": "docs/integrations-review.html",
     "tour": "tour.html",
     "security": "https://github.com/phaema/phaema-app/blob/main/SECURITY.md",
+    "procurement": "https://github.com/phaema/phaema-app/blob/main/docs/procurement/README.md",
 }
 
 PILOT_SUBJECT = "PHAEMA pilot council"
@@ -88,7 +89,9 @@ SECURE_NOW = [
     ("Access by role and area", "Roles decide what people can change and access areas decide what they can open, "
      "checked on the server for every page, download, report and API call."),
     ("A log of every change", "Who changed what and when, across properties, leases, cases, finance, access and "
-     "sign-in."),
+     "sign-in. The database itself refuses to alter or delete the log."),
+    ("Browser protections", "A strict Content Security Policy, HSTS and other headers on every page limit what a "
+     "malicious script or link could do."),
     ("Your data, your hosting", "PHAEMA runs on the council's own servers or UK or EU hosting, and sends nothing to "
      "the project."),
     ("Secure servers by default", "The installer sets up HTTPS, a firewall, automatic security updates and nightly "
@@ -100,9 +103,7 @@ BEFORE_LIVE = [
     "An independent penetration test by a CREST or CHECK accredited tester, with a summary of the results published",
     "Single sign-on proved against a pilot council's live Microsoft 365 tenant and its conditional access rules",
     "An independent accessibility audit against WCAG 2.2 AA",
-    "Templates for a data protection impact assessment and record of processing, and answers to common security "
-    "questionnaires",
-    "Numbered releases, with release notes and a security support period for each",
+    "Numbered releases, with a security support period for each",
 ]
 
 CAPABILITIES = [
@@ -202,6 +203,10 @@ ROADMAP = [
         "Credit control, payment plans and interest on late rent",
         "Void marketing with agent instructions; ITZA and rent per m² Zone A for shops",
         "Limits on password guessing, shorter sessions, and code and dependency scanning on every change",
+        "IFRS 16 data pack for finance on the leases the council holds",
+        "Welsh (Cymraeg) interface, chosen by each person, as a draft for review",
+        "Content Security Policy and a change log the database cannot alter",
+        "A procurement and information governance pack for councils' assessments",
     ]),
     ("now", "Now: testing", [
         "A major test programme run by council staff",
@@ -221,7 +226,7 @@ ROADMAP = [
         "Condition surveys and lifecycle planning",
         "Full Golden Thread information management",
         "Live finance, legal and CRM connectors",
-        "Welsh translation",
+        "Welsh translation reviewed by a qualified translator",
     ]),
 ]
 
@@ -229,6 +234,9 @@ ROADMAP = [
 RESOURCES = [
     ("Security policy", "What protects PHAEMA today, the known gaps, and how to report a security problem.",
      "security", "Read the security policy"),
+    ("Procurement pack", "A service definition, answers to common security questions, and templates for the "
+     "accessibility statement, DPIA, record of processing and retention schedule.",
+     "procurement", "Read the procurement pack"),
     ("Tour", "A self-running, clickable tour of every part of PHAEMA, for a first look or a screen at an event.",
      "tour", "Watch the tour"),
     ("Test site", "Try PHAEMA with fictional data: a council estate, leases, cases and projects to explore. "
@@ -383,7 +391,7 @@ BODY = r'''<div class="top"><div class="wrap top__inner">
   <div class="wrap four">
     <div><h3>Free to use</h3><p>No licence fee, ever. Councils pay only for hosting and any support they choose, and can run it themselves or have any supplier host it.</p></div>
     <div><h3>Built by surveyors</h3><p>Covers the day-to-day work of public sector estate and asset management, to the professional standards: heads of terms to the RICS leasing code, 1954 Act notice dates, service charges to the RICS 2nd edition, Red Book valuation records and Golden Thread building information.</p></div>
-    <div><h3>Accessible by design</h3><p>Built on the GOV.UK Design System and aiming for WCAG 2.2 AA, with dark, high-contrast and large-text settings.</p></div>
+    <div><h3>Accessible by design</h3><p>Built on the GOV.UK Design System and aiming for WCAG 2.2 AA, with dark, high-contrast and large-text settings, and a Welsh (Cymraeg) interface the council can offer.</p></div>
     <div><h3>Secure by design</h3><p>Two-step sign-in, optional single sign-on, access by role and area, a log of every change, and hosting in the UK or EU. <a href="#security">What is done, and what comes before live use</a>.</p></div>
   </div>
 </section>

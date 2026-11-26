@@ -559,6 +559,8 @@ COURSES = [
              "Single sign-on lets people sign in with their council (Microsoft 365) account. The installer adds the service's details to the server first; then tick the box here and choose who may still use a PHAEMA password."),
             (T, "/admin/cases/casetype/1/change/", "h2:has-text('Site visit checklist')", "Site visit sheets",
              "Each case type has its own site visit checklist and choice of property details for the sheet. Change them here and every case of that type follows."),
+            (T, "/admin/core/modulesettings/1/change/", "fieldset:has(h2:has-text('Language'))", "Welsh (Cymraeg)",
+             "Tick Offer Welsh (Cymraeg) and an English | Cymraeg choice appears at the top of every page. Each person chooses for themselves, and PHAEMA keeps to English until they do. The Welsh is a draft until a qualified translator has reviewed it."),
         ],
         "exercise": {"q": "Where do you switch the rent ledger on?", "options": ["Manage data, Module settings", "Reports", "The dashboard"], "answer": 0,
                      "hint": "Manage data lists every setting."},
@@ -569,6 +571,8 @@ COURSES = [
              "why": "Branding is in Module settings."},
             {"q": "Approvals are needed before Decision for a case type. Who sets that?", "options": ["An administrator, in Case types", "Each surveyor", "Nobody"], "answer": 0,
              "why": "It is set per case type."},
+            {"q": "Welsh is switched on. Which language does a surveyor see?", "options": ["English, until they choose Cymraeg", "Welsh for everyone", "Whatever their browser is set to"], "answer": 0,
+             "why": "Each person chooses; PHAEMA ignores the browser's language."},
         ]}, {
         "id": "import", "title": "Bringing data in", "minutes": 20,
         "intro": "Import properties, parties, leases and more from spreadsheets.",
