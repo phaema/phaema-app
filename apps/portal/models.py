@@ -73,6 +73,11 @@ class SignInCode(models.Model):
                                  expires_at=timezone.now() + timedelta(minutes=cls.MINUTES))
         return row, code
 
+    @classmethod
+    def purge(cls):
+        """Delete codes made before yesterday: none can still be used (each lasts 15 minutes)."""
+        return cls.objects.filter(created_at__lt=timezone.now() - timedelta(days=1)).delete()[0]
+
     def matches(self, code):
         """True if the code is right and still usable. Every try counts, right or wrong."""
         if self.used_at or self.expires_at < timezone.now() or self.tries >= self.TRIES:

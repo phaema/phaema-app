@@ -248,3 +248,12 @@ def test_staff_share_a_document_and_demand_emails_link_to_the_portal(world, clie
     run = leases["L-CAFE"].charges.first().run
     _subject, body = emails.compose(emails.demands(run)[0])
     assert "/tenant/sign-in/" in body
+
+
+def test_old_sign_in_codes_are_deleted(world):
+    _leases, ann, _bob = world
+    old, _code = SignInCode.issue(ann)
+    SignInCode.objects.filter(pk=old.pk).update(created_at=old.created_at - timedelta(days=2))
+    fresh, _code = SignInCode.issue(ann)
+    assert SignInCode.purge() == 1
+    assert list(SignInCode.objects.all()) == [fresh]

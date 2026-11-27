@@ -24,6 +24,14 @@ automatically yet: an administrator deletes them, and reports can list what has 
 | Change log (audit trail) | 7 years | Evidence of who changed records; a database administrator removes older entries with the purge setting described in the technical manual |
 | User accounts | Disabled on leaving; deleted 1 year later, keeping their change log entries without the name | Access control; accountability |
 | Emails filed on cases | As the case | Kept with the case |
+| Emails to tenants (PHAEMA's copy: demands, invitations, codes masked, reminders, reply notices) | Current year plus 6 years | Evidence of what was sent; kept with the rent account |
+| Copies held by GOV.UK Notify | 7 days by default (set in the council's Notify settings) | Notify's own retention; nothing needs keeping there |
+| Tenant portal accounts | Access stops by itself 12 months after the last agreement the tenant can see ends; then remove the account. PHAEMA does not yet remove or anonymise these accounts automatically: [say who does, and how often] | Access ends automatically; the change log keeps who did what |
+| Sign-in codes | Deleted by the daily tasks the day after they are made | Kept only as a keyed hash; valid 15 minutes |
+| Messages with tenants | As the agreement's correspondence: 6 years after the agreement ends, or with the case if about a request | Correspondence |
+| Contact changes asked for by tenants | 6 years after the decision | Evidence of who changed billing details |
+| Repair reports and photos | As maintenance jobs: current year plus 6 years | Kept with the job, or on their own if no job was raised |
+| Certificates and insurance documents sent by tenants | As compliance certificates and lease documents above | Same records, sent a different way |
 | Backups | 14 days on the server (the installer's default); off-site copies per the council's backup policy | Recovery |
 
 These periods are a starting point, not legal advice.
