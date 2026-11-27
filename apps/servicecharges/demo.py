@@ -38,9 +38,9 @@ def setup(today=None):
         modules.save()
     from apps.properties import demo_north
 
-    north = demo_north.SERVICE
-    build(north["name"], north["estate"], north["members"], north["caps"], north["budget"], north["factor"],
-          north["description"], today)
+    for district in demo_north.SERVICES:
+        build(district["name"], district["estate"], district["members"], district["caps"], district["budget"],
+              district["factor"], district["description"], today)
     return build(NAME, "DM-E01", MEMBERS, CAPS, BUDGET, SPEND_FACTOR,
                  "Estate roads, lighting, landscaping, security patrols and waste for the units on the estate. "
                  "Fictional demonstration data.", today)
@@ -99,4 +99,4 @@ def build(name, estate_ref, members, caps, budget, spend_factor, description, to
 def remove():
     from apps.properties import demo_north
 
-    Schedule.objects.filter(name__in=[NAME, demo_north.SERVICE["name"]]).delete()
+    Schedule.objects.filter(name__in=[NAME] + [district["name"] for district in demo_north.SERVICES]).delete()

@@ -76,6 +76,10 @@ Everything since 0.9.0 (10 to 27 November 2026).
 ### Changed
 - Minimum versions raised to those PHAEMA is tested with: Django REST framework 3.18.3, drf-spectacular
   0.30.0, python-docx 1.2.0 and pytest-django 4.14.0 (#107). Django stays on 5.2, the long-term support release.
+- The demonstration data is twice the size: two more fictional districts, Westbrook (DM-W, DL-06) and Kingsmere
+  (DM-K, DL-07), follow Northfield's layout with their own names, rents and dates. There are now 147 properties,
+  95 agreements, about 120 cases and 49 maintenance jobs. Exampleton and Northfield are unchanged, so the manual,
+  e-learning and tour still match. Run `./phaema.sh demo-data --reset` on a test site to load it.
 
 ### Fixed
 - Year-end service charge statements showed a zero balance once the year was reconciled, because the balancing

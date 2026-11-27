@@ -45,8 +45,9 @@ def test_dashboard_shows_vacancy_and_floor_space(client_in, demo):
     ctx = resp.context
     assert ctx["unit_count"] == Property.objects.filter(property_type="unit").count()
     # Vacant leaves in Exampleton: units 3 and 8, shop 3, suite 3 (480 + 640 + 72 + 60 = 1,252 m²);
-    # in Northfield: units 4 and 10, shops 3 and 7, studio 2 (650 + 480 + 80 + 80 + 85 = 1,375 m²)
-    assert ctx["vacant_space"]["nia"] == Decimal("2627")
+    # in each of Northfield, Westbrook and Kingsmere: units 4 and 10, shops 3 and 7, studio 2
+    # (650 + 480 + 80 + 80 + 85 = 1,375 m²)
+    assert ctx["vacant_space"]["nia"] == Decimal("1252") + 3 * Decimal("1375")
     assert ctx["vacancy_rate"] is not None
     html = resp.content.decode()
     assert "?property_type=unit" in html and "occupation=vacant" in html
@@ -81,7 +82,7 @@ def test_register_sort_and_surveyor_filter(client_in, demo, officer):
     listed = client_in.get(url, {"surveyor": priya.pk}).context["page_obj"].paginator.count
     assert listed == Property.objects.filter(managing_surveyor=priya).count() > 0
     unassigned = client_in.get(url, {"surveyor": "none"}).context["page_obj"]
-    assert {p.reference for p in unassigned} == {"DM-S06", "DM-S10", "DM-N06"}
+    assert {p.reference for p in unassigned} == {"DM-S06", "DM-S10", "DM-N06", "DM-W06", "DM-K06"}
     Property.objects.filter(reference="DM-S06").update(managing_surveyor=officer)
     assert [p.reference for p in client_in.get(url, {"surveyor": "me"}).context["page_obj"]] == ["DM-S06"]
     # Units inherit their estate's surveyor in the demo data
