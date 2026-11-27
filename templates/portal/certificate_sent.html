@@ -1,0 +1,7 @@
+{% extends "portal/base.html" %}{% load i18n %}
+{% block title %}{% translate "Certificate sent" %}{% endblock %}
+{% block content %}
+<div class="govuk-panel govuk-panel--confirmation"><h1 class="govuk-panel__title">{% translate "Certificate sent" %}</h1><div class="govuk-panel__body">{% blocktranslate with d=cert.expires_on|date:"j F Y" %}Valid until {{ d }}{% endblocktranslate %}</div></div>
+<p class="govuk-body">{% translate "Thank you. The estates team will check it. We will remind you before it runs out." %}</p>
+<p class="govuk-body"><a class="govuk-link" href="{% url 'portal:agreement' lease.pk %}">{% translate "Back to the agreement" %}</a></p>
+{% endblock %}

@@ -83,6 +83,49 @@
 {% include "cases/_request_list.html" %}
 {% endif %}
 
+{% if sc_years %}
+<h2 class="govuk-heading-m">{% translate "Service charges" %}</h2>
+<table class="govuk-table">
+  <thead class="govuk-table__head"><tr class="govuk-table__row">
+    <th scope="col" class="govuk-table__header">{% translate "Year" %}</th>
+    <th scope="col" class="govuk-table__header">{% translate "Budget" %}</th>
+    <th scope="col" class="govuk-table__header">{% translate "Year-end statement" %}</th>
+  </tr></thead>
+  <tbody class="govuk-table__body">
+  {% for member, year, budget, statement in sc_years %}
+  <tr class="govuk-table__row">
+    <td class="govuk-table__cell">{{ year.schedule.name }} {{ year.label }}</td>
+    <td class="govuk-table__cell">{% if budget %}<a class="govuk-link" href="{% url 'portal:sc-budget' lease.pk year.pk %}">{% translate "Budget" %}<span class="govuk-visually-hidden"> {{ year.label }}</span></a>{% else %}–{% endif %}</td>
+    <td class="govuk-table__cell">{% if statement %}<a class="govuk-link" href="{% url 'portal:sc-statement' lease.pk year.pk %}">{% translate "Statement" %}<span class="govuk-visually-hidden"> {{ year.label }}</span></a>{% else %}{% translate "Not yet" %}{% endif %}</td>
+  </tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% endif %}
+
+{% if certificates %}
+<h2 class="govuk-heading-m">{% translate "Certificates you provide" %}</h2>
+<p class="govuk-body">{% translate "Under your agreement you arrange these checks and send the council a copy. We remind you by email before each runs out." %}</p>
+<table class="govuk-table">
+  <thead class="govuk-table__head"><tr class="govuk-table__row">
+    <th scope="col" class="govuk-table__header">{% translate "Certificate" %}</th>
+    <th scope="col" class="govuk-table__header">{% translate "Status" %}</th>
+    <th scope="col" class="govuk-table__header">{% translate "Valid until" %}</th>
+    <th scope="col" class="govuk-table__header"><span class="govuk-visually-hidden">{% translate "Send" %}</span></th>
+  </tr></thead>
+  <tbody class="govuk-table__body">
+  {% for req, status in certificates %}
+  <tr class="govuk-table__row">
+    <td class="govuk-table__cell">{{ req.kind.name }}{% if lease.properties.count > 1 %}<br><span class="govuk-body-s">{{ req.property.name }}</span>{% endif %}</td>
+    <td class="govuk-table__cell"><strong class="govuk-tag govuk-tag--{{ status.0 }}">{% if status.1 == "Missing" %}{% translate "Not sent yet" %}{% elif status.1 == "Expired" %}{% translate "Run out" %}{% elif status.1 == "Expires soon" %}{% translate "Runs out soon" %}{% elif status.1 == "Unsatisfactory" %}{% translate "Unsatisfactory" %}{% else %}{% translate "In date" %}{% endif %}</strong></td>
+    <td class="govuk-table__cell">{{ req.latest.expires_on|date:"j M Y"|default:"–" }}</td>
+    <td class="govuk-table__cell"><a class="govuk-link" href="{% url 'portal:certificate' lease.pk req.pk %}">{% translate "Send a new one" %}<span class="govuk-visually-hidden"> {{ req.kind.name }}</span></a></td>
+  </tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% endif %}
+
 {% if can_report %}
 <h2 class="govuk-heading-m">{% translate "Repairs" %}</h2>
 <p class="govuk-body"><a class="govuk-button govuk-button--secondary" href="{% url 'portal:repair' lease.pk %}">{% translate "Report a repair" %}</a></p>

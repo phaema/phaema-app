@@ -167,6 +167,14 @@ def agreement(request, pk):
     ctx["can_ask"] = asks.tenant_types().exists()
     ctx["requests"] = list(asks.tenant_cases(account).filter(lease=lease)[:20])
     ctx["request_url"] = "portal:request"
+    if account.facilities and settings_row.service_charges_enabled:
+        from apps.servicecharges.tenant import published_years
+
+        ctx["sc_years"] = published_years(lease)
+    if account.facilities and settings_row.compliance_enabled:
+        from apps.compliance.workflow import statuses
+
+        ctx["certificates"] = statuses(_tenant_requirements(lease), today)
     if account.facilities and settings_row.maintenance_enabled:
         ctx["can_report"] = True
         ctx["repairs"] = list(lease.repair_reports.select_related("job").order_by("-created_at")[:20])
@@ -231,6 +239,133 @@ def request_document(request, pk, doc):
     item = get_object_or_404(asks.shared_documents(case), pk=doc)
     return FileResponse(item.file.open("rb"), as_attachment=True,
                         filename=item.original_filename or item.file.name.rsplit("/", 1)[-1])
+
+
+def _facilities(request, flag):
+    account = request.portal_account
+    if not (account.facilities and getattr(ModuleSettings.load(), flag)):
+        raise Http404
+
+
+def _member_year(lease, year_pk):
+    from apps.servicecharges.tenant import published_years
+
+    found = next(((m, y, b, st) for m, y, b, st in published_years(lease) if y.pk == year_pk), None)
+    if found is None:
+        raise Http404
+    return found
+
+
+@tenant_required
+def sc_budget(request, pk, year_pk):
+    from apps.servicecharges.tenant import budget_context
+
+    _facilities(request, "service_charges_enabled")
+    lease = _lease(request, pk)
+    member, year, budget, _statement = _member_year(lease, year_pk)
+    if not budget:
+        raise Http404
+    return render(request, "portal/sc_budget.html", {"lease": lease, **budget_context(year, member)})
+
+
+@tenant_required
+def sc_statement(request, pk, year_pk):
+    from apps.servicecharges.tenant import statement_context
+
+    _facilities(request, "service_charges_enabled")
+    lease = _lease(request, pk)
+    member, year, _budget, statement = _member_year(lease, year_pk)
+    if not statement:
+        raise Http404
+    return render(request, "portal/sc_statement.html", {"lease": lease, **statement_context(year, member)})
+
+
+@tenant_required
+def sc_query(request, pk, year_pk):
+    """Query a line of the service charge: opens a service charge query case, which the tenant can follow."""
+    from django import forms
+
+    from apps.cases import workflow
+    from apps.cases.models import CaseType, Correspondence
+    from apps.servicecharges import apportion
+
+    _facilities(request, "service_charges_enabled")
+    account = request.portal_account
+    lease = _lease(request, pk)
+    _member, year, _budget, _statement = _member_year(lease, year_pk)
+    case_type = CaseType.objects.filter(code="sc_dispute", active=True).first()
+    if case_type is None:
+        raise Http404
+    headings = [h for h, _b, _a in apportion.by_heading(year)]
+
+    class QueryForm(forms.Form):
+        heading = forms.ChoiceField(choices=[("", _("The whole statement"))] + [(str(h.pk), h.name) for h in headings],
+                                    required=False, label=_("Which line"))
+        question = forms.CharField(widget=forms.Textarea(attrs={"rows": 5}), max_length=4000,
+                                   label=_("Your question"))
+
+    form = QueryForm(request.POST or None)
+    if request.method == "POST" and form.is_valid():
+        line = next((h.name for h in headings if str(h.pk) == form.cleaned_data["heading"]), _("The whole statement"))
+        title = _("Query: %(line)s, %(year)s") % {"line": line, "year": f"{year.schedule.name} {year.label}"}
+        case = workflow.open_case(case_type, title=title[:200], lease=lease, how_received="portal",
+                                  portal_account=account)
+        Correspondence.objects.create(case=case, direction=Correspondence.Direction.IN,
+                                      method=Correspondence.Method.ONLINE,
+                                      correspondent=f"{account.name} ({account.party.name})"[:250],
+                                      subject=title[:250], summary=form.cleaned_data["question"])
+        return render(request, "portal/request_sent.html", {"lease": lease, "case": case})
+    return render(request, "portal/sc_query.html", {"lease": lease, "year": year, "form": form})
+
+
+def _tenant_requirements(lease):
+    from apps.compliance.models import Requirement
+
+    return (Requirement.objects.filter(property__in=lease.properties.all(), responsible="tenant", active=True)
+            .select_related("kind", "property").order_by("property__reference", "kind__order"))
+
+
+@tenant_required
+def certificate(request, pk, req_pk):
+    """Upload a certificate the tenant must provide, such as a gas safety record. Estates check it afterwards."""
+    from django import forms
+
+    from apps.cases.models import validate_case_file
+    from apps.compliance import workflow
+    from apps.compliance.models import Certificate
+
+    _facilities(request, "compliance_enabled")
+    account = request.portal_account
+    lease = _lease(request, pk)
+    req = get_object_or_404(_tenant_requirements(lease), pk=req_pk)
+
+    class CertificateForm(forms.Form):
+        issued_on = forms.DateField(label=_("Date of the inspection or certificate"),
+                                    widget=forms.DateInput(attrs={"type": "date"}))
+        result = forms.ChoiceField(choices=Certificate.Result.choices, initial=Certificate.Result.SATISFACTORY,
+                                   label=_("Result"), widget=forms.RadioSelect)
+        carried_out_by = forms.CharField(max_length=200, label=_("Carried out by"),
+                                         help_text=_("The engineer or company, with their registration number if "
+                                                     "they have one"))
+        reference = forms.CharField(max_length=60, required=False, label=_("Certificate number"))
+        file = forms.FileField(label=_("The certificate"), validators=[validate_case_file],
+                               help_text=_("PDF or a photo, up to 25 MB"))
+
+        def clean_issued_on(self):
+            day = self.cleaned_data["issued_on"]
+            if day > date.today():
+                raise forms.ValidationError(_("The date cannot be in the future."))
+            return day
+
+    form = CertificateForm(request.POST or None, request.FILES or None)
+    if request.method == "POST" and form.is_valid():
+        d = form.cleaned_data
+        cert = workflow.record(req, d["issued_on"], None, d["file"], result=d["result"],
+                               carried_out_by=d["carried_out_by"], reference=d["reference"],
+                               portal_account=account,
+                               notes=_("Uploaded in the tenant portal by %(name)s.") % {"name": account.name})
+        return render(request, "portal/certificate_sent.html", {"lease": lease, "cert": cert})
+    return render(request, "portal/certificate.html", {"lease": lease, "req": req, "form": form})
 
 
 @tenant_required
