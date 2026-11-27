@@ -193,6 +193,15 @@ def build(user, today=None, viewer=None):
                             f"{case.display_reference} {case.case_type.name}", case.get_absolute_url(),
                             case.get_how_received_display()))
 
+    # Messages from tenants in the tenant portal, waiting for an answer (managing surveyor or their cover).
+    if ModuleSettings.load().tenant_portal_enabled:
+        from apps.portal.messaging import waiting_for
+
+        for m in waiting_for(user)[:20]:
+            now.append(Item(None, _("Message from a tenant"), "estate",
+                            f"{m.lease.reference} {m.lease.counterparty.name}",
+                            reverse("leases:messages", args=[m.lease_id]), m.account.name if m.account else ""))
+
     # Certificates tenants sent in the tenant portal, waiting to be checked.
     from .access import can_use
 

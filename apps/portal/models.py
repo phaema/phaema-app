@@ -131,3 +131,40 @@ class ContactChange(models.Model):
     def decline(self, user):
         self.status, self.decided_by, self.decided_at = self.Status.DECLINED, user, timezone.now()
         self.save(update_fields=["status", "decided_by", "decided_at"])
+
+
+class PortalMessage(models.Model):
+    """A message between a tenant and the estates team about an agreement (and, if given, one of its requests).
+    Answered by the property's managing surveyor, or whoever is covering for them."""
+
+    class Direction(models.TextChoices):
+        FROM_TENANT = "in", _("From the tenant")
+        TO_TENANT = "out", _("To the tenant")
+
+    lease = models.ForeignKey("leases.Lease", verbose_name=_("agreement"), on_delete=models.CASCADE,
+                              related_name="portal_messages")
+    case = models.ForeignKey("cases.Case", verbose_name=_("request"), null=True, blank=True,
+                             on_delete=models.SET_NULL, related_name="portal_messages")
+    direction = models.CharField(_("direction"), max_length=3, choices=Direction.choices)
+    account = models.ForeignKey(PortalAccount, verbose_name=_("tenant"), null=True, blank=True,
+                                on_delete=models.SET_NULL, related_name="messages")
+    author = models.ForeignKey(settings.AUTH_USER_MODEL, verbose_name=_("from"), null=True, blank=True,
+                               on_delete=models.SET_NULL, related_name="+")
+    text = models.TextField(_("message"))
+    created_at = models.DateTimeField(_("sent"), auto_now_add=True)
+    answered_at = models.DateTimeField(_("answered"), null=True, blank=True)
+    read_at = models.DateTimeField(_("read by the tenant"), null=True, blank=True)
+
+    class Meta:
+        ordering = ["created_at", "pk"]
+        verbose_name = _("tenant portal message")
+        verbose_name_plural = _("tenant portal messages")
+
+    def __str__(self):
+        return f"{self.lease.reference}: {self.get_direction_display()} {self.created_at:%d %b %Y}"
+
+    @property
+    def sender(self):
+        if self.direction == self.Direction.FROM_TENANT:
+            return self.account.name if self.account else _("Tenant")
+        return (self.author.get_full_name() or self.author.username) if self.author else _("Estates team")

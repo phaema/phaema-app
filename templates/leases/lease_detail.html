@@ -138,6 +138,7 @@
   {% endif %}
   {% if user|can_edit:object %}<p class="govuk-body-s"><a class="govuk-link" href="{% url 'admin:leases_lease_change' object.pk %}#deposit_entries-group">{% if deposit_rows %}{% translate "Record money in or out of the rent deposit" %}{% else %}{% translate "Start a rent deposit account" %}{% endif %}</a></p>{% endif %}
   {% if doc_templates %}<p class="govuk-body-s">{% translate "Create a letter:" %} {% for t in doc_templates %}<a class="govuk-link" href="{% url 'documents:create' t.code %}?lease={{ object.pk }}">{{ t.name }}</a>{% if not forloop.last %} · {% endif %}{% endfor %} · <a class="govuk-link" href="{% url 'documents:library' %}">{% translate "Document library" %}</a></p>{% endif %}
+  {% if modules.tenant_portal_enabled and object.is_let_out %}{% with n=object.portal_messages.count %}{% if n %}<p class="govuk-body"><a class="govuk-link" href="{% url 'leases:messages' object.pk %}">{% blocktranslate count n=n %}{{ n }} message with the tenant in the tenant portal{% plural %}{{ n }} messages with the tenant in the tenant portal{% endblocktranslate %}</a></p>{% endif %}{% endwith %}{% endif %}
   <h2 class="govuk-heading-m" id="documents">{% translate "Documents" %}</h2>
   {% with docs=documents %}
   {% if docs %}
@@ -156,7 +157,7 @@
         <td class="govuk-table__cell">{{ d.get_document_type_display }}</td>
         <td class="govuk-table__cell">{{ d.document_date|date:"j M Y"|default:"–" }}</td>
         <td class="govuk-table__cell">{% with rag=d.review_rag %}{% if rag %}{{ d.review_date|date:"j M Y" }}{% if rag.0 != "green" %}<br><strong class="govuk-tag govuk-tag--{{ rag.0 }}">{{ rag.1 }}</strong>{% endif %}{% else %}–{% endif %}{% endwith %}</td>
-        {% if modules.tenant_portal_enabled and object.is_let_out %}<td class="govuk-table__cell">{% if d.shared_with_tenant %}<strong class="govuk-tag govuk-tag--green">{% translate "Shared" %}</strong>{% else %}<span class="govuk-body-s">{% translate "Not shared" %}</span>{% endif %}
+        {% if modules.tenant_portal_enabled and object.is_let_out %}<td class="govuk-table__cell">{% if d.portal_account %}<span class="govuk-body-s">{% translate "Sent by the tenant" %}</span> {% endif %}{% if d.shared_with_tenant %}<strong class="govuk-tag govuk-tag--green">{% translate "Shared" %}</strong>{% else %}<span class="govuk-body-s">{% translate "Not shared" %}</span>{% endif %}
           {% if user|can_edit:object %}<form method="post" action="{% url 'leases:document-share' d.pk %}" class="govuk-!-display-inline">{% csrf_token %}<input type="hidden" name="share" value="{% if d.shared_with_tenant %}0{% else %}1{% endif %}"><button class="govuk-button govuk-button--secondary govuk-!-margin-bottom-0 govuk-!-margin-left-1" data-module="govuk-button">{% if d.shared_with_tenant %}{% translate "Stop sharing" %}{% else %}{% translate "Share with tenant" %}{% endif %}<span class="govuk-visually-hidden"> {{ d.description|default:d.get_document_type_display }}</span></button></form>{% endif %}</td>{% endif %}
       </tr>
     {% endfor %}

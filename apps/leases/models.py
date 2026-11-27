@@ -706,6 +706,9 @@ class LeaseDocument(TimeStampedModel):
     shared_with_tenant = models.BooleanField(
         _("shared with the tenant"), default=False,
         help_text=_("Tenants with a portal account can see and download this document."))
+    portal_account = models.ForeignKey("portal.PortalAccount", on_delete=models.SET_NULL, null=True, blank=True,
+                                       related_name="lease_documents", editable=False,
+                                       verbose_name=_("sent by (tenant portal)"))
 
     class Meta:
         ordering = ["document_type", "-document_date"]

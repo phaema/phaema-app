@@ -9,7 +9,8 @@ class PortalConfig(AppConfig):
     def ready(self):
         from apps.core import audit
 
-        from .models import ContactChange, PortalAccount
+        from .models import ContactChange, PortalAccount, PortalMessage
 
         audit.register(PortalAccount)
         audit.register(ContactChange)
+        audit.register(PortalMessage)

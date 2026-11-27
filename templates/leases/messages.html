@@ -1,0 +1,18 @@
+{% extends "base.html" %}{% load i18n %}
+{% block title %}{% translate "Messages with the tenant" %} {{ object.reference }}{% endblock %}
+{% block help_page %}tenant-portal{% endblock %}
+{% block content %}
+<a class="govuk-back-link" href="{{ object.get_absolute_url }}">{{ object.reference }} {{ object.counterparty.name }}</a>
+<div class="govuk-grid-row"><div class="govuk-grid-column-two-thirds">
+<span class="govuk-caption-l">{{ object.reference }} {{ object.counterparty.name }}</span>
+<h1 class="govuk-heading-l">{% translate "Messages with the tenant" %}</h1>
+<p class="govuk-body">{% translate "From the tenant portal. Answered by:" %} {% for u in answerers %}{{ u.get_full_name|default:u.username }}{% if not forloop.last %}, {% endif %}{% empty %}–{% endfor %}. {% translate "The tenant is emailed that there is a reply; the text stays in PHAEMA." %}</p>
+{% include "portal/_thread.html" %}
+<form method="post" novalidate>{% csrf_token %}
+  {% if cases %}<div class="govuk-form-group"><label class="govuk-label" for="case">{% translate "About" %}</label><select class="govuk-select" id="case" name="case"><option value="">{% translate "The agreement" %}</option>{% for c in cases %}<option value="{{ c.pk }}">{{ c.display_reference }} {{ c.case_type.name }}</option>{% endfor %}</select></div>{% endif %}
+  <div class="govuk-form-group"><label class="govuk-label govuk-label--s" for="text">{% translate "Reply" %}</label>
+    <textarea class="govuk-textarea" id="text" name="text" rows="5"></textarea></div>
+  <button class="govuk-button" data-module="govuk-button" data-prevent-double-click="true">{% translate "Send the reply" %}</button>
+</form>
+</div></div>
+{% endblock %}

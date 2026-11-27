@@ -1,0 +1,30 @@
+{% extends "portal/base.html" %}{% load i18n %}
+{% block title %}{% translate "Send your insurance certificate" %}{% endblock %}
+{% block content %}
+<a class="govuk-back-link" href="{% url 'portal:agreement' lease.pk %}">{{ lease.reference }}</a>
+<div class="govuk-grid-row"><div class="govuk-grid-column-two-thirds">
+{% include "portal/_errors.html" %}
+<span class="govuk-caption-l">{{ lease.reference }}</span>
+<h1 class="govuk-heading-l">{% translate "Send your insurance certificate" %}</h1>
+<p class="govuk-body">{% translate "Under your agreement you insure the premises and send the council evidence of cover each year." %}</p>
+<form method="post" enctype="multipart/form-data" novalidate>{% csrf_token %}
+  <div class="govuk-form-group{% if form.insurer.errors %} govuk-form-group--error{% endif %}">
+    <label class="govuk-label" for="id_insurer">{{ form.insurer.label }}</label>
+    {% for e in form.insurer.errors %}<p class="govuk-error-message">{{ e }}</p>{% endfor %}
+    <input class="govuk-input" id="id_insurer" name="insurer" maxlength="120" value="{{ form.insurer.value|default:'' }}">
+  </div>
+  <div class="govuk-form-group{% if form.valid_until.errors %} govuk-form-group--error{% endif %}">
+    <label class="govuk-label" for="id_valid_until">{{ form.valid_until.label }}</label>
+    {% for e in form.valid_until.errors %}<p class="govuk-error-message">{{ e }}</p>{% endfor %}
+    <input class="govuk-input govuk-input--width-10" id="id_valid_until" name="valid_until" type="date" value="{{ form.valid_until.value|default:'' }}">
+  </div>
+  <div class="govuk-form-group{% if form.file.errors %} govuk-form-group--error{% endif %}">
+    <label class="govuk-label" for="id_file">{{ form.file.label }}</label>
+    <div class="govuk-hint" id="file-hint">{{ form.file.help_text }}</div>
+    {% for e in form.file.errors %}<p class="govuk-error-message">{{ e }}</p>{% endfor %}
+    <div class="govuk-drop-zone" data-module="govuk-file-upload" data-i18n.choose-file-button="{% translate 'Choose file' %}" data-i18n.drop-instruction="{% translate 'or drop file here' %}" data-i18n.no-file-chosen="{% translate 'No file chosen' %}"><input class="govuk-file-upload" id="id_file" name="file" type="file" accept=".pdf,application/pdf" aria-describedby="file-hint"></div>
+  </div>
+  <button class="govuk-button" data-module="govuk-button" data-prevent-double-click="true">{% translate "Send the certificate" %}</button>
+</form>
+</div></div>
+{% endblock %}
