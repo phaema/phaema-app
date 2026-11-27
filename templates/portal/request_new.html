@@ -1,0 +1,12 @@
+{% extends "portal/base.html" %}{% load i18n %}
+{% block title %}{% translate "Make a request" %}{% endblock %}
+{% block content %}
+<a class="govuk-back-link" href="{% url 'portal:agreement' lease.pk %}">{{ lease.reference }}</a>
+<div class="govuk-grid-row"><div class="govuk-grid-column-two-thirds">
+{% include "portal/_errors.html" %}
+<span class="govuk-caption-l">{{ lease.reference }}</span>
+<h1 class="govuk-heading-l">{% translate "Make a request" %}</h1>
+<p class="govuk-body">{% translate "Ask the council for consent or permission under your agreement. The estates team will acknowledge it and you can follow it on the agreement page. Any fee is dealt with separately." %}</p>
+{% include "cases/_request_form.html" %}
+</div></div>
+{% endblock %}

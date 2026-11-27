@@ -14,6 +14,7 @@ from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils.translation import gettext as _
 from django.utils.translation import gettext_lazy, ngettext
+from django.views.decorators.http import require_POST
 from django.views.generic import ListView
 
 from apps.core.roles import ADMINISTRATORS, CONTRIBUTORS, SURVEYORS, is_administrator
@@ -824,3 +825,18 @@ def site_visit_sheet(request, pk):
     return render(request, "cases/site_visit_sheet.html", {
         "case": case, "property": prop, "body": mark_safe(doc_render.to_html(text, values)),  # noqa: S308
         "can_configure": is_administrator(request.user)})
+
+
+@require_POST
+@login_required
+def document_share(request, pk):
+    """Share a document on a request from the tenant portal or a council department with the person who asked."""
+    doc = get_object_or_404(CaseDocument.objects.select_related("case"), pk=pk,
+                            case__how_received__in=(Case.Received.PORTAL, Case.Received.DEPARTMENT))
+    if not workflow.can_work(request.user, doc.case):
+        raise PermissionDenied
+    doc.shared_with_requester = request.POST.get("share") == "1"
+    doc.save(update_fields=["shared_with_requester", "updated_at"])
+    messages.success(request, _("Shared with the person who asked.") if doc.shared_with_requester
+                     else _("No longer shared with the person who asked."))
+    return redirect(doc.case)

@@ -1,0 +1,6 @@
+{% extends "portal/base.html" %}{% load i18n %}
+{% block title %}{{ case.display_reference }}{% endblock %}
+{% block content %}
+<a class="govuk-back-link" href="{% url 'portal:agreement' case.lease_id %}">{{ case.lease.reference }}</a>
+{% include "cases/_request_detail.html" %}
+{% endblock %}

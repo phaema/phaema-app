@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PHAEMA 0.9\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-27 09:32+0000\n"
+"POT-Creation-Date: 2026-11-27 10:19+0000\n"
 "PO-Revision-Date: 2026-11-26 13:00+0000\n"
 "Last-Translator: Draft by Claude, awaiting review\n"
 "Language-Team: Welsh (draft, awaiting review) <stuart@phaema.co.uk>\n"
@@ -16,8 +16,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=4; plural=(n==1) ? 0 : (n==2) ? 1 : (n != 8 && n != "
-"11) ? 2 : 3;\n"
+"Plural-Forms: nplurals=4; plural=(n==1) ? 0 : (n==2) ? 1 : (n != 8 && n != 11) ? 2 : 3;\n"
 
 #: apps/cases/leasing.py:14
 msgid "Premises and extent"
@@ -28,16 +27,15 @@ msgid ""
 "With a plan that meets Land Registry requirements if the lease will be "
 "registrable."
 msgstr ""
-"Gyda chynllun sy'n bodloni gofynion y Gofrestrfa Tir os bydd modd "
-"cofrestru'r les."
+"Gyda chynllun sy'n bodloni gofynion y Gofrestrfa Tir os bydd modd cofrestru'r"
+" les."
 
 #: apps/cases/leasing.py:16 templates/leases/lease_detail.html:82
 msgid "Special rights"
 msgstr "Hawliau arbennig"
 
 #: apps/cases/leasing.py:16
-msgid ""
-"Parking, rights of way, telecoms access and so on. Write \"None\" if none."
+msgid "Parking, rights of way, telecoms access and so on. Write \"None\" if none."
 msgstr ""
 "Parcio, hawliau tramwy, mynediad telathrebu ac ati. Ysgrifennwch \"Dim\" os "
 "nad oes rhai."
@@ -126,8 +124,8 @@ msgid ""
 "The tenant is unrepresented: record the date they were given the RICS Code "
 "and its supplemental guide."
 msgstr ""
-"Nid oes gan y tenant gynrychiolydd: cofnodwch y dyddiad y cafodd God RICS "
-"a'i ganllaw atodol."
+"Nid oes gan y tenant gynrychiolydd: cofnodwch y dyddiad y cafodd God RICS a'i"
+" ganllaw atodol."
 
 #: apps/cases/leasing.py:105
 msgid "termination date"
@@ -147,7 +145,7 @@ msgstr "Dylai'r %(what)s fod rhwng 6 a 12 mis ar ôl rhoi'r hysbysiad."
 msgid "The date given is before the lease's contractual expiry."
 msgstr "Mae'r dyddiad a roddwyd cyn i'r les ddod i ben yn ôl y contract."
 
-#: apps/cases/models.py:21 apps/cases/models.py:481
+#: apps/cases/models.py:21 apps/cases/models.py:500
 #: templates/cases/case_detail.html:25 templates/cases/case_detail.html:94
 #: templates/cases/case_detail.html:102 templates/cases/case_detail.html:110
 #: templates/ledger/receipts.html:17 templates/projects/project_detail.html:142
@@ -162,8 +160,8 @@ msgstr "Casglu gwybodaeth"
 msgid "Assessing"
 msgstr "Asesu"
 
-#: apps/cases/models.py:24 templates/cases/case_detail.html:32
-#: templates/cases/case_detail.html:49
+#: apps/cases/models.py:24 templates/cases/_request_detail.html:8
+#: templates/cases/case_detail.html:32 templates/cases/case_detail.html:49
 #: templates/projects/project_detail.html:36
 msgid "Decision"
 msgstr "Penderfyniad"
@@ -239,7 +237,7 @@ msgstr "enw"
 msgid "group"
 msgstr "grŵp"
 
-#: apps/cases/models.py:50 apps/cases/models.py:512 apps/core/models.py:332
+#: apps/cases/models.py:50 apps/cases/models.py:532 apps/core/models.py:332
 #: apps/leases/models.py:700 apps/ledger/models.py:62
 #: apps/maintenance/models.py:337 apps/projects/models.py:49
 #: apps/projects/models.py:83 apps/projects/models.py:335
@@ -258,8 +256,8 @@ msgid ""
 "Calendar days from a complete application to the decision. Blank for no "
 "target."
 msgstr ""
-"Diwrnodau calendr o gais cyflawn hyd at y penderfyniad. Gadewch yn wag os "
-"nad oes targed."
+"Diwrnodau calendr o gais cyflawn hyd at y penderfyniad. Gadewch yn wag os nad"
+" oes targed."
 
 #: apps/cases/models.py:55
 msgid "working days to acknowledge"
@@ -280,8 +278,8 @@ msgid ""
 "refusal."
 msgstr ""
 "Caniatâd i aseinio, isosod, arwystlo neu ildio meddiant: mae penderfyniad yn "
-"ddyledus o fewn amser rhesymol, gyda rhesymau ysgrifenedig dros unrhyw "
-"amodau neu wrthod."
+"ddyledus o fewn amser rhesymol, gyda rhesymau ysgrifenedig dros unrhyw amodau"
+" neu wrthod."
 
 #: apps/cases/models.py:60
 msgid "fixed fee (£, net)"
@@ -316,11 +314,11 @@ msgid ""
 "approved, for example [\"decision\"]. Choose from: received, information, "
 "assessing, decision, completing."
 msgstr ""
-"Camau na all achos o'r math hwn eu cyrraedd nes bod goruchwyliwr y "
-"perchennog wedi cymeradwyo, er enghraifft [\"decision\"]. Dewiswch o: "
-"received, information, assessing, decision, completing."
+"Camau na all achos o'r math hwn eu cyrraedd nes bod goruchwyliwr y perchennog"
+" wedi cymeradwyo, er enghraifft [\"decision\"]. Dewiswch o: received, "
+"information, assessing, decision, completing."
 
-#: apps/cases/models.py:72 apps/cases/models.py:228
+#: apps/cases/models.py:72 apps/cases/models.py:247
 msgid "heads of terms"
 msgstr "penawdau telerau"
 
@@ -330,8 +328,8 @@ msgid ""
 "business premises, and cannot move to the decision until they do."
 msgstr ""
 "Mae achosion yn cofnodi penawdau telerau sy'n cwmpasu pob eitem yng Nghod "
-"RICS ar gyfer prydlesu eiddo busnes, ac ni allant symud at y penderfyniad "
-"nes eu bod yn gwneud hynny."
+"RICS ar gyfer prydlesu eiddo busnes, ac ni allant symud at y penderfyniad nes"
+" eu bod yn gwneud hynny."
 
 #: apps/cases/models.py:76 apps/properties/models.py:1127
 #: templates/cases/_challenge.html:2
@@ -353,15 +351,52 @@ msgstr "gwybodaeth am yr eiddo ar y daflen ymweliad safle"
 
 #: apps/cases/models.py:81
 msgid ""
-"The parts of the property record printed on the site visit sheet for cases "
-"of this type. The case details and the safety information are always "
-"included."
+"The parts of the property record printed on the site visit sheet for cases of"
+" this type. The case details and the safety information are always included."
 msgstr ""
 "Y rhannau o gofnod yr eiddo a argreffir ar y daflen ymweliad safle ar gyfer "
 "achosion o'r math hwn. Mae manylion yr achos a'r wybodaeth ddiogelwch bob "
 "amser wedi'u cynnwys."
 
-#: apps/cases/models.py:83 apps/compliance/models.py:28
+#: apps/cases/models.py:84
+msgid "tenants can ask for this in the tenant portal"
+msgstr "gall tenantiaid ofyn am hyn yn y porth tenantiaid"
+
+#: apps/cases/models.py:86
+msgid "council departments can ask for this"
+msgstr "gall adrannau’r cyngor ofyn am hyn"
+
+#: apps/cases/models.py:87
+msgid ""
+"Property liaisons see it on their building pages, for example space requests."
+msgstr ""
+"Mae swyddogion cyswllt eiddo yn ei weld ar dudalennau eu hadeiladau, er "
+"enghraifft ceisiadau am le."
+
+#: apps/cases/models.py:89
+msgid "guidance for people asking"
+msgstr "canllawiau i bobl sy’n gofyn"
+
+#: apps/cases/models.py:90
+msgid ""
+"Shown on the request form: what to tell the council and what happens next."
+msgstr ""
+"Dangosir ar y ffurflen gais: beth i’w ddweud wrth y cyngor a beth sy’n "
+"digwydd nesaf."
+
+#: apps/cases/models.py:92
+msgid "documents to attach"
+msgstr "dogfennau i’w hatodi"
+
+#: apps/cases/models.py:93
+msgid ""
+"One per line, shown as a list on the request form, for example \"Drawings of "
+"the works\"."
+msgstr ""
+"Un i bob llinell, wedi’u dangos fel rhestr ar y ffurflen gais, er enghraifft "
+"\"Lluniadau o’r gwaith\"."
+
+#: apps/cases/models.py:94 apps/compliance/models.py:28
 #: apps/compliance/models.py:53 apps/documents/models.py:57
 #: apps/maintenance/models.py:59 apps/maintenance/models.py:176
 #: apps/portal/models.py:29 apps/projects/models.py:56
@@ -371,7 +406,7 @@ msgstr ""
 msgid "active"
 msgstr "gweithredol"
 
-#: apps/cases/models.py:84 apps/cases/models.py:107 apps/cases/models.py:153
+#: apps/cases/models.py:95 apps/cases/models.py:118 apps/cases/models.py:164
 #: apps/documents/models.py:58 apps/ledger/models.py:150
 #: apps/properties/models.py:38 apps/properties/models.py:63
 #: apps/properties/models.py:891 apps/properties/models.py:1085
@@ -381,64 +416,64 @@ msgstr "gweithredol"
 msgid "order"
 msgstr "trefn"
 
-#: apps/cases/models.py:88
+#: apps/cases/models.py:99
 msgid "case type"
 msgstr "math o achos"
 
-#: apps/cases/models.py:93
+#: apps/cases/models.py:104
 msgid "Use a list of stages, for example [\"decision\"]."
 msgstr "Defnyddiwch restr o gamau, er enghraifft [\"decision\"]."
 
-#: apps/cases/models.py:97
+#: apps/cases/models.py:108
 msgid "Choose from the parts listed."
 msgstr "Dewiswch o'r rhannau a restrir."
 
-#: apps/cases/models.py:105 apps/cases/models.py:195 apps/cases/models.py:353
+#: apps/cases/models.py:116 apps/cases/models.py:208 apps/cases/models.py:372
 msgid "stage"
 msgstr "cam"
 
-#: apps/cases/models.py:106 apps/cases/models.py:354
+#: apps/cases/models.py:117 apps/cases/models.py:373
 #: apps/maintenance/models.py:158 apps/projects/models.py:272
 msgid "task"
 msgstr "tasg"
 
-#: apps/cases/models.py:111
+#: apps/cases/models.py:122
 msgid "task template"
 msgstr "templed tasg"
 
-#: apps/cases/models.py:121
+#: apps/cases/models.py:132
 msgid "Tick when checked"
 msgstr "Ticiwch pan gaiff ei wirio"
 
-#: apps/cases/models.py:122
+#: apps/cases/models.py:133
 msgid "Yes or no"
 msgstr "Ie neu na"
 
-#: apps/cases/models.py:123
+#: apps/cases/models.py:134
 msgid "Written answer"
 msgstr "Ateb ysgrifenedig"
 
-#: apps/cases/models.py:124
+#: apps/cases/models.py:135
 msgid "Number or measurement"
 msgstr "Rhif neu fesuriad"
 
-#: apps/cases/models.py:125
+#: apps/cases/models.py:136
 msgid "One of a list"
 msgstr "Un o restr"
 
-#: apps/cases/models.py:129 apps/properties/views.py:39
+#: apps/cases/models.py:140 apps/properties/views.py:39
 #: templates/core/my_work.html:77 templates/properties/property_detail.html:48
 #: templates/properties/property_detail.html:138
 msgid "Occupation"
 msgstr "Meddiannaeth"
 
-#: apps/cases/models.py:129 templates/properties/property_detail.html:49
+#: apps/cases/models.py:140 templates/properties/property_detail.html:49
 #: templates/space/building.html:34 templates/space/home.html:16
 #: templates/space/liaison_building.html:26 templates/space/occupier.html:24
 msgid "Use"
 msgstr "Defnydd"
 
-#: apps/cases/models.py:129 apps/properties/models.py:736
+#: apps/cases/models.py:140 apps/properties/models.py:736
 #: templates/cases/case_detail.html:120
 #: templates/maintenance/job_detail.html:109
 #: templates/projects/project_detail.html:29
@@ -447,56 +482,56 @@ msgstr "Defnydd"
 msgid "Description"
 msgstr "Disgrifiad"
 
-#: apps/cases/models.py:130 apps/properties/models.py:737
+#: apps/cases/models.py:141 apps/properties/models.py:737
 msgid "Built"
 msgstr "Adeiladwyd"
 
-#: apps/cases/models.py:130 apps/properties/models.py:739
+#: apps/cases/models.py:141 apps/properties/models.py:739
 msgid "Construction"
 msgstr "Adeiladwaith"
 
-#: apps/cases/models.py:130 apps/properties/models.py:740
+#: apps/cases/models.py:141 apps/properties/models.py:740
 msgid "Storeys"
 msgstr "Lloriau"
 
-#: apps/cases/models.py:131
+#: apps/cases/models.py:142
 msgid "Roof type and covering"
 msgstr "Math a gorchudd y to"
 
-#: apps/cases/models.py:131 apps/properties/models.py:744
+#: apps/cases/models.py:142 apps/properties/models.py:744
 msgid "Windows"
 msgstr "Ffenestri"
 
-#: apps/cases/models.py:131 apps/properties/models.py:745
+#: apps/cases/models.py:142 apps/properties/models.py:745
 msgid "Parking"
 msgstr "Parcio"
 
-#: apps/cases/models.py:132
+#: apps/cases/models.py:143
 msgid "Services"
 msgstr "Gwasanaethau"
 
-#: apps/cases/models.py:132 apps/properties/models.py:719
+#: apps/cases/models.py:143 apps/properties/models.py:719
 msgid "Solar panels"
 msgstr "Paneli solar"
 
-#: apps/cases/models.py:132 templates/properties/property_detail.html:123
+#: apps/cases/models.py:143 templates/properties/property_detail.html:123
 msgid "Floor areas"
 msgstr "Arwynebeddau llawr"
 
-#: apps/cases/models.py:133 apps/properties/models.py:735
+#: apps/cases/models.py:144 apps/properties/models.py:735
 msgid "Site area"
 msgstr "Arwynebedd y safle"
 
-#: apps/cases/models.py:133
+#: apps/cases/models.py:144
 msgid "Site hazards"
 msgstr "Peryglon ar y safle"
 
-#: apps/cases/models.py:137 apps/cases/models.py:606
+#: apps/cases/models.py:148 apps/cases/models.py:629
 #: apps/strategy/models.py:183 apps/strategy/models.py:247
 msgid "heading"
 msgstr "pennawd"
 
-#: apps/cases/models.py:138
+#: apps/cases/models.py:149
 msgid ""
 "Items with the same heading are printed together, for example Outside or "
 "Inside."
@@ -504,36 +539,36 @@ msgstr ""
 "Caiff eitemau â'r un pennawd eu hargraffu gyda'i gilydd, er enghraifft Y tu "
 "allan neu Y tu mewn."
 
-#: apps/cases/models.py:140 apps/cases/models.py:607
+#: apps/cases/models.py:151 apps/cases/models.py:630
 msgid "item"
 msgstr "eitem"
 
-#: apps/cases/models.py:141 apps/cases/models.py:608
+#: apps/cases/models.py:152 apps/cases/models.py:631
 msgid "guidance"
 msgstr "canllaw"
 
-#: apps/cases/models.py:142
+#: apps/cases/models.py:153
 msgid "A short prompt printed under the item."
 msgstr "Anogaeth fer a argreffir o dan yr eitem."
 
-#: apps/cases/models.py:143 apps/cases/models.py:609
+#: apps/cases/models.py:154 apps/cases/models.py:632
 #: apps/strategy/models.py:251
 msgid "answer"
 msgstr "ateb"
 
-#: apps/cases/models.py:144 apps/cases/models.py:610
+#: apps/cases/models.py:155 apps/cases/models.py:633
 msgid "list to choose from"
 msgstr "rhestr i ddewis ohoni"
 
-#: apps/cases/models.py:145
+#: apps/cases/models.py:156
 msgid "For \"One of a list\": the choices, separated by commas."
 msgstr "Ar gyfer \"Un o restr\": y dewisiadau, wedi'u gwahanu gan atalnodau."
 
-#: apps/cases/models.py:146 apps/cases/models.py:611
+#: apps/cases/models.py:157 apps/cases/models.py:634
 msgid "checks the recorded"
 msgstr "yn gwirio'r hyn a gofnodwyd"
 
-#: apps/cases/models.py:147
+#: apps/cases/models.py:158
 msgid ""
 "The value on the property record is printed beside the item, to confirm or "
 "correct on site."
@@ -541,11 +576,11 @@ msgstr ""
 "Caiff y gwerth ar gofnod yr eiddo ei argraffu wrth ymyl yr eitem, i'w "
 "gadarnhau neu ei gywiro ar y safle."
 
-#: apps/cases/models.py:150
+#: apps/cases/models.py:161
 msgid "for each building"
 msgstr "ar gyfer pob adeilad"
 
-#: apps/cases/models.py:151
+#: apps/cases/models.py:162
 msgid ""
 "On a site with several buildings, repeat this item for each one. Leave "
 "unticked for things checked once for the whole visit."
@@ -553,34 +588,36 @@ msgstr ""
 "Ar safle â sawl adeilad, ailadroddwch yr eitem hon ar gyfer pob un. Gadewch "
 "heb dic ar gyfer pethau a wirir unwaith ar gyfer yr ymweliad cyfan."
 
-#: apps/cases/models.py:157
+#: apps/cases/models.py:168
 msgid "site visit checklist item"
 msgstr "eitem rhestr wirio ymweliad safle"
 
-#: apps/cases/models.py:164
+#: apps/cases/models.py:175
 msgid "Give the choices, separated by commas."
 msgstr "Rhowch y dewisiadau, wedi'u gwahanu gan atalnodau."
 
-#: apps/cases/models.py:169 apps/projects/models.py:377
+#: apps/cases/models.py:180 apps/projects/models.py:377
 msgid "Open"
 msgstr "Ar agor"
 
-#: apps/cases/models.py:170 apps/cases/models.py:318
-#: templates/cases/case_list.html:41 templates/leases/lease_detail.html:65
-#: templates/ledger/account.html:14 templates/projects/project_detail.html:223
+#: apps/cases/models.py:181 apps/cases/models.py:337 apps/cases/requests.py:81
+#: templates/cases/_request_list.html:15 templates/cases/case_list.html:41
+#: templates/leases/lease_detail.html:65 templates/ledger/account.html:14
+#: templates/projects/project_detail.html:223
 msgid "On hold"
 msgstr "Ar stop"
 
-#: apps/cases/models.py:171 apps/maintenance/models.py:213
-#: apps/projects/models.py:76 apps/projects/models.py:378
-#: apps/projects/views.py:121 apps/valuations/models.py:277
-#: templates/cases/_case_rows.html:7 templates/cases/case_detail.html:33
+#: apps/cases/models.py:182 apps/cases/requests.py:79
+#: apps/maintenance/models.py:213 apps/projects/models.py:76
+#: apps/projects/models.py:378 apps/projects/views.py:121
+#: apps/valuations/models.py:277 templates/cases/_case_rows.html:7
+#: templates/cases/_request_list.html:15 templates/cases/case_detail.html:33
 #: templates/projects/project_detail.html:186
 #: templates/projects/project_detail.html:223
 msgid "Closed"
 msgstr "Wedi cau"
 
-#: apps/cases/models.py:174 apps/cases/models.py:530
+#: apps/cases/models.py:185 apps/cases/models.py:553
 #: apps/maintenance/models.py:264 templates/maintenance/contractors.html:9
 #: templates/maintenance/job_detail.html:47
 #: templates/projects/project_detail.html:40
@@ -591,51 +628,61 @@ msgstr "Wedi cau"
 msgid "Approved"
 msgstr "Cymeradwywyd"
 
-#: apps/cases/models.py:175
+#: apps/cases/models.py:186
 msgid "Approved with conditions"
 msgstr "Cymeradwywyd gydag amodau"
 
-#: apps/cases/models.py:176 apps/leases/models.py:483
+#: apps/cases/models.py:187 apps/leases/models.py:483
 msgid "Refused"
 msgstr "Gwrthodwyd"
 
-#: apps/cases/models.py:177 apps/cases/models.py:384 apps/cases/models.py:532
+#: apps/cases/models.py:188 apps/cases/models.py:403 apps/cases/models.py:555
 #: apps/leases/models.py:484 templates/cases/_marketing.html:16
 msgid "Withdrawn"
 msgstr "Tynnwyd yn ôl"
 
-#: apps/cases/models.py:178
+#: apps/cases/models.py:189
 msgid "No decision needed"
 msgstr "Dim angen penderfyniad"
 
-#: apps/cases/models.py:181 apps/cases/models.py:485
+#: apps/cases/models.py:192 apps/cases/models.py:504
 #: apps/maintenance/models.py:218 templates/cases/case_detail.html:111
 #: templates/ledger/run_email.html:52
 msgid "Email"
 msgstr "E-bost"
 
-#: apps/cases/models.py:182 apps/cases/models.py:486
+#: apps/cases/models.py:193 apps/cases/models.py:505
 #: templates/cases/case_detail.html:111
 msgid "Letter"
 msgstr "Llythyr"
 
-#: apps/cases/models.py:183 apps/maintenance/models.py:217
+#: apps/cases/models.py:194 apps/maintenance/models.py:217
 msgid "Phone"
 msgstr "Ffôn"
 
-#: apps/cases/models.py:184
+#: apps/cases/models.py:195
 msgid "Online form"
 msgstr "Ffurflen ar-lein"
 
-#: apps/cases/models.py:185
+#: apps/cases/models.py:196
 msgid "In person"
 msgstr "Wyneb yn wyneb"
 
-#: apps/cases/models.py:186
+#: apps/cases/models.py:197
 msgid "PHAEMA lease event"
 msgstr "Digwyddiad les PHAEMA"
 
-#: apps/cases/models.py:187 apps/cases/models.py:489
+#: apps/cases/models.py:198 apps/maintenance/models.py:358
+#: templates/leases/lease_detail.html:150 templates/portal/base.html:6
+#: templates/portal/base.html:18
+msgid "Tenant portal"
+msgstr "Porth tenantiaid"
+
+#: apps/cases/models.py:199 apps/maintenance/models.py:359
+msgid "Council department"
+msgstr "Adran o’r cyngor"
+
+#: apps/cases/models.py:200 apps/cases/models.py:509
 #: apps/compliance/models.py:205 apps/leases/models.py:31
 #: apps/leases/models.py:153 apps/leases/models.py:477
 #: apps/maintenance/models.py:31 apps/projects/models.py:229
@@ -649,26 +696,26 @@ msgstr "Digwyddiad les PHAEMA"
 msgid "Other"
 msgstr "Arall"
 
-#: apps/cases/models.py:190 apps/maintenance/models.py:228
+#: apps/cases/models.py:203 apps/maintenance/models.py:228
 #: apps/strategy/models.py:123 apps/valuations/models.py:175
 msgid "project"
 msgstr "prosiect"
 
-#: apps/cases/models.py:193 apps/leases/models.py:34 apps/ledger/models.py:61
+#: apps/cases/models.py:206 apps/leases/models.py:34 apps/ledger/models.py:61
 #: apps/projects/models.py:82 apps/properties/models.py:113
 #: apps/servicecharges/models.py:198
 msgid "type"
 msgstr "math"
 
-#: apps/cases/models.py:194 apps/compliance/models.py:209
+#: apps/cases/models.py:207 apps/compliance/models.py:209
 #: apps/leases/models.py:795 apps/maintenance/models.py:77
 #: apps/projects/models.py:301 apps/properties/models.py:924
 #: apps/properties/models.py:984 apps/strategy/models.py:25
 msgid "title"
 msgstr "teitl"
 
-#: apps/cases/models.py:196 apps/cases/models.py:405 apps/cases/models.py:541
-#: apps/cases/models.py:578 apps/core/models.py:442 apps/core/models.py:552
+#: apps/cases/models.py:209 apps/cases/models.py:424 apps/cases/models.py:564
+#: apps/cases/models.py:601 apps/core/models.py:442 apps/core/models.py:552
 #: apps/leases/models.py:218 apps/leases/models.py:489
 #: apps/leases/models.py:797 apps/ledger/models.py:210
 #: apps/maintenance/models.py:251 apps/maintenance/models.py:384
@@ -680,19 +727,19 @@ msgstr "teitl"
 msgid "status"
 msgstr "statws"
 
-#: apps/cases/models.py:197 apps/leases/models.py:318
+#: apps/cases/models.py:210 apps/leases/models.py:318
 msgid "on hold because"
 msgstr "ar stop oherwydd"
 
-#: apps/cases/models.py:199
+#: apps/cases/models.py:212
 msgid "case owner"
 msgstr "perchennog yr achos"
 
-#: apps/cases/models.py:201
+#: apps/cases/models.py:214
 msgid "contributors"
 msgstr "cyfranwyr"
 
-#: apps/cases/models.py:202
+#: apps/cases/models.py:215
 msgid ""
 "For example the legal officer: they can add notes, documents and "
 "correspondence."
@@ -700,64 +747,64 @@ msgstr ""
 "Er enghraifft y swyddog cyfreithiol: gallant ychwanegu nodiadau, dogfennau a "
 "gohebiaeth."
 
-#: apps/cases/models.py:204
+#: apps/cases/models.py:217
 msgid "received by"
 msgstr "wedi dod i law drwy"
 
-#: apps/cases/models.py:205 apps/ledger/models.py:109
+#: apps/cases/models.py:218 apps/ledger/models.py:109
 #: templates/cases/_standards.html:8
 msgid "received"
 msgstr "wedi dod i law"
 
-#: apps/cases/models.py:206
+#: apps/cases/models.py:219
 msgid "For consents, the date the written application arrived."
 msgstr "Ar gyfer caniatâd, y dyddiad y cyrhaeddodd y cais ysgrifenedig."
 
-#: apps/cases/models.py:207
+#: apps/cases/models.py:220
 msgid "acknowledged"
 msgstr "cydnabuwyd"
 
-#: apps/cases/models.py:208
+#: apps/cases/models.py:221
 msgid "application complete"
 msgstr "cais yn gyflawn"
 
-#: apps/cases/models.py:209
+#: apps/cases/models.py:222
 msgid "When all the information needed to decide arrived."
 msgstr "Pryd y cyrhaeddodd yr holl wybodaeth sydd ei hangen i benderfynu."
 
-#: apps/cases/models.py:210
+#: apps/cases/models.py:223
 msgid "target decision date"
 msgstr "dyddiad targed y penderfyniad"
 
-#: apps/cases/models.py:211
+#: apps/cases/models.py:224
 msgid "decision"
 msgstr "penderfyniad"
 
-#: apps/cases/models.py:212
+#: apps/cases/models.py:225
 msgid "decision sent"
 msgstr "anfonwyd y penderfyniad"
 
-#: apps/cases/models.py:213
+#: apps/cases/models.py:226
 msgid "reasons and conditions"
 msgstr "rhesymau ac amodau"
 
-#: apps/cases/models.py:214 apps/projects/models.py:240
+#: apps/cases/models.py:227 apps/projects/models.py:240
 #: apps/valuations/models.py:302
 msgid "outcome"
 msgstr "canlyniad"
 
-#: apps/cases/models.py:215 apps/valuations/models.py:303
+#: apps/cases/models.py:228 apps/valuations/models.py:303
 #: templates/leases/event_detail.html:25
 msgid "closed"
 msgstr "wedi cau"
 
-#: apps/cases/models.py:217 apps/core/models.py:548 apps/leases/models.py:487
+#: apps/cases/models.py:230 apps/core/models.py:548 apps/leases/models.py:487
 #: apps/maintenance/models.py:237 apps/maintenance/models.py:371
 #: apps/portal/models.py:96
 msgid "agreement"
 msgstr "cytundeb"
 
-#: apps/cases/models.py:219 apps/cases/models.py:569
+#: apps/cases/models.py:232 apps/cases/models.py:592
 #: apps/compliance/models.py:46 apps/maintenance/models.py:114
 #: apps/maintenance/models.py:155 apps/maintenance/models.py:231
 #: apps/maintenance/models.py:369 apps/properties/models.py:459
@@ -765,31 +812,44 @@ msgstr "cytundeb"
 msgid "property"
 msgstr "eiddo"
 
-#: apps/cases/models.py:221
+#: apps/cases/models.py:234
 msgid "applicant"
 msgstr "ymgeisydd"
 
-#: apps/cases/models.py:223 apps/leases/models.py:815
+#: apps/cases/models.py:236 apps/leases/models.py:815
 msgid "lease event"
 msgstr "digwyddiad les"
 
-#: apps/cases/models.py:224
+#: apps/cases/models.py:237
 msgid "applicant's reference"
 msgstr "cyfeirnod yr ymgeisydd"
 
-#: apps/cases/models.py:225 templates/cases/case_detail.html:170
+#: apps/cases/models.py:239
+msgid "asked by (tenant portal)"
+msgstr "gofynnwyd gan (porth tenantiaid)"
+
+#: apps/cases/models.py:241
+msgid "department asking"
+msgstr "yr adran sy’n gofyn"
+
+#: apps/cases/models.py:243 apps/portal/models.py:98
+#: templates/cases/case_detail.html:136
+msgid "asked by"
+msgstr "gofynnwyd gan"
+
+#: apps/cases/models.py:244 templates/cases/case_detail.html:170
 msgid "Iken matter number"
 msgstr "rhif mater Iken"
 
-#: apps/cases/models.py:226 templates/cases/case_detail.html:171
+#: apps/cases/models.py:245 templates/cases/case_detail.html:171
 msgid "CRM reference"
 msgstr "cyfeirnod CRM"
 
-#: apps/cases/models.py:229
+#: apps/cases/models.py:248
 msgid "tenant has a professional adviser"
 msgstr "mae gan y tenant gynghorydd proffesiynol"
 
-#: apps/cases/models.py:230 apps/leases/event_views.py:97
+#: apps/cases/models.py:249 apps/leases/event_views.py:97
 #: apps/properties/models.py:226 apps/properties/models.py:291
 #: apps/properties/models.py:392 apps/strategy/models.py:239
 #: templates/cases/_leasing.html:9 templates/cases/_leasing.html:40
@@ -800,7 +860,7 @@ msgstr "mae gan y tenant gynghorydd proffesiynol"
 msgid "Yes"
 msgstr "Ie"
 
-#: apps/cases/models.py:230 apps/projects/views.py:164
+#: apps/cases/models.py:249 apps/projects/views.py:164
 #: apps/properties/models.py:227 apps/properties/models.py:292
 #: apps/properties/models.py:393 apps/strategy/models.py:241
 #: templates/cases/_leasing.html:41 templates/cases/visit.html:29
@@ -810,151 +870,151 @@ msgstr "Ie"
 msgid "No"
 msgstr "Na"
 
-#: apps/cases/models.py:231
+#: apps/cases/models.py:250
 msgid "RICS Code given to the tenant"
 msgstr "Rhoddwyd Cod RICS i'r tenant"
 
-#: apps/cases/models.py:232
+#: apps/cases/models.py:251
 msgid "1954 Act notice"
 msgstr "Hysbysiad Deddf 1954"
 
-#: apps/cases/models.py:233
+#: apps/cases/models.py:252
 msgid "Section 25 notice from the council"
 msgstr "Hysbysiad adran 25 gan y cyngor"
 
-#: apps/cases/models.py:234
+#: apps/cases/models.py:253
 msgid "Section 26 request from the tenant"
 msgstr "Cais adran 26 gan y tenant"
 
-#: apps/cases/models.py:235
+#: apps/cases/models.py:254
 msgid "notice given"
 msgstr "rhoddwyd yr hysbysiad"
 
-#: apps/cases/models.py:236
+#: apps/cases/models.py:255
 msgid "date in the notice"
 msgstr "dyddiad yn yr hysbysiad"
 
-#: apps/cases/models.py:237 templates/cases/_leasing.html:18
+#: apps/cases/models.py:256 templates/cases/_leasing.html:18
 msgid ""
 "The termination date in a section 25 notice, or the start date of the new "
 "tenancy in a section 26 request."
 msgstr ""
-"Y dyddiad terfynu mewn hysbysiad adran 25, neu ddyddiad dechrau'r "
-"denantiaeth newydd mewn cais adran 26."
+"Y dyddiad terfynu mewn hysbysiad adran 25, neu ddyddiad dechrau'r denantiaeth"
+" newydd mewn cais adran 26."
 
-#: apps/cases/models.py:239
+#: apps/cases/models.py:258
 msgid "council opposes a new tenancy"
 msgstr "mae'r cyngor yn gwrthwynebu tenantiaeth newydd"
 
-#: apps/cases/models.py:240
+#: apps/cases/models.py:259
 msgid "grounds of opposition"
 msgstr "seiliau'r gwrthwynebiad"
 
-#: apps/cases/models.py:241 templates/cases/_leasing.html:20
+#: apps/cases/models.py:260 templates/cases/_leasing.html:20
 msgid "Section 30(1) paragraphs, for example (f) redevelopment."
 msgstr "Paragraffau adran 30(1), er enghraifft (f) ailddatblygu."
 
-#: apps/cases/models.py:245
+#: apps/cases/models.py:264
 msgid "proposed asset strategy"
 msgstr "strategaeth asedau arfaethedig"
 
-#: apps/cases/models.py:247 apps/maintenance/models.py:387
+#: apps/cases/models.py:266 apps/maintenance/models.py:387
 #: apps/portal/models.py:108 apps/projects/models.py:238
 #: apps/properties/models.py:1138 templates/cases/case_detail.html:136
 msgid "decided by"
 msgstr "penderfynwyd gan"
 
-#: apps/cases/models.py:248 templates/cases/_challenge_decision.html:5
+#: apps/cases/models.py:267 templates/cases/_challenge_decision.html:5
 msgid "For example Head of Estates, Cabinet or the Asset Management Board."
 msgstr "Er enghraifft Pennaeth Ystadau, y Cabinet neu'r Bwrdd Rheoli Asedau."
 
-#: apps/cases/models.py:249 apps/properties/models.py:1140
+#: apps/cases/models.py:268 apps/properties/models.py:1140
 msgid "meeting date"
 msgstr "dyddiad y cyfarfod"
 
-#: apps/cases/models.py:250 apps/properties/models.py:1141
+#: apps/cases/models.py:269 apps/properties/models.py:1141
 #: apps/strategy/models.py:35
 msgid "minute or decision reference"
 msgstr "cyfeirnod y cofnod neu'r penderfyniad"
 
-#: apps/cases/models.py:252
+#: apps/cases/models.py:271
 msgid "schedule of dilapidations (£)"
 msgstr "rhestr o adfeiliadau (£)"
 
-#: apps/cases/models.py:254
+#: apps/cases/models.py:273
 msgid "schedule served"
 msgstr "cyflwynwyd y rhestr"
 
-#: apps/cases/models.py:255
+#: apps/cases/models.py:274
 msgid "tenant's response (£)"
 msgstr "ymateb y tenant (£)"
 
-#: apps/cases/models.py:257
+#: apps/cases/models.py:276
 msgid "response received"
 msgstr "daeth yr ymateb i law"
 
-#: apps/cases/models.py:258
+#: apps/cases/models.py:277
 msgid "settlement (£)"
 msgstr "setliad (£)"
 
-#: apps/cases/models.py:260
+#: apps/cases/models.py:279
 msgid "settled"
 msgstr "setlwyd"
 
-#: apps/cases/models.py:261
+#: apps/cases/models.py:280
 msgid "council's costs (£)"
 msgstr "costau'r cyngor (£)"
 
-#: apps/cases/models.py:263
+#: apps/cases/models.py:282
 msgid "dilapidations notes"
 msgstr "nodiadau adfeiliadau"
 
-#: apps/cases/models.py:265
+#: apps/cases/models.py:284
 msgid "conflicts of interest"
 msgstr "gwrthdaro buddiannau"
 
-#: apps/cases/models.py:266 apps/properties/models.py:387
+#: apps/cases/models.py:285 apps/properties/models.py:387
 #: apps/properties/models.py:399 apps/properties/models.py:404
 #: templates/core/hand_over.html:66
 msgid "None"
 msgstr "Dim"
 
-#: apps/cases/models.py:266 templates/cases/_approval.html:8
+#: apps/cases/models.py:285 templates/cases/_approval.html:8
 #: templates/cases/_standards.html:28
 msgid "Declared"
 msgstr "Wedi'i ddatgan"
 
-#: apps/cases/models.py:267
+#: apps/cases/models.py:286
 msgid "conflict declared and how it is managed"
 msgstr "y gwrthdaro a ddatganwyd a sut y caiff ei reoli"
 
-#: apps/cases/models.py:269
+#: apps/cases/models.py:288
 msgid "declared by"
 msgstr "datganwyd gan"
 
-#: apps/cases/models.py:270
+#: apps/cases/models.py:289
 msgid "declared"
 msgstr "datganwyd"
 
-#: apps/cases/models.py:323 apps/maintenance/models.py:311
+#: apps/cases/models.py:342 apps/maintenance/models.py:311
 #: templates/cases/case_list.html:7 templates/core/my_work.html:107
 msgid "Past target"
 msgstr "Wedi pasio'r targed"
 
-#: apps/cases/models.py:325
+#: apps/cases/models.py:344
 msgid "Due within a week"
 msgstr "Yn ddyledus o fewn wythnos"
 
-#: apps/cases/models.py:326 apps/maintenance/models.py:316
+#: apps/cases/models.py:345 apps/maintenance/models.py:316
 #: apps/projects/models.py:160 apps/strategy/models.py:72
 msgid "On track"
 msgstr "Ar y trywydd iawn"
 
-#: apps/cases/models.py:338
+#: apps/cases/models.py:357
 msgid "Give written reasons for conditions or a refusal."
 msgstr "Rhowch resymau ysgrifenedig dros amodau neu wrthod."
 
-#: apps/cases/models.py:355 apps/compliance/models.py:128
+#: apps/cases/models.py:374 apps/compliance/models.py:128
 #: apps/ledger/models.py:66 apps/ledger/models.py:234
 #: apps/projects/models.py:276 templates/cases/case_detail.html:69
 #: templates/ledger/home.html:15 templates/projects/project_detail.html:124
@@ -962,113 +1022,113 @@ msgstr "Rhowch resymau ysgrifenedig dros amodau neu wrthod."
 msgid "due"
 msgstr "yn ddyledus"
 
-#: apps/cases/models.py:358 apps/compliance/models.py:129
+#: apps/cases/models.py:377 apps/compliance/models.py:129
 #: apps/projects/models.py:277
 msgid "done"
 msgstr "wedi'i wneud"
 
-#: apps/cases/models.py:375
+#: apps/cases/models.py:394
 msgid "Sole agency"
 msgstr "Asiantaeth unigol"
 
-#: apps/cases/models.py:376
+#: apps/cases/models.py:395
 msgid "Joint sole agency"
 msgstr "Asiantaeth unigol ar y cyd"
 
-#: apps/cases/models.py:377
+#: apps/cases/models.py:396
 msgid "Multiple agency"
 msgstr "Asiantaeth luosog"
 
-#: apps/cases/models.py:378
+#: apps/cases/models.py:397
 msgid "Sole letting (or selling) rights"
 msgstr "Hawliau gosod (neu werthu) unigol"
 
-#: apps/cases/models.py:379
+#: apps/cases/models.py:398
 msgid "Marketed by the council itself"
 msgstr "Marchnatwyd gan y cyngor ei hun"
 
-#: apps/cases/models.py:382 apps/valuations/models.py:156
+#: apps/cases/models.py:401 apps/valuations/models.py:156
 #: templates/cases/_marketing.html:26
 msgid "Instructed"
 msgstr "Cyfarwyddwyd"
 
-#: apps/cases/models.py:383 templates/cases/_marketing.html:16
+#: apps/cases/models.py:402 templates/cases/_marketing.html:16
 msgid "Let or sold"
 msgstr "Wedi'i osod neu ei werthu"
 
-#: apps/cases/models.py:385 apps/leases/models.py:159 apps/leases/models.py:485
+#: apps/cases/models.py:404 apps/leases/models.py:159 apps/leases/models.py:485
 #: templates/cases/_marketing.html:16 templates/leases/lease_detail.html:53
 msgid "Ended"
 msgstr "Wedi dod i ben"
 
-#: apps/cases/models.py:388
+#: apps/cases/models.py:407
 msgid "agent"
 msgstr "asiant"
 
-#: apps/cases/models.py:389
+#: apps/cases/models.py:408
 msgid "Blank when the council markets it itself."
 msgstr "Gwag pan fydd y cyngor yn ei farchnata ei hun."
 
-#: apps/cases/models.py:390 apps/space/models.py:189
+#: apps/cases/models.py:409 apps/space/models.py:189
 #: apps/valuations/models.py:179
 msgid "basis"
 msgstr "sail"
 
-#: apps/cases/models.py:391
+#: apps/cases/models.py:410
 msgid "instructed"
 msgstr "cyfarwyddwyd"
 
-#: apps/cases/models.py:392
+#: apps/cases/models.py:411
 msgid "instruction ends"
 msgstr "cyfarwyddyd yn dod i ben"
 
-#: apps/cases/models.py:393
+#: apps/cases/models.py:412
 msgid "The end of any sole agency period."
 msgstr "Diwedd unrhyw gyfnod asiantaeth unigol."
 
-#: apps/cases/models.py:394
+#: apps/cases/models.py:413
 #, python-format
 msgid "fee (% of first year's rent or price)"
 msgstr "ffi (% o rent neu bris y flwyddyn gyntaf)"
 
-#: apps/cases/models.py:396
+#: apps/cases/models.py:415
 msgid "fixed fee (£)"
 msgstr "ffi sefydlog (£)"
 
-#: apps/cases/models.py:397
+#: apps/cases/models.py:416
 msgid "fee terms"
 msgstr "telerau'r ffi"
 
-#: apps/cases/models.py:398
+#: apps/cases/models.py:417
 msgid "For example: plus VAT, payable on completion, marketing costs capped."
 msgstr ""
 "Er enghraifft: a TAW, yn daladwy wrth gwblhau, costau marchnata wedi'u capio."
 
-#: apps/cases/models.py:399
+#: apps/cases/models.py:418
 msgid "asking rent a year (£)"
 msgstr "rhent gofyn y flwyddyn (£)"
 
-#: apps/cases/models.py:401
+#: apps/cases/models.py:420
 msgid "asking price (£)"
 msgstr "pris gofyn (£)"
 
-#: apps/cases/models.py:402
+#: apps/cases/models.py:421
 msgid "terms offered"
 msgstr "telerau a gynigir"
 
-#: apps/cases/models.py:403
+#: apps/cases/models.py:422
 msgid "For example: new full repairing lease, 5 years or more."
 msgstr "Er enghraifft: les atgyweirio llawn newydd, 5 mlynedd neu fwy."
 
-#: apps/cases/models.py:404
+#: apps/cases/models.py:423
 msgid "board up"
 msgstr "bwrdd i fyny"
 
-#: apps/cases/models.py:406
+#: apps/cases/models.py:425
 msgid "ended"
 msgstr "daeth i ben"
 
-#: apps/cases/models.py:407 apps/compliance/models.py:52
+#: apps/cases/models.py:426 apps/compliance/models.py:52
 #: apps/compliance/models.py:98 apps/compliance/models.py:215
 #: apps/leases/models.py:45 apps/leases/models.py:100 apps/leases/models.py:364
 #: apps/leases/models.py:518 apps/leases/models.py:571
@@ -1087,124 +1147,140 @@ msgstr "daeth i ben"
 msgid "notes"
 msgstr "nodiadau"
 
-#: apps/cases/models.py:411
+#: apps/cases/models.py:430
 msgid "agent instruction"
 msgstr "cyfarwyddyd i asiant"
 
-#: apps/cases/models.py:414
+#: apps/cases/models.py:433
 msgid "in-house"
 msgstr "yn fewnol"
 
-#: apps/cases/models.py:423
+#: apps/cases/models.py:442
 msgid "Choose the agent, or choose marketed by the council itself."
 msgstr "Dewiswch yr asiant, neu dewiswch marchnatwyd gan y cyngor ei hun."
 
-#: apps/cases/models.py:442 apps/cases/models.py:615
+#: apps/cases/models.py:461 apps/cases/models.py:638
 #: apps/projects/models.py:290 apps/strategy/models.py:284
 msgid "note"
 msgstr "nodyn"
 
-#: apps/cases/models.py:443 apps/projects/models.py:94
+#: apps/cases/models.py:462 apps/projects/models.py:94
 msgid "confidential"
 msgstr "cyfrinachol"
 
-#: apps/cases/models.py:444
+#: apps/cases/models.py:463
 msgid "Only the case owner and administrators can see it."
 msgstr "Dim ond perchennog yr achos a gweinyddwyr all ei weld."
 
-#: apps/cases/models.py:466
+#: apps/cases/models.py:485
 msgid ""
 "Upload a PDF, image, email (.eml or .msg), Word, Excel, text or CSV file."
 msgstr ""
 "Llwythwch i fyny ffeil PDF, delwedd, e-bost (.eml neu .msg), Word, Excel, "
 "testun neu CSV."
 
-#: apps/cases/models.py:468
+#: apps/cases/models.py:487
 msgid "The file must be smaller than 25 MB."
 msgstr "Rhaid i'r ffeil fod yn llai na 25 MB."
 
-#: apps/cases/models.py:476 apps/core/files.py:61
+#: apps/cases/models.py:495 apps/core/files.py:61
 msgid "The file's contents do not match its type."
 msgstr "Nid yw cynnwys y ffeil yn cyfateb i'w math."
 
-#: apps/cases/models.py:482 templates/cases/case_detail.html:94
+#: apps/cases/models.py:501 templates/cases/case_detail.html:94
 #: templates/cases/case_detail.html:102 templates/cases/case_detail.html:110
 msgid "Sent"
 msgstr "Anfonwyd"
 
-#: apps/cases/models.py:487 templates/cases/case_detail.html:111
+#: apps/cases/models.py:506 templates/cases/case_detail.html:111
 msgid "Phone call"
 msgstr "Galwad ffôn"
 
-#: apps/cases/models.py:488 templates/cases/case_detail.html:111
+#: apps/cases/models.py:507 templates/cases/case_detail.html:111
 msgid "Meeting"
 msgstr "Cyfarfod"
 
-#: apps/cases/models.py:492 apps/leases/models.py:216
+#: apps/cases/models.py:508
+msgid "Online request"
+msgstr "Cais ar-lein"
+
+#: apps/cases/models.py:512 apps/leases/models.py:216
 msgid "direction"
 msgstr "cyfeiriad"
 
-#: apps/cases/models.py:493 apps/valuations/models.py:192
+#: apps/cases/models.py:513 apps/valuations/models.py:192
 msgid "method"
 msgstr "dull"
 
-#: apps/cases/models.py:494 apps/leases/models.py:565 apps/ledger/models.py:183
+#: apps/cases/models.py:514 apps/leases/models.py:565 apps/ledger/models.py:183
 #: apps/servicecharges/models.py:192 apps/valuations/models.py:328
 msgid "date"
 msgstr "dyddiad"
 
-#: apps/cases/models.py:495
+#: apps/cases/models.py:515
 msgid "from or to"
 msgstr "oddi wrth neu at"
 
-#: apps/cases/models.py:496 apps/core/models.py:546
+#: apps/cases/models.py:516 apps/core/models.py:546
 msgid "subject"
 msgstr "pwnc"
 
-#: apps/cases/models.py:497
+#: apps/cases/models.py:517
 msgid "summary or text"
 msgstr "crynodeb neu destun"
 
-#: apps/cases/models.py:498
+#: apps/cases/models.py:518
 msgid "saved email or letter"
 msgstr "e-bost neu lythyr a gadwyd"
 
-#: apps/cases/models.py:504
+#: apps/cases/models.py:524
 msgid "correspondence"
 msgstr "gohebiaeth"
 
-#: apps/cases/models.py:513 apps/compliance/models.py:211
+#: apps/cases/models.py:533 apps/compliance/models.py:211
 #: apps/maintenance/models.py:338 apps/projects/models.py:302
 #: apps/properties/models.py:925
 msgid "file"
 msgstr "ffeil"
 
-#: apps/cases/models.py:529 templates/cases/_approval.html:4
+#: apps/cases/models.py:538
+msgid "shared with the person who asked"
+msgstr "wedi’i rannu â’r person a ofynnodd"
+
+#: apps/cases/models.py:539
+msgid ""
+"For requests from the tenant portal or a council department: they can see and"
+" download it."
+msgstr ""
+"Ar gyfer ceisiadau o’r porth tenantiaid neu adran o’r cyngor: gallant ei weld"
+" a’i lawrlwytho."
+
+#: apps/cases/models.py:552 templates/cases/_approval.html:4
 msgid "Waiting for approval"
 msgstr "Yn aros am gymeradwyaeth"
 
-#: apps/cases/models.py:531
+#: apps/cases/models.py:554
 msgid "Returned with comments"
 msgstr "Dychwelwyd gyda sylwadau"
 
-#: apps/cases/models.py:535
+#: apps/cases/models.py:558
 msgid "to move to"
 msgstr "i symud i"
 
-#: apps/cases/models.py:540
+#: apps/cases/models.py:563
 msgid "recommendation"
 msgstr "argymhelliad"
 
-#: apps/cases/models.py:544 apps/maintenance/models.py:388
+#: apps/cases/models.py:567 apps/maintenance/models.py:388
 #: apps/portal/models.py:110
 msgid "decided"
 msgstr "penderfynwyd"
 
-#: apps/cases/models.py:545 apps/maintenance/models.py:271
+#: apps/cases/models.py:568 apps/maintenance/models.py:271
 msgid "approver's comments"
 msgstr "sylwadau'r cymeradwywr"
 
-#: apps/cases/models.py:564 apps/leases/forms.py:90 apps/leases/models.py:789
+#: apps/cases/models.py:587 apps/leases/forms.py:90 apps/leases/models.py:789
 #: apps/strategy/models.py:114 apps/strategy/models.py:204
 #: templates/cases/case_detail.html:84 templates/leases/lease_detail.html:31
 #: templates/strategy/health_check.html:12
@@ -1212,104 +1288,140 @@ msgstr "sylwadau'r cymeradwywr"
 msgid "In progress"
 msgstr "Ar y gweill"
 
-#: apps/cases/models.py:565 apps/strategy/models.py:205
+#: apps/cases/models.py:588 apps/strategy/models.py:205
 #: templates/cases/case_detail.html:84 templates/strategy/health_check.html:12
 #: templates/strategy/health_list.html:26
 msgid "Finished"
 msgstr "Wedi gorffen"
 
-#: apps/cases/models.py:571
+#: apps/cases/models.py:594
 msgid "visited by"
 msgstr "ymwelwyd gan"
 
-#: apps/cases/models.py:572
+#: apps/cases/models.py:595
 msgid "date of visit"
 msgstr "dyddiad yr ymweliad"
 
-#: apps/cases/models.py:573
+#: apps/cases/models.py:596
 msgid "time"
 msgstr "amser"
 
-#: apps/cases/models.py:573
+#: apps/cases/models.py:596
 msgid "For example 10:30 to 12:00."
 msgstr "Er enghraifft 10:30 i 12:00."
 
-#: apps/cases/models.py:574
+#: apps/cases/models.py:597
 msgid "weather"
 msgstr "tywydd"
 
-#: apps/cases/models.py:575
+#: apps/cases/models.py:598
 msgid "people met"
 msgstr "pobl a gyfarfuwyd"
 
-#: apps/cases/models.py:576
+#: apps/cases/models.py:599
 msgid "general notes"
 msgstr "nodiadau cyffredinol"
 
-#: apps/cases/models.py:577
+#: apps/cases/models.py:600
 msgid "to follow up"
 msgstr "i'w ddilyn i fyny"
 
-#: apps/cases/models.py:579 apps/strategy/models.py:213
+#: apps/cases/models.py:602 apps/strategy/models.py:213
 msgid "finished on"
 msgstr "gorffennwyd ar"
 
-#: apps/cases/models.py:583
+#: apps/cases/models.py:606
 msgid "site visit"
 msgstr "ymweliad safle"
 
-#: apps/cases/models.py:584
+#: apps/cases/models.py:607
 msgid "site visits"
 msgstr "ymweliadau safle"
 
-#: apps/cases/models.py:605
+#: apps/cases/models.py:628
 msgid "For items answered for each building on a site."
 msgstr "Ar gyfer eitemau a atebir ar gyfer pob adeilad ar safle."
 
-#: apps/cases/models.py:612
+#: apps/cases/models.py:635
 msgid "recorded at the start"
 msgstr "cofnodwyd ar y dechrau"
 
-#: apps/cases/models.py:614
+#: apps/cases/models.py:637
 msgid "found on site"
 msgstr "canfuwyd ar y safle"
 
-#: apps/cases/models.py:619
+#: apps/cases/models.py:642
 msgid "Record updated"
 msgstr "Diweddarwyd y cofnod"
 
-#: apps/cases/models.py:620
+#: apps/cases/models.py:643
 msgid "Record left as it was"
 msgstr "Gadawyd y cofnod fel yr oedd"
 
-#: apps/cases/models.py:622
+#: apps/cases/models.py:645
 msgid "difference from the record"
 msgstr "gwahaniaeth o'r cofnod"
 
-#: apps/cases/models.py:630
+#: apps/cases/models.py:653
 msgid "site visit answer"
 msgstr "ateb ymweliad safle"
 
-#: apps/cases/models.py:658
+#: apps/cases/models.py:681
 msgid "about"
 msgstr "ynghylch"
 
-#: apps/cases/models.py:659 apps/maintenance/models.py:427
+#: apps/cases/models.py:682 apps/maintenance/models.py:427
 #: apps/properties/models.py:885 apps/properties/models.py:895
 msgid "photo"
 msgstr "llun"
 
-#: apps/cases/models.py:660 apps/properties/models.py:887
+#: apps/cases/models.py:683 apps/properties/models.py:887
 msgid "caption"
 msgstr "capsiwn"
 
-#: apps/cases/models.py:662 templates/cases/visit.html:63
+#: apps/cases/models.py:685 templates/cases/visit.html:63
 msgid "also on the property"
 msgstr "hefyd ar yr eiddo"
 
-#: apps/cases/models.py:666
+#: apps/cases/models.py:689
 msgid "site visit photo"
 msgstr "llun ymweliad safle"
+
+#: apps/cases/requests.py:27
+#, python-format
+msgid "Attach up to %(n)s files."
+msgstr "Atodwch hyd at %(n)s ffeil."
+
+#: apps/cases/requests.py:34
+msgid "What are you asking for?"
+msgstr "Am beth rydych yn gofyn?"
+
+#: apps/cases/requests.py:36
+msgid "In a few words"
+msgstr "Mewn ychydig eiriau"
+
+#: apps/cases/requests.py:37
+msgid "For example: assign the lease to Smith Trading Ltd"
+msgstr "Er enghraifft: aseinio’r les i Smith Trading Ltd"
+
+#: apps/cases/requests.py:39
+msgid "Tell us more"
+msgstr "Dywedwch fwy wrthym"
+
+#: apps/cases/requests.py:40 templates/base.html:31
+#: templates/cases/_request_detail.html:10
+#: templates/leases/document_list.html:7 templates/leases/lease_detail.html:141
+#: templates/portal/agreement.html:92
+#: templates/projects/project_detail.html:264
+#: templates/properties/title_detail.html:24
+msgid "Documents"
+msgstr "Dogfennau"
+
+#: apps/cases/requests.py:41
+msgid "Up to 10 files: PDF, Word, Excel, images or emails, 25 MB each"
+msgstr ""
+"Hyd at 10 ffeil: PDF, Word, Excel, delweddau neu negeseuon e-bost, 25 MB yr "
+"un"
 
 #: apps/cases/standards.py:35
 #, python-format
@@ -1340,17 +1452,17 @@ msgstr ""
 "Nid oes EPC wedi'i gofnodi ar gyfer %(ref)s. Gwiriwch a oes angen un cyn "
 "gosod."
 
-#: apps/cases/views.py:151 apps/cases/views.py:173
+#: apps/cases/views.py:152 apps/cases/views.py:174
 #, python-format
 msgid "Case %(ref)s opened."
 msgstr "Agorwyd achos %(ref)s."
 
-#: apps/cases/views.py:254 apps/leases/views.py:352
+#: apps/cases/views.py:255 apps/leases/views.py:352
 #: apps/properties/views.py:556
 msgid "Choose or drop at least one file."
 msgstr "Dewiswch neu ollwng o leiaf un ffeil."
 
-#: apps/cases/views.py:277 templates/leases/document_list.html:36
+#: apps/cases/views.py:278 templates/leases/document_list.html:36
 #: templates/properties/property_detail.html:238
 #, python-format
 msgid "%(n)s document"
@@ -1360,7 +1472,7 @@ msgstr[1] "%(n)s ddogfen"
 msgstr[2] "%(n)s dogfen"
 msgstr[3] "%(n)s dogfen"
 
-#: apps/cases/views.py:279
+#: apps/cases/views.py:280
 #, python-format
 msgid "%(n)s email"
 msgid_plural "%(n)s emails"
@@ -1369,50 +1481,50 @@ msgstr[1] "%(n)s e-bost"
 msgstr[2] "%(n)s e-bost"
 msgstr[3] "%(n)s e-bost"
 
-#: apps/cases/views.py:280
+#: apps/cases/views.py:281
 #, python-format
 msgid "Filed on this case: %(what)s."
 msgstr "Ffeiliwyd ar yr achos hwn: %(what)s."
 
-#: apps/cases/views.py:282 apps/leases/views.py:350
+#: apps/cases/views.py:283 apps/leases/views.py:350
 #, python-format
 msgid "Not filed: %(p)s"
 msgstr "Heb eu ffeilio: %(p)s"
 
-#: apps/cases/views.py:284 apps/cases/views.py:750
+#: apps/cases/views.py:285 apps/cases/views.py:751
 #, python-format
 msgid "Some attachments were not kept: %(p)s"
 msgstr "Ni chadwyd rhai atodiadau: %(p)s"
 
-#: apps/cases/views.py:348
+#: apps/cases/views.py:349
 msgid "Schedule of dilapidations (£)"
 msgstr "Rhestr o adfeiliadau (£)"
 
-#: apps/cases/views.py:349
+#: apps/cases/views.py:350
 msgid "Date the schedule was served"
 msgstr "Dyddiad cyflwyno'r rhestr"
 
-#: apps/cases/views.py:350
+#: apps/cases/views.py:351
 msgid "Tenant's response (£)"
 msgstr "Ymateb y tenant (£)"
 
-#: apps/cases/views.py:351
+#: apps/cases/views.py:352
 msgid "Date the response was received"
 msgstr "Dyddiad y daeth yr ymateb i law"
 
-#: apps/cases/views.py:352
+#: apps/cases/views.py:353
 msgid "Settlement (£)"
 msgstr "Setliad (£)"
 
-#: apps/cases/views.py:353
+#: apps/cases/views.py:354
 msgid "Date settled"
 msgstr "Dyddiad setlo"
 
-#: apps/cases/views.py:354
+#: apps/cases/views.py:355
 msgid "Council's costs (£)"
 msgstr "Costau'r cyngor (£)"
 
-#: apps/cases/views.py:355 apps/leases/forms.py:48 apps/leases/forms.py:54
+#: apps/cases/views.py:356 apps/leases/forms.py:48 apps/leases/forms.py:54
 #: apps/leases/forms.py:67 apps/leases/forms.py:73 apps/leases/forms.py:83
 #: apps/leases/forms.py:105 apps/properties/models.py:764
 #: templates/cases/_marketing.html:35 templates/cases/_standards.html:12
@@ -1428,73 +1540,73 @@ msgstr "Costau'r cyngor (£)"
 msgid "Notes"
 msgstr "Nodiadau"
 
-#: apps/cases/views.py:428
+#: apps/cases/views.py:429
 msgid "An Asset Challenge needs a property before its outcome can be recorded."
 msgstr "Mae angen eiddo ar Her Asedau cyn y gellir cofnodi ei chanlyniad."
 
-#: apps/cases/views.py:431
+#: apps/cases/views.py:432
 msgid "Choose the asset strategy decided."
 msgstr "Dewiswch y strategaeth asedau a benderfynwyd."
 
-#: apps/cases/views.py:434
+#: apps/cases/views.py:435
 msgid ""
 "Give the reasons for the asset strategy: they are kept with the property."
 msgstr ""
 "Rhowch y rhesymau dros y strategaeth asedau: cânt eu cadw gyda'r eiddo."
 
-#: apps/cases/views.py:441 apps/properties/models.py:1160
+#: apps/cases/views.py:442 apps/properties/models.py:1160
 msgid "The decision date cannot be in the future."
 msgstr "Ni all dyddiad y penderfyniad fod yn y dyfodol."
 
-#: apps/cases/views.py:494
+#: apps/cases/views.py:495
 msgid "There is no approval waiting on this case."
 msgstr "Nid oes cymeradwyaeth yn aros ar yr achos hwn."
 
-#: apps/cases/views.py:501
+#: apps/cases/views.py:502
 msgid "Choose someone other than the person who asked."
 msgstr "Dewiswch rywun heblaw'r person a ofynnodd."
 
-#: apps/cases/views.py:504
+#: apps/cases/views.py:505
 #, python-format
 msgid "Approval sent to %(name)s."
 msgstr "Anfonwyd y cais am gymeradwyaeth at %(name)s."
 
-#: apps/cases/views.py:510 apps/maintenance/views.py:211
+#: apps/cases/views.py:511 apps/maintenance/views.py:211
 msgid "Say why you are returning it."
 msgstr "Nodwch pam rydych yn ei ddychwelyd."
 
-#: apps/cases/views.py:513
+#: apps/cases/views.py:514
 #, python-format
 msgid "Approved: the case has moved to %(stage)s."
 msgstr "Cymeradwywyd: mae'r achos wedi symud i %(stage)s."
 
-#: apps/cases/views.py:514
+#: apps/cases/views.py:515
 #, python-format
 msgid "Returned to %(name)s with your comments."
 msgstr "Dychwelwyd at %(name)s gyda'ch sylwadau."
 
-#: apps/cases/views.py:525
+#: apps/cases/views.py:526
 msgid ""
 "This stage needs your supervisor's approval first. Ask for approval below."
 msgstr ""
 "Mae angen cymeradwyaeth eich goruchwyliwr ar gyfer y cam hwn yn gyntaf. "
 "Gofynnwch am gymeradwyaeth isod."
 
-#: apps/cases/views.py:528
+#: apps/cases/views.py:529
 #, python-format
 msgid "Moved to %(stage)s."
 msgstr "Symudwyd i %(stage)s."
 
-#: apps/cases/views.py:546
+#: apps/cases/views.py:547
 #, python-format
 msgid "Application recorded as complete. Target date: %(d)s."
 msgstr "Cofnodwyd bod y cais yn gyflawn. Dyddiad targed: %(d)s."
 
-#: apps/cases/views.py:552
+#: apps/cases/views.py:553
 msgid "Choose a decision."
 msgstr "Dewiswch benderfyniad."
 
-#: apps/cases/views.py:555
+#: apps/cases/views.py:556
 msgid ""
 "The decision needs your supervisor's approval first. Ask for approval, with "
 "your recommendation."
@@ -1502,15 +1614,15 @@ msgstr ""
 "Mae angen cymeradwyaeth eich goruchwyliwr ar y penderfyniad yn gyntaf. "
 "Gofynnwch am gymeradwyaeth, gyda'ch argymhelliad."
 
-#: apps/cases/views.py:560
+#: apps/cases/views.py:561
 msgid ""
-"The Landlord and Tenant Act 1988 requires written reasons for conditions or "
-"a refusal."
+"The Landlord and Tenant Act 1988 requires written reasons for conditions or a"
+" refusal."
 msgstr ""
 "Mae Deddf Landlord a Thenant 1988 yn mynnu rhesymau ysgrifenedig dros amodau "
 "neu wrthod."
 
-#: apps/cases/views.py:578
+#: apps/cases/views.py:579
 msgid ""
 "Decision recorded. The asset strategy is now on the property, with the next "
 "review date."
@@ -1518,7 +1630,7 @@ msgstr ""
 "Cofnodwyd y penderfyniad. Mae'r strategaeth asedau bellach ar yr eiddo, gyda "
 "dyddiad yr adolygiad nesaf."
 
-#: apps/cases/views.py:581
+#: apps/cases/views.py:582
 msgid ""
 "Decision recorded. The dealing on the agreement is marked as consented: "
 "record its completion there when the deed is completed."
@@ -1526,11 +1638,11 @@ msgstr ""
 "Cofnodwyd y penderfyniad. Mae'r ddelio ar y cytundeb wedi'i nodi fel un a "
 "ganiatawyd: cofnodwch ei chwblhau yno pan fydd y weithred wedi'i chwblhau."
 
-#: apps/cases/views.py:584
+#: apps/cases/views.py:585
 msgid "Decision recorded."
 msgstr "Cofnodwyd y penderfyniad."
 
-#: apps/cases/views.py:587
+#: apps/cases/views.py:588
 msgid ""
 "This case needs approval before a decision. If the request was withdrawn, "
 "record the decision as Withdrawn first."
@@ -1538,107 +1650,115 @@ msgstr ""
 "Mae angen cymeradwyaeth ar yr achos hwn cyn penderfyniad. Os tynnwyd y cais "
 "yn ôl, cofnodwch y penderfyniad fel Tynnwyd yn ôl yn gyntaf."
 
-#: apps/cases/views.py:591
+#: apps/cases/views.py:592
 msgid ""
 "Record the outcome on the lease event first; the case then closes itself."
 msgstr ""
-"Cofnodwch y canlyniad ar y digwyddiad les yn gyntaf; yna bydd yr achos yn "
-"cau ei hun."
+"Cofnodwch y canlyniad ar y digwyddiad les yn gyntaf; yna bydd yr achos yn cau"
+" ei hun."
 
-#: apps/cases/views.py:594
+#: apps/cases/views.py:595
 msgid "Case closed."
 msgstr "Caewyd yr achos."
 
-#: apps/cases/views.py:601
+#: apps/cases/views.py:602
 msgid "No approval is needed for that stage."
 msgstr "Nid oes angen cymeradwyaeth ar gyfer y cam hwnnw."
 
-#: apps/cases/views.py:606
+#: apps/cases/views.py:607
 msgid ""
 "Confirm whether there is a conflict of interest before asking for approval."
 msgstr "Cadarnhewch a oes gwrthdaro buddiannau cyn gofyn am gymeradwyaeth."
 
-#: apps/cases/views.py:609
+#: apps/cases/views.py:610
 msgid "Write your recommendation for the approver."
 msgstr "Ysgrifennwch eich argymhelliad ar gyfer y cymeradwywr."
 
-#: apps/cases/views.py:616 apps/maintenance/views.py:254
+#: apps/cases/views.py:617 apps/maintenance/views.py:254
 #, python-format
 msgid "Sent to %(name)s for approval."
 msgstr "Anfonwyd at %(name)s i'w gymeradwyo."
 
-#: apps/cases/views.py:624
+#: apps/cases/views.py:625
 msgid "Proposed asset strategy saved."
 msgstr "Cadwyd y strategaeth asedau arfaethedig."
 
-#: apps/cases/views.py:624
+#: apps/cases/views.py:625
 msgid "Proposal cleared."
 msgstr "Cliriwyd y cynnig."
 
-#: apps/cases/views.py:632
+#: apps/cases/views.py:633
 #, python-format
 msgid "Heads of terms saved: %(n)s of %(t)s items covered."
 msgstr "Cadwyd y penawdau telerau: %(n)s o %(t)s eitem wedi'u cynnwys."
 
-#: apps/cases/views.py:645
+#: apps/cases/views.py:646
 msgid "Notice dates saved."
 msgstr "Cadwyd dyddiadau'r hysbysiad."
 
-#: apps/cases/views.py:656
+#: apps/cases/views.py:657
 #, python-format
 msgid "%(label)s must be an amount in pounds."
 msgstr "Rhaid i %(label)s fod yn swm mewn punnoedd."
 
-#: apps/cases/views.py:665
+#: apps/cases/views.py:666
 msgid "Dilapidations saved."
 msgstr "Cadwyd yr adfeiliadau."
 
-#: apps/cases/views.py:670
+#: apps/cases/views.py:671
 msgid "Choose whether there is a conflict of interest."
 msgstr "Dewiswch a oes gwrthdaro buddiannau."
 
-#: apps/cases/views.py:673
+#: apps/cases/views.py:674
 msgid "Describe the conflict and how it is managed."
 msgstr "Disgrifiwch y gwrthdaro a sut y caiff ei reoli."
 
-#: apps/cases/views.py:678
+#: apps/cases/views.py:679
 msgid "Conflict of interest declaration saved."
 msgstr "Cadwyd y datganiad gwrthdaro buddiannau."
 
-#: apps/cases/views.py:685
+#: apps/cases/views.py:686
 msgid "Agent instruction recorded."
 msgstr "Cofnodwyd y cyfarwyddyd i'r asiant."
 
-#: apps/cases/views.py:688
+#: apps/cases/views.py:689
 msgid "Instruction ended."
 msgstr "Daeth y cyfarwyddyd i ben."
 
-#: apps/cases/views.py:711
+#: apps/cases/views.py:712
 msgid "People updated."
 msgstr "Diweddarwyd y bobl."
 
-#: apps/cases/views.py:719
+#: apps/cases/views.py:720
 #, python-format
 msgid "Fee %(ref)s of £%(amount)s charged to the tenant's rent account."
 msgstr "Codwyd ffi %(ref)s o £%(amount)s ar gyfrif rhent y tenant."
 
-#: apps/cases/views.py:722
+#: apps/cases/views.py:723
 msgid "No fee to raise: the case needs an agreement and its type a fee."
 msgstr "Dim ffi i'w chodi: mae angen cytundeb ar yr achos a ffi ar ei fath."
 
-#: apps/cases/views.py:742
+#: apps/cases/views.py:743
 msgid "Choose a saved email: an .eml file, or an .msg file from Outlook."
 msgstr "Dewiswch e-bost a gadwyd: ffeil .eml, neu ffeil .msg o Outlook."
 
-#: apps/cases/views.py:748
+#: apps/cases/views.py:749
 #, python-format
 msgid "Email filed: %(s)s"
 msgstr "Ffeiliwyd yr e-bost: %(s)s"
 
-#: apps/cases/views.py:756 apps/compliance/views.py:176
+#: apps/cases/views.py:757 apps/compliance/views.py:176
 #: apps/maintenance/views.py:306 apps/projects/views.py:518
 msgid "Choose a file."
 msgstr "Dewiswch ffeil."
+
+#: apps/cases/views.py:840
+msgid "Shared with the person who asked."
+msgstr "Wedi’i rannu â’r person a ofynnodd."
+
+#: apps/cases/views.py:841
+msgid "No longer shared with the person who asked."
+msgstr "Nid yw wedi’i rannu â’r person a ofynnodd mwyach."
 
 #: apps/cases/visit_views.py:39
 msgid "Visit started. Answer each section and save it as you go."
@@ -2384,14 +2504,14 @@ msgstr "dolen dalu"
 #, python-brace-format
 msgid ""
 "The address of the council's online payment page, used for \"Pay now\" in "
-"demand emails. You can include {reference}, {amount} and {account}, which "
-"are filled in for each tenant, for example https://pay.example.gov.uk/rent?"
-"ref={reference}&amount={amount}"
+"demand emails. You can include {reference}, {amount} and {account}, which are"
+" filled in for each tenant, for example "
+"https://pay.example.gov.uk/rent?ref={reference}&amount={amount}"
 msgstr ""
 "Cyfeiriad tudalen dalu ar-lein y cyngor, a ddefnyddir ar gyfer \"Talu nawr\" "
-"mewn negeseuon e-bost galw am daliad. Gallwch gynnwys {reference}, {amount} "
-"a {account}, a gaiff eu llenwi ar gyfer pob tenant, er enghraifft https://"
-"pay.example.gov.uk/rent?ref={reference}&amount={amount}"
+"mewn negeseuon e-bost galw am daliad. Gallwch gynnwys {reference}, {amount} a"
+" {account}, a gaiff eu llenwi ar gyfer pob tenant, er enghraifft "
+"https://pay.example.gov.uk/rent?ref={reference}&amount={amount}"
 
 #: apps/core/models.py:54
 msgid "website"
@@ -2451,8 +2571,8 @@ msgid ""
 "Ledger code (cost centre and account) for rent income, included in the "
 "finance export."
 msgstr ""
-"Cod cyfriflyfr (canolfan gost a chyfrif) ar gyfer incwm rhent, wedi'i "
-"gynnwys yn yr allforiad cyllid."
+"Cod cyfriflyfr (canolfan gost a chyfrif) ar gyfer incwm rhent, wedi'i gynnwys"
+" yn yr allforiad cyllid."
 
 #: apps/core/models.py:75
 msgid "service charge income code"
@@ -2515,9 +2635,9 @@ msgid ""
 "Record which departments and outside organisations occupy each building, "
 "floor and room, headcount and public use. Supports One Public Estate sharing."
 msgstr ""
-"Cofnodwch pa adrannau a sefydliadau allanol sy'n meddiannu pob adeilad, "
-"llawr ac ystafell, nifer y staff a defnydd y cyhoedd. Yn cefnogi rhannu Un "
-"Ystad Gyhoeddus."
+"Cofnodwch pa adrannau a sefydliadau allanol sy'n meddiannu pob adeilad, llawr"
+" ac ystafell, nifer y staff a defnydd y cyhoedd. Yn cefnogi rhannu Un Ystad "
+"Gyhoeddus."
 
 #: apps/core/models.py:93
 msgid "space and costing: show costs"
@@ -2541,9 +2661,9 @@ msgid ""
 "account, demands, key dates and shared documents. Sign-in codes are emailed "
 "through GOV.UK Notify."
 msgstr ""
-"Gadael i denantiaid y mae’r tîm ystadau yn eu gwahodd fewngofnodi yn /"
-"tenant/ i weld eu cyfrif, galwadau am daliad, dyddiadau allweddol a "
-"dogfennau a rennir. Caiff codau mewngofnodi eu hanfon drwy GOV.UK Notify."
+"Gadael i denantiaid y mae’r tîm ystadau yn eu gwahodd fewngofnodi yn /tenant/"
+" i weld eu cyfrif, galwadau am daliad, dyddiadau allweddol a dogfennau a "
+"rennir. Caiff codau mewngofnodi eu hanfon drwy GOV.UK Notify."
 
 #: apps/core/models.py:100
 msgid "tenant portal welcome"
@@ -2563,9 +2683,8 @@ msgstr "cyhoeddi data agored"
 
 #: apps/core/models.py:105
 msgid ""
-"Publish the Transparency Code land and assets list and the available "
-"property list at /open-data/ under the Open Government Licence, without "
-"signing in."
+"Publish the Transparency Code land and assets list and the available property"
+" list at /open-data/ under the Open Government Licence, without signing in."
 msgstr ""
 "Cyhoeddi rhestr tir ac asedau'r Cod Tryloywder a'r rhestr eiddo sydd ar gael "
 "yn /open-data/ o dan y Drwydded Llywodraeth Agored, heb fewngofnodi."
@@ -2589,9 +2708,9 @@ msgstr "Allwedd API OS Maps"
 #: apps/core/models.py:115
 msgid ""
 "Your council's Ordnance Survey Data Hub key (free under the Public Sector "
-"Geospatial Agreement). Leave blank to use OpenStreetMap only. The key is "
-"sent to users' browsers, so restrict it to your PHAEMA web address in the OS "
-"Data Hub."
+"Geospatial Agreement). Leave blank to use OpenStreetMap only. The key is sent"
+" to users' browsers, so restrict it to your PHAEMA web address in the OS Data"
+" Hub."
 msgstr ""
 "Allwedd Ordnance Survey Data Hub eich cyngor (am ddim o dan y Cytundeb Geo-"
 "ofodol Sector Cyhoeddus). Gadewch yn wag i ddefnyddio OpenStreetMap yn unig. "
@@ -2665,8 +2784,8 @@ msgid ""
 "Applies once single sign-on is on. A person counts as having a council "
 "account from the first time they sign in with it."
 msgstr ""
-"Yn berthnasol unwaith y bydd mewngofnodi sengl ymlaen. Ystyrir bod gan "
-"berson gyfrif cyngor o'r tro cyntaf y mae'n mewngofnodi ag ef."
+"Yn berthnasol unwaith y bydd mewngofnodi sengl ymlaen. Ystyrir bod gan berson"
+" gyfrif cyngor o'r tro cyntaf y mae'n mewngofnodi ag ef."
 
 #: apps/core/models.py:150
 msgid "RICS Code of Measuring Practice (GIA, NIA, GEA)"
@@ -2686,10 +2805,9 @@ msgid ""
 "costs and the data standard export. Where a property has only the other set, "
 "that is used, always labelled with its basis."
 msgstr ""
-"Pa set o arwynebeddau llawr y mae PHAEMA yn ei defnyddio gyntaf ar "
-"dudalennau eiddo, adroddiadau, costau gofod a'r allforiad safon data. Lle "
-"mai dim ond y set arall sydd gan eiddo, defnyddir honno, bob amser wedi'i "
-"labelu â'i sail."
+"Pa set o arwynebeddau llawr y mae PHAEMA yn ei defnyddio gyntaf ar dudalennau"
+" eiddo, adroddiadau, costau gofod a'r allforiad safon data. Lle mai dim ond y"
+" set arall sydd gan eiddo, defnyddir honno, bob amser wedi'i labelu â'i sail."
 
 #: apps/core/models.py:159
 msgid "recognise text in scanned PDFs"
@@ -2715,8 +2833,8 @@ msgstr "cynnig Cymraeg"
 msgid ""
 "Shows an English | Cymraeg choice at the top of every page, so each person "
 "can use PHAEMA in Welsh. The Welsh text is a draft awaiting review by a "
-"qualified translator: check it with your council's translation service "
-"before relying on it."
+"qualified translator: check it with your council's translation service before"
+" relying on it."
 msgstr ""
 "Yn dangos dewis English | Cymraeg ar frig pob tudalen, fel y gall pob person "
 "ddefnyddio PHAEMA yn Gymraeg. Drafft yw'r testun Cymraeg sy'n aros am "
@@ -2734,8 +2852,8 @@ msgid ""
 "due."
 msgstr ""
 "Pan gofnodir strategaeth asedau heb ddyddiad adolygu, mae'n ddyledus i'w "
-"hadolygu hyn o flynyddoedd yn ddiweddarach. Caiff y syrfëwr rheoli ei "
-"atgoffa pan ddaw'n ddyledus."
+"hadolygu hyn o flynyddoedd yn ddiweddarach. Caiff y syrfëwr rheoli ei atgoffa"
+" pan ddaw'n ddyledus."
 
 #: apps/core/models.py:174
 msgid "outside users' access lasts (months)"
@@ -2764,8 +2882,8 @@ msgid ""
 msgstr ""
 "I ffwrdd: dim ond pobl y mae gweinyddwr eisoes wedi'u hychwanegu all "
 "fewngofnodi. Ymlaen: mae unrhyw un y mae'r gwasanaeth mewngofnodi yn ei "
-"ganiatáu yn cael cyfrif, gyda'r rolau a'r meysydd mynediad o'r mapiau "
-"grwpiau mewngofnodi. Heb grŵp wedi'i fapio ni fyddant yn gweld dim nes bod "
+"ganiatáu yn cael cyfrif, gyda'r rolau a'r meysydd mynediad o'r mapiau grwpiau"
+" mewngofnodi. Heb grŵp wedi'i fapio ni fyddant yn gweld dim nes bod "
 "gweinyddwr yn rhoi rôl iddynt."
 
 #: apps/core/models.py:187
@@ -2779,8 +2897,8 @@ msgstr "Rhowch liw fel #1d3557."
 #: apps/core/models.py:189
 msgid ""
 "Your council's colour for the PHAEMA header, as a hex code such as #1d3557. "
-"Choose a dark colour so the white header text stays readable. Leave blank "
-"for the default."
+"Choose a dark colour so the white header text stays readable. Leave blank for"
+" the default."
 msgstr ""
 "Lliw eich cyngor ar gyfer pennawd PHAEMA, fel cod hecs megis #1d3557. "
 "Dewiswch liw tywyll fel bod testun gwyn y pennawd yn parhau'n ddarllenadwy. "
@@ -2869,12 +2987,12 @@ msgstr "defnyddiwr allanol"
 
 #: apps/core/models.py:286
 msgid ""
-"Tick for anyone who is not council staff, such as a consultant, contractor "
-"or tenant's agent. Their access ends automatically on the date below."
+"Tick for anyone who is not council staff, such as a consultant, contractor or"
+" tenant's agent. Their access ends automatically on the date below."
 msgstr ""
 "Ticiwch ar gyfer unrhyw un nad yw'n staff y cyngor, megis ymgynghorydd, "
-"contractwr neu asiant tenant. Daw eu mynediad i ben yn awtomatig ar y "
-"dyddiad isod."
+"contractwr neu asiant tenant. Daw eu mynediad i ben yn awtomatig ar y dyddiad"
+" isod."
 
 #: apps/core/models.py:288 apps/core/models.py:387
 msgid "organisation"
@@ -2895,8 +3013,8 @@ msgid ""
 "filled in from Module settings. For council staff it can be left blank."
 msgstr ""
 "Y diwrnod olaf y gall y person hwn fewngofnodi. Ar gyfer defnyddwyr allanol, "
-"os caiff ei adael yn wag caiff ei lenwi o Gosodiadau modiwlau. Ar gyfer "
-"staff y cyngor gellir ei adael yn wag."
+"os caiff ei adael yn wag caiff ei lenwi o Gosodiadau modiwlau. Ar gyfer staff"
+" y cyngor gellir ei adael yn wag."
 
 #: apps/core/models.py:296
 msgid "supervisor and approver"
@@ -2969,9 +3087,9 @@ msgstr "rhent a thaliadau gwasanaeth ar gyfer eu hardal eu hunain"
 
 #: apps/core/models.py:337
 msgid ""
-"Members see rent, arrears and service charges for the properties they "
-"manage, those of everyone they supervise (the whole chain) and anyone they "
-"are covering for."
+"Members see rent, arrears and service charges for the properties they manage,"
+" those of everyone they supervise (the whole chain) and anyone they are "
+"covering for."
 msgstr ""
 "Mae aelodau'n gweld rhent, ôl-ddyledion a thaliadau gwasanaeth ar gyfer yr "
 "eiddo y maent yn eu rheoli, rhai pawb y maent yn eu goruchwylio (y gadwyn "
@@ -3179,8 +3297,8 @@ msgstr "yn gweithredu fel"
 
 #: apps/core/models.py:485
 msgid ""
-"The account the token acts for. It can never do more than this account's "
-"role allows. A separate account with the Viewer role is best for read-only "
+"The account the token acts for. It can never do more than this account's role"
+" allows. A separate account with the Viewer role is best for read-only "
 "systems."
 msgstr ""
 "Y cyfrif y mae'r tocyn yn gweithredu ar ei ran. Ni all byth wneud mwy nag y "
@@ -3385,7 +3503,7 @@ msgstr "Tasg prosiect"
 msgid "Milestone"
 msgstr "Carreg filltir"
 
-#: apps/core/mywork.py:161 apps/core/mywork.py:222
+#: apps/core/mywork.py:161 apps/core/mywork.py:233
 #: templates/cases/_approval.html:13
 msgid "Approve"
 msgstr "Cymeradwyo"
@@ -3407,53 +3525,57 @@ msgid "Asked in the tenant portal"
 msgstr "Gofynnwyd yn y porth tenantiaid"
 
 #: apps/core/mywork.py:192
+msgid "Request with no one to deal with it"
+msgstr "Cais heb neb i ddelio ag ef"
+
+#: apps/core/mywork.py:203
 msgid "Repair report to look at"
 msgstr "Adroddiad atgyweirio i edrych arno"
 
-#: apps/core/mywork.py:195
+#: apps/core/mywork.py:206
 msgid "Someone may be at risk"
 msgstr "Gall rhywun fod mewn perygl"
 
-#: apps/core/mywork.py:203
+#: apps/core/mywork.py:214
 msgid "API token ends"
 msgstr "Tocyn API yn dod i ben"
 
-#: apps/core/mywork.py:205
+#: apps/core/mywork.py:216
 msgid "Make a new token and give it to the other system before this date"
 msgstr "Gwnewch docyn newydd a'i roi i'r system arall cyn y dyddiad hwn"
 
-#: apps/core/mywork.py:217
+#: apps/core/mywork.py:228
 msgid "Repair past target"
 msgstr "Atgyweiriad wedi pasio'r targed"
 
-#: apps/core/mywork.py:223
+#: apps/core/mywork.py:234
 msgid "Works order waiting for your approval"
 msgstr "Archeb waith yn aros am eich cymeradwyaeth"
 
-#: apps/core/mywork.py:226
+#: apps/core/mywork.py:237
 msgid "Statutory task"
 msgstr "Tasg statudol"
 
-#: apps/core/mywork.py:226 templates/maintenance/job_detail.html:40
+#: apps/core/mywork.py:237 templates/maintenance/job_detail.html:40
 msgid "Planned task"
 msgstr "Tasg wedi'i chynllunio"
 
-#: apps/core/mywork.py:237 templates/compliance/_status_table.html:3
+#: apps/core/mywork.py:248 templates/compliance/_status_table.html:3
 #: templates/compliance/_status_table.html:7 templates/compliance/home.html:18
 #: templates/compliance/property.html:16
 msgid "Certificate"
 msgstr "Tystysgrif"
 
-#: apps/core/mywork.py:250 apps/projects/views.py:554
+#: apps/core/mywork.py:261 apps/projects/views.py:554
 #: templates/cases/case_detail.html:174 templates/valuations/valuation.html:2
 msgid "Valuation"
 msgstr "Prisiad"
 
-#: apps/core/mywork.py:253 templates/valuations/home.html:10
+#: apps/core/mywork.py:264 templates/valuations/home.html:10
 msgid "Audit query"
 msgstr "Ymholiad archwilio"
 
-#: apps/core/mywork.py:254
+#: apps/core/mywork.py:265
 msgid "To answer"
 msgstr "I'w ateb"
 
@@ -3577,8 +3699,8 @@ msgstr "cwestiynau i'w gofyn"
 
 #: apps/documents/models.py:44
 msgid ""
-"Extra details to ask for when the document is created, as a list of "
-"{\"key\": \"conditions\", \"label\": \"Conditions\", \"long\": true}."
+"Extra details to ask for when the document is created, as a list of {\"key\":"
+" \"conditions\", \"label\": \"Conditions\", \"long\": true}."
 msgstr ""
 "Manylion ychwanegol i ofyn amdanynt pan gaiff y ddogfen ei chreu, fel rhestr "
 "o {\"key\": \"conditions\", \"label\": \"Conditions\", \"long\": true}."
@@ -3605,8 +3727,8 @@ msgstr "ffurflen ragnodedig"
 
 #: apps/documents/models.py:53
 msgid ""
-"If the law prescribes a form, name it: PHAEMA then warns that the "
-"particulars must go on the current prescribed form."
+"If the law prescribes a form, name it: PHAEMA then warns that the particulars"
+" must go on the current prescribed form."
 msgstr ""
 "Os yw'r gyfraith yn rhagnodi ffurflen, enwch hi: bydd PHAEMA wedyn yn "
 "rhybuddio bod rhaid i'r manylion fynd ar y ffurflen ragnodedig gyfredol."
@@ -4455,8 +4577,8 @@ msgid ""
 "Who it belongs to and when it is paid, for example \"to the tenant, yearly, "
 "at base rate\"."
 msgstr ""
-"I bwy y mae'n perthyn a phryd y caiff ei dalu, er enghraifft \"i'r tenant, "
-"yn flynyddol, ar y gyfradd sylfaenol\"."
+"I bwy y mae'n perthyn a phryd y caiff ei dalu, er enghraifft \"i'r tenant, yn"
+" flynyddol, ar y gyfradd sylfaenol\"."
 
 #: apps/leases/models.py:256
 msgid "deposit deed dated"
@@ -4491,8 +4613,8 @@ msgid ""
 "Details, for example \"6 months rent-free, then half rent for 6 months\", or "
 "a fitting-out contribution."
 msgstr ""
-"Manylion, er enghraifft \"6 mis yn ddi-rent, yna hanner rhent am 6 mis\", "
-"neu gyfraniad at osod allan."
+"Manylion, er enghraifft \"6 mis yn ddi-rent, yna hanner rhent am 6 mis\", neu"
+" gyfraniad at osod allan."
 
 #: apps/leases/models.py:267
 msgid "rent review basis"
@@ -4606,8 +4728,8 @@ msgid ""
 "As finance has decided. Most leases the council holds go on the balance "
 "sheet."
 msgstr ""
-"Fel y mae cyllid wedi penderfynu. Mae'r rhan fwyaf o'r lesoedd y mae'r "
-"cyngor yn eu dal yn mynd ar y fantolen."
+"Fel y mae cyllid wedi penderfynu. Mae'r rhan fwyaf o'r lesoedd y mae'r cyngor"
+" yn eu dal yn mynd ar y fantolen."
 
 #: apps/leases/models.py:307
 msgid "IFRS 16 lease term ends"
@@ -4681,8 +4803,8 @@ msgstr "cyfradd llog neu lwfans (%)"
 
 #: apps/leases/models.py:331
 msgid ""
-"The margin over base rate (e.g. 4 for base rate plus 4%), or the fixed "
-"yearly rate."
+"The margin over base rate (e.g. 4 for base rate plus 4%), or the fixed yearly"
+" rate."
 msgstr ""
 "Y lwfans uwchben y gyfradd sylfaenol (e.e. 4 ar gyfer y gyfradd sylfaenol a "
 "4%), neu'r gyfradd flynyddol sefydlog."
@@ -4696,8 +4818,8 @@ msgid ""
 "Interest runs from the due date if the rent is still unpaid this many days "
 "after it (often 14 or 21). 0: from the due date in every case."
 msgstr ""
-"Mae llog yn rhedeg o'r dyddiad dyledus os yw'r rhent yn dal heb ei dalu hyn "
-"o ddiwrnodau ar ôl hynny (14 neu 21 yn aml). 0: o'r dyddiad dyledus ym mhob "
+"Mae llog yn rhedeg o'r dyddiad dyledus os yw'r rhent yn dal heb ei dalu hyn o"
+" ddiwrnodau ar ôl hynny (14 neu 21 yn aml). 0: o'r dyddiad dyledus ym mhob "
 "achos."
 
 #: apps/leases/models.py:337
@@ -4777,8 +4899,8 @@ msgid ""
 "holds it (for example the lease the council holds, for property it lets on)."
 msgstr ""
 "Ar gyfer is-les: y les uwch y caiff ei rhoi ohoni, lle mae PHAEMA yn ei dal "
-"(er enghraifft y les y mae'r cyngor yn ei dal, ar gyfer eiddo y mae'n ei "
-"osod ymlaen)."
+"(er enghraifft y les y mae'r cyngor yn ei dal, ar gyfer eiddo y mae'n ei osod"
+" ymlaen)."
 
 #: apps/leases/models.py:361
 msgid "alterations and reinstatement"
@@ -5139,8 +5261,8 @@ msgstr "telerau ac amodau"
 
 #: apps/leases/models.py:659
 msgid ""
-"For example the new term and rent for a renewal, or the price for a "
-"purchase, and any conditions such as no breach of covenant."
+"For example the new term and rent for a renewal, or the price for a purchase,"
+" and any conditions such as no breach of covenant."
 msgstr ""
 "Er enghraifft y tymor a'r rhent newydd ar gyfer adnewyddu, neu'r pris ar "
 "gyfer prynu, ac unrhyw amodau megis dim torri cyfamod."
@@ -5568,8 +5690,8 @@ msgid ""
 "%(council)s has issued the following charges for %(premises)s (agreement "
 "%(ref)s):"
 msgstr ""
-"Mae %(council)s wedi codi’r taliadau canlynol ar gyfer %(premises)s "
-"(cytundeb %(ref)s):"
+"Mae %(council)s wedi codi’r taliadau canlynol ar gyfer %(premises)s (cytundeb"
+" %(ref)s):"
 
 #: apps/ledger/emails.py:88
 #, python-format
@@ -5738,8 +5860,8 @@ msgstr "Agor achos adennill ôl-ddyledion rhent"
 #: apps/ledger/models.py:148
 msgid "Review the account (for example refer to legal or debt collectors)"
 msgstr ""
-"Adolygu'r cyfrif (er enghraifft cyfeirio at yr adran gyfreithiol neu "
-"gasglwyr dyledion)"
+"Adolygu'r cyfrif (er enghraifft cyfeirio at yr adran gyfreithiol neu gasglwyr"
+" dyledion)"
 
 #: apps/ledger/models.py:152
 msgid "days overdue"
@@ -6071,9 +6193,8 @@ msgid ""
 "The RICS service charge standard expects contracts to be re-tendered or "
 "benchmarked at least every three years. Blank means the start date."
 msgstr ""
-"Mae safon tâl gwasanaeth RICS yn disgwyl i gontractau gael eu hail-dendro "
-"neu eu meincnodi o leiaf bob tair blynedd. Mae gwag yn golygu'r dyddiad "
-"dechrau."
+"Mae safon tâl gwasanaeth RICS yn disgwyl i gontractau gael eu hail-dendro neu"
+" eu meincnodi o leiaf bob tair blynedd. Mae gwag yn golygu'r dyddiad dechrau."
 
 #: apps/maintenance/models.py:87
 msgid "re-tender or benchmark every (years)"
@@ -6340,15 +6461,6 @@ msgstr "cymeradwywyd"
 msgid "Emergency"
 msgstr "Argyfwng"
 
-#: apps/maintenance/models.py:358 templates/leases/lease_detail.html:150
-#: templates/portal/base.html:6 templates/portal/base.html:18
-msgid "Tenant portal"
-msgstr "Porth tenantiaid"
-
-#: apps/maintenance/models.py:359
-msgid "Council department"
-msgstr "Adran o’r cyngor"
-
 #: apps/maintenance/models.py:362
 msgid "Waiting to be looked at"
 msgstr "Yn aros i rywun edrych arno"
@@ -6607,8 +6719,8 @@ msgstr "%(council)s: eich cyfrif porth tenantiaid"
 #: apps/portal/emails.py:28
 #, python-format
 msgid ""
-"%(council)s has given you an account on its tenant portal for %(tenant)s. "
-"You can see your rent account, demands, key dates and documents the council "
+"%(council)s has given you an account on its tenant portal for %(tenant)s. You"
+" can see your rent account, demands, key dates and documents the council "
 "shares with you."
 msgstr ""
 "Mae %(council)s wedi rhoi cyfrif i chi ar ei borth tenantiaid ar gyfer "
@@ -6689,8 +6801,8 @@ msgid ""
 "For repairs, certificates and service charges, as they are added to the "
 "portal."
 msgstr ""
-"Ar gyfer atgyweiriadau, tystysgrifau a thaliadau gwasanaeth, wrth iddynt "
-"gael eu hychwanegu at y porth."
+"Ar gyfer atgyweiriadau, tystysgrifau a thaliadau gwasanaeth, wrth iddynt gael"
+" eu hychwanegu at y porth."
 
 #: apps/portal/models.py:30
 msgid "Untick to stop this person signing in at once."
@@ -6719,10 +6831,6 @@ msgstr "Derbyniwyd"
 #: apps/portal/models.py:94
 msgid "Declined"
 msgstr "Gwrthodwyd"
-
-#: apps/portal/models.py:98 templates/cases/case_detail.html:136
-msgid "asked by"
-msgstr "gofynnwyd gan"
 
 #: apps/portal/models.py:100
 msgid "contact for demands"
@@ -6759,8 +6867,8 @@ msgstr ""
 
 #: apps/portal/views.py:81
 msgid ""
-"That code is not right, has been used or has run out. Check the latest "
-"email, or ask for a new code."
+"That code is not right, has been used or has run out. Check the latest email,"
+" or ask for a new code."
 msgstr ""
 "Nid yw’r cod hwnnw’n gywir, mae wedi’i ddefnyddio neu mae wedi dod i ben. "
 "Gwiriwch yr e-bost diweddaraf, neu gofynnwch am god newydd."
@@ -7745,8 +7853,8 @@ msgid ""
 "The council's own sub-category under the holding purpose, for example "
 "Operational: Depots."
 msgstr ""
-"Is-gategori'r cyngor ei hun o dan ddiben y daliad, er enghraifft "
-"Gweithredol: Depos."
+"Is-gategori'r cyngor ei hun o dan ddiben y daliad, er enghraifft Gweithredol:"
+" Depos."
 
 #: apps/properties/models.py:138
 msgid "estate strategy section"
@@ -7912,8 +8020,8 @@ msgid ""
 "areas at their fractions of Zone A. Work it out with the ITZA calculator on "
 "the property page."
 msgstr ""
-"Ar gyfer siopau: arwynebedd gwerthu'r llawr gwaelod wedi'i barthu a'i "
-"haneru, a mannau eraill ar eu ffracsiynau o Barth A. Cyfrifwch ef gyda'r "
+"Ar gyfer siopau: arwynebedd gwerthu'r llawr gwaelod wedi'i barthu a'i haneru,"
+" a mannau eraill ar eu ffracsiynau o Barth A. Cyfrifwch ef gyda'r "
 "gyfrifiannell ITZA ar dudalen yr eiddo."
 
 #: apps/properties/models.py:213
@@ -7980,8 +8088,8 @@ msgstr "mesurwyd IPMS 3"
 #: apps/properties/models.py:239
 msgid "Externally (3.1) or internally (3.2). Most lettings use 3.2."
 msgstr ""
-"Yn allanol (3.1) neu'n fewnol (3.2). Mae'r rhan fwyaf o osodiadau'n "
-"defnyddio 3.2."
+"Yn allanol (3.1) neu'n fewnol (3.2). Mae'r rhan fwyaf o osodiadau'n defnyddio"
+" 3.2."
 
 #: apps/properties/models.py:240
 msgid "IPMS areas measured on"
@@ -8072,8 +8180,8 @@ msgid ""
 "e.g. Surplus to the service's needs after the depot review; Cabinet decision "
 "14 May 2026."
 msgstr ""
-"e.e. Dros ben i anghenion y gwasanaeth ar ôl yr adolygiad depos; "
-"penderfyniad y Cabinet 14 Mai 2026."
+"e.e. Dros ben i anghenion y gwasanaeth ar ôl yr adolygiad depos; penderfyniad"
+" y Cabinet 14 Mai 2026."
 
 #: apps/properties/models.py:271
 msgid "disposal expected on"
@@ -8180,8 +8288,8 @@ msgid ""
 "If the space is only available for a time, for example until redevelopment "
 "starts."
 msgstr ""
-"Os yw'r gofod ar gael am gyfnod yn unig, er enghraifft nes bod "
-"ailddatblygu'n dechrau."
+"Os yw'r gofod ar gael am gyfnod yn unig, er enghraifft nes bod ailddatblygu'n"
+" dechrau."
 
 #: apps/properties/models.py:320
 msgid "easting"
@@ -8228,9 +8336,9 @@ msgid ""
 "For anyone visiting: access, lone working, dogs, unsafe areas, confined "
 "spaces. Shown on jobs, cases and valuations for this property and its parts."
 msgstr ""
-"I unrhyw un sy'n ymweld: mynediad, gweithio ar eich pen eich hun, cŵn, "
-"mannau anniogel, mannau cyfyng. Caiff eu dangos ar swyddi, achosion a "
-"phrisiadau ar gyfer yr eiddo hwn a'i rannau."
+"I unrhyw un sy'n ymweld: mynediad, gweithio ar eich pen eich hun, cŵn, mannau"
+" anniogel, mannau cyfyng. Caiff eu dangos ar swyddi, achosion a phrisiadau ar"
+" gyfer yr eiddo hwn a'i rannau."
 
 #: apps/properties/models.py:341
 msgid "Traditional masonry (brick or block)"
@@ -8398,8 +8506,8 @@ msgid ""
 "Where the property is and what surrounds it: the part of town, road links, "
 "neighbouring uses, access."
 msgstr ""
-"Ble mae'r eiddo a beth sydd o'i gwmpas: y rhan o'r dref, cysylltiadau "
-"ffordd, defnyddiau cyfagos, mynediad."
+"Ble mae'r eiddo a beth sydd o'i gwmpas: y rhan o'r dref, cysylltiadau ffordd,"
+" defnyddiau cyfagos, mynediad."
 
 #: apps/properties/models.py:412
 msgid ""
@@ -9004,12 +9112,12 @@ msgstr "Cofnodi'r strategaeth asedau"
 #: apps/properties/strategy_views.py:72
 msgid ""
 "Use this for a decision already made, for example in an earlier review or at "
-"a committee. To review the property's future afresh, start an Asset "
-"Challenge instead."
+"a committee. To review the property's future afresh, start an Asset Challenge"
+" instead."
 msgstr ""
-"Defnyddiwch hwn ar gyfer penderfyniad sydd eisoes wedi'i wneud, er "
-"enghraifft mewn adolygiad cynharach neu mewn pwyllgor. I adolygu dyfodol yr "
-"eiddo o'r newydd, dechreuwch Her Asedau yn lle hynny."
+"Defnyddiwch hwn ar gyfer penderfyniad sydd eisoes wedi'i wneud, er enghraifft"
+" mewn adolygiad cynharach neu mewn pwyllgor. I adolygu dyfodol yr eiddo o'r "
+"newydd, dechreuwch Her Asedau yn lle hynny."
 
 #: apps/properties/strategy_views.py:87
 #, python-format
@@ -9304,11 +9412,11 @@ msgstr "cap blynyddol (£)"
 
 #: apps/servicecharges/models.py:88
 msgid ""
-"If the lease caps the service charge, the most it pays in a year. The "
-"council bears any excess."
+"If the lease caps the service charge, the most it pays in a year. The council"
+" bears any excess."
 msgstr ""
-"Os yw'r les yn capio'r tâl gwasanaeth, y mwyaf y mae'n ei dalu mewn "
-"blwyddyn. Y cyngor sy'n ysgwyddo unrhyw ormodedd."
+"Os yw'r les yn capio'r tâl gwasanaeth, y mwyaf y mae'n ei dalu mewn blwyddyn."
+" Y cyngor sy'n ysgwyddo unrhyw ormodedd."
 
 #: apps/servicecharges/models.py:95
 msgid "contributing lease"
@@ -9385,8 +9493,8 @@ msgstr "datganiadau diwedd blwyddyn wedi'u cyhoeddi"
 #: apps/servicecharges/models.py:125
 msgid "RICS expects year-end statements within four months of the year end."
 msgstr ""
-"Mae RICS yn disgwyl datganiadau diwedd blwyddyn o fewn pedwar mis i ddiwedd "
-"y flwyddyn."
+"Mae RICS yn disgwyl datganiadau diwedd blwyddyn o fewn pedwar mis i ddiwedd y"
+" flwyddyn."
 
 #: apps/servicecharges/models.py:126
 msgid "why the statements were late"
@@ -9480,9 +9588,9 @@ msgstr "Gwelliant neu wella"
 
 #: apps/servicecharges/models.py:213
 msgid ""
-"Remedying defects covered by the Building Safety Act 2022 is not "
-"recoverable. Improvements are recoverable only where tenants have agreed, "
-"with a cost-benefit case."
+"Remedying defects covered by the Building Safety Act 2022 is not recoverable."
+" Improvements are recoverable only where tenants have agreed, with a cost-"
+"benefit case."
 msgstr ""
 "Nid yw unioni diffygion a gwmpesir gan Ddeddf Diogelwch Adeiladau 2022 yn "
 "adenilladwy. Mae gwelliannau'n adenilladwy dim ond lle mae tenantiaid wedi "
@@ -9553,46 +9661,51 @@ msgstr "Nid yw'r flwyddyn wedi dod i ben eto."
 msgid "Year reconciled: %(n)s balancing charges and credits raised."
 msgstr "Cysonwyd y flwyddyn: codwyd %(n)s tâl a chredyd cydbwyso."
 
-#: apps/space/liaison_views.py:92
+#: apps/space/liaison_views.py:97
 #, python-format
 msgid "Repair reported. Your reference is %(ref)s."
 msgstr "Atgyweiriad wedi’i adrodd. Eich cyfeirnod yw %(ref)s."
 
-#: apps/space/liaison_views.py:107
+#: apps/space/liaison_views.py:112
 msgid "Enter the number of people based here, as a whole number."
 msgstr "Rhowch nifer y bobl sydd wedi'u lleoli yma, fel rhif cyfan."
 
-#: apps/space/liaison_views.py:115
+#: apps/space/liaison_views.py:120
 msgid ""
 "Enter the full-time equivalent as a number, such as 42.5, or leave it blank."
 msgstr ""
 "Rhowch y cyfwerth ag amser llawn fel rhif, megis 42.5, neu gadewch ef yn wag."
 
-#: apps/space/liaison_views.py:119
+#: apps/space/liaison_views.py:124
 msgid "The date cannot be in the future."
 msgstr "Ni all y dyddiad fod yn y dyfodol."
 
-#: apps/space/liaison_views.py:121
+#: apps/space/liaison_views.py:126
 msgid "Enter the date as day, month and year."
 msgstr "Rhowch y dyddiad fel diwrnod, mis a blwyddyn."
 
-#: apps/space/liaison_views.py:130
+#: apps/space/liaison_views.py:135
 #, python-format
 msgid "Entered by %(name)s for %(occupier)s"
 msgstr "Wedi'i roi gan %(name)s ar ran %(occupier)s"
 
-#: apps/space/liaison_views.py:133
+#: apps/space/liaison_views.py:138
 #, python-format
 msgid "Headcount recorded. %(surveyor)s will check it."
 msgstr "Nifer staff wedi'i gofnodi. Bydd %(surveyor)s yn ei wirio."
 
-#: apps/space/liaison_views.py:134 templates/space/liaison_building.html:12
+#: apps/space/liaison_views.py:139 templates/space/liaison_building.html:12
 msgid "The estates team"
 msgstr "Y tîm ystadau"
 
-#: apps/space/liaison_views.py:158
+#: apps/space/liaison_views.py:163
 msgid "Headcount marked as checked."
 msgstr "Nifer staff wedi'i nodi fel un a wiriwyd."
+
+#: apps/space/liaison_views.py:195
+#, python-format
+msgid "Request sent. Your reference is %(ref)s."
+msgstr "Cais wedi’i anfon. Eich cyfeirnod yw %(ref)s."
 
 #: apps/space/models.py:33
 msgid "Directorate"
@@ -9977,8 +10090,8 @@ msgid ""
 "For notional rent on freehold buildings: shown separately, and totals are "
 "given with and without it."
 msgstr ""
-"Ar gyfer rhent tybiannol ar adeiladau rhydd-ddaliad: wedi'i ddangos ar "
-"wahân, a rhoddir cyfansymiau gydag ef a hebddo."
+"Ar gyfer rhent tybiannol ar adeiladau rhydd-ddaliad: wedi'i ddangos ar wahân,"
+" a rhoddir cyfansymiau gydag ef a hebddo."
 
 #: apps/space/models.py:341
 msgid "can be worked out from maintenance jobs"
@@ -10125,9 +10238,8 @@ msgid ""
 "The rules the strategy sets, one per paragraph, for example: keep property "
 "only where a service needs it and it is fit for purpose."
 msgstr ""
-"Y rheolau y mae'r strategaeth yn eu gosod, un i bob paragraff, er "
-"enghraifft: cadw eiddo dim ond lle mae ar wasanaeth ei angen a'i fod yn "
-"addas i'r diben."
+"Y rheolau y mae'r strategaeth yn eu gosod, un i bob paragraff, er enghraifft:"
+" cadw eiddo dim ond lle mae ar wasanaeth ei angen a'i fod yn addas i'r diben."
 
 #: apps/strategy/models.py:44
 msgid "estate strategy"
@@ -10325,8 +10437,8 @@ msgstr "crynodeb"
 #: apps/strategy/models.py:215
 msgid "The lead's overall view: strengths, gaps and priorities for the year."
 msgstr ""
-"Barn gyffredinol yr arweinydd: cryfderau, bylchau a blaenoriaethau ar gyfer "
-"y flwyddyn."
+"Barn gyffredinol yr arweinydd: cryfderau, bylchau a blaenoriaethau ar gyfer y"
+" flwyddyn."
 
 #: apps/strategy/models.py:219
 msgid "asset management health check"
@@ -10548,8 +10660,8 @@ msgid ""
 "For a council employee: their valuations appear on their dashboard and they "
 "can record them."
 msgstr ""
-"Ar gyfer gweithiwr y cyngor: mae eu prisiadau'n ymddangos ar eu dangosfwrdd "
-"a gallant eu cofnodi."
+"Ar gyfer gweithiwr y cyngor: mae eu prisiadau'n ymddangos ar eu dangosfwrdd a"
+" gallant eu cofnodi."
 
 #: apps/valuations/models.py:125
 msgid "firm"
@@ -11012,13 +11124,6 @@ msgstr "Achosion"
 msgid "Projects"
 msgstr "Prosiectau"
 
-#: templates/base.html:31 templates/leases/document_list.html:7
-#: templates/leases/lease_detail.html:141 templates/portal/agreement.html:86
-#: templates/projects/project_detail.html:264
-#: templates/properties/title_detail.html:24
-msgid "Documents"
-msgstr "Dogfennau"
-
 #: templates/base.html:33
 msgid "Rents receivable"
 msgstr "Rhenti derbyniadwy"
@@ -11116,6 +11221,8 @@ msgstr "Allgofnodi"
 #: templates/base.html:62 templates/space/liaison_building.html:5
 #: templates/space/liaison_home.html:2 templates/space/liaison_home.html:5
 #: templates/space/liaison_home.html:10 templates/space/liaison_repair.html:5
+#: templates/space/liaison_request.html:5
+#: templates/space/liaison_request_detail.html:5
 msgid "Your buildings"
 msgstr "Eich adeiladau"
 
@@ -11182,8 +11289,8 @@ msgid ""
 "Your access to PHAEMA ends after %(day)s. If you still need it, ask the "
 "council officer you work with."
 msgstr ""
-"Daw eich mynediad i PHAEMA i ben ar ôl %(day)s. Os oes ei angen arnoch o "
-"hyd, gofynnwch i swyddog y cyngor rydych yn gweithio gydag ef."
+"Daw eich mynediad i PHAEMA i ben ar ôl %(day)s. Os oes ei angen arnoch o hyd,"
+" gofynnwch i swyddog y cyngor rydych yn gweithio gydag ef."
 
 #: templates/base.html:137
 msgid "Open-source software licensed under"
@@ -11283,11 +11390,11 @@ msgstr "Dim goruchwyliwr"
 
 #: templates/cases/_approval.html:42
 msgid ""
-"You have no supervisor in PHAEMA to approve this. Ask an administrator to "
-"set one on your user record."
+"You have no supervisor in PHAEMA to approve this. Ask an administrator to set"
+" one on your user record."
 msgstr ""
-"Nid oes gennych oruchwyliwr yn PHAEMA i gymeradwyo hyn. Gofynnwch i "
-"weinyddwr osod un ar eich cofnod defnyddiwr."
+"Nid oes gennych oruchwyliwr yn PHAEMA i gymeradwyo hyn. Gofynnwch i weinyddwr"
+" osod un ar eich cofnod defnyddiwr."
 
 #: templates/cases/_case_rows.html:3 templates/cases/case_detail.html:74
 #: templates/projects/project_detail.html:214
@@ -11376,8 +11483,8 @@ msgstr "Strategaeth asedau arfaethedig"
 
 #: templates/cases/_challenge.html:12
 msgid ""
-"Your recommendation after the option appraisal. Explain it in the request "
-"for approval."
+"Your recommendation after the option appraisal. Explain it in the request for"
+" approval."
 msgstr ""
 "Eich argymhelliad ar ôl arfarnu'r opsiynau. Esboniwch ef yn y cais am "
 "gymeradwyaeth."
@@ -11393,9 +11500,9 @@ msgstr "Cadw'r cynnig"
 
 #: templates/cases/_challenge_decision.html:2
 msgid ""
-"When approved, the asset strategy below is recorded on the property with "
-"your reasons, who decided and the minute reference, and the next review date "
-"is set."
+"When approved, the asset strategy below is recorded on the property with your"
+" reasons, who decided and the minute reference, and the next review date is "
+"set."
 msgstr ""
 "Pan gaiff ei gymeradwyo, caiff y strategaeth asedau isod ei chofnodi ar yr "
 "eiddo gyda'ch rhesymau, pwy a benderfynodd a chyfeirnod y cofnod, a gosodir "
@@ -11645,8 +11752,8 @@ msgstr "Cyfarwyddyd yn dod i ben"
 #: templates/cases/_marketing.html:27
 msgid "The end of any sole agency period. PHAEMA warns two weeks before."
 msgstr ""
-"Diwedd unrhyw gyfnod asiantaeth unigol. Mae PHAEMA yn rhybuddio bythefnos "
-"cyn hynny."
+"Diwedd unrhyw gyfnod asiantaeth unigol. Mae PHAEMA yn rhybuddio bythefnos cyn"
+" hynny."
 
 #: templates/cases/_marketing.html:28
 #, python-format
@@ -11680,6 +11787,111 @@ msgstr "Telerau a gynigir"
 #: templates/cases/_marketing.html:36
 msgid "Record the instruction"
 msgstr "Cofnodi'r cyfarwyddyd"
+
+#: templates/cases/_request_detail.html:5 templates/cases/_request_list.html:7
+msgid "Where it has got to"
+msgstr "Ble mae wedi cyrraedd"
+
+#: templates/cases/_request_detail.html:6 templates/cases/_request_list.html:5
+msgid "Asked"
+msgstr "Gofynnwyd"
+
+#: templates/cases/_request_detail.html:7
+msgid "Target date for a decision"
+msgstr "Dyddiad targed ar gyfer penderfyniad"
+
+#: templates/cases/_request_detail.html:12
+#: templates/compliance/property.html:87
+#: templates/maintenance/job_detail.html:106
+#: templates/projects/project_detail.html:304
+#: templates/reports/report_list.html:26 templates/space/occupiers.html:9
+#: templates/space/occupiers.html:12 templates/strategy/health_check.html:62
+msgid "None yet."
+msgstr "Dim eto."
+
+#: templates/cases/_request_detail.html:13
+msgid ""
+"To add something or ask a question, contact the estates team and quote the "
+"reference."
+msgstr ""
+"I ychwanegu rhywbeth neu ofyn cwestiwn, cysylltwch â’r tîm ystadau a nodwch y"
+" cyfeirnod."
+
+#: templates/cases/_request_form.html:3
+#: templates/maintenance/_repair_form.html:3
+msgid "Department"
+msgstr "Adran"
+
+#: templates/cases/_request_form.html:13
+msgid "Please attach:"
+msgstr "Atodwch:"
+
+#: templates/cases/_request_form.html:14
+#, python-format
+msgid "We aim to decide within %(days)s days of having everything we need."
+msgstr ""
+"Ein nod yw penderfynu o fewn %(days)s diwrnod o gael popeth sydd ei angen "
+"arnom."
+
+#: templates/cases/_request_form.html:34 templates/cases/case_detail.html:93
+#: templates/leases/lease_detail.html:171
+#: templates/maintenance/_repair_form.html:35
+#: templates/properties/property_detail.html:110
+#: templates/properties/property_detail.html:115
+msgid "Choose files"
+msgstr "Dewis ffeiliau"
+
+#: templates/cases/_request_form.html:34 templates/cases/case_detail.html:93
+#: templates/leases/lease_detail.html:171
+#: templates/maintenance/_repair_form.html:35
+#: templates/properties/property_detail.html:110
+#: templates/properties/property_detail.html:115
+msgid "or drop files here"
+msgstr "neu ollwng ffeiliau yma"
+
+#: templates/cases/_request_form.html:34 templates/cases/case_detail.html:93
+#: templates/leases/lease_detail.html:171
+#: templates/maintenance/_repair_form.html:35
+#: templates/properties/property_detail.html:110
+#: templates/properties/property_detail.html:115
+msgid "No files chosen"
+msgstr "Dim ffeiliau wedi'u dewis"
+
+#: templates/cases/_request_form.html:36
+msgid "Send the request"
+msgstr "Anfon y cais"
+
+#: templates/cases/_request_list.html:6
+msgid "Request"
+msgstr "Cais"
+
+#: templates/cases/_request_list.html:8 templates/cases/case_detail.html:11
+#: templates/cases/case_detail.html:31 templates/core/my_work.html:101
+#: templates/maintenance/_job_table.html:3
+#: templates/maintenance/_repair_list.html:8
+#: templates/maintenance/job_detail.html:10
+#: templates/projects/project_detail.html:75
+#: templates/projects/project_detail.html:90 templates/strategy/home.html:22
+#: templates/strategy/objective.html:29
+msgid "Target"
+msgstr "Targed"
+
+#: templates/cases/_request_list.html:21
+msgid "No requests yet."
+msgstr "Dim ceisiadau eto."
+
+#: templates/cases/_share_toggle.html:1 templates/leases/lease_detail.html:159
+#: templates/reports/_report_table.html:11
+msgid "Shared"
+msgstr "Wedi'i rannu"
+
+#: templates/cases/_share_toggle.html:1 templates/leases/lease_detail.html:160
+msgid "Stop sharing"
+msgstr "Peidio â rhannu"
+
+#: templates/cases/_share_toggle.html:1
+msgid "Share with the person who asked"
+msgstr "Rhannu â’r person a ofynnodd"
 
 #: templates/cases/_standards.html:5
 msgid "Dilapidations"
@@ -11787,16 +11999,6 @@ msgstr "Y gwrthdaro, a sut y caiff ei reoli"
 msgid "Part of project"
 msgstr "Rhan o brosiect"
 
-#: templates/cases/case_detail.html:11 templates/cases/case_detail.html:31
-#: templates/core/my_work.html:101 templates/maintenance/_job_table.html:3
-#: templates/maintenance/_repair_list.html:8
-#: templates/maintenance/job_detail.html:10
-#: templates/projects/project_detail.html:75
-#: templates/projects/project_detail.html:90 templates/strategy/home.html:22
-#: templates/strategy/objective.html:29
-msgid "Target"
-msgstr "Targed"
-
 #: templates/cases/case_detail.html:13
 msgid "Stages"
 msgstr "Camau"
@@ -11821,6 +12023,24 @@ msgstr ""
 #: templates/cases/case_detail.html:23 templates/portal/agreement.html:73
 msgid "Key dates"
 msgstr "Dyddiadau allweddol"
+
+#: templates/cases/case_detail.html:25
+#, python-format
+msgid ""
+"Asked by %(name)s (%(email)s) in the tenant portal. They see the stage, "
+"target date, decision and documents you share."
+msgstr ""
+"Gofynnwyd gan %(name)s (%(email)s) yn y porth tenantiaid. Maen nhw’n gweld y "
+"cam, y dyddiad targed, y penderfyniad a’r dogfennau rydych yn eu rhannu."
+
+#: templates/cases/case_detail.html:25
+#, python-format
+msgid ""
+"Asked by %(name)s for %(dept)s. They see the stage, target date, decision and"
+" documents you share."
+msgstr ""
+"Gofynnwyd gan %(name)s ar ran %(dept)s. Maen nhw’n gweld y cam, y dyddiad "
+"targed, y penderfyniad a’r dogfennau rydych yn eu rhannu."
 
 #: templates/cases/case_detail.html:26
 msgid "Acknowledged"
@@ -12003,8 +12223,8 @@ msgstr "Dechrau ymweliad safle"
 
 #: templates/cases/case_detail.html:85
 msgid ""
-"This type of case has no checklist, so the visit will record notes and "
-"photos only."
+"This type of case has no checklist, so the visit will record notes and photos"
+" only."
 msgstr ""
 "Nid oes rhestr wirio gan y math hwn o achos, felly bydd yr ymweliad yn "
 "cofnodi nodiadau a lluniau yn unig."
@@ -12037,31 +12257,10 @@ msgid ""
 "time. Saved emails (.eml or .msg) are read and filed with their attachments; "
 "other files are kept as documents named after the file."
 msgstr ""
-"Llusgwch ffeiliau yma o ffolder neu'ch bwrdd gwaith, neu dewiswch nhw: hyd "
-"at 20 ar y tro. Caiff e-byst a gadwyd (.eml neu .msg) eu darllen a'u ffeilio "
+"Llusgwch ffeiliau yma o ffolder neu'ch bwrdd gwaith, neu dewiswch nhw: hyd at"
+" 20 ar y tro. Caiff e-byst a gadwyd (.eml neu .msg) eu darllen a'u ffeilio "
 "gyda'u hatodiadau; cedwir ffeiliau eraill fel dogfennau wedi'u henwi ar ôl y "
 "ffeil."
-
-#: templates/cases/case_detail.html:93 templates/leases/lease_detail.html:171
-#: templates/maintenance/_repair_form.html:35
-#: templates/properties/property_detail.html:110
-#: templates/properties/property_detail.html:115
-msgid "Choose files"
-msgstr "Dewis ffeiliau"
-
-#: templates/cases/case_detail.html:93 templates/leases/lease_detail.html:171
-#: templates/maintenance/_repair_form.html:35
-#: templates/properties/property_detail.html:110
-#: templates/properties/property_detail.html:115
-msgid "or drop files here"
-msgstr "neu ollwng ffeiliau yma"
-
-#: templates/cases/case_detail.html:93 templates/leases/lease_detail.html:171
-#: templates/maintenance/_repair_form.html:35
-#: templates/properties/property_detail.html:110
-#: templates/properties/property_detail.html:115
-msgid "No files chosen"
-msgstr "Dim ffeiliau wedi'u dewis"
 
 #: templates/cases/case_detail.html:94
 msgid "Emails were"
@@ -12305,10 +12504,9 @@ msgstr "Beth yw achos?"
 
 #: templates/cases/case_list.html:6
 msgid ""
-"A case is a piece of estate work with an owner, stages, tasks and an "
-"outcome: a consent request, a rent review, a dispute, an enquiry. PHAEMA "
-"opens cases for rent reviews, breaks and expiries automatically ahead of the "
-"date."
+"A case is a piece of estate work with an owner, stages, tasks and an outcome:"
+" a consent request, a rent review, a dispute, an enquiry. PHAEMA opens cases "
+"for rent reviews, breaks and expiries automatically ahead of the date."
 msgstr ""
 "Darn o waith ystad gyda pherchennog, camau, tasgau a chanlyniad yw achos: "
 "cais am ganiatâd, adolygiad rhent, anghydfod, ymholiad. Mae PHAEMA yn agor "
@@ -12402,12 +12600,12 @@ msgstr "Dechrau'r achos"
 
 #: templates/cases/site_visit_sheet.html:13
 msgid ""
-"Read it on your phone, or print it to write on. Nothing you tick or type "
-"here is saved: record what you find on the case and the property afterwards."
+"Read it on your phone, or print it to write on. Nothing you tick or type here"
+" is saved: record what you find on the case and the property afterwards."
 msgstr ""
 "Darllenwch hi ar eich ffôn, neu argraffwch hi i ysgrifennu arni. Ni chaiff "
-"dim a diciwch neu a deipiwch yma ei gadw: cofnodwch yr hyn a ganfyddwch ar "
-"yr achos a'r eiddo wedyn."
+"dim a diciwch neu a deipiwch yma ei gadw: cofnodwch yr hyn a ganfyddwch ar yr"
+" achos a'r eiddo wedyn."
 
 #: templates/cases/site_visit_sheet.html:15
 #: templates/cases/visit_record.html:10 templates/core/pdf_view.html:40
@@ -12459,8 +12657,8 @@ msgstr "Taflen ymweliad"
 
 #: templates/cases/visit.html:11
 msgid ""
-"Save each section as you go: if the signal drops, only the section you are "
-"on is lost. You can leave and carry on later from the case page."
+"Save each section as you go: if the signal drops, only the section you are on"
+" is lost. You can leave and carry on later from the case page."
 msgstr ""
 "Cadwch bob adran wrth fynd ymlaen: os bydd y signal yn diflannu, dim ond yr "
 "adran rydych arni a gollir. Gallwch adael a pharhau'n ddiweddarach o dudalen "
@@ -12493,11 +12691,11 @@ msgstr "Cadw'r adran hon"
 
 #: templates/cases/visit.html:47
 msgid ""
-"This type of case has no checklist. Record what you find in the visit "
-"details and photos below."
+"This type of case has no checklist. Record what you find in the visit details"
+" and photos below."
 msgstr ""
-"Nid oes rhestr wirio gan y math hwn o achos. Cofnodwch yr hyn a ganfyddwch "
-"ym manylion yr ymweliad a'r lluniau isod."
+"Nid oes rhestr wirio gan y math hwn o achos. Cofnodwch yr hyn a ganfyddwch ym"
+" manylion yr ymweliad a'r lluniau isod."
 
 #: templates/cases/visit.html:52
 msgid "Date of visit"
@@ -12742,8 +12940,8 @@ msgid ""
 msgstr ""
 "Agorwch dudalen cydymffurfiaeth eiddo (o'r eiddo, neu'r rhestr isod) a "
 "dewiswch pa dystysgrifau sydd eu hangen arno: diogelwch nwy, EICR, asesiad "
-"risg tân ac ati. Yna cofnodwch bob tystysgrif wrth iddi gyrraedd, gyda'r "
-"PDF. Mae PHAEMA yn cyfrifo pryd mae pob un yn dod i ben."
+"risg tân ac ati. Yna cofnodwch bob tystysgrif wrth iddi gyrraedd, gyda'r PDF."
+" Mae PHAEMA yn cyfrifo pryd mae pob un yn dod i ben."
 
 #: templates/compliance/home.html:8
 msgid "of required certificates in date"
@@ -12970,8 +13168,8 @@ msgstr "Beth yw'r haenau?"
 msgid ""
 "Tier A: higher-risk buildings in England (at least 18 metres or 7 storeys, "
 "with at least two homes) and buildings in scope in Wales, which need the "
-"statutory Golden Thread. Tier B: other buildings under the Fire Safety "
-"Order, kept to the same principles as best practice. Tier C: land and simple "
+"statutory Golden Thread. Tier B: other buildings under the Fire Safety Order,"
+" kept to the same principles as best practice. Tier C: land and simple "
 "assets. PHAEMA suggests a tier; an officer confirms it."
 msgstr ""
 "Haen A: adeiladau risg uwch yn Lloegr (o leiaf 18 metr neu 7 llawr, gydag o "
@@ -13088,14 +13286,6 @@ msgstr "Dyddiedig"
 #, python-format
 msgid "version %(v)s"
 msgstr "fersiwn %(v)s"
-
-#: templates/compliance/property.html:87
-#: templates/maintenance/job_detail.html:106
-#: templates/projects/project_detail.html:304
-#: templates/reports/report_list.html:26 templates/space/occupiers.html:9
-#: templates/space/occupiers.html:12 templates/strategy/health_check.html:62
-msgid "None yet."
-msgstr "Dim eto."
 
 #: templates/compliance/property.html:88
 #, python-format
@@ -13268,9 +13458,9 @@ msgid ""
 "email address or the username."
 msgstr ""
 "Mae'r safle prawf hwn yn dal ystad cyngor ffuglennol. Gofynnwch am fanylion "
-"mewngofnodi ac, unwaith y caiff ei gymeradwyo (o fewn dau ddiwrnod gwaith "
-"fel arfer), anfonir eich enw defnyddiwr a dolen i ddewis eich cyfrinair "
-"atoch drwy e-bost. Gallwch fewngofnodi gyda'ch cyfeiriad e-bost neu'r enw "
+"mewngofnodi ac, unwaith y caiff ei gymeradwyo (o fewn dau ddiwrnod gwaith fel"
+" arfer), anfonir eich enw defnyddiwr a dolen i ddewis eich cyfrinair atoch "
+"drwy e-bost. Gallwch fewngofnodi gyda'ch cyfeiriad e-bost neu'r enw "
 "defnyddiwr."
 
 #: templates/core/account_request.html:15
@@ -13289,6 +13479,7 @@ msgstr "Anfon cais"
 
 #: templates/core/account_request_sent.html:2
 #: templates/core/account_request_sent.html:6
+#: templates/portal/request_sent.html:2 templates/portal/request_sent.html:4
 msgid "Request sent"
 msgstr "Anfonwyd y cais"
 
@@ -13679,8 +13870,8 @@ msgid ""
 "outcome. Break dates and notice deadlines lapse on their own once passed."
 msgstr ""
 "Mae digwyddiad yn hwyr pan fydd ei ddyddiad wedi pasio a neb wedi cofnodi'r "
-"canlyniad. Mae dyddiadau toriad a therfynau amser hysbysiadau yn darfod ar "
-"eu pen eu hunain unwaith y byddant wedi pasio."
+"canlyniad. Mae dyddiadau toriad a therfynau amser hysbysiadau yn darfod ar eu"
+" pen eu hunain unwaith y byddant wedi pasio."
 
 #: templates/core/dashboard.html:92
 msgid "Next 6 months"
@@ -13821,13 +14012,13 @@ msgstr "Dim wedi newid eto."
 
 #: templates/core/hand_over.html:6
 msgid ""
-"Move one person's properties, cases, tasks and approvals to colleagues in "
-"one step, when someone leaves, changes job or a new starter takes over part "
-"of a patch. Every change goes in the change log."
+"Move one person's properties, cases, tasks and approvals to colleagues in one"
+" step, when someone leaves, changes job or a new starter takes over part of a"
+" patch. Every change goes in the change log."
 msgstr ""
-"Symud eiddo, achosion, tasgau a chymeradwyaethau un person i gydweithwyr "
-"mewn un cam, pan fydd rhywun yn gadael, yn newid swydd neu pan fydd rhywun "
-"newydd yn cymryd rhan o ardal. Mae pob newid yn mynd i'r cofnod newidiadau."
+"Symud eiddo, achosion, tasgau a chymeradwyaethau un person i gydweithwyr mewn"
+" un cam, pan fydd rhywun yn gadael, yn newid swydd neu pan fydd rhywun newydd"
+" yn cymryd rhan o ardal. Mae pob newid yn mynd i'r cofnod newidiadau."
 
 #: templates/core/hand_over.html:6
 msgid "For someone who is away for a while, you can"
@@ -13907,8 +14098,8 @@ msgstr "Gadael gyda %(name)s"
 #: templates/core/hand_over.html:74
 #, python-format
 msgid ""
-"They are also the PHAEMA user for the internal valuer “%(name)s”. Change "
-"that valuer under Manage data, Valuers."
+"They are also the PHAEMA user for the internal valuer “%(name)s”. Change that"
+" valuer under Manage data, Valuers."
 msgstr ""
 "Nhw hefyd yw defnyddiwr PHAEMA ar gyfer y prisiwr mewnol “%(name)s”. "
 "Newidiwch y prisiwr hwnnw o dan Rheoli data, Prisiwyr."
@@ -14219,16 +14410,16 @@ msgstr ""
 
 #: templates/core/pdf_view.html:46
 msgid ""
-"This is a scanned document with too many pages for its text to be "
-"recognised, so Find cannot search it."
+"This is a scanned document with too many pages for its text to be recognised,"
+" so Find cannot search it."
 msgstr ""
 "Dogfen wedi'i sganio yw hon gyda gormod o dudalennau i'w thestun gael ei "
 "adnabod, felly ni all Canfod ei chwilio."
 
 #: templates/core/pdf_view.html:47
 msgid ""
-"This is a scanned document whose text could not be recognised, so Find "
-"cannot search it."
+"This is a scanned document whose text could not be recognised, so Find cannot"
+" search it."
 msgstr ""
 "Dogfen wedi'i sganio yw hon nad oedd modd adnabod ei thestun, felly ni all "
 "Canfod ei chwilio."
@@ -14282,8 +14473,8 @@ msgid ""
 msgstr ""
 "Mae mewngofnodi dau gam (dilysu aml-ffactor) yn diogelu eich cyfrif os bydd "
 "rhywun yn dod i wybod eich cyfrinair. Ar ôl eich cyfrinair, mae PHAEMA yn "
-"gofyn am god 6 digid o ap dilysu ar eich ffôn, megis Microsoft "
-"Authenticator, Google Authenticator, FreeOTP neu Aegis."
+"gofyn am god 6 digid o ap dilysu ar eich ffôn, megis Microsoft Authenticator,"
+" Google Authenticator, FreeOTP neu Aegis."
 
 #: templates/core/two_step.html:18
 msgid "Save your recovery codes"
@@ -14329,8 +14520,8 @@ msgid ""
 "To move to a new phone, ask an administrator to reset it, then set it up "
 "again."
 msgstr ""
-"Mae eich cyngor yn mynnu mewngofnodi dau gam ar eich cyfer, felly ni ellir "
-"ei ddiffodd. I symud i ffôn newydd, gofynnwch i weinyddwr ei ailosod, yna ei "
+"Mae eich cyngor yn mynnu mewngofnodi dau gam ar eich cyfer, felly ni ellir ei"
+" ddiffodd. I symud i ffôn newydd, gofynnwch i weinyddwr ei ailosod, yna ei "
 "sefydlu eto."
 
 #: templates/core/two_step.html:31
@@ -14395,8 +14586,8 @@ msgid ""
 "You will need your phone with an authenticator app installed. It takes about "
 "two minutes."
 msgstr ""
-"Bydd angen eich ffôn arnoch gydag ap dilysu wedi'i osod. Mae'n cymryd tua "
-"dau funud."
+"Bydd angen eich ffôn arnoch gydag ap dilysu wedi'i osod. Mae'n cymryd tua dau"
+" funud."
 
 #: templates/core/two_step.html:69
 msgid "Set up two-step sign-in"
@@ -14473,9 +14664,9 @@ msgstr "Sut mae defnyddio templed?"
 #: templates/documents/library.html:7
 msgid ""
 "Most templates are used from a case: open the case and choose Create a "
-"document. PHAEMA fills in the tenant, premises, lease details, dates and "
-"case details; you check and complete them, preview, and download a Word "
-"document. Anything PHAEMA could not fill in is highlighted in yellow."
+"document. PHAEMA fills in the tenant, premises, lease details, dates and case"
+" details; you check and complete them, preview, and download a Word document."
+" Anything PHAEMA could not fill in is highlighted in yellow."
 msgstr ""
 "Defnyddir y rhan fwyaf o dempledi o achos: agorwch yr achos a dewiswch Creu "
 "dogfen. Mae PHAEMA yn llenwi'r tenant, yr eiddo, manylion y les, dyddiadau a "
@@ -14565,9 +14756,9 @@ msgstr "Mewnforio o daenlen"
 
 #: templates/imports/hub.html:6
 msgid ""
-"Add or update many records at once from Excel or CSV. Each import starts "
-"with a template, and you see a preview before anything is saved. If any row "
-"has a problem, nothing is imported."
+"Add or update many records at once from Excel or CSV. Each import starts with"
+" a template, and you see a preview before anything is saved. If any row has a"
+" problem, nothing is imported."
 msgstr ""
 "Ychwanegu neu ddiweddaru llawer o gofnodion ar unwaith o Excel neu CSV. Mae "
 "pob mewnforiad yn dechrau gyda thempled, ac rydych yn gweld rhagolwg cyn i "
@@ -14577,8 +14768,8 @@ msgstr ""
 #: templates/imports/hub.html:7
 msgid "Import in this order, so each record can find the ones it links to:"
 msgstr ""
-"Mewnforiwch yn y drefn hon, fel y gall pob cofnod ddod o hyd i'r rhai y "
-"mae'n cysylltu â nhw:"
+"Mewnforiwch yn y drefn hon, fel y gall pob cofnod ddod o hyd i'r rhai y mae'n"
+" cysylltu â nhw:"
 
 #: templates/imports/hub.html:10 templates/reports/_report_table.html:4
 #: templates/reports/report_choose.html:8
@@ -14794,8 +14985,8 @@ msgstr "Cofnodi'r cwblhau"
 #, python-format
 msgid ""
 "£%(owed)s is owed on the rent account. Arrears stay with the agreement, so "
-"they would show on the new tenant's account after the assignment: settle "
-"them first."
+"they would show on the new tenant's account after the assignment: settle them"
+" first."
 msgstr ""
 "Mae £%(owed)s yn ddyledus ar y cyfrif rhent. Mae ôl-ddyledion yn aros gyda'r "
 "cytundeb, felly byddent yn dangos ar gyfrif y tenant newydd ar ôl yr "
@@ -14866,9 +15057,8 @@ msgstr "wedi'i gymhwyso"
 
 #: templates/leases/_index_calculation.html:16
 msgid ""
-"Check this against the lease before recording the outcome. The new rent "
-"below is filled in from this calculation; change it if the lease says "
-"otherwise."
+"Check this against the lease before recording the outcome. The new rent below"
+" is filled in from this calculation; change it if the lease says otherwise."
 msgstr ""
 "Gwiriwch hyn yn erbyn y les cyn cofnodi'r canlyniad. Caiff y rhent newydd "
 "isod ei lenwi o'r cyfrifiad hwn; newidiwch ef os yw'r les yn dweud fel arall."
@@ -14924,11 +15114,11 @@ msgstr "Cynnwys digwyddiadau pawb, nid dim ond y rhai a neilltuwyd i mi"
 
 #: templates/leases/calendar.html:25
 msgid ""
-"Anyone with this address can see the events in it. Do not share it. If it "
-"has been shared, make a new one."
+"Anyone with this address can see the events in it. Do not share it. If it has"
+" been shared, make a new one."
 msgstr ""
-"Gall unrhyw un sydd â'r cyfeiriad hwn weld y digwyddiadau ynddo. Peidiwch "
-"â'i rannu. Os yw wedi'i rannu, gwnewch un newydd."
+"Gall unrhyw un sydd â'r cyfeiriad hwn weld y digwyddiadau ynddo. Peidiwch â'i"
+" rannu. Os yw wedi'i rannu, gwnewch un newydd."
 
 #: templates/leases/calendar.html:27
 msgid "Make a new address"
@@ -14955,8 +15145,8 @@ msgstr "Beth yw'r dyddiad adolygu?"
 #: templates/leases/document_list.html:12
 msgid ""
 "Any lease document can carry a date when it should next be looked at: an "
-"insurance certificate's expiry, a schedule of condition to re-inspect, a "
-"side letter that runs out. Set it when you add the document to the agreement."
+"insurance certificate's expiry, a schedule of condition to re-inspect, a side"
+" letter that runs out. Set it when you add the document to the agreement."
 msgstr ""
 "Gall unrhyw ddogfen les gario dyddiad pan ddylid edrych arni nesaf: diwedd "
 "tystysgrif yswiriant, rhestr cyflwr i'w hailarolygu, llythyr ochr sy'n dod i "
@@ -15079,13 +15269,13 @@ msgstr "O ble mae'r digwyddiadau hyn yn dod?"
 
 #: templates/leases/event_list.html:6
 msgid ""
-"PHAEMA creates rent reviews, break notice deadlines, breaks and expiries "
-"from each agreement's terms and keeps them up to date. You can add other "
-"events on an agreement's page."
+"PHAEMA creates rent reviews, break notice deadlines, breaks and expiries from"
+" each agreement's terms and keeps them up to date. You can add other events "
+"on an agreement's page."
 msgstr ""
 "Mae PHAEMA yn creu adolygiadau rhent, terfynau amser hysbysiadau toriad, "
-"toriadau a dod i ben o delerau pob cytundeb ac yn eu cadw'n gyfredol. "
-"Gallwch ychwanegu digwyddiadau eraill ar dudalen cytundeb."
+"toriadau a dod i ben o delerau pob cytundeb ac yn eu cadw'n gyfredol. Gallwch"
+" ychwanegu digwyddiadau eraill ar dudalen cytundeb."
 
 #: templates/leases/event_list.html:7
 msgid "My events"
@@ -15317,8 +15507,8 @@ msgstr "Galwadau rhent"
 msgid ""
 "Demand runs raise nothing on this agreement until the hold is taken off."
 msgstr ""
-"Nid yw rhediadau galwadau'n codi dim ar y cytundeb hwn nes bod y stop yn "
-"cael ei dynnu."
+"Nid yw rhediadau galwadau'n codi dim ar y cytundeb hwn nes bod y stop yn cael"
+" ei dynnu."
 
 #: templates/leases/lease_detail.html:66 templates/ledger/account.html:15
 msgid "Passed to"
@@ -15473,8 +15663,8 @@ msgstr "Taliadau nesaf yn ddyledus"
 
 #: templates/leases/lease_detail.html:116
 msgid ""
-"A guide only: part periods are not apportioned. Demands will be raised by "
-"the rent ledger."
+"A guide only: part periods are not apportioned. Demands will be raised by the"
+" rent ledger."
 msgstr ""
 "Canllaw yn unig: ni chaiff cyfnodau rhannol eu dosrannu. Bydd y cyfriflyfr "
 "rhent yn codi'r galwadau."
@@ -15537,8 +15727,8 @@ msgstr "Wedi'i ddal"
 #: templates/leases/lease_detail.html:136
 #, python-format
 msgid ""
-"The deposit held (£%(held)s) is below the £%(due)s the deed requires: ask "
-"the tenant to top it up."
+"The deposit held (£%(held)s) is below the £%(due)s the deed requires: ask the"
+" tenant to top it up."
 msgstr ""
 "Mae'r blaendal a ddelir (£%(held)s) yn is na'r £%(due)s y mae'r weithred yn "
 "ei fynnu: gofynnwch i'r tenant ychwanegu ato."
@@ -15556,17 +15746,8 @@ msgid "Create a letter:"
 msgstr "Creu llythyr:"
 
 #: templates/leases/lease_detail.html:159
-#: templates/reports/_report_table.html:11
-msgid "Shared"
-msgstr "Wedi'i rannu"
-
-#: templates/leases/lease_detail.html:159
 msgid "Not shared"
 msgstr "Heb ei rannu"
-
-#: templates/leases/lease_detail.html:160
-msgid "Stop sharing"
-msgstr "Peidio â rhannu"
 
 #: templates/leases/lease_detail.html:160
 msgid "Share with tenant"
@@ -15766,10 +15947,10 @@ msgid ""
 "increases or variations. Rent reviews are recorded from the review event. "
 "Future rents take effect automatically on their date."
 msgstr ""
-"Defnyddiwch hwn ar gyfer camau rhent sefydlog, cyfnodau di-rent neu "
-"ostyngol, codiadau sy'n gysylltiedig â mynegai neu amrywiadau. Caiff "
-"adolygiadau rhent eu cofnodi o ddigwyddiad yr adolygiad. Mae renti'r dyfodol "
-"yn dod i rym yn awtomatig ar eu dyddiad."
+"Defnyddiwch hwn ar gyfer camau rhent sefydlog, cyfnodau di-rent neu ostyngol,"
+" codiadau sy'n gysylltiedig â mynegai neu amrywiadau. Caiff adolygiadau rhent"
+" eu cofnodi o ddigwyddiad yr adolygiad. Mae renti'r dyfodol yn dod i rym yn "
+"awtomatig ar eu dyddiad."
 
 #: templates/leases/rent_step_add.html:13
 msgid "Add rent"
@@ -15810,10 +15991,10 @@ msgid ""
 "discount rate."
 msgstr ""
 "Llyfr gwaith ar gyfer cyfrifyddu lesoedd cyllid: pob cytundeb y mae'r cyngor "
-"yn ei ddal a oedd mewn grym yn y flwyddyn ariannol, gyda'i dymor les ar "
-"gyfer IFRS 16, rhent, opsiynau a sail adolygu; pob taliad o ddechrau'r "
-"flwyddyn i ddiwedd y tymor (heb ddisgowntio); a newidiadau'r flwyddyn. "
-"Cyllid sy'n ychwanegu'r gyfradd ddisgownt."
+"yn ei ddal a oedd mewn grym yn y flwyddyn ariannol, gyda'i dymor les ar gyfer"
+" IFRS 16, rhent, opsiynau a sail adolygu; pob taliad o ddechrau'r flwyddyn i "
+"ddiwedd y tymor (heb ddisgowntio); a newidiadau'r flwyddyn. Cyllid sy'n "
+"ychwanegu'r gyfradd ddisgownt."
 
 #: templates/leases/rents_payable.html:15
 msgid ""
@@ -16053,11 +16234,11 @@ msgstr "Codi llog o £%(amount)s"
 
 #: templates/ledger/_account_extras.html:42
 msgid ""
-"Check the figures against the lease first. Interest is simple, over a 365-"
-"day year, and is not charged on interest."
+"Check the figures against the lease first. Interest is simple, over a 365-day"
+" year, and is not charged on interest."
 msgstr ""
-"Gwiriwch y ffigurau yn erbyn y les yn gyntaf. Llog syml yw hwn, dros "
-"flwyddyn o 365 diwrnod, ac ni chaiff ei godi ar log."
+"Gwiriwch y ffigurau yn erbyn y les yn gyntaf. Llog syml yw hwn, dros flwyddyn"
+" o 365 diwrnod, ac ni chaiff ei godi ar log."
 
 #: templates/ledger/_account_extras.html:43
 msgid "No interest is due."
@@ -16331,8 +16512,8 @@ msgstr "Rhenti"
 
 #: templates/ledger/home.html:6
 msgid ""
-"Showing rent for your patch: the properties you manage, those of everyone "
-"you supervise, and anyone you are covering for."
+"Showing rent for your patch: the properties you manage, those of everyone you"
+" supervise, and anyone you are covering for."
 msgstr ""
 "Yn dangos rhent ar gyfer eich ardal: yr eiddo rydych yn eu rheoli, rhai pawb "
 "rydych yn eu goruchwylio, ac unrhyw un rydych yn cyflenwi drosto."
@@ -16504,11 +16685,11 @@ msgstr ""
 
 #: templates/ledger/run_email.html:19
 msgid ""
-"Emails do not replace any notice the agreement says must be served by post "
-"or by hand."
+"Emails do not replace any notice the agreement says must be served by post or"
+" by hand."
 msgstr ""
-"Nid yw negeseuon e-bost yn disodli unrhyw hysbysiad y mae’r cytundeb yn "
-"dweud bod rhaid ei gyflwyno drwy’r post neu â llaw."
+"Nid yw negeseuon e-bost yn disodli unrhyw hysbysiad y mae’r cytundeb yn dweud"
+" bod rhaid ei gyflwyno drwy’r post neu â llaw."
 
 #: templates/ledger/run_email.html:23
 #, python-format
@@ -16586,10 +16767,10 @@ msgid ""
 "an approved budget. A period is never charged twice, so runs can overlap "
 "safely."
 msgstr ""
-"Codi'r rhent sy'n dod yn ddyledus rhwng dau ddyddiad ar bob cytundeb "
-"cyfredol a osodir gan y cyngor, a thaliadau gwasanaeth ar gyfrif lle mae gan "
-"amserlen gyllideb wedi'i chymeradwyo. Ni chodir cyfnod ddwywaith byth, felly "
-"gall rhediadau orgyffwrdd yn ddiogel."
+"Codi'r rhent sy'n dod yn ddyledus rhwng dau ddyddiad ar bob cytundeb cyfredol"
+" a osodir gan y cyngor, a thaliadau gwasanaeth ar gyfrif lle mae gan amserlen"
+" gyllideb wedi'i chymeradwyo. Ni chodir cyfnod ddwywaith byth, felly gall "
+"rhediadau orgyffwrdd yn ddiogel."
 
 #: templates/ledger/run_new.html:10
 msgid "Payments due from"
@@ -16656,8 +16837,8 @@ msgid ""
 "Each charge gets an invoice number. Charges cannot be deleted afterwards; "
 "correct them with a credit note."
 msgstr ""
-"Mae pob tâl yn cael rhif anfoneb. Ni ellir dileu taliadau wedyn; cywirwch "
-"nhw gyda nodyn credyd."
+"Mae pob tâl yn cael rhif anfoneb. Ni ellir dileu taliadau wedyn; cywirwch nhw"
+" gyda nodyn credyd."
 
 #: templates/ledger/run_new.html:45
 msgid "Charges cannot be deleted afterwards; correct them with a credit note."
@@ -16673,8 +16854,8 @@ msgid ""
 "charged, or no current agreement has a payment date in that range."
 msgstr ""
 "Nid oes dim newydd yn ddyledus rhwng y dyddiadau hynny. Naill ai mae'r rhent "
-"eisoes wedi'i godi, neu nid oes gan unrhyw gytundeb cyfredol ddyddiad talu "
-"yn yr ystod honno."
+"eisoes wedi'i godi, neu nid oes gan unrhyw gytundeb cyfredol ddyddiad talu yn"
+" yr ystod honno."
 
 #: templates/maintenance/_job_table.html:3
 #: templates/maintenance/contractor_detail.html:5
@@ -16703,19 +16884,14 @@ msgstr "Adroddiadau atgyweirio"
 msgid "Lifecycle forecast"
 msgstr "Rhagolwg cylch oes"
 
-#: templates/maintenance/_repair_form.html:3
-msgid "Department"
-msgstr "Adran"
-
 #: templates/maintenance/_repair_form.html:26
 msgid ""
 "In an emergency, such as fire, flooding or a gas leak, phone the emergency "
 "services or the council's out of hours number now. Do not wait for a reply "
 "here."
 msgstr ""
-"Mewn argyfwng, fel tân, llifogydd neu nwy yn gollwng, ffoniwch y "
-"gwasanaethau brys neu rif y tu allan i oriau’r cyngor nawr. Peidiwch ag aros "
-"am ateb yma."
+"Mewn argyfwng, fel tân, llifogydd neu nwy yn gollwng, ffoniwch y gwasanaethau"
+" brys neu rif y tu allan i oriau’r cyngor nawr. Peidiwch ag aros am ateb yma."
 
 #: templates/maintenance/_repair_form.html:37
 msgid "Send the report"
@@ -16919,13 +17095,13 @@ msgstr "Dim contractau eto."
 
 #: templates/maintenance/forecast.html:7
 msgid ""
-"When components reach the end of their expected life, and what replacing "
-"them costs, from the component register. Replacements already overdue are "
-"counted in this year."
+"When components reach the end of their expected life, and what replacing them"
+" costs, from the component register. Replacements already overdue are counted"
+" in this year."
 msgstr ""
 "Pryd mae cydrannau'n cyrraedd diwedd eu hoes ddisgwyliedig, a beth mae eu "
-"hailosod yn ei gostio, o'r gofrestr cydrannau. Caiff ailosodiadau sydd "
-"eisoes yn hwyr eu cyfrif yn y flwyddyn hon."
+"hailosod yn ei gostio, o'r gofrestr cydrannau. Caiff ailosodiadau sydd eisoes"
+" yn hwyr eu cyfrif yn y flwyddyn hon."
 
 #: templates/maintenance/forecast.html:9
 #: templates/servicecharges/schedule_detail.html:34
@@ -16946,9 +17122,9 @@ msgstr "Blwyddyn"
 
 #: templates/maintenance/home.html:7 templates/maintenance/job_list.html:7
 #: templates/maintenance/job_new.html:2 templates/maintenance/job_new.html:5
-#: templates/maintenance/property.html:8 templates/portal/agreement.html:82
+#: templates/maintenance/property.html:8 templates/portal/agreement.html:88
 #: templates/portal/repair.html:2 templates/portal/repair.html:7
-#: templates/space/liaison_building.html:58
+#: templates/space/liaison_building.html:63
 #: templates/space/liaison_repair.html:2 templates/space/liaison_repair.html:11
 msgid "Report a repair"
 msgstr "Adrodd am atgyweiriad"
@@ -17243,11 +17419,11 @@ msgstr "Nid oes swyddi'n cyfateb."
 
 #: templates/maintenance/job_new.html:7
 msgid ""
-"PHAEMA works out who pays from the lease repairing terms, and sets the "
-"target from the priority. You can change both on the job."
+"PHAEMA works out who pays from the lease repairing terms, and sets the target"
+" from the priority. You can change both on the job."
 msgstr ""
-"Mae PHAEMA yn cyfrifo pwy sy'n talu o delerau atgyweirio'r les, ac yn gosod "
-"y targed o'r flaenoriaeth. Gallwch newid y ddau ar y swydd."
+"Mae PHAEMA yn cyfrifo pwy sy'n talu o delerau atgyweirio'r les, ac yn gosod y"
+" targed o'r flaenoriaeth. Gallwch newid y ddau ar y swydd."
 
 #: templates/maintenance/job_new.html:11
 msgid "Raise the job"
@@ -17279,9 +17455,9 @@ msgid ""
 "add your own under Manage data. PHAEMA raises a job for the contractor 28 "
 "days before each task is due."
 msgstr ""
-"Agorwch dudalen cynnal a chadw eiddo ac ychwanegwch dasgau o lyfrgell "
-"PHAEMA, neu ychwanegwch eich rhai eich hun o dan Rheoli data. Mae PHAEMA yn "
-"codi swydd ar gyfer y contractwr 28 diwrnod cyn i bob tasg ddod yn ddyledus."
+"Agorwch dudalen cynnal a chadw eiddo ac ychwanegwch dasgau o lyfrgell PHAEMA,"
+" neu ychwanegwch eich rhai eich hun o dan Rheoli data. Mae PHAEMA yn codi "
+"swydd ar gyfer y contractwr 28 diwrnod cyn i bob tasg ddod yn ddyledus."
 
 #: templates/maintenance/planned.html:10
 msgid "Any time"
@@ -17315,15 +17491,15 @@ msgstr "Sut caiff hyn ei gyfrifo?"
 #: templates/maintenance/property.html:12
 msgid ""
 "From the repairing terms of the current lease of this property: full "
-"repairing leases leave repairs to the tenant; on internal repairing terms "
-"the tenant looks after the inside and the council the structure and "
-"exterior, recovered through the service charge where the lease has one. "
-"Common parts of a let building go to the service charge. Check the lease "
-"itself for anything unusual."
+"repairing leases leave repairs to the tenant; on internal repairing terms the"
+" tenant looks after the inside and the council the structure and exterior, "
+"recovered through the service charge where the lease has one. Common parts of"
+" a let building go to the service charge. Check the lease itself for anything"
+" unusual."
 msgstr ""
 "O delerau atgyweirio les gyfredol yr eiddo hwn: mae lesoedd atgyweirio llawn "
-"yn gadael atgyweiriadau i'r tenant; ar delerau atgyweirio mewnol mae'r "
-"tenant yn gofalu am y tu mewn a'r cyngor am y strwythur a'r tu allan, wedi'u "
+"yn gadael atgyweiriadau i'r tenant; ar delerau atgyweirio mewnol mae'r tenant"
+" yn gofalu am y tu mewn a'r cyngor am y strwythur a'r tu allan, wedi'u "
 "hadennill drwy'r tâl gwasanaeth lle mae gan y les un. Mae rhannau cyffredin "
 "adeilad a osodir yn mynd i'r tâl gwasanaeth. Gwiriwch y les ei hun am unrhyw "
 "beth anarferol."
@@ -17426,8 +17602,8 @@ msgid ""
 "They see this in the portal or on their buildings page. Needed if you do not "
 "raise a job."
 msgstr ""
-"Maen nhw’n gweld hyn yn y porth neu ar dudalen eu hadeiladau. Mae ei angen "
-"os nad ydych yn creu swydd."
+"Maen nhw’n gweld hyn yn y porth neu ar dudalen eu hadeiladau. Mae ei angen os"
+" nad ydych yn creu swydd."
 
 #: templates/maintenance/report_detail.html:35
 msgid "Decides who pays, from the repairing terms."
@@ -17567,8 +17743,8 @@ msgstr "Talu nawr"
 
 #: templates/portal/agreement.html:42
 msgid ""
-"Please quote the reference when you pay. Payments can take a few days to "
-"show here."
+"Please quote the reference when you pay. Payments can take a few days to show"
+" here."
 msgstr ""
 "Nodwch y cyfeirnod pan fyddwch yn talu. Gall gymryd ychydig ddyddiau i "
 "daliadau ymddangos yma."
@@ -17582,19 +17758,30 @@ msgid "No dates coming up."
 msgstr "Dim dyddiadau i ddod."
 
 #: templates/portal/agreement.html:81 templates/space/liaison_building.html:57
+msgid "Requests"
+msgstr "Ceisiadau"
+
+#: templates/portal/agreement.html:82 templates/portal/request_new.html:2
+#: templates/portal/request_new.html:8 templates/space/liaison_building.html:58
+#: templates/space/liaison_request.html:2
+#: templates/space/liaison_request.html:11
+msgid "Make a request"
+msgstr "Gwneud cais"
+
+#: templates/portal/agreement.html:87 templates/space/liaison_building.html:62
 msgid "Repairs"
 msgstr "Atgyweiriadau"
 
-#: templates/portal/agreement.html:91
+#: templates/portal/agreement.html:97
 msgid "The council has not shared any documents for this agreement yet."
 msgstr ""
 "Nid yw’r cyngor wedi rhannu unrhyw ddogfennau ar gyfer y cytundeb hwn eto."
 
-#: templates/portal/agreement.html:94
+#: templates/portal/agreement.html:100
 msgid "Contact details for demands"
 msgstr "Manylion cyswllt ar gyfer galwadau am daliad"
 
-#: templates/portal/agreement.html:98
+#: templates/portal/agreement.html:104
 #, python-format
 msgid ""
 "You asked to change these on %(day)s. The estates team will check the change "
@@ -17603,7 +17790,7 @@ msgstr ""
 "Gofynnoch am newid y rhain ar %(day)s. Bydd y tîm ystadau yn gwirio’r newid "
 "cyn iddo gael ei wneud."
 
-#: templates/portal/agreement.html:99
+#: templates/portal/agreement.html:105
 msgid "Ask to change these details"
 msgstr "Gofyn am newid y manylion hyn"
 
@@ -17669,8 +17856,8 @@ msgid ""
 "Change what is different. The estates team checks every change before it is "
 "made."
 msgstr ""
-"Newidiwch yr hyn sy’n wahanol. Mae’r tîm ystadau yn gwirio pob newid cyn "
-"iddo gael ei wneud."
+"Newidiwch yr hyn sy’n wahanol. Mae’r tîm ystadau yn gwirio pob newid cyn iddo"
+" gael ei wneud."
 
 #: templates/portal/contact.html:18
 msgid "Send the change"
@@ -17689,6 +17876,7 @@ msgstr ""
 "i’r manylion sydd gennym eisoes."
 
 #: templates/portal/contact_sent.html:6 templates/portal/repair_sent.html:6
+#: templates/portal/request_sent.html:6
 msgid "Back to the agreement"
 msgstr "Yn ôl i’r cytundeb"
 
@@ -17706,16 +17894,34 @@ msgstr ""
 msgid "Repair reported"
 msgstr "Atgyweiriad wedi’i adrodd"
 
-#: templates/portal/repair_sent.html:4
+#: templates/portal/repair_sent.html:4 templates/portal/request_sent.html:4
 msgid "Your reference"
 msgstr "Eich cyfeirnod"
 
 #: templates/portal/repair_sent.html:5
 msgid ""
-"The estates team will look at it and you can follow progress on the "
-"agreement page."
+"The estates team will look at it and you can follow progress on the agreement"
+" page."
 msgstr ""
 "Bydd y tîm ystadau yn edrych arno a gallwch ddilyn y cynnydd ar dudalen y "
+"cytundeb."
+
+#: templates/portal/request_new.html:9
+msgid ""
+"Ask the council for consent or permission under your agreement. The estates "
+"team will acknowledge it and you can follow it on the agreement page. Any fee"
+" is dealt with separately."
+msgstr ""
+"Gofynnwch i’r cyngor am gydsyniad neu ganiatâd o dan eich cytundeb. Bydd y "
+"tîm ystadau yn cydnabod y cais a gallwch ei ddilyn ar dudalen y cytundeb. "
+"Ymdrinnir ag unrhyw ffi ar wahân."
+
+#: templates/portal/request_sent.html:5
+msgid ""
+"The estates team will acknowledge it and you can follow progress on the "
+"agreement page."
+msgstr ""
+"Bydd y tîm ystadau yn ei gydnabod a gallwch ddilyn y cynnydd ar dudalen y "
 "cytundeb."
 
 #: templates/portal/sign_in.html:6
@@ -17724,8 +17930,8 @@ msgstr "Mewngofnodi i’r porth tenantiaid"
 
 #: templates/portal/sign_in.html:7
 msgid ""
-"For tenants the council has given an account. Enter your email address and "
-"we will email you a sign-in code."
+"For tenants the council has given an account. Enter your email address and we"
+" will email you a sign-in code."
 msgstr ""
 "Ar gyfer tenantiaid y mae’r cyngor wedi rhoi cyfrif iddynt. Rhowch eich "
 "cyfeiriad e-bost a byddwn yn anfon cod mewngofnodi atoch."
@@ -17764,8 +17970,8 @@ msgid ""
 "Confidential: only the project team and administrators can see this project, "
 "its site and its papers."
 msgstr ""
-"Cyfrinachol: dim ond tîm y prosiect a gweinyddwyr all weld y prosiect hwn, "
-"ei safle a'i bapurau."
+"Cyfrinachol: dim ond tîm y prosiect a gweinyddwyr all weld y prosiect hwn, ei"
+" safle a'i bapurau."
 
 #: templates/projects/project_detail.html:25
 msgid "Sponsor"
@@ -17837,12 +18043,12 @@ msgstr "Rhestr wirio cwblhau"
 #: templates/projects/project_detail.html:65
 msgid ""
 "What the register needs when the project completes. PHAEMA opens each form "
-"filled in from the project; nothing in the register changes until you save "
-"it there."
+"filled in from the project; nothing in the register changes until you save it"
+" there."
 msgstr ""
 "Beth sydd ei angen ar y gofrestr pan fydd y prosiect yn cwblhau. Mae PHAEMA "
-"yn agor pob ffurflen wedi'i llenwi o'r prosiect; nid oes dim yn y gofrestr "
-"yn newid nes i chi ei gadw yno."
+"yn agor pob ffurflen wedi'i llenwi o'r prosiect; nid oes dim yn y gofrestr yn"
+" newid nes i chi ei gadw yno."
 
 #: templates/projects/project_detail.html:68
 msgid "checked by PHAEMA"
@@ -18224,10 +18430,10 @@ msgid ""
 "gateway decision once it is started. Starter tasks for the type of project "
 "are added for you."
 msgstr ""
-"Mae prosiect yn grwpio gwaith mwy: datblygiad, caffaeliad, gwarediad, "
-"rhaglen neu adolygiad. Ychwanegwch eiddo, y tîm, cerrig milltir a'r "
-"penderfyniad porth cyntaf unwaith y bydd wedi dechrau. Caiff tasgau "
-"cychwynnol ar gyfer y math o brosiect eu hychwanegu i chi."
+"Mae prosiect yn grwpio gwaith mwy: datblygiad, caffaeliad, gwarediad, rhaglen"
+" neu adolygiad. Ychwanegwch eiddo, y tîm, cerrig milltir a'r penderfyniad "
+"porth cyntaf unwaith y bydd wedi dechrau. Caiff tasgau cychwynnol ar gyfer y "
+"math o brosiect eu hychwanegu i chi."
 
 #: templates/projects/project_form.html:8
 #, python-format
@@ -18250,9 +18456,9 @@ msgid ""
 "groups the cases, jobs and valuations that serve it."
 msgstr ""
 "Mae prosiect yn ddarn mwy o waith nag achos: datblygiad dros sawl eiddo, "
-"caffael tir nad yw'r cyngor yn berchen arno eto, gwarediad, rhaglen waith "
-"neu adolygiad strategol. Mae'n mynd drwy bedwar porth ac yn grwpio'r "
-"achosion, y swyddi a'r prisiadau sy'n ei wasanaethu."
+"caffael tir nad yw'r cyngor yn berchen arno eto, gwarediad, rhaglen waith neu"
+" adolygiad strategol. Mae'n mynd drwy bedwar porth ac yn grwpio'r achosion, y"
+" swyddi a'r prisiadau sy'n ei wasanaethu."
 
 #: templates/projects/project_list.html:14
 msgid "Project number, name or site"
@@ -18308,8 +18514,8 @@ msgstr "Mewnforio parseli INSPIRE ar gyfer eich ardal"
 
 #: templates/properties/boundary_from_inspire.html:17
 msgid ""
-"This property has no boundary or grid reference, so PHAEMA cannot find "
-"nearby parcels. Add an easting and northing first."
+"This property has no boundary or grid reference, so PHAEMA cannot find nearby"
+" parcels. Add an easting and northing first."
 msgstr ""
 "Nid oes gan yr eiddo hwn ffin na chyfeirnod grid, felly ni all PHAEMA ddod o "
 "hyd i barseli cyfagos. Ychwanegwch ddwyreiniad a gogleddiad yn gyntaf."
@@ -18374,9 +18580,9 @@ msgid ""
 "recorded: nothing is estimated."
 msgstr ""
 "Mae cofnodion PHAEMA wedi'u mapio i <a class=\"govuk-link\" "
-"href=\"%(url)s\">Safon Data Eiddo'r Llywodraeth</a> (%(ref)s). Mae'r safon "
-"yn rhwymo'r llywodraeth ganolog, nid cynghorau, felly mapio iddi yw hyn ac "
-"nid tystysgrif cydymffurfio. Mae cell wag yn golygu nad yw'r ffaith wedi'i "
+"href=\"%(url)s\">Safon Data Eiddo'r Llywodraeth</a> (%(ref)s). Mae'r safon yn"
+" rhwymo'r llywodraeth ganolog, nid cynghorau, felly mapio iddi yw hyn ac nid "
+"tystysgrif cydymffurfio. Mae cell wag yn golygu nad yw'r ffaith wedi'i "
 "chofnodi: ni chaiff dim ei amcangyfrif."
 
 #: templates/properties/data_standard.html:15
@@ -18400,8 +18606,8 @@ msgid ""
 "licensee. Lettings by the council are not part of the standard's contract "
 "fields; use the reports for those."
 msgstr ""
-"Contractau: cytundebau y mae'r cyngor yn dal eiddo oddi tanynt fel tenant "
-"neu drwyddedai. Nid yw gosodiadau gan y cyngor yn rhan o feysydd contract y "
+"Contractau: cytundebau y mae'r cyngor yn dal eiddo oddi tanynt fel tenant neu"
+" drwyddedai. Nid yw gosodiadau gan y cyngor yn rhan o feysydd contract y "
 "safon; defnyddiwch yr adroddiadau ar gyfer y rheini."
 
 #: templates/properties/data_standard.html:24
@@ -18416,8 +18622,8 @@ msgstr "Asedau rheoli cyfleusterau: cydrannau adeiladau o gynnal a chadw."
 msgid ""
 "FM assets: empty, because maintenance is switched off or not open to you."
 msgstr ""
-"Asedau rheoli cyfleusterau: gwag, oherwydd bod cynnal a chadw wedi'i "
-"ddiffodd neu nad yw ar agor i chi."
+"Asedau rheoli cyfleusterau: gwag, oherwydd bod cynnal a chadw wedi'i ddiffodd"
+" neu nad yw ar agor i chi."
 
 #: templates/properties/data_standard.html:26
 msgid ""
@@ -18445,8 +18651,8 @@ msgid ""
 msgstr ""
 "Ar gyfer pob un o feysydd y safon yn y ddalen Eiddo: faint o gofnodion eiddo "
 "cyfredol sydd â rhywbeth wedi'i gofnodi. Nid yw pob maes yn berthnasol i bob "
-"cofnod (nid oes gan dir arwynebedd llawr, nid oes gan rydd-ddaliad "
-"dystysgrif ynni), felly nid 100%% yw'r nod ar gyfer pob un ohonynt."
+"cofnod (nid oes gan dir arwynebedd llawr, nid oes gan rydd-ddaliad dystysgrif"
+" ynni), felly nid 100%% yw'r nod ar gyfer pob un ohonynt."
 
 #: templates/properties/data_standard.html:38
 #: templates/servicecharges/matrix.html:12
@@ -18508,8 +18714,8 @@ msgid ""
 "Including parts: a unit or building follows the strategy of the estate or "
 "site it is part of unless it has its own."
 msgstr ""
-"Gan gynnwys rhannau: mae uned neu adeilad yn dilyn strategaeth yr ystad "
-"neu'r safle y mae'n rhan ohono oni bai fod ganddo ei un ei hun."
+"Gan gynnwys rhannau: mae uned neu adeilad yn dilyn strategaeth yr ystad neu'r"
+" safle y mae'n rhan ohono oni bai fod ganddo ei un ei hun."
 
 #: templates/properties/estate_strategy.html:26
 msgid "Decided for"
@@ -18571,8 +18777,8 @@ msgstr "Mewnforio'r eiddo hyn"
 
 #: templates/properties/import.html:57
 msgid ""
-"Add or update many properties at once from an Excel or CSV file. You will "
-"see a preview and can check it before anything is saved."
+"Add or update many properties at once from an Excel or CSV file. You will see"
+" a preview and can check it before anything is saved."
 msgstr ""
 "Ychwanegu neu ddiweddaru llawer o eiddo ar unwaith o ffeil Excel neu CSV. "
 "Byddwch yn gweld rhagolwg a gallwch ei wirio cyn i ddim gael ei gadw."
@@ -18583,11 +18789,11 @@ msgstr "(mae'n cynnwys canllawiau a rhestrau cwymplen)."
 
 #: templates/properties/import.html:60
 msgid ""
-"Fill in one row per property. Existing references are updated; new "
-"references are added."
+"Fill in one row per property. Existing references are updated; new references"
+" are added."
 msgstr ""
-"Llenwch un rhes ar gyfer pob eiddo. Caiff cyfeirnodau presennol eu "
-"diweddaru; caiff cyfeirnodau newydd eu hychwanegu."
+"Llenwch un rhes ar gyfer pob eiddo. Caiff cyfeirnodau presennol eu diweddaru;"
+" caiff cyfeirnodau newydd eu hychwanegu."
 
 #: templates/properties/import.html:61
 msgid "Upload the file and check the preview."
@@ -18628,8 +18834,8 @@ msgstr "Ffeil zip neu GML INSPIRE"
 
 #: templates/properties/inspire_upload.html:16
 msgid ""
-"A whole district can take a few minutes. Very large files are better "
-"imported with ./phaema.sh import-inspire."
+"A whole district can take a few minutes. Very large files are better imported"
+" with ./phaema.sh import-inspire."
 msgstr ""
 "Gall ardal gyfan gymryd ychydig funudau. Mae'n well mewnforio ffeiliau mawr "
 "iawn gyda ./phaema.sh import-inspire."
@@ -18675,8 +18881,8 @@ msgid ""
 "Current rent on %(ref)s: £%(r)s a year, £%(z)s per m² Zone A (£%(f)s per sq "
 "ft)."
 msgstr ""
-"Rhent cyfredol ar %(ref)s: £%(r)s y flwyddyn, £%(z)s fesul m² Parth A (£"
-"%(f)s fesul troedfedd sgwâr)."
+"Rhent cyfredol ar %(ref)s: £%(r)s y flwyddyn, £%(z)s fesul m² Parth A (£%(f)s"
+" fesul troedfedd sgwâr)."
 
 #: templates/properties/itza.html:16
 msgid "Zone depth (m)"
@@ -18976,8 +19182,8 @@ msgstr "Safle ac adeiladau"
 
 #: templates/properties/property_detail.html:100
 msgid ""
-"Nothing recorded yet about the location, construction, roof, windows, "
-"parking or services."
+"Nothing recorded yet about the location, construction, roof, windows, parking"
+" or services."
 msgstr ""
 "Dim wedi'i gofnodi eto am y lleoliad, yr adeiladwaith, y to, y ffenestri, "
 "parcio na gwasanaethau."
@@ -19001,8 +19207,8 @@ msgstr "Ychwanegu cynlluniau llawr neu luniau"
 
 #: templates/properties/property_detail.html:109
 msgid ""
-"Drag plans here, or choose them: PDF or AutoCAD (.dwg or .dxf), up to 20 at "
-"a time, 50 MB each. Each is named after its file."
+"Drag plans here, or choose them: PDF or AutoCAD (.dwg or .dxf), up to 20 at a"
+" time, 50 MB each. Each is named after its file."
 msgstr ""
 "Llusgwch gynlluniau yma, neu dewiswch nhw: PDF neu AutoCAD (.dwg neu .dxf), "
 "hyd at 20 ar y tro, 50 MB yr un. Caiff pob un ei enwi ar ôl ei ffeil."
@@ -19018,8 +19224,8 @@ msgid ""
 "with its file name."
 msgstr ""
 "Llusgwch luniau yma, neu dewiswch nhw: JPEG neu PNG, hyd at 20 ar y tro, 20 "
-"MB yr un. Cânt eu hailfeintio a thynnir eu data lleoliad. Rhoddir enw'r "
-"ffeil fel capsiwn i bob un."
+"MB yr un. Cânt eu hailfeintio a thynnir eu data lleoliad. Rhoddir enw'r ffeil"
+" fel capsiwn i bob un."
 
 #: templates/properties/property_detail.html:116
 msgid "Add the photos"
@@ -19248,8 +19454,8 @@ msgstr "Dewiswch eiddo ar y map i weld ei fanylion."
 
 #: templates/properties/property_report.html:14
 msgid ""
-"Drawn from the property records as they are now, for the valuer. Add "
-"anything missing on the property's page and open this report again."
+"Drawn from the property records as they are now, for the valuer. Add anything"
+" missing on the property's page and open this report again."
 msgstr ""
 "Wedi'i lunio o gofnodion yr eiddo fel y maent nawr, ar gyfer y prisiwr. "
 "Ychwanegwch unrhyw beth sydd ar goll ar dudalen yr eiddo ac agorwch yr "
@@ -19326,8 +19532,8 @@ msgstr "Gofynnwch i weinyddwr PHAEMA osod cyfrinair newydd i chi."
 
 #: templates/registration/forgot_password_sent.html:6
 msgid ""
-"If that email address or username belongs to a PHAEMA sign-in, we have sent "
-"a link to choose a new password."
+"If that email address or username belongs to a PHAEMA sign-in, we have sent a"
+" link to choose a new password."
 msgstr ""
 "Os yw'r cyfeiriad e-bost neu'r enw defnyddiwr hwnnw'n perthyn i fewngofnodi "
 "PHAEMA, rydym wedi anfon dolen i ddewis cyfrinair newydd."
@@ -19335,8 +19541,8 @@ msgstr ""
 #: templates/registration/forgot_password_sent.html:7
 #, python-format
 msgid ""
-"The link works once, within %(minutes)s minutes. Your password stays as it "
-"is until you use it."
+"The link works once, within %(minutes)s minutes. Your password stays as it is"
+" until you use it."
 msgstr ""
 "Mae'r ddolen yn gweithio unwaith, o fewn %(minutes)s munud. Mae eich "
 "cyfrinair yn aros fel y mae nes i chi ei defnyddio."
@@ -19357,8 +19563,8 @@ msgstr ""
 
 #: templates/registration/forgot_password_sent.html:12
 msgid ""
-"Ask your PHAEMA administrator: your sign-in may have no email address, or "
-"may have been closed."
+"Ask your PHAEMA administrator: your sign-in may have no email address, or may"
+" have been closed."
 msgstr ""
 "Gofynnwch i weinyddwr PHAEMA: efallai nad oes cyfeiriad e-bost ar eich "
 "mewngofnodi, neu efallai ei fod wedi'i gau."
@@ -19369,9 +19575,9 @@ msgid ""
 "Too many wrong passwords. Sign-in is paused for this account or connection: "
 "try again in %(minutes)s minutes, or reset your password."
 msgstr ""
-"Gormod o gyfrineiriau anghywir. Mae mewngofnodi wedi'i oedi ar gyfer y "
-"cyfrif neu'r cysylltiad hwn: rhowch gynnig arall arni ymhen %(minutes)s "
-"munud, neu ailosodwch eich cyfrinair."
+"Gormod o gyfrineiriau anghywir. Mae mewngofnodi wedi'i oedi ar gyfer y cyfrif"
+" neu'r cysylltiad hwn: rhowch gynnig arall arni ymhen %(minutes)s munud, neu "
+"ailosodwch eich cyfrinair."
 
 #: templates/registration/login.html:9
 msgid "Enter a correct username or email address, and password."
@@ -19413,8 +19619,8 @@ msgstr "Darllen y llawlyfr defnyddiwr"
 
 #: templates/registration/login_code.html:17
 msgid ""
-"The 6-digit code for PHAEMA. If you do not have your phone, enter one of "
-"your recovery codes."
+"The 6-digit code for PHAEMA. If you do not have your phone, enter one of your"
+" recovery codes."
 msgstr ""
 "Y cod 6 digid ar gyfer PHAEMA. Os nad yw eich ffôn gennych, rhowch un o'ch "
 "codau adfer."
@@ -19502,8 +19708,8 @@ msgstr "Colofnau"
 
 #: templates/reports/report_edit.html:25
 msgid ""
-"Tick the columns you want. To change their order, number them: 1 is the "
-"first column. Unnumbered columns follow in the order shown."
+"Tick the columns you want. To change their order, number them: 1 is the first"
+" column. Unnumbered columns follow in the order shown."
 msgstr ""
 "Ticiwch y colofnau rydych eu heisiau. I newid eu trefn, rhifwch nhw: 1 yw'r "
 "golofn gyntaf. Mae colofnau heb rif yn dilyn yn y drefn a ddangosir."
@@ -19628,21 +19834,21 @@ msgid ""
 "The yearly self-assessment of how well the council manages its property, "
 "compared with the year before."
 msgstr ""
-"Yr hunanasesiad blynyddol o ba mor dda y mae'r cyngor yn rheoli ei eiddo, "
-"o'i gymharu â'r flwyddyn flaenorol."
+"Yr hunanasesiad blynyddol o ba mor dda y mae'r cyngor yn rheoli ei eiddo, o'i"
+" gymharu â'r flwyddyn flaenorol."
 
 #: templates/reports/report_list.html:19
 msgid ""
-"Holding purposes, asset strategies, reviews due, Asset Challenges in "
-"progress and suitability across the estate."
+"Holding purposes, asset strategies, reviews due, Asset Challenges in progress"
+" and suitability across the estate."
 msgstr ""
 "Dibenion daliadau, strategaethau asedau, adolygiadau sy'n ddyledus, Heriau "
 "Asedau ar y gweill ac addasrwydd ar draws yr ystad."
 
 #: templates/reports/report_list.html:20
 msgid ""
-"The estate in the layout of the government's property data standard, with "
-"how complete the records are."
+"The estate in the layout of the government's property data standard, with how"
+" complete the records are."
 msgstr ""
 "Yr ystad yng nghynllun safon data eiddo'r llywodraeth, gyda pha mor gyflawn "
 "yw'r cofnodion."
@@ -19834,8 +20040,8 @@ msgid ""
 "The difference becomes a balancing charge or a credit on the tenant's rent "
 "account."
 msgstr ""
-"Cyfran pob les o'r gwariant gwirioneddol, am y diwrnodau yr oedd mewn grym "
-"yn y flwyddyn ac o fewn unrhyw gap, o'i chymharu â'r hyn a godwyd arni ar "
+"Cyfran pob les o'r gwariant gwirioneddol, am y diwrnodau yr oedd mewn grym yn"
+" y flwyddyn ac o fewn unrhyw gap, o'i chymharu â'r hyn a godwyd arni ar "
 "gyfrif. Daw'r gwahaniaeth yn dâl cydbwyso neu'n gredyd ar gyfrif rhent y "
 "tenant."
 
@@ -19893,8 +20099,8 @@ msgstr "credyd"
 msgid ""
 "This year has not ended. Only reconcile early if all the spending is in."
 msgstr ""
-"Nid yw'r flwyddyn hon wedi dod i ben. Cysonwch yn gynnar dim ond os yw'r "
-"holl wariant i mewn."
+"Nid yw'r flwyddyn hon wedi dod i ben. Cysonwch yn gynnar dim ond os yw'r holl"
+" wariant i mewn."
 
 #: templates/servicecharges/reconcile.html:33
 msgid "Reconcile before the year ends"
@@ -20415,8 +20621,8 @@ msgid ""
 "Use is people based here against desks or places in the spaces they hold; "
 "with hybrid working it overstates actual use until occupancy is surveyed."
 msgstr ""
-"Caiff gofod a rennir ei rannu'n gymesur â'r gofod y mae pob meddiannydd yn "
-"ei ddal. Defnydd yw'r bobl sydd wedi'u lleoli yma o'u cymharu â desgiau neu "
+"Caiff gofod a rennir ei rannu'n gymesur â'r gofod y mae pob meddiannydd yn ei"
+" ddal. Defnydd yw'r bobl sydd wedi'u lleoli yma o'u cymharu â desgiau neu "
 "leoedd yn y gofodau y maent yn eu dal; gyda gweithio hybrid mae'n gorddatgan "
 "y defnydd gwirioneddol nes bod meddiannaeth yn cael ei harolygu."
 
@@ -20552,8 +20758,8 @@ msgstr "Gofod a meddianwyr yr adeilad hwn"
 
 #: templates/space/home.html:6
 msgid ""
-"Who occupies the council's buildings, how much space each occupier holds, "
-"and how well it is used."
+"Who occupies the council's buildings, how much space each occupier holds, and"
+" how well it is used."
 msgstr ""
 "Pwy sy'n meddiannu adeiladau'r cyngor, faint o ofod y mae pob meddiannydd yn "
 "ei ddal, a pha mor dda y caiff ei ddefnyddio."
@@ -20602,8 +20808,8 @@ msgstr "Pobl sydd wedi'u lleoli yn yr adeilad hwn"
 
 #: templates/space/liaison_building.html:45
 msgid ""
-"Everyone whose usual place of work is here, whether or not they come in "
-"every day. A count only: no names."
+"Everyone whose usual place of work is here, whether or not they come in every"
+" day. A count only: no names."
 msgstr ""
 "Pawb y mae eu man gwaith arferol yma, p'un a ydynt yn dod i mewn bob dydd ai "
 "peidio. Cyfrif yn unig: dim enwau."
@@ -20624,11 +20830,11 @@ msgstr ""
 "Defnyddir y ffigur ar unwaith. Mae eich cyswllt ystadau yn ei wirio a gall "
 "ofyn i chi amdano."
 
-#: templates/space/liaison_building.html:62
+#: templates/space/liaison_building.html:67
 msgid "Earlier headcounts"
 msgstr "Niferoedd staff cynharach"
 
-#: templates/space/liaison_building.html:63
+#: templates/space/liaison_building.html:68
 msgid "Waiting to be checked"
 msgstr "Yn aros i gael ei wirio"
 
@@ -20667,6 +20873,15 @@ msgid ""
 msgstr ""
 "Mae’r tîm ystadau yn edrych ar bob adroddiad ac yn penderfynu beth sy’n "
 "digwydd. Gallwch ei ddilyn ar dudalen yr adeilad."
+
+#: templates/space/liaison_request.html:12
+msgid ""
+"Ask the estates team for more space, to give space back, a move or an "
+"alteration. They will acknowledge it and you can follow it on the building "
+"page."
+msgstr ""
+"Gofynnwch i’r tîm ystadau am fwy o le, i roi lle yn ôl, symud neu addasiad. "
+"Byddant yn ei gydnabod a gallwch ei ddilyn ar dudalen yr adeilad."
 
 #: templates/space/occupier.html:11
 msgid "Head of service"
@@ -20879,15 +21094,15 @@ msgstr "Cadw'r crynodeb"
 #: templates/strategy/health_list.html:9
 #, python-format
 msgid ""
-"Once a year, the head of estates answers %(n)s short questions about how "
-"well the council manages its property: strategy, planning, finance, "
-"operations, governance, data and review. Each answer is yes, partly, no or "
-"not applicable, with notes and where the evidence is. Gaps can be added to "
-"the estate strategy's action plan, and the report compares each answer with "
-"the year before."
+"Once a year, the head of estates answers %(n)s short questions about how well"
+" the council manages its property: strategy, planning, finance, operations, "
+"governance, data and review. Each answer is yes, partly, no or not "
+"applicable, with notes and where the evidence is. Gaps can be added to the "
+"estate strategy's action plan, and the report compares each answer with the "
+"year before."
 msgstr ""
-"Unwaith y flwyddyn, mae pennaeth ystadau yn ateb %(n)s cwestiwn byr am ba "
-"mor dda y mae'r cyngor yn rheoli ei eiddo: strategaeth, cynllunio, cyllid, "
+"Unwaith y flwyddyn, mae pennaeth ystadau yn ateb %(n)s cwestiwn byr am ba mor"
+" dda y mae'r cyngor yn rheoli ei eiddo: strategaeth, cynllunio, cyllid, "
 "gweithrediadau, llywodraethu, data ac adolygu. Mae pob ateb yn ie, yn "
 "rhannol, na neu ddim yn berthnasol, gyda nodiadau a ble mae'r dystiolaeth. "
 "Gellir ychwanegu bylchau at gynllun gweithredu'r strategaeth ystadau, ac "
@@ -20978,11 +21193,11 @@ msgstr "Eu hychwanegu"
 #: templates/strategy/home.html:33
 msgid ""
 "No estate strategy has been recorded yet. Record the council's asset "
-"management strategy, its period and its objectives; then link projects, "
-"cases and other actions to each objective and report progress to the board."
+"management strategy, its period and its objectives; then link projects, cases"
+" and other actions to each objective and report progress to the board."
 msgstr ""
-"Nid oes strategaeth ystadau wedi'i chofnodi eto. Cofnodwch strategaeth "
-"rheoli asedau'r cyngor, ei chyfnod a'i hamcanion; yna cysylltwch brosiectau, "
+"Nid oes strategaeth ystadau wedi'i chofnodi eto. Cofnodwch strategaeth rheoli"
+" asedau'r cyngor, ei chyfnod a'i hamcanion; yna cysylltwch brosiectau, "
 "achosion a chamau gweithredu eraill â phob amcan ac adroddwch ar gynnydd i'r "
 "bwrdd."
 
@@ -21108,8 +21323,8 @@ msgid ""
 "Progress on the estate strategy as it stands today. Download it as Word to "
 "add a covering report, then send it to the board."
 msgstr ""
-"Cynnydd ar y strategaeth ystadau fel y mae heddiw. Lawrlwythwch ef fel Word "
-"i ychwanegu adroddiad cyflwyno, yna anfonwch ef at y bwrdd."
+"Cynnydd ar y strategaeth ystadau fel y mae heddiw. Lawrlwythwch ef fel Word i"
+" ychwanegu adroddiad cyflwyno, yna anfonwch ef at y bwrdd."
 
 #: templates/valuations/audit.html:2 templates/valuations/audit.html:6
 msgid "Valuation audit"
@@ -21135,9 +21350,9 @@ msgstr ""
 "Mae gweinyddwr yn nodi prisiad ar ei dudalen, gydag ymholiad yr archwilydd a "
 "dyddiad dyledus. Anfonir e-bost at y person sy'n paratoi'r ymateb. Maent yn "
 "cofnodi'r ymateb ac unrhyw dystiolaeth, ac yn ei nodi fel un a adroddwyd i'r "
-"archwilydd. Pan fydd yr archwilydd yn fodlon, mae gweinyddwr yn ei gau "
-"gyda'r canlyniad. Os oes rhaid i'r prisiad newid, mae ei gau yn ailagor y "
-"prisiad i'w ddiwygio."
+"archwilydd. Pan fydd yr archwilydd yn fodlon, mae gweinyddwr yn ei gau gyda'r"
+" canlyniad. Os oes rhaid i'r prisiad newid, mae ei gau yn ailagor y prisiad "
+"i'w ddiwygio."
 
 #: templates/valuations/audit.html:9
 msgid "Download the audit log for the auditor (Excel)"
@@ -21458,8 +21673,8 @@ msgstr "Adroddiad prisio"
 #: templates/valuations/valuation.html:32
 #, python-format
 msgid ""
-"The buildings are worth more than £%(t)s: record each component worth "
-"%(s)s%% or more of the building value, with its remaining life."
+"The buildings are worth more than £%(t)s: record each component worth %(s)s%%"
+" or more of the building value, with its remaining life."
 msgstr ""
 "Mae'r adeiladau'n werth mwy na £%(t)s: cofnodwch bob cydran sy'n werth "
 "%(s)s%% neu fwy o werth yr adeilad, gyda'i hoes weddill."

@@ -1,0 +1,21 @@
+{% load i18n %}{# Requests someone made, for the tenant portal and council departments. Needs request_url. #}
+{% if requests %}
+<table class="govuk-table">
+  <thead class="govuk-table__head"><tr class="govuk-table__row">
+    <th scope="col" class="govuk-table__header">{% translate "Asked" %}</th>
+    <th scope="col" class="govuk-table__header">{% translate "Request" %}</th>
+    <th scope="col" class="govuk-table__header">{% translate "Where it has got to" %}</th>
+    <th scope="col" class="govuk-table__header">{% translate "Target" %}</th>
+  </tr></thead>
+  <tbody class="govuk-table__body">
+  {% for c in requests %}
+  <tr class="govuk-table__row">
+    <td class="govuk-table__cell">{{ c.received_on|date:"j M Y" }}<br><span class="govuk-body-s">{{ c.display_reference }}</span></td>
+    <td class="govuk-table__cell"><a class="govuk-link" href="{% url request_url c.pk %}">{{ c.case_type.name }}</a><br><span class="govuk-body-s">{{ c.title }}</span></td>
+    <td class="govuk-table__cell">{% if c.status == "closed" %}{% if c.decision %}{{ c.get_decision_display }}{% else %}{% translate "Closed" %}{% endif %}{% elif c.status == "on_hold" %}{% translate "On hold" %}{% else %}{{ c.get_stage_display }}{% endif %}</td>
+    <td class="govuk-table__cell">{% if c.is_open %}{{ c.target_date|date:"j M Y"|default:"–" }}{% else %}–{% endif %}</td>
+  </tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% else %}<p class="govuk-body">{% translate "No requests yet." %}</p>{% endif %}

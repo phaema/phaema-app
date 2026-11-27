@@ -56,6 +56,11 @@ def building(request, pk):
         "surveyor": prop.managing_surveyor, "today": date.today(),
         "history": Headcount.objects.filter(building=prop, occupier_id__in=mine).select_related("occupier")[:10],
     }
+    from apps.cases import requests as asks
+
+    ctx["can_ask"] = bool(recordable) and asks.department_types().exists()
+    ctx["requests"] = list(asks.department_cases(request.user).filter(property__in=_building_parts(prop))[:20])
+    ctx["request_url"] = "occupier:request"
     if repairs_on():
         from apps.maintenance.models import RepairReport
 
@@ -163,3 +168,52 @@ def check(request, pk):
                .order_by("-counted_on").first())
     return render(request, "space/headcount_check.html", {
         "item": item, "earlier": earlier, "can_open_space": can_use(request.user, "space")})
+
+
+def _recordable(user, prop):
+    mine = {o.pk for o in liaison.occupiers_for(user)}
+    editable = liaison.editable_for(user)
+    return [h.occupier for h in summary.holdings(prop) if h.occupier.pk in mine and h.occupier.pk in editable]
+
+
+@_contact_only
+def request_new(request, pk):
+    """A property liaison asks the estates team for something that opens a case, such as a space request."""
+    from apps.cases import requests as asks
+
+    prop = get_object_or_404(liaison.buildings_for(request.user), pk=pk)
+    recordable = _recordable(request.user, prop)
+    types = asks.department_types()
+    if not recordable or not types.exists():
+        raise Http404
+    form = asks.RequestForm(request.POST or None, request.FILES or None, types=types)
+    if request.method == "POST" and form.is_valid():
+        occupier = next((o for o in recordable if str(o.pk) == request.POST.get("occupier")), recordable[0])
+        name = request.user.get_full_name() or request.user.username
+        case = asks.submit(form, received="dept", who=f"{name} ({occupier.name})", prop=prop, occupier=occupier,
+                           user=request.user)
+        messages.success(request, _("Request sent. Your reference is %(ref)s.") % {"ref": case.display_reference})
+        return redirect("occupier:building", pk=prop.pk)
+    return render(request, "space/liaison_request.html", {"object": prop, "form": form, "occupiers": recordable})
+
+
+@_contact_only
+def request_detail(request, pk):
+    from apps.cases import requests as asks
+
+    case = get_object_or_404(asks.department_cases(request.user), pk=pk)
+    return render(request, "space/liaison_request_detail.html", {
+        "case": case, "progress": asks.progress(case), "documents": asks.shared_documents(case),
+        "doc_url": "occupier:request-document"})
+
+
+@_contact_only
+def request_document(request, pk, doc):
+    from django.http import FileResponse
+
+    from apps.cases import requests as asks
+
+    case = get_object_or_404(asks.department_cases(request.user), pk=pk)
+    item = get_object_or_404(asks.shared_documents(case), pk=doc)
+    return FileResponse(item.file.open("rb"), as_attachment=True,
+                        filename=item.original_filename or item.file.name.rsplit("/", 1)[-1])

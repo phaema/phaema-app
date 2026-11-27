@@ -1,0 +1,13 @@
+{% load i18n %}{# One request as the person who asked sees it. Needs case, progress, documents, doc_url. #}
+<span class="govuk-caption-l">{{ case.case_type.name }} · {{ case.display_reference }}</span>
+<h1 class="govuk-heading-l">{{ case.title }}</h1>
+<dl class="govuk-summary-list">
+  <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Where it has got to" %}</dt><dd class="govuk-summary-list__value">{{ progress }}</dd></div>
+  <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Asked" %}</dt><dd class="govuk-summary-list__value">{{ case.received_on|date:"j F Y" }}</dd></div>
+  {% if case.is_open and case.target_date %}<div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Target date for a decision" %}</dt><dd class="govuk-summary-list__value">{{ case.target_date|date:"j F Y" }}</dd></div>{% endif %}
+  {% if case.decision_on %}<div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Decision" %}</dt><dd class="govuk-summary-list__value">{{ case.get_decision_display }}, {{ case.decision_on|date:"j F Y" }}{% if case.reasons %}<br>{{ case.reasons|linebreaksbr }}{% endif %}</dd></div>{% endif %}
+</dl>
+<h2 class="govuk-heading-m">{% translate "Documents" %}</h2>
+{% if documents %}<ul class="govuk-list">{% for d in documents %}<li><a class="govuk-link" href="{% url doc_url case.pk d.pk %}">{{ d.description }}</a>, {{ d.created_at|date:"j M Y" }}</li>{% endfor %}</ul>
+{% else %}<p class="govuk-body">{% translate "None yet." %}</p>{% endif %}
+<p class="govuk-body">{% translate "To add something or ask a question, contact the estates team and quote the reference." %}</p>

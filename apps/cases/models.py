@@ -80,6 +80,17 @@ class CaseType(models.Model):
         _("property information on the site visit sheet"), default=default_visit_parts, blank=True,
         help_text=_("The parts of the property record printed on the site visit sheet for cases of this type. "
                     "The case details and the safety information are always included."))
+    tenant_can_start = models.BooleanField(
+        _("tenants can ask for this in the tenant portal"), default=False)
+    department_can_start = models.BooleanField(
+        _("council departments can ask for this"), default=False,
+        help_text=_("Property liaisons see it on their building pages, for example space requests."))
+    request_guidance = models.TextField(
+        _("guidance for people asking"), blank=True,
+        help_text=_("Shown on the request form: what to tell the council and what happens next."))
+    request_documents = models.TextField(
+        _("documents to attach"), blank=True,
+        help_text=_("One per line, shown as a list on the request form, for example \"Drawings of the works\"."))
     active = models.BooleanField(_("active"), default=True)
     order = models.PositiveSmallIntegerField(_("order"), default=0)
 
@@ -184,6 +195,8 @@ class Case(TimeStampedModel):
         ONLINE = "online", _("Online form")
         PERSON = "person", _("In person")
         EVENT = "event", _("PHAEMA lease event")
+        PORTAL = "portal", _("Tenant portal")
+        DEPARTMENT = "dept", _("Council department")
         OTHER = "other", _("Other")
 
     project = models.ForeignKey("projects.Project", on_delete=models.SET_NULL, null=True, blank=True,
@@ -222,6 +235,12 @@ class Case(TimeStampedModel):
     event = models.ForeignKey(LeaseEvent, on_delete=models.SET_NULL, null=True, blank=True, related_name="cases",
                               verbose_name=_("lease event"))
     applicant_reference = models.CharField(_("applicant's reference"), max_length=60, blank=True)
+    portal_account = models.ForeignKey("portal.PortalAccount", on_delete=models.SET_NULL, null=True, blank=True,
+                                       related_name="cases", verbose_name=_("asked by (tenant portal)"))
+    occupier = models.ForeignKey("space.Occupier", on_delete=models.SET_NULL, null=True, blank=True,
+                                 related_name="cases", verbose_name=_("department asking"))
+    requested_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True,
+                                     related_name="+", verbose_name=_("asked by"))
     iken_matter = models.CharField(_("Iken matter number"), max_length=60, blank=True)
     crm_reference = models.CharField(_("CRM reference"), max_length=60, blank=True)
     # New lettings and renewals
@@ -486,6 +505,7 @@ class Correspondence(TimeStampedModel):
         LETTER = "letter", _("Letter")
         PHONE = "phone", _("Phone call")
         MEETING = "meeting", _("Meeting")
+        ONLINE = "online", _("Online request")
         OTHER = "other", _("Other")
 
     case = models.ForeignKey(Case, on_delete=models.CASCADE, related_name="correspondence")
@@ -514,6 +534,9 @@ class CaseDocument(TimeStampedModel):
     original_filename = models.CharField(max_length=255, blank=True, editable=False)
     correspondence = models.ForeignKey(Correspondence, on_delete=models.CASCADE, null=True, blank=True,
                                        related_name="attachments")
+    shared_with_requester = models.BooleanField(
+        _("shared with the person who asked"), default=False,
+        help_text=_("For requests from the tenant portal or a council department: they can see and download it."))
 
     class Meta:
         ordering = ["-created_at"]

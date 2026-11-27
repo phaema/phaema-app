@@ -182,6 +182,17 @@ def build(user, today=None, viewer=None):
                         reverse("admin:portal_contactchange_change", args=[change.pk]),
                         _("Asked in the tenant portal")))
 
+    # Requests from the tenant portal or a council department that no one owns (no managing surveyor): administrators.
+    if is_administrator(user):
+        from apps.cases.models import Case
+
+        for case in (Case.objects.filter(owner__isnull=True, status=Case.Status.OPEN,
+                                         how_received__in=(Case.Received.PORTAL, Case.Received.DEPARTMENT))
+                     .select_related("case_type")[:20]):
+            now.append(Item(None, _("Request with no one to deal with it"), "cases",
+                            f"{case.display_reference} {case.case_type.name}", case.get_absolute_url(),
+                            case.get_how_received_display()))
+
     # Repairs reported by tenants and council departments, waiting to be looked at.
     from .access import can_use
 

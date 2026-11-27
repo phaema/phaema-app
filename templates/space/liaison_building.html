@@ -53,6 +53,11 @@
 <p class="govuk-body-s">{% translate "The figure is used at once. Your estates contact checks it and may ask you about it." %}</p>
 {% endif %}
 
+{% if can_ask or requests %}
+<h2 class="govuk-heading-m">{% translate "Requests" %}</h2>
+{% if can_ask %}<p class="govuk-body"><a class="govuk-button govuk-button--secondary" href="{% url 'occupier:request-new' object.pk %}">{% translate "Make a request" %}</a></p>{% endif %}
+{% include "cases/_request_list.html" %}
+{% endif %}
 {% if repairs is not None %}
 <h2 class="govuk-heading-m">{% translate "Repairs" %}</h2>
 {% if can_report %}<p class="govuk-body"><a class="govuk-button govuk-button--secondary" href="{% url 'occupier:repair' object.pk %}">{% translate "Report a repair" %}</a></p>{% endif %}

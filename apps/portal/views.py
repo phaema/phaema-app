@@ -162,6 +162,11 @@ def agreement(request, pk):
            "waiting_change": lease.contact_changes.filter(status=ContactChange.Status.WAITING).first()}
     if account.finance and settings_row.rent_ledger_enabled:
         ctx.update(_money_view(lease, settings_row, today))
+    from apps.cases import requests as asks
+
+    ctx["can_ask"] = asks.tenant_types().exists()
+    ctx["requests"] = list(asks.tenant_cases(account).filter(lease=lease)[:20])
+    ctx["request_url"] = "portal:request"
     if account.facilities and settings_row.maintenance_enabled:
         ctx["can_report"] = True
         ctx["repairs"] = list(lease.repair_reports.select_related("job").order_by("-created_at")[:20])
@@ -188,6 +193,44 @@ def repair(request, pk):
         report = reports.submit(form, source="tenant", reporter_name=account.name, lease=lease, account=account)
         return render(request, "portal/repair_sent.html", {"lease": lease, "report": report})
     return render(request, "portal/repair.html", {"lease": lease, "form": form})
+
+
+@tenant_required
+def request_new(request, pk):
+    """Ask the council for something that opens a case, such as consent to assign or a licence for alterations."""
+    from apps.cases import requests as asks
+
+    account = request.portal_account
+    lease = _lease(request, pk)
+    types = asks.tenant_types()
+    if not types.exists():
+        raise Http404
+    form = asks.RequestForm(request.POST or None, request.FILES or None, types=types)
+    if request.method == "POST" and form.is_valid():
+        case = asks.submit(form, received="portal", who=f"{account.name} ({account.party.name})", lease=lease,
+                           account=account)
+        return render(request, "portal/request_sent.html", {"lease": lease, "case": case})
+    return render(request, "portal/request_new.html", {"lease": lease, "form": form})
+
+
+@tenant_required
+def request_detail(request, pk):
+    from apps.cases import requests as asks
+
+    case = get_object_or_404(asks.tenant_cases(request.portal_account), pk=pk)
+    return render(request, "portal/request_detail.html", {
+        "case": case, "progress": asks.progress(case), "documents": asks.shared_documents(case),
+        "doc_url": "portal:request-document"})
+
+
+@tenant_required
+def request_document(request, pk, doc):
+    from apps.cases import requests as asks
+
+    case = get_object_or_404(asks.tenant_cases(request.portal_account), pk=pk)
+    item = get_object_or_404(asks.shared_documents(case), pk=doc)
+    return FileResponse(item.file.open("rb"), as_attachment=True,
+                        filename=item.original_filename or item.file.name.rsplit("/", 1)[-1])
 
 
 @tenant_required

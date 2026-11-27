@@ -1,0 +1,37 @@
+{% load i18n %}{# The request form, shared by the tenant portal and council departments' pages. #}
+<form method="post" enctype="multipart/form-data" novalidate>{% csrf_token %}
+  {% if occupiers|length > 1 %}<div class="govuk-form-group"><label class="govuk-label" for="id_occupier">{% translate "Department" %}</label><select class="govuk-select" id="id_occupier" name="occupier">{% for o in occupiers %}<option value="{{ o.pk }}">{{ o.name }}</option>{% endfor %}</select></div>{% endif %}
+  <div class="govuk-form-group{% if form.case_type.errors %} govuk-form-group--error{% endif %}">
+    <fieldset class="govuk-fieldset"><legend class="govuk-fieldset__legend govuk-fieldset__legend--s">{{ form.case_type.label }}</legend>
+    {% for e in form.case_type.errors %}<p class="govuk-error-message">{{ e }}</p>{% endfor %}
+    <div class="govuk-radios" data-module="govuk-radios">
+    {% for t in form.types %}
+      <div class="govuk-radios__item"><input class="govuk-radios__input" id="type-{{ t.pk }}" name="case_type" type="radio" value="{{ t.pk }}"{% if form.case_type.value|stringformat:"s" == t.pk|stringformat:"s" or form.types|length == 1 %} checked{% endif %}{% if t.request_guidance or t.request_documents %} data-aria-controls="guide-{{ t.pk }}"{% endif %}>
+        <label class="govuk-label govuk-radios__label" for="type-{{ t.pk }}">{{ t.name }}</label></div>
+      {% if t.request_guidance or t.request_documents %}<div class="govuk-radios__conditional govuk-radios__conditional--hidden" id="guide-{{ t.pk }}">
+        {% if t.request_guidance %}<p class="govuk-body">{{ t.request_guidance|linebreaksbr }}</p>{% endif %}
+        {% if t.request_documents %}<p class="govuk-body">{% translate "Please attach:" %}</p><ul class="govuk-list govuk-list--bullet">{% for line in t.request_documents.splitlines %}{% if line.strip %}<li>{{ line }}</li>{% endif %}{% endfor %}</ul>{% endif %}
+        {% if t.target_days %}<p class="govuk-body-s">{% blocktranslate with days=t.target_days %}We aim to decide within {{ days }} days of having everything we need.{% endblocktranslate %}</p>{% endif %}
+      </div>{% endif %}
+    {% endfor %}
+    </div></fieldset>
+  </div>
+  <div class="govuk-form-group{% if form.title.errors %} govuk-form-group--error{% endif %}">
+    <label class="govuk-label" for="id_title">{{ form.title.label }}</label>
+    <div class="govuk-hint" id="title-hint">{{ form.title.help_text }}</div>
+    {% for e in form.title.errors %}<p class="govuk-error-message">{{ e }}</p>{% endfor %}
+    <input class="govuk-input" id="id_title" name="title" maxlength="150" aria-describedby="title-hint" value="{{ form.title.value|default:'' }}">
+  </div>
+  <div class="govuk-form-group{% if form.details.errors %} govuk-form-group--error{% endif %}">
+    <label class="govuk-label" for="id_details">{{ form.details.label }}</label>
+    {% for e in form.details.errors %}<p class="govuk-error-message">{{ e }}</p>{% endfor %}
+    <textarea class="govuk-textarea" id="id_details" name="details" rows="6">{{ form.details.value|default:'' }}</textarea>
+  </div>
+  <div class="govuk-form-group{% if form.files.errors %} govuk-form-group--error{% endif %}">
+    <label class="govuk-label" for="id_files">{{ form.files.label }}</label>
+    <div class="govuk-hint" id="files-hint">{{ form.files.help_text }}</div>
+    {% for e in form.files.errors %}<p class="govuk-error-message">{{ e }}</p>{% endfor %}
+    <div class="govuk-drop-zone" data-module="govuk-file-upload" data-i18n.choose-files-button="{% translate 'Choose files' %}" data-i18n.drop-instruction="{% translate 'or drop files here' %}" data-i18n.no-file-chosen="{% translate 'No files chosen' %}"><input class="govuk-file-upload" id="id_files" name="files" type="file" multiple aria-describedby="files-hint"></div>
+  </div>
+  <button class="govuk-button" data-module="govuk-button" data-prevent-double-click="true">{% translate "Send the request" %}</button>
+</form>
