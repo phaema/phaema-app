@@ -60,11 +60,15 @@ class OccupierAdmin(admin.ModelAdmin):
     list_filter = ("level", "external_kind", "active")
     search_fields = ("name", "cost_centre", "head_of_service")
     autocomplete_fields = ("parent", "liaison")
+    filter_horizontal = ("readers",)
     fieldsets = (
         (None, {"fields": ("name", "level", "parent", "external_kind", "active"),
                 "description": "Council directorates, departments and teams, and outside organisations sharing "
                                "council buildings (NHS, police, charities: One Public Estate)."}),
-        ("Contacts and finance", {"fields": ("head_of_service", "liaison", "liaison_name", "cost_centre")}),
+        ("Contacts and finance", {"fields": ("head_of_service", "liaison", "liaison_name", "readers", "cost_centre"),
+                                  "description": "A property liaison or read-only person with a PHAEMA account can "
+                                                 "sign in to see this occupier's buildings (no role needed). The "
+                                                 "liaison can record headcount."}),
     )
 
     @admin.display(description="Property liaison")
@@ -116,10 +120,18 @@ class OccupationAdmin(_BuildingChoices, RoleAdminMixin, admin.ModelAdmin):
 
 @admin.register(Headcount)
 class HeadcountAdmin(_BuildingChoices, RoleAdminMixin, admin.ModelAdmin):
-    list_display = ("occupier", "building", "counted_on", "people", "fte", "source", "entered_by")
-    list_filter = ("occupier",)
+    list_display = ("occupier", "building", "counted_on", "people", "fte", "source", "entered_by", "checked")
+    list_filter = ("occupier", "from_department")
     autocomplete_fields = ("building",)
-    fields = ("building", "occupier", "counted_on", ("people", "fte"), "source")
+    fields = ("building", "occupier", "counted_on", ("people", "fte"), "source", "from_department",
+              ("checked_by", "checked_on"))
+    readonly_fields = ("from_department", "checked_by", "checked_on")
+
+    @admin.display(description="Checked")
+    def checked(self, obj):
+        if not obj.from_department:
+            return "–"
+        return f"{obj.checked_on:%d %b %Y}" if obj.checked_on else "Waiting"
 
     @admin.display(description="Entered by")
     def entered_by(self, obj):

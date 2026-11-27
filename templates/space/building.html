@@ -5,19 +5,6 @@
   <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="{% url 'space:home' %}">{% translate "Space and costing" %}</a></li>
   <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="{{ object.get_absolute_url }}">{{ object.reference }} {{ object.name }}</a></li></ol></div>{% endblock %}
 {% block content %}
-<style>
-  .phaema-stack { margin: 0 0 20px; }
-  .phaema-stack__row { display: flex; align-items: stretch; margin-bottom: 4px; }
-  .phaema-stack__label { flex: 0 0 9em; padding: 6px 8px 6px 0; font-weight: 700; }
-  .phaema-stack__bar { display: flex; border: 2px solid #0b0c0c; min-height: 52px; }
-  .phaema-stack__block { box-sizing: border-box; border-right: 1px solid #0b0c0c; padding: 4px 6px; overflow: hidden;
-    font-size: 15px; line-height: 1.25; color: #0b0c0c; min-width: 0; }
-  .phaema-stack__block:last-child { border-right: 0; }
-  .phaema-stack__block--external { background-image: repeating-linear-gradient(45deg, transparent 0 8px, rgba(0,0,0,.12) 8px 10px); }
-  .phaema-stack__block--vacant { background: repeating-linear-gradient(-45deg, #fff 0 6px, #f3f2f1 6px 12px); font-style: italic; }
-  .phaema-stack__swatch { display: inline-block; width: 1em; height: 1em; border: 1px solid #0b0c0c; vertical-align: -2px; margin-right: 6px; }
-  @media (max-width: 640px) { .phaema-stack__label { flex-basis: 5.5em; font-size: 14px; } .phaema-stack__block { font-size: 13px; } }
-</style>
 <span class="govuk-caption-l">{{ object.reference }} {{ object.name }}</span>
 <h1 class="govuk-heading-l">{% translate "Space and occupiers" %}</h1>
 <p class="govuk-body">{% blocktranslate with day=on|date:"j F Y" %}As at {{ day }}.{% endblocktranslate %}
@@ -33,24 +20,7 @@
 
 {% for w in warnings %}<div class="govuk-warning-text"><span class="govuk-warning-text__icon" aria-hidden="true">!</span><strong class="govuk-warning-text__text"><span class="govuk-visually-hidden">{% translate "Warning" %}</span>{{ w }}</strong></div>{% endfor %}
 
-{% if rows %}
-<h2 class="govuk-heading-m">{% translate "Stacking plan" %}</h2>
-<p class="govuk-body-s">{% translate "Top floor first. Each block's width is its floor area. Shared space is grey; vacant space is hatched; outside organisations have diagonal stripes." %}</p>
-<div class="phaema-stack" aria-hidden="true">
-  {% for r in rows %}<div class="phaema-stack__row">
-    <div class="phaema-stack__label">{{ r.name }}{% if r.area %}<br><span class="govuk-body-s">{{ r.area|floatformat:0|intcomma }} m²</span>{% endif %}</div>
-    <div class="phaema-stack__bar" style="width: calc((100% - 9em) * {{ r.scale|stringformat:'s' }} / 100);">
-      {% for b in r.blocks %}<div class="phaema-stack__block{% if b.kind == 'vacant' %} phaema-stack__block--vacant{% endif %}{% if b.occupier.is_external %} phaema-stack__block--external{% endif %}" style="flex: {{ b.width|default:1|stringformat:'s' }} 1 0; background-color: {{ b.colour }};" title="{{ b.label }}{% if b.area %}: {{ b.area|floatformat:0 }} m²{% endif %}">{{ b.label }}{% if b.area %}<br>{{ b.area|floatformat:0 }} m²{% endif %}</div>{% endfor %}
-    </div></div>{% endfor %}
-</div>
-<table class="govuk-table govuk-visually-hidden">
-  <caption class="govuk-table__caption">{% translate "Stacking plan as a table" %}</caption>
-  <thead class="govuk-table__head"><tr class="govuk-table__row"><th scope="col" class="govuk-table__header">{% translate "Floor" %}</th><th scope="col" class="govuk-table__header">{% translate "Who or what" %}</th><th scope="col" class="govuk-table__header">{% translate "Area (m²)" %}</th></tr></thead>
-  <tbody class="govuk-table__body">{% for r in rows %}{% for b in r.blocks %}<tr class="govuk-table__row"><td class="govuk-table__cell">{{ r.name }}</td><td class="govuk-table__cell">{{ b.label }}{% if b.space and b.kind == 'occupier' %} ({{ b.space.name }}){% endif %}</td><td class="govuk-table__cell">{{ b.area|floatformat:0|default:"–" }}</td></tr>{% endfor %}{% endfor %}</tbody>
-</table>
-{% else %}
-<div class="govuk-inset-text">{% translate "No floors, rooms or occupiers recorded for this building yet." %}</div>
-{% endif %}
+{% include "space/_stacking.html" %}
 
 {% if holdings %}
 <h2 class="govuk-heading-m">{% translate "Occupiers" %}</h2>

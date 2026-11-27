@@ -55,6 +55,16 @@ class RoleRequiredMiddleware:
         user = getattr(request, "user", None)
         if (user is not None and user.is_authenticated and not has_role(user)
                 and not request.path.startswith(self.OPEN_PREFIXES)):
+            from apps.space import liaison
+
+            # Occupier contacts (departmental property liaisons) have no role: they get their own pages only.
+            if liaison.is_contact(user):
+                if request.path == "/":
+                    from django.shortcuts import redirect
+
+                    return redirect("occupier:home")
+                if request.path.startswith(liaison.PATHS):
+                    return self.get_response(request)
             return render(request, "core/no_access.html", status=403)
         return self.get_response(request)
 

@@ -57,6 +57,17 @@
           {% csrf_token %}<button type="submit">{% translate "Sign out" %}</button>
         </form>
       </nav>
+      {% elif user.is_authenticated and occupier_contact %}
+      <nav class="phaema-header__nav" aria-label="{% translate 'Main menu' %}">
+        <a href="{% url 'occupier:home' %}">{% translate "Your buildings" %}</a>
+        <a href="{% url 'help:page' 'occupier-contacts' %}">{% translate "Help" %}</a>
+        <span class="phaema-header__user">{{ user.get_full_name|default:user.get_username }}</span>
+        <a href="{% url 'change-password' %}">{% translate "Change password" %}</a>
+        <a href="{% url 'two-step' %}">{% translate "Two-step sign-in" %}</a>
+        <form method="post" action="{% url 'logout' %}" class="phaema-header__logout">
+          {% csrf_token %}<button type="submit">{% translate "Sign out" %}</button>
+        </form>
+      </nav>
       {% elif user.is_authenticated %}
       <form method="post" action="{% url 'logout' %}" class="phaema-header__logout phaema-header__nav">{% csrf_token %}<button type="submit">{% translate "Sign out" %}</button></form>
       {% endif %}

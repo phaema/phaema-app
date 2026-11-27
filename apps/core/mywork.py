@@ -161,6 +161,14 @@ def build(user, today=None, viewer=None):
         now.append(Item(None, _("Approve"), "cases", f"{c.display_reference} {c.title}", c.get_absolute_url(),
                         _("Waiting for your approval")))
 
+    # Headcounts entered by departments for buildings this person manages, waiting to be checked.
+    from apps.space.liaison_views import to_check
+
+    for count in to_check(user)[:20]:
+        now.append(Item(None, _("Headcount from a department to check"), "estate",
+                        f"{count.building.reference} {count.occupier.name}: {count.people}",
+                        reverse("space:headcount-check", args=[count.pk]), count.building.name))
+
     # API tokens the person made that end soon, so the other system does not stop without warning.
     if is_administrator(user):
         from .models import ApiToken

@@ -54,6 +54,7 @@ def phaema(request):
         "demo_site": settings.PHAEMA_DEMO_SITE,
         "demo_reset_hours": settings.PHAEMA_DEMO_RESET_HOURS,
         "access_ends_soon": _ends_soon(user),
+        "occupier_contact": _lazy_contact(user) if role is None else False,
     }
 
 
@@ -69,6 +70,18 @@ def _ends_soon(user):
     if end and date.today() <= end <= date.today() + timedelta(days=WARN_DAYS):
         return end
     return None
+
+
+class _lazy_contact:
+    """True if this person is an occupier contact (no role, named on an occupier); worked out when a template asks."""
+
+    def __init__(self, user):
+        self.user = user
+
+    def __bool__(self):
+        from apps.space import liaison
+
+        return bool(self.user is not None and liaison.is_contact(self.user))
 
 
 class _lazy_cover:

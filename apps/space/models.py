@@ -59,6 +59,10 @@ class Occupier(TimeStampedModel):
         help_text=_("The person in this department who deals with the estates team about its buildings."))
     liaison_name = models.CharField(
         _("property liaison (if not a PHAEMA user)"), max_length=200, blank=True)
+    readers = models.ManyToManyField(
+        settings.AUTH_USER_MODEL, verbose_name=_("can see, read only"), blank=True, related_name="reads_occupiers",
+        help_text=_("People such as the head of service who may see this occupier's buildings and figures in "
+                    "PHAEMA without changing anything."))
     active = models.BooleanField(_("active"), default=True)
 
     class Meta:
@@ -86,9 +90,10 @@ class Occupier(TimeStampedModel):
 
     def family(self):
         """This occupier and every occupier below it."""
-        found, frontier = [self], [self]
+        found, frontier, seen = [self], [self], {self.pk}
         while frontier:
-            frontier = list(Occupier.objects.filter(parent__in=frontier))
+            frontier = [o for o in Occupier.objects.filter(parent__in=frontier) if o.pk not in seen]
+            seen.update(o.pk for o in frontier)  # each once, so a loop in bad data cannot run forever
             found.extend(frontier)
         return found
 
@@ -249,6 +254,12 @@ class Headcount(TimeStampedModel):
     fte = models.DecimalField(_("full-time equivalent"), max_digits=8, decimal_places=1, null=True, blank=True)
     source = models.CharField(_("source"), max_length=200, blank=True,
                               help_text=_("Where the figure comes from, for example \"HR establishment list\"."))
+    from_department = models.BooleanField(
+        _("entered by the department"), default=False,
+        help_text=_("Entered by the occupier's property liaison; the managing surveyor checks it."))
+    checked_by = models.ForeignKey(settings.AUTH_USER_MODEL, verbose_name=_("checked by"), null=True, blank=True,
+                                   on_delete=models.SET_NULL, related_name="+")
+    checked_on = models.DateField(_("checked on"), null=True, blank=True)
 
     class Meta:
         ordering = ["building", "occupier", "-counted_on"]

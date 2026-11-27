@@ -25,7 +25,9 @@ buildings with. Administrators keep this list.
 - **Outside organisations**: NHS, police, fire and rescue, other public bodies, charities. They are shown with a
   blue tag and striped in the stacking plan. Sharing buildings with them is the **One Public Estate** picture.
 - Each occupier can have a **head of service**, a **property liaison** (the person in the department who deals with
-  estates about its buildings) and a **cost centre**, ready for costs.
+  estates about its buildings) and a **cost centre**, ready for costs. A liaison with a PHAEMA account, and anyone
+  named under **Can see, read only**, can sign in to see the department's buildings; the liaison can record
+  headcount. See [Your buildings (for departments)](occupier-contacts.md).
 
 An occupier in use cannot be deleted: untick **Active** instead, so its history stays.
 

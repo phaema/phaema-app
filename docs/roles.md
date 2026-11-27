@@ -45,7 +45,7 @@ PHAEMA has three roles. Give each person one role in **Manage data > Users** (ti
 Notes:
 
 - "Manage data" (the data-entry screens) appears for Administrators and Surveyors. Records a surveyor cannot change open read-only.
-- Someone who signs in without a role sees a "no access yet" page until an administrator gives them one.
+- Someone who signs in without a role sees a "no access yet" page until an administrator gives them one. The exception is an **occupier contact**: someone named as a department's property liaison, or under "Can see, read only", in Manage data, Occupiers, while the space module is on. They see only **Your buildings** for their department; the liaison can record headcount. See the help page "Your buildings (for departments)".
 - The person who installs PHAEMA creates a **superuser** with `./phaema.sh admin`. Superusers can do everything, including creating other superusers. Keep superuser accounts to a minimum and use the Administrators role day to day.
 - Every change, whoever makes it, is recorded in the change log.
 
