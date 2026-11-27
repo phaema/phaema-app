@@ -1,0 +1,21 @@
+{% extends "portal/base.html" %}{% load i18n %}
+{% block title %}{% translate "Change contact details" %}{% endblock %}
+{% block content %}
+<a class="govuk-back-link" href="{% url 'portal:agreement' lease.pk %}">{{ lease.reference }}</a>
+<div class="govuk-grid-row"><div class="govuk-grid-column-two-thirds">
+{% include "portal/_errors.html" %}
+<h1 class="govuk-heading-l">{% translate "Change contact details for demands" %}</h1>
+<p class="govuk-body">{% translate "Change what is different. The estates team checks every change before it is made." %}</p>
+<form method="post" novalidate>{% csrf_token %}
+  {% for field in form %}
+  <div class="govuk-form-group{% if field.errors %} govuk-form-group--error{% endif %}">
+    <label class="govuk-label" for="{{ field.id_for_label }}">{{ field.label|capfirst }}</label>
+    {% for e in field.errors %}<p class="govuk-error-message">{{ e }}</p>{% endfor %}
+    {% if field.name == "address" or field.name == "note" %}<textarea class="govuk-textarea" id="{{ field.id_for_label }}" name="{{ field.name }}" rows="4">{{ field.value|default:"" }}</textarea>
+    {% else %}<input class="govuk-input" id="{{ field.id_for_label }}" name="{{ field.name }}" type="{% if field.name == 'email' %}email{% else %}text{% endif %}" value="{{ field.value|default:'' }}">{% endif %}
+  </div>
+  {% endfor %}
+  <button class="govuk-button" data-module="govuk-button">{% translate "Send the change" %}</button>
+</form>
+</div></div>
+{% endblock %}

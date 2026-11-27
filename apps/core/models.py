@@ -92,6 +92,14 @@ class ModuleSettings(models.Model):
     space_costing_enabled = models.BooleanField(
         _("space and costing: show costs"), default=False,
         help_text=_("Also share each building's costs between its occupiers. Needs space and costing on."))
+    tenant_portal_enabled = models.BooleanField(
+        _("tenant portal"), default=False,
+        help_text=_("Let tenants the estates team invites sign in at /tenant/ to see their account, demands, key dates "
+                    "and shared documents. Sign-in codes are emailed through GOV.UK Notify."))
+    portal_welcome = models.TextField(
+        _("tenant portal welcome"), blank=True,
+        help_text=_("Shown to tenants on their first page in the portal, for example how to contact the estates team "
+                    "and how quickly you reply."))
     open_data_enabled = models.BooleanField(
         _("publish open data"), default=False,
         help_text=_("Publish the Transparency Code land and assets list and the available property list at "

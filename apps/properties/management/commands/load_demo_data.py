@@ -377,6 +377,9 @@ class Command(BaseCommand):
         from apps.leases import demo_commercial
 
         demo_commercial.load()
+        from apps.portal import demo as portal_demo
+
+        portal_demo.load()
 
         modules = ModuleSettings.load()
         if not modules.organisation_name:
@@ -497,6 +500,9 @@ class Command(BaseCommand):
         from apps.servicecharges import demo as service_demo
 
         maintenance_demo.remove()
+        from apps.portal import demo as portal_demo
+
+        portal_demo.remove()
         from apps.compliance import demo as compliance_demo
 
         compliance_demo.remove()

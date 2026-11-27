@@ -74,6 +74,7 @@ INSTALLED_APPS = [
     "apps.projects",
     "apps.strategy",
     "apps.space",
+    "apps.portal",
 ]
 
 MIDDLEWARE = [
@@ -257,6 +258,9 @@ DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL", default="PHAEMA <phaema@localhost
 # The template is one the council creates in Notify with the subject ((subject)) and the body ((body)).
 PHAEMA_NOTIFY_API_KEY = env("PHAEMA_NOTIFY_API_KEY", default="")
 PHAEMA_NOTIFY_TEMPLATE_ID = env("PHAEMA_NOTIFY_TEMPLATE_ID", default="")
+# Test sites only: show tenant portal sign-in codes on screen when Notify is not set up, so the portal can be tried.
+PHAEMA_PORTAL_SHOW_CODES = env.bool("PHAEMA_PORTAL_SHOW_CODES", default=False)
+PHAEMA_PORTAL_IDLE_MINUTES = env.int("PHAEMA_PORTAL_IDLE_MINUTES", default=30)
 # The web address of this PHAEMA, used for links in emails, e.g. https://phaema.example.gov.uk
 PHAEMA_BASE_URL = env("PHAEMA_BASE_URL", default="http://localhost:8000")
 

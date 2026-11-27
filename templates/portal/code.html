@@ -1,0 +1,19 @@
+{% extends "portal/base.html" %}{% load i18n %}
+{% block title %}{% translate "Enter your code" %}{% endblock %}
+{% block content %}
+<div class="govuk-grid-row"><div class="govuk-grid-column-two-thirds">
+{% include "portal/_errors.html" %}
+<h1 class="govuk-heading-l">{% translate "Check your email" %}</h1>
+<p class="govuk-body">{% blocktranslate %}If that address has an account, we have sent it a 6-digit code. The code works once, for {{ minutes }} minutes.{% endblocktranslate %}</p>
+{% if shown_code %}<div class="govuk-inset-text">{% blocktranslate %}Test site: emails are not sent, so your code is {{ shown_code }}.{% endblocktranslate %}</div>{% endif %}
+<form method="post" novalidate>{% csrf_token %}
+  <div class="govuk-form-group{% if form.code.errors %} govuk-form-group--error{% endif %}">
+    <label class="govuk-label" for="id_code">{% translate "Sign-in code" %}</label>
+    {% for e in form.code.errors %}<p class="govuk-error-message">{{ e }}</p>{% endfor %}
+    <input class="govuk-input govuk-input--width-5" id="id_code" name="code" type="text" inputmode="numeric" autocomplete="one-time-code" spellcheck="false">
+  </div>
+  <button class="govuk-button" data-module="govuk-button">{% translate "Sign in" %}</button>
+</form>
+<p class="govuk-body"><a class="govuk-link" href="{% url 'portal:sign-in' %}">{% translate "Ask for a new code" %}</a></p>
+</div></div>
+{% endblock %}

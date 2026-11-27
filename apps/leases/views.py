@@ -353,6 +353,29 @@ def lease_files(request, pk):
     return redirect(lease.get_absolute_url() + "#documents")
 
 
+@require_POST
+@login_required
+def document_share(request, pk):
+    """Share a lease document with the tenant in the tenant portal, or stop sharing it."""
+    from django.contrib import messages
+    from django.core.exceptions import PermissionDenied
+    from django.shortcuts import get_object_or_404, redirect
+    from django.utils.translation import gettext as _
+
+    from apps.core.roles import can_edit
+
+    from .models import LeaseDocument
+
+    doc = get_object_or_404(LeaseDocument.objects.select_related("lease"), pk=pk)
+    if not can_edit(request.user, doc.lease):
+        raise PermissionDenied
+    doc.shared_with_tenant = request.POST.get("share") == "1"
+    doc.save(update_fields=["shared_with_tenant", "updated_at"])
+    messages.success(request, _("Shared with the tenant.") if doc.shared_with_tenant
+                     else _("No longer shared with the tenant."))
+    return redirect(doc.lease.get_absolute_url() + "#documents")
+
+
 @login_required
 def rents_payable(request):
     """Rents the council pays for property it holds as tenant, with the payments due in the next twelve months."""

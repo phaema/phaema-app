@@ -1,0 +1,6 @@
+{% extends "portal/base.html" %}{% load i18n %}
+{% block title %}{% translate "Signed out" %}{% endblock %}
+{% block content %}
+<h1 class="govuk-heading-l">{% translate "You have signed out" %}</h1>
+<p class="govuk-body"><a class="govuk-link" href="{% url 'portal:sign-in' %}">{% translate "Sign in again" %}</a></p>
+{% endblock %}
