@@ -88,8 +88,9 @@ def test_details_are_checked_and_tidied(estate):
     assert dict(hall.designation_rows())["Listed building"] == "Grade II"
     assert "C: poor" in hall.condition_text() and "20 May 2024" in hall.condition_text()
 
-    for field, value in (("condition_surveyed_on", TODAY + timedelta(days=1)),
-                         ("acquired_on", TODAY + timedelta(days=1)), ("built_year", TODAY.year + 9)):
+    today = date.today()  # worked out now, not when the file was loaded, so a run past midnight still works
+    for field, value in (("condition_surveyed_on", today + timedelta(days=1)),
+                         ("acquired_on", today + timedelta(days=1)), ("built_year", today.year + 9)):
         broken = Property.objects.get(pk=hall.pk)
         setattr(broken, field, value)
         with pytest.raises(ValidationError) as caught:
