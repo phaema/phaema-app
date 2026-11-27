@@ -9,6 +9,7 @@ urlpatterns = [
     path("", views.home, name="home"),
     path("runs/new/", views.run_new, name="run-new"),
     path("runs/<int:pk>/", views.run_detail, name="run"),
+    path("runs/<int:pk>/email/", views.run_email, name="run-email"),
     path("accounts/<int:lease_pk>/", views.account, name="account"),
     path("charges/<int:charge_pk>/credit/", views.credit, name="credit"),
     path("arrears/", views.arrears, name="arrears"),

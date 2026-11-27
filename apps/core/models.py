@@ -42,6 +42,15 @@ class ModuleSettings(models.Model):
                                       help_text=_("Also the address for service of notices on the council."))
     letter_phone = models.CharField(_("phone, for letters"), max_length=40, blank=True)
     letter_email = models.EmailField(_("email, for letters"), blank=True)
+    email_demands = models.BooleanField(
+        _("email demands"), default=False,
+        help_text=_("Offer to email each demand run to tenants through GOV.UK Notify. Emails are only sent once "
+                    "IT has added the council's Notify key; until then they are recorded but not sent."))
+    payment_link = models.CharField(
+        _("payment link"), max_length=500, blank=True,
+        help_text=_("The address of the council's online payment page, used for \"Pay now\" in demand emails. "
+                    "You can include {reference}, {amount} and {account}, which are filled in for each tenant, "
+                    "for example https://pay.example.gov.uk/rent?ref={reference}&amount={amount}"))
     website = models.CharField(_("website"), max_length=200, blank=True)
     rent_ledger_enabled = models.BooleanField(
         _("rent ledger"), default=False,
@@ -513,3 +522,37 @@ class ApiToken(models.Model):
 
     def allows(self, resource):
         return not self.resources or resource in self.resources
+
+
+class OutgoingEmail(models.Model):
+    """An email PHAEMA has sent, or recorded for sending, through GOV.UK Notify: kept so the estates team can see
+    what each tenant was sent, when, and whether it went."""
+
+    class Status(models.TextChoices):
+        RECORDED = "recorded", _("Recorded, not sent (no Notify key)")
+        SENT = "sent", _("Sent to GOV.UK Notify")
+        FAILED = "failed", _("Not sent: Notify refused it")
+
+    kind = models.CharField(_("kind"), max_length=30)
+    to = models.EmailField(_("to"))
+    subject = models.CharField(_("subject"), max_length=250)
+    body = models.TextField(_("body"))
+    lease = models.ForeignKey("leases.Lease", verbose_name=_("agreement"), null=True, blank=True,
+                              on_delete=models.SET_NULL, related_name="emails")
+    demand_run = models.ForeignKey("ledger.DemandRun", verbose_name=_("demand run"), null=True, blank=True,
+                                   on_delete=models.SET_NULL, related_name="emails")
+    status = models.CharField(_("status"), max_length=10, choices=Status.choices, default=Status.RECORDED)
+    notify_id = models.CharField(_("Notify reference"), max_length=60, blank=True)
+    error = models.TextField(_("error"), blank=True)
+    created_at = models.DateTimeField(_("made"), auto_now_add=True)
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, verbose_name=_("by"), null=True, blank=True,
+                                   on_delete=models.SET_NULL, related_name="+")
+    sent_at = models.DateTimeField(_("sent"), null=True, blank=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+        verbose_name = _("email to a tenant")
+        verbose_name_plural = _("emails to tenants")
+
+    def __str__(self):
+        return f"{self.subject} to {self.to}"

@@ -12,12 +12,13 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.utils.translation import gettext as _
 from django.views.decorators.http import require_POST
 
+from apps.core import notify
 from apps.core.access import can_do_finance, finance_only, lease_in_patch, module_view, patch_leases, require_full
 from apps.core.models import ModuleSettings
 from apps.leases.models import Lease
 from apps.reports.export import csv_response, xlsx_response
 
-from . import billing, finance
+from . import billing, emails, finance
 from .models import Charge, DemandRun, ExportBatch, Receipt
 
 Col = namedtuple("Col", "label type")
@@ -119,8 +120,48 @@ def run_detail(request, pk):
         return xlsx_response(str(run), CHARGE_COLUMNS, _charge_rows(charges), totals=True)
     if fmt == "csv":
         return csv_response(str(run), CHARGE_COLUMNS, _charge_rows(charges))
+    settings = ModuleSettings.load()
+    sent = run.emails.all()
     return render(request, "ledger/run_detail.html", {
         "run": run, "charges": charges, "totals": charges.aggregate(net=Sum("net"), vat=Sum("vat"), gross=Sum("gross")),
+        "email_demands": settings.email_demands, "emails_sent": sent.count(),
+        "emails_failed": sent.filter(status="failed").count(),
+    })
+
+
+@finance_only
+@ledger_view
+def run_email(request, pk):
+    """Check, then email, the demands in a run: one email per agreement, through GOV.UK Notify."""
+    require_full(request)
+    run = get_object_or_404(DemandRun, pk=pk)
+    settings = ModuleSettings.load()
+    if not settings.email_demands:
+        raise PermissionDenied
+    if request.method == "POST":
+        made = emails.send_run(run, request.user, again="again" in request.POST)
+        if not made:
+            messages.info(request, _("There were no demands left to email."))
+        elif notify.configured():
+            failed = sum(1 for e in made if e.status == "failed")
+            messages.success(request, _("%(n)s demands sent to GOV.UK Notify.") % {"n": len(made) - failed})
+            if failed:
+                messages.warning(request, _("%(n)s could not be sent. You can try them again below.") % {"n": failed})
+        else:
+            messages.info(request, _("%(n)s demand emails recorded. They have not been sent, because GOV.UK Notify is "
+                                     "not set up yet.") % {"n": len(made)})
+        return redirect("ledger:run-email", pk=run.pk)
+    items = emails.demands(run)
+    preview = None
+    ready = [d for d in items if d.to and not d.already]
+    if ready:
+        subject, body = emails.compose(ready[0], settings)
+        preview = {"to": ready[0].to, "subject": subject, "body": body}
+    return render(request, "ledger/run_email.html", {
+        "run": run, "items": items, "ready": len(ready), "preview": preview, "configured": notify.configured(),
+        "no_address": sum(1 for d in items if not d.to),
+        "failed": sum(1 for d in items if d.already and d.already.status == "failed"),
+        "settings": settings,
     })
 
 
