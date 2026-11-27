@@ -1,0 +1,36 @@
+{% extends "base.html" %}{% load i18n %}
+{% block title %}{% translate "Repair reports" %}{% endblock %}
+{% block help_page %}repair-reports{% endblock %}
+{% block content %}
+<h1 class="govuk-heading-l">{% translate "Repair reports" %}</h1>
+{% include "maintenance/_nav.html" %}
+<p class="govuk-body">{% translate "Repairs reported by tenants in the tenant portal and by council departments. Decide whether each becomes a job." %}</p>
+<nav class="phaema-subnav govuk-!-margin-bottom-4" aria-label="{% translate 'Filter by status' %}">
+{% for value, label in statuses %}<a class="govuk-link" href="?status={{ value }}"{% if status == value %} aria-current="page"{% endif %}>{{ label }}</a>{% endfor %}
+<a class="govuk-link" href="?status=all"{% if status == "all" %} aria-current="page"{% endif %}>{% translate "All" %}</a>
+</nav>
+{% if reports %}
+<table class="govuk-table">
+  <thead class="govuk-table__head"><tr class="govuk-table__row">
+    <th scope="col" class="govuk-table__header">{% translate "Report" %}</th>
+    <th scope="col" class="govuk-table__header">{% translate "Property" %}</th>
+    <th scope="col" class="govuk-table__header">{% translate "Where" %}</th>
+    <th scope="col" class="govuk-table__header">{% translate "From" %}</th>
+    <th scope="col" class="govuk-table__header">{% translate "Reported" %}</th>
+    <th scope="col" class="govuk-table__header">{% translate "Status" %}</th>
+  </tr></thead>
+  <tbody class="govuk-table__body">
+  {% for r in reports %}
+  <tr class="govuk-table__row">
+    <td class="govuk-table__cell"><a class="govuk-link" href="{% url 'maintenance:report' r.pk %}">{{ r.reference }}</a>{% if r.danger %} <strong class="govuk-tag govuk-tag--red">{% translate "Risk" %}</strong>{% endif %}</td>
+    <td class="govuk-table__cell">{{ r.property.reference }} {{ r.property.name }}</td>
+    <td class="govuk-table__cell">{{ r.location }}</td>
+    <td class="govuk-table__cell">{{ r.reporter_name }}<br><span class="govuk-body-s">{% if r.lease %}{{ r.lease.reference }}{% elif r.occupier %}{{ r.occupier.name }}{% endif %} ({{ r.get_source_display }})</span></td>
+    <td class="govuk-table__cell">{{ r.created_at|date:"j M Y H:i" }}</td>
+    <td class="govuk-table__cell">{{ r.get_status_display }}{% if r.job %}<br><a class="govuk-link" href="{{ r.job.get_absolute_url }}">{{ r.job.reference }}</a>{% endif %}</td>
+  </tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% else %}<p class="govuk-body">{% translate "No repair reports here." %}</p>{% endif %}
+{% endblock %}

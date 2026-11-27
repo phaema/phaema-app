@@ -53,6 +53,11 @@
 <p class="govuk-body-s">{% translate "The figure is used at once. Your estates contact checks it and may ask you about it." %}</p>
 {% endif %}
 
+{% if repairs is not None %}
+<h2 class="govuk-heading-m">{% translate "Repairs" %}</h2>
+{% if can_report %}<p class="govuk-body"><a class="govuk-button govuk-button--secondary" href="{% url 'occupier:repair' object.pk %}">{% translate "Report a repair" %}</a></p>{% endif %}
+{% include "maintenance/_repair_list.html" %}
+{% endif %}
 {% if history %}
 <h2 class="govuk-heading-m">{% translate "Earlier headcounts" %}</h2>
 <ul class="govuk-list">{% for c in history %}<li>{{ c.counted_on|date:"j M Y" }}: {{ c.occupier.name }}, {{ c.people }}{% if c.fte %} ({{ c.fte }} FTE){% endif %}{% if c.from_department and not c.checked_on %} <strong class="govuk-tag govuk-tag--yellow">{% translate "Waiting to be checked" %}</strong>{% endif %}</li>{% endfor %}</ul>

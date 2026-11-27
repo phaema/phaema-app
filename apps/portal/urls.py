@@ -12,5 +12,6 @@ urlpatterns = [
     path("sign-out/", views.sign_out, name="sign-out"),
     path("agreements/<int:pk>/", views.agreement, name="agreement"),
     path("agreements/<int:pk>/contact/", views.contact, name="contact"),
+    path("agreements/<int:pk>/repair/", views.repair, name="repair"),
     path("documents/<int:pk>/", views.document, name="document"),
 ]

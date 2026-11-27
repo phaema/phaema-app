@@ -1,0 +1,15 @@
+{% extends "base.html" %}{% load i18n %}
+{% block title %}{% translate "Report a repair" %}{% endblock %}
+{% block help_page %}occupier-contacts{% endblock %}
+{% block breadcrumbs %}<div class="govuk-breadcrumbs"><ol class="govuk-breadcrumbs__list">
+  <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="{% url 'occupier:home' %}">{% translate "Your buildings" %}</a></li>
+  <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="{% url 'occupier:building' object.pk %}">{{ object.name }}</a></li></ol></div>{% endblock %}
+{% block content %}
+<div class="govuk-grid-row"><div class="govuk-grid-column-two-thirds">
+{% include "core/_form_errors.html" %}
+<span class="govuk-caption-l">{{ object.name }}</span>
+<h1 class="govuk-heading-l">{% translate "Report a repair" %}</h1>
+<p class="govuk-body">{% translate "The estates team looks at every report and decides what happens. You can follow it on the building page." %}</p>
+{% include "maintenance/_repair_form.html" %}
+</div></div>
+{% endblock %}

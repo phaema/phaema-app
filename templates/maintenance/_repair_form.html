@@ -1,0 +1,38 @@
+{% load i18n %}{# The repair report form, shared by the tenant portal and council departments' pages. #}
+<form method="post" enctype="multipart/form-data" novalidate>{% csrf_token %}
+  {% if occupiers|length > 1 %}<div class="govuk-form-group"><label class="govuk-label" for="id_occupier">{% translate "Department" %}</label><select class="govuk-select" id="id_occupier" name="occupier">{% for o in occupiers %}<option value="{{ o.pk }}">{{ o.name }}</option>{% endfor %}</select></div>{% endif %}
+  {% if form.single %}<input type="hidden" name="property" value="{{ form.single.pk }}"><p class="govuk-body"><strong>{{ form.single.name }}</strong></p>
+  {% else %}<div class="govuk-form-group{% if form.property.errors %} govuk-form-group--error{% endif %}">
+    <label class="govuk-label" for="id_property">{{ form.property.label }}</label>
+    {% for e in form.property.errors %}<p class="govuk-error-message">{{ e }}</p>{% endfor %}
+    <select class="govuk-select" id="id_property" name="property"><option value=""></option>{% for value, label in form.property.field.choices %}{% if value %}<option value="{{ value }}"{% if form.property.value|stringformat:"s" == value|stringformat:"s" %} selected{% endif %}>{{ label }}</option>{% endif %}{% endfor %}</select>
+  </div>{% endif %}
+  <div class="govuk-form-group{% if form.location.errors %} govuk-form-group--error{% endif %}">
+    <label class="govuk-label" for="id_location">{{ form.location.label }}</label>
+    <div class="govuk-hint" id="location-hint">{{ form.location.help_text }}</div>
+    {% for e in form.location.errors %}<p class="govuk-error-message">{{ e }}</p>{% endfor %}
+    <input class="govuk-input" id="id_location" name="location" maxlength="200" aria-describedby="location-hint" value="{{ form.location.value|default:'' }}">
+  </div>
+  <div class="govuk-form-group{% if form.description.errors %} govuk-form-group--error{% endif %}">
+    <label class="govuk-label" for="id_description">{{ form.description.label }}</label>
+    <div class="govuk-hint" id="description-hint">{{ form.description.help_text }}</div>
+    {% for e in form.description.errors %}<p class="govuk-error-message">{{ e }}</p>{% endfor %}
+    <textarea class="govuk-textarea" id="id_description" name="description" rows="5" aria-describedby="description-hint">{{ form.description.value|default:'' }}</textarea>
+  </div>
+  <div class="govuk-form-group"><div class="govuk-checkboxes" data-module="govuk-checkboxes"><div class="govuk-checkboxes__item">
+    <input class="govuk-checkboxes__input" id="id_danger" name="danger" type="checkbox"{% if form.danger.value %} checked{% endif %}>
+    <label class="govuk-label govuk-checkboxes__label" for="id_danger">{{ form.danger.label }}</label>
+  </div></div>
+  <div class="govuk-inset-text">{% translate "In an emergency, such as fire, flooding or a gas leak, phone the emergency services or the council's out of hours number now. Do not wait for a reply here." %}</div></div>
+  <div class="govuk-form-group">
+    <label class="govuk-label" for="id_contact_phone">{{ form.contact_phone.label }}</label>
+    <input class="govuk-input govuk-input--width-20" id="id_contact_phone" name="contact_phone" type="tel" autocomplete="tel" value="{{ form.contact_phone.value|default:'' }}">
+  </div>
+  <div class="govuk-form-group{% if form.photos.errors %} govuk-form-group--error{% endif %}">
+    <label class="govuk-label" for="id_photos">{{ form.photos.label }}</label>
+    <div class="govuk-hint" id="photos-hint">{{ form.photos.help_text }}</div>
+    {% for e in form.photos.errors %}<p class="govuk-error-message">{{ e }}</p>{% endfor %}
+    <div class="govuk-drop-zone" data-module="govuk-file-upload" data-i18n.choose-files-button="{% translate 'Choose files' %}" data-i18n.drop-instruction="{% translate 'or drop files here' %}" data-i18n.no-file-chosen="{% translate 'No files chosen' %}"><input class="govuk-file-upload" id="id_photos" name="photos" type="file" multiple accept="image/jpeg,image/png" aria-describedby="photos-hint"></div>
+  </div>
+  <button class="govuk-button" data-module="govuk-button" data-prevent-double-click="true">{% translate "Send the report" %}</button>
+</form>

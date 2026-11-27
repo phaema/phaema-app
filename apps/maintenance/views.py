@@ -504,3 +504,69 @@ def contracts(request):
     return render(request, "maintenance/contracts.html", {
         "section": "contracts", "contracts": rows, "today": today, "soon": today + timedelta(days=183),
         "place_filters": places.filters(request.GET)})
+
+
+# ------------------------------------------------------------------ repair reports (triage queue)
+
+@maintenance_view
+def reports(request):
+    """Repairs reported by tenants and council departments, waiting for estates to decide what happens."""
+    from .models import RepairReport
+
+    status = request.GET.get("status", "new")
+    qs = RepairReport.objects.select_related("property", "lease", "occupier", "job")
+    if status in RepairReport.Status.values:
+        qs = qs.filter(status=status)
+    if status != "new":
+        qs = qs.order_by("-created_at")
+    return render(request, "maintenance/reports.html", {
+        "reports": qs[:300], "status": status, "statuses": RepairReport.Status.choices, "section": "reports"})
+
+
+@maintenance_view
+def report_detail(request, pk):
+    from . import reports as triage
+    from .models import RepairReport
+
+    report = get_object_or_404(RepairReport.objects.select_related("property", "lease", "occupier", "job",
+                                                                   "portal_account", "decided_by"), pk=pk)
+    can_decide = _can_raise(request.user) and report.status == RepairReport.Status.NEW
+    errors = []
+    if request.method == "POST":
+        if not can_decide:
+            raise PermissionDenied
+        action, reply = request.POST.get("action"), request.POST.get("reply", "").strip()[:2000]
+        if action == "job":
+            title = request.POST.get("title", "").strip()[:200]
+            category = request.POST.get("category", "")
+            priority = request.POST.get("priority", "")
+            if not title:
+                errors.append(_("Say what needs doing."))
+            if category not in Category.values or priority not in Job.Priority.values:
+                errors.append(_("Choose a category and priority."))
+            if not errors:
+                triage.raise_job(report, request.user, title, category, priority, reply)
+                messages.success(request, _("Job %(ref)s raised from the report.") % {"ref": report.job.reference})
+                return redirect(report.job)
+        elif action == "duplicate":
+            job = triage.open_jobs_at(report.property).filter(pk=request.POST.get("job") or 0).first()
+            if job is None:
+                errors.append(_("Choose the job it was already reported as."))
+            else:
+                triage.mark(report, request.user, RepairReport.Status.DUPLICATE, reply, job)
+                messages.success(request, _("Marked as already reported."))
+                return redirect("maintenance:reports")
+        elif action in ("tenant", "closed"):
+            if not reply:
+                errors.append(_("Write a reply explaining why, for the person who reported it."))
+            else:
+                triage.mark(report, request.user, action, reply)
+                messages.success(request, _("Report closed."))
+                return redirect("maintenance:reports")
+        else:
+            errors.append(_("Choose what to do."))
+    return render(request, "maintenance/report_detail.html", {
+        "report": report, "can_decide": can_decide, "errors": errors, "categories": Category.choices,
+        "priorities": Job.Priority.choices, "open_jobs": triage.open_jobs_at(report.property)[:20],
+        "suggested_priority": Job.Priority.URGENT if report.danger else Job.Priority.ROUTINE,
+        "section": "reports", "progress": report.progress()})

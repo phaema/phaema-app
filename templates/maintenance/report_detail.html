@@ -1,0 +1,46 @@
+{% extends "base.html" %}{% load i18n %}
+{% block title %}{{ report.reference }}{% endblock %}
+{% block help_page %}repair-reports{% endblock %}
+{% block content %}
+<a class="govuk-back-link" href="{% url 'maintenance:reports' %}">{% translate "Repair reports" %}</a>
+<span class="govuk-caption-l">{% translate "Repair report" %} {{ report.reference }}</span>
+<h1 class="govuk-heading-l">{{ report.location }}</h1>
+{% if errors %}<div class="govuk-error-summary" data-module="govuk-error-summary"><div role="alert"><h2 class="govuk-error-summary__title">{% translate "There is a problem" %}</h2><div class="govuk-error-summary__body"><ul class="govuk-list govuk-error-summary__list">{% for e in errors %}<li>{{ e }}</li>{% endfor %}</ul></div></div></div>{% endif %}
+{% if report.danger %}<div class="govuk-warning-text"><span class="govuk-warning-text__icon" aria-hidden="true">!</span><strong class="govuk-warning-text__text"><span class="govuk-visually-hidden">{% translate "Warning" %}</span>{% translate "Reported as a possible risk to people, or an unsafe or insecure building." %}</strong></div>{% endif %}
+<dl class="govuk-summary-list">
+  <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Property" %}</dt><dd class="govuk-summary-list__value"><a class="govuk-link" href="{{ report.property.get_absolute_url }}">{{ report.property.reference }} {{ report.property.name }}</a>{% if report.property.managing_surveyor %}<br><span class="govuk-body-s">{% translate "Managed by" %} {{ report.property.managing_surveyor.get_full_name|default:report.property.managing_surveyor.username }}</span>{% endif %}</dd></div>
+  <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "What is wrong" %}</dt><dd class="govuk-summary-list__value">{{ report.description|linebreaksbr }}</dd></div>
+  <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Reported by" %}</dt><dd class="govuk-summary-list__value">{{ report.reporter_name }}{% if report.contact_phone %}, {{ report.contact_phone }}{% endif %}<br><span class="govuk-body-s">{{ report.get_source_display }}{% if report.lease %}: <a class="govuk-link" href="{{ report.lease.get_absolute_url }}">{{ report.lease.reference }} {{ report.lease.counterparty.name }}</a>{% elif report.occupier %}: {{ report.occupier.name }}{% endif %}, {{ report.created_at|date:"j M Y H:i" }}</span></dd></div>
+  {% if report.lease %}<div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Repairing terms" %}</dt><dd class="govuk-summary-list__value">{{ report.lease.get_repairing_display|default:"–" }}</dd></div>{% endif %}
+  <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Status" %}</dt><dd class="govuk-summary-list__value">{{ report.get_status_display }}{% if report.job %}: <a class="govuk-link" href="{{ report.job.get_absolute_url }}">{{ report.job.reference }}</a>{% endif %}{% if report.decided_by %}<br><span class="govuk-body-s">{{ report.decided_by.get_full_name|default:report.decided_by.username }}, {{ report.decided_at|date:"j M Y" }}</span>{% endif %}</dd></div>
+  {% if report.reply %}<div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Reply" %}</dt><dd class="govuk-summary-list__value">{{ report.reply|linebreaksbr }}</dd></div>{% endif %}
+</dl>
+{% if report.photos.all %}
+<h2 class="govuk-heading-m">{% translate "Photos" %}</h2>
+<div class="phaema-photo-grid">{% for p in report.photos.all %}<a href="{{ p.image.url }}" target="_blank" rel="noopener"><img src="{{ p.image.url }}" alt="{% blocktranslate with n=forloop.counter %}Photo {{ n }} of the problem{% endblocktranslate %}" style="max-width: 300px; max-height: 300px; margin: 0 10px 10px 0"></a>{% endfor %}</div>
+{% endif %}
+
+{% if can_decide %}
+<h2 class="govuk-heading-m">{% translate "Decide" %}</h2>
+<form method="post" novalidate>{% csrf_token %}
+  <div class="govuk-form-group">
+    <label class="govuk-label govuk-label--s" for="reply">{% translate "Reply to the person who reported it" %}</label>
+    <div class="govuk-hint" id="reply-hint">{% translate "They see this in the portal or on their buildings page. Needed if you do not raise a job." %}</div>
+    <textarea class="govuk-textarea" id="reply" name="reply" rows="3" aria-describedby="reply-hint"></textarea>
+  </div>
+  <div class="govuk-radios" data-module="govuk-radios">
+    <div class="govuk-radios__item"><input class="govuk-radios__input" id="a-job" name="action" type="radio" value="job" data-aria-controls="c-job" checked><label class="govuk-label govuk-radios__label" for="a-job">{% translate "Raise a job" %}</label></div>
+    <div class="govuk-radios__conditional" id="c-job">
+      <div class="govuk-form-group"><label class="govuk-label" for="title">{% translate "What needs doing" %}</label><input class="govuk-input" id="title" name="title" maxlength="200" value="{{ report.location }}: {{ report.description|truncatechars:120 }}"></div>
+      <div class="govuk-form-group"><label class="govuk-label" for="category">{% translate "Category" %}</label><div class="govuk-hint">{% translate "Decides who pays, from the repairing terms." %}</div><select class="govuk-select" id="category" name="category">{% for v, l in categories %}<option value="{{ v }}"{% if v == "other" %} selected{% endif %}>{{ l }}</option>{% endfor %}</select></div>
+      <div class="govuk-form-group"><label class="govuk-label" for="priority">{% translate "Priority" %}</label><select class="govuk-select" id="priority" name="priority">{% for v, l in priorities %}<option value="{{ v }}"{% if v == suggested_priority %} selected{% endif %}>{{ l }}</option>{% endfor %}</select></div>
+    </div>
+    {% if open_jobs %}<div class="govuk-radios__item"><input class="govuk-radios__input" id="a-dup" name="action" type="radio" value="duplicate" data-aria-controls="c-dup"><label class="govuk-label govuk-radios__label" for="a-dup">{% translate "Already reported: link it to an open job" %}</label></div>
+    <div class="govuk-radios__conditional govuk-radios__conditional--hidden" id="c-dup"><div class="govuk-form-group"><label class="govuk-label" for="job">{% translate "Job" %}</label><select class="govuk-select" id="job" name="job">{% for j in open_jobs %}<option value="{{ j.pk }}">{{ j.reference }} {{ j.title|truncatechars:60 }}</option>{% endfor %}</select></div></div>{% endif %}
+    {% if report.lease %}<div class="govuk-radios__item"><input class="govuk-radios__input" id="a-tenant" name="action" type="radio" value="tenant"><label class="govuk-label govuk-radios__label" for="a-tenant">{% translate "The tenant's to repair under the agreement" %}</label></div>{% endif %}
+    <div class="govuk-radios__item"><input class="govuk-radios__input" id="a-close" name="action" type="radio" value="closed"><label class="govuk-label govuk-radios__label" for="a-close">{% translate "Close without a job" %}</label></div>
+  </div>
+  <button class="govuk-button govuk-!-margin-top-4" data-module="govuk-button">{% translate "Save the decision" %}</button>
+</form>
+{% endif %}
+{% endblock %}

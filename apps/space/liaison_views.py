@@ -49,11 +49,49 @@ def building(request, pk):
     recordable = [h.occupier for h in own if h.occupier.pk in editable]
     if request.method == "POST":
         return _record_headcount(request, prop, recordable)
-    return render(request, "space/liaison_building.html", {
+    from apps.maintenance.reports import enabled as repairs_on
+
+    ctx = {
         "object": prop, "rows": summary.stacking(prop), "holdings": own, "recordable": recordable,
         "surveyor": prop.managing_surveyor, "today": date.today(),
         "history": Headcount.objects.filter(building=prop, occupier_id__in=mine).select_related("occupier")[:10],
-    })
+    }
+    if repairs_on():
+        from apps.maintenance.models import RepairReport
+
+        ctx["can_report"] = bool(recordable)
+        ctx["repairs"] = list(RepairReport.objects.filter(occupier_id__in=mine, property__in=_building_parts(prop))
+                              .select_related("job").order_by("-created_at")[:20])
+    return render(request, "space/liaison_building.html", ctx)
+
+
+def _building_parts(prop):
+    from apps.properties.models import Property
+
+    return Property.objects.filter(pk__in=[prop.pk, *prop._descendant_ids()]).order_by("reference")
+
+
+@_contact_only
+def repair(request, pk):
+    """A property liaison reports a repair at one of their department's buildings, into the triage queue."""
+    from apps.maintenance import reports
+
+    if not reports.enabled():
+        raise Http404
+    prop = get_object_or_404(liaison.buildings_for(request.user), pk=pk)
+    mine = {o.pk for o in liaison.occupiers_for(request.user)}
+    editable = liaison.editable_for(request.user)
+    recordable = [h.occupier for h in summary.holdings(prop) if h.occupier.pk in mine and h.occupier.pk in editable]
+    if not recordable:
+        raise Http404
+    form = reports.RepairForm(request.POST or None, request.FILES or None, properties=_building_parts(prop))
+    if request.method == "POST" and form.is_valid():
+        occupier = next((o for o in recordable if str(o.pk) == request.POST.get("occupier")), recordable[0])
+        report = reports.submit(form, source="department", occupier=occupier, user=request.user,
+                                reporter_name=request.user.get_full_name() or request.user.username)
+        messages.success(request, _("Repair reported. Your reference is %(ref)s.") % {"ref": report.reference})
+        return redirect("occupier:building", pk=prop.pk)
+    return render(request, "space/liaison_repair.html", {"object": prop, "form": form, "occupiers": recordable})
 
 
 def _record_headcount(request, prop, recordable):

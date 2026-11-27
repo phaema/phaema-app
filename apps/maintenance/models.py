@@ -12,6 +12,7 @@ from django.utils.translation import gettext_lazy as _
 
 from apps.cases.models import validate_case_file
 from apps.core.dates import add_months, add_working_days
+from apps.core.files import process_image, validate_image
 from apps.core.models import TimeStampedModel
 from apps.leases.models import Lease
 from apps.properties.models import Property
@@ -343,3 +344,93 @@ class JobDocument(TimeStampedModel):
     def __str__(self):
         return self.description
 
+
+
+def _repair_photo_path(instance, filename):
+    return f"repairs/{instance.report_id}/{filename}"
+
+
+class RepairReport(TimeStampedModel):
+    """A repair reported by a tenant (in the tenant portal) or a council department (its property liaison). It waits
+    in the triage queue until estates decide whether it becomes a job."""
+
+    class Source(models.TextChoices):
+        TENANT = "tenant", _("Tenant portal")
+        DEPARTMENT = "department", _("Council department")
+
+    class Status(models.TextChoices):
+        NEW = "new", _("Waiting to be looked at")
+        JOB = "job", _("Job raised")
+        TENANT = "tenant", _("The tenant's to repair")
+        DUPLICATE = "duplicate", _("Already reported")
+        CLOSED = "closed", _("Closed without a job")
+
+    property = models.ForeignKey(Property, on_delete=models.PROTECT, related_name="repair_reports",
+                                 verbose_name=_("property"))
+    lease = models.ForeignKey(Lease, on_delete=models.SET_NULL, null=True, blank=True, related_name="repair_reports",
+                              verbose_name=_("agreement"))
+    occupier = models.ForeignKey("space.Occupier", on_delete=models.SET_NULL, null=True, blank=True,
+                                 related_name="repair_reports", verbose_name=_("department"))
+    source = models.CharField(_("reported through"), max_length=10, choices=Source.choices)
+    portal_account = models.ForeignKey("portal.PortalAccount", on_delete=models.SET_NULL, null=True, blank=True,
+                                       related_name="repair_reports", verbose_name=_("tenant portal account"))
+    reported_by_user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True,
+                                         related_name="+", verbose_name=_("reported by (PHAEMA user)"))
+    reporter_name = models.CharField(_("reported by"), max_length=150)
+    contact_phone = models.CharField(_("phone"), max_length=30, blank=True)
+    location = models.CharField(_("where"), max_length=200)
+    description = models.TextField(_("what is wrong"))
+    danger = models.BooleanField(_("someone may be at risk, or the building is unsafe or insecure"), default=False)
+    status = models.CharField(_("status"), max_length=10, choices=Status.choices, default=Status.NEW, db_index=True)
+    reply = models.TextField(_("reply to the person who reported it"), blank=True)
+    decided_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True,
+                                   related_name="+", verbose_name=_("decided by"))
+    decided_at = models.DateTimeField(_("decided"), null=True, blank=True)
+    job = models.ForeignKey(Job, on_delete=models.SET_NULL, null=True, blank=True, related_name="repair_reports",
+                            verbose_name=_("job"))
+
+    MAX_PHOTOS = 3
+
+    class Meta:
+        ordering = ["-danger", "created_at"]
+        verbose_name = _("repair report")
+        verbose_name_plural = _("repair reports")
+
+    def __str__(self):
+        return f"{self.reference} {self.location}"
+
+    @builtins.property
+    def reference(self):
+        return f"RR-{self.pk:05d}" if self.pk else "RR-new"
+
+    def get_absolute_url(self):
+        return reverse("maintenance:report", args=[self.pk])
+
+    def progress(self):
+        """What the person who reported it is told: (status, target date or None, who pays or "")."""
+        if self.status == self.Status.JOB and self.job_id:
+            job = self.job
+            label = {Job.Status.REPORTED: _("Job raised"), Job.Status.ORDERED: _("Work ordered"),
+                     Job.Status.COMPLETED: _("Work done"), Job.Status.CLOSED: _("Work done"),
+                     Job.Status.CANCELLED: _("Job cancelled")}.get(job.status, job.get_status_display())
+            return label, job.target_date if job.is_open else None, job.get_responsibility_display()
+        if self.status == self.Status.DUPLICATE and self.job_id:
+            return self.get_status_display(), self.job.target_date if self.job.is_open else None, \
+                self.job.get_responsibility_display()
+        if self.status == self.Status.TENANT:
+            return self.get_status_display(), None, Responsibility.TENANT.label
+        return self.get_status_display(), None, ""
+
+
+class RepairPhoto(models.Model):
+    report = models.ForeignKey(RepairReport, on_delete=models.CASCADE, related_name="photos")
+    image = models.ImageField(_("photo"), upload_to=_repair_photo_path, validators=[validate_image])
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["pk"]
+
+    def save(self, *args, **kwargs):
+        if self.image and not getattr(self.image, "_committed", True):
+            self.image = process_image(self.image)
+        super().save(*args, **kwargs)
