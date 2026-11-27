@@ -3,7 +3,7 @@ from django import forms
 from django.contrib import admin
 
 from .admin_users import PhaemaUserAdmin
-from .models import AccessArea, AccountRequest, ApiToken, AuditEntry, Cover, ModuleSettings, TextCopy
+from .models import AccessArea, AccountRequest, ApiToken, AuditEntry, Cover, ModuleSettings, OutgoingEmail, TextCopy
 
 
 @admin.register(ModuleSettings)
@@ -17,7 +17,7 @@ class ModuleSettingsAdmin(admin.ModelAdmin):
                                     "rent_income_code", "service_charge_income_code", "vat_code_standard",
                                     "vat_code_exempt"]}),
         ("Letters and notices", {"fields": ["department", "postal_address", "letter_phone", "letter_email",
-                                            "website"]}),
+                                            "website", "email_demands", "payment_link"]}),
         ("Maintenance", {"fields": ["order_approval_limit"]}),
         ("Maps", {"fields": ["os_maps_api_key", "os_map_style"]}),
         ("Floor areas", {"fields": ["area_basis"]}),
@@ -304,3 +304,24 @@ class ApiTokenAdmin(admin.ModelAdmin):
             token.save(update_fields=["revoked_at", "revoked_by"])
             count += 1
         self.message_user(request, f"{count} token{'s' if count != 1 else ''} cancelled. They stop working at once.")
+
+
+@admin.register(OutgoingEmail)
+class OutgoingEmailAdmin(admin.ModelAdmin):
+    """Every email to a tenant, kept as a record: it cannot be changed or deleted here."""
+    list_display = ["created_at", "kind", "to", "subject", "status"]
+    list_filter = ["status", "kind"]
+    search_fields = ["to", "subject", "lease__reference"]
+    date_hierarchy = "created_at"
+
+    def get_readonly_fields(self, request, obj=None):
+        return [f.name for f in self.model._meta.fields]
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return request.method in ("GET", "HEAD") and super().has_view_permission(request, obj)
+
+    def has_delete_permission(self, request, obj=None):
+        return False

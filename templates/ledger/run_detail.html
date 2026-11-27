@@ -7,5 +7,14 @@
 {% include "ledger/_nav.html" %}
 <p class="govuk-body">{% translate "Issued" %} {{ run.issue_date|date:"j M Y" }}{% if run.created_by %} {% translate "by" %} {{ run.created_by.get_full_name|default:run.created_by.username }}{% endif %}. {{ run.notes }}</p>
 <p class="govuk-body">{% translate "Download:" %} <a class="govuk-link" href="?format=xlsx">Excel</a> · <a class="govuk-link" href="?format=csv">CSV</a></p>
+{% if email_demands %}
+<div class="govuk-inset-text">
+  {% if emails_sent %}
+  {% blocktranslate count n=emails_sent %}{{ n }} demand email for this run.{% plural %}{{ n }} demand emails for this run.{% endblocktranslate %}
+  {% if emails_failed %}<strong>{% blocktranslate count n=emails_failed %}{{ n }} could not be sent.{% plural %}{{ n }} could not be sent.{% endblocktranslate %}</strong>{% endif %}
+  {% endif %}
+  <a class="govuk-link" href="{% url 'ledger:run-email' run.pk %}">{% if emails_sent %}{% translate "See the emails" %}{% else %}{% translate "Email these demands to tenants" %}{% endif %}</a>
+</div>
+{% endif %}
 {% include "ledger/_charge_table.html" %}
 {% endblock %}

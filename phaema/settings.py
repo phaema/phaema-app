@@ -252,6 +252,11 @@ if env("EMAIL_HOST", default=""):
 else:
     EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL", default="PHAEMA <phaema@localhost>")
+
+# GOV.UK Notify, for emails to tenants (demands). Without a key, emails are recorded in PHAEMA but not sent.
+# The template is one the council creates in Notify with the subject ((subject)) and the body ((body)).
+PHAEMA_NOTIFY_API_KEY = env("PHAEMA_NOTIFY_API_KEY", default="")
+PHAEMA_NOTIFY_TEMPLATE_ID = env("PHAEMA_NOTIFY_TEMPLATE_ID", default="")
 # The web address of this PHAEMA, used for links in emails, e.g. https://phaema.example.gov.uk
 PHAEMA_BASE_URL = env("PHAEMA_BASE_URL", default="http://localhost:8000")
 

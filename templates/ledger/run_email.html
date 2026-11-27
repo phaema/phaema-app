@@ -1,0 +1,65 @@
+{% extends "base.html" %}{% load i18n %}
+{% block title %}{% translate "Email demands" %} – {{ run }}{% endblock %}
+{% block help_page %}emailing-demands{% endblock %}
+{% block content %}
+<a class="govuk-back-link" href="{% url 'ledger:run' run.pk %}">{% translate "Back to the demand run" %}</a>
+<span class="govuk-caption-l">{% translate "Rent due" %} {{ run.due_from|date:"j M Y" }} – {{ run.due_to|date:"j M Y" }}</span>
+<h1 class="govuk-heading-l">{% translate "Email demands" %}</h1>
+
+{% if not configured %}
+<div class="govuk-warning-text">
+  <span class="govuk-warning-text__icon" aria-hidden="true">!</span>
+  <strong class="govuk-warning-text__text"><span class="govuk-visually-hidden">{% translate "Warning" %}</span>
+  {% translate "GOV.UK Notify is not set up yet, so emails will be recorded here but not sent. Ask IT to add the council's Notify key." %}</strong>
+</div>
+{% endif %}
+{% if not settings.payment_link %}
+<p class="govuk-body">{% translate "There is no payment link yet, so the emails will not include “Pay now”. An administrator can add one in the settings, under Letters and notices." %}</p>
+{% endif %}
+<p class="govuk-body">{% translate "Emails do not replace any notice the agreement says must be served by post or by hand." %}</p>
+
+{% if ready %}
+<form method="post" novalidate>{% csrf_token %}
+  <p class="govuk-body">{% blocktranslate count n=ready %}{{ n }} agreement is ready to email.{% plural %}{{ n }} agreements are ready to email.{% endblocktranslate %}</p>
+  <button class="govuk-button" data-module="govuk-button" data-prevent-double-click="true">{% if configured %}{% translate "Send the emails" %}{% else %}{% translate "Record the emails" %}{% endif %}</button>
+</form>
+{% endif %}
+{% if failed %}
+<form method="post" novalidate>{% csrf_token %}<input type="hidden" name="again" value="1">
+  <button class="govuk-button govuk-button--secondary" data-module="govuk-button" data-prevent-double-click="true">{% blocktranslate count n=failed %}Try the {{ n }} failed email again{% plural %}Try the {{ n }} failed emails again{% endblocktranslate %}</button>
+</form>
+{% endif %}
+{% if no_address %}
+<p class="govuk-body">{% blocktranslate count n=no_address %}{{ n }} agreement has no email address for demands. Add a billing email on the agreement, or an email on the tenant.{% plural %}{{ n }} agreements have no email address for demands. Add a billing email on the agreement, or an email on the tenant.{% endblocktranslate %}</p>
+{% endif %}
+
+{% if preview %}
+<details class="govuk-details">
+  <summary class="govuk-details__summary"><span class="govuk-details__summary-text">{% translate "See an example email" %}</span></summary>
+  <div class="govuk-details__text">
+    <p class="govuk-body"><strong>{% translate "To" %}:</strong> {{ preview.to }}<br><strong>{% translate "Subject" %}:</strong> {{ preview.subject }}</p>
+    <pre class="govuk-body" style="white-space: pre-wrap; font-family: inherit;">{{ preview.body }}</pre>
+  </div>
+</details>
+{% endif %}
+
+<table class="govuk-table">
+  <caption class="govuk-table__caption govuk-table__caption--m">{% translate "Agreements in this run" %}</caption>
+  <thead class="govuk-table__head"><tr class="govuk-table__row">
+    <th scope="col" class="govuk-table__header">{% translate "Agreement" %}</th>
+    <th scope="col" class="govuk-table__header">{% translate "To" %}</th>
+    <th scope="col" class="govuk-table__header govuk-table__header--numeric">{% translate "Amount" %}</th>
+    <th scope="col" class="govuk-table__header">{% translate "Email" %}</th>
+  </tr></thead>
+  <tbody class="govuk-table__body">
+  {% for d in items %}
+  <tr class="govuk-table__row">
+    <td class="govuk-table__cell"><a class="govuk-link" href="{% url 'ledger:account' d.lease.pk %}">{{ d.lease.reference }}</a> {{ d.lease.counterparty.name }}</td>
+    <td class="govuk-table__cell">{{ d.to|default:"—" }}</td>
+    <td class="govuk-table__cell govuk-table__cell--numeric">£{{ d.total|floatformat:"2g" }}</td>
+    <td class="govuk-table__cell">{% if d.already %}<strong class="govuk-tag{% if d.already.status == 'failed' %} govuk-tag--red{% elif d.already.status == 'recorded' %} govuk-tag--grey{% else %} govuk-tag--green{% endif %}">{{ d.already.get_status_display }}</strong> {{ d.already.created_at|date:"j M Y H:i" }}{% elif not d.to %}{% translate "No address" %}{% else %}{% translate "Not yet emailed" %}{% endif %}</td>
+  </tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

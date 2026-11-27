@@ -57,6 +57,9 @@ How PHAEMA works out each charge:
 
 Charges cannot be deleted. Correct a mistake with a [credit note](#credit-notes).
 
+If the council has switched it on, you can then [email the demands](emailing-demands.md) to tenants, with a
+**Pay now** link.
+
 ## Rent accounts and statements
 
 Each agreement has a rent account, which you can open from the agreement's page, the arrears list or the receipts
