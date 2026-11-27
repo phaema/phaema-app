@@ -27,6 +27,11 @@ Everything since 0.9.0 (10 to 27 November 2026).
   (Manage data, API tokens), or set `PHAEMA_API_PASSWORD_SIGN_IN=True` while you move them over.
 
 ### Added
+- Condition surveys and backlog maintenance: dated surveys of buildings and sites with the work found element by
+  element (condition grade, priority 1 to 4, cost, year due, component); finishing a survey updates the property's
+  grade and, if wanted, its components'; jobs raised from items; a survey programme showing what is never
+  surveyed, overdue or due; a backlog page by priority, element and year with an Excel download; and an import for
+  survey firms' spreadsheets. Help, Maintenance.
 - Tenant portal (optional, off by default) at `/tenant/`: tenants the estates team invites sign in with a code
   emailed each time and see, for their own agreements, the rent account with arrears by age, interest and the next
   credit control step, demands with Pay now links, the statement, key dates, documents the council shares, service

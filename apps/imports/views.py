@@ -31,7 +31,8 @@ def _available(user):
 
     settings = ModuleSettings.load()
     needs = {"receipts": settings.rent_ledger_enabled, "expenditure": settings.service_charges_enabled,
-             "maintenance": settings.maintenance_enabled, "valuations": settings.valuation_enabled}
+             "maintenance": settings.maintenance_enabled,
+             "condition_surveys": settings.maintenance_enabled, "valuations": settings.valuation_enabled}
     found = [wb for wb in WORKBOOKS.values() if needs.get(wb.key, True)]
     if is_administrator(user):
         return found

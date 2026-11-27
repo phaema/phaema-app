@@ -1,0 +1,63 @@
+{% extends "base.html" %}{% load i18n humanize %}
+{% block title %}{% translate "Backlog maintenance" %}{% endblock %}
+{% block help_page %}maintenance{% endblock %}
+{% block content %}
+<h1 class="govuk-heading-xl govuk-!-margin-bottom-4">{% translate "Backlog maintenance" %}</h1>
+{% include "maintenance/_nav.html" %}
+<p class="govuk-body">{% translate "Work found by condition surveys that is still to do. Backlog maintenance is the work of priorities 1 to 3, needed within five years; priority 4 is shown beside it. An item drops out when it is marked done or not needed, or its job is completed." %}</p>
+<form method="get" class="phaema-inline-fields govuk-!-margin-bottom-4">
+  <label class="govuk-label govuk-!-margin-right-2" for="priority">{% translate "Priority" %}</label>
+  <select class="govuk-select" id="priority" name="priority"><option value="">{% translate "All" %}</option><option value="backlog"{% if priority == "backlog" %} selected{% endif %}>{% translate "1 to 3 (backlog)" %}</option>{% for p in "1234" %}<option{% if priority == p %} selected{% endif %}>{{ p }}</option>{% endfor %}</select>
+  <label class="govuk-label govuk-!-margin-right-2" for="years">{% translate "Years" %}</label>
+  <select class="govuk-select" id="years" name="years"><option{% if span == 5 %} selected{% endif %}>5</option><option{% if span == 10 %} selected{% endif %}>10</option><option{% if span == 20 %} selected{% endif %}>20</option></select>
+  {% include "core/_place_filters.html" %}
+  <button class="govuk-button govuk-button--secondary govuk-!-margin-bottom-0" data-module="govuk-button">{% translate "Show" %}</button>
+</form>
+<p class="govuk-body-s"><a class="govuk-link" href="?{{ query }}{% if query %}&amp;{% endif %}format=xlsx">{% translate "Download to Excel" %}</a></p>
+<p class="govuk-body-l">{% blocktranslate with t=summary.total|floatformat:0|intcomma %}£{{ t }} of backlog maintenance{% endblocktranslate %}</p>
+<div class="govuk-grid-row">
+<div class="govuk-grid-column-one-half">
+<table class="govuk-table">
+  <caption class="govuk-table__caption govuk-table__caption--s">{% translate "By priority" %}</caption>
+  <tbody class="govuk-table__body">{% for p, label, n, cost in summary.by_priority %}
+    <tr class="govuk-table__row"><th scope="row" class="govuk-table__header govuk-!-font-weight-regular">{{ label }}</th><td class="govuk-table__cell govuk-table__cell--numeric">{{ n }}</td><td class="govuk-table__cell govuk-table__cell--numeric">£{{ cost|floatformat:0|intcomma }}</td></tr>
+  {% endfor %}</tbody>
+</table>
+</div>
+<div class="govuk-grid-column-one-half">
+<table class="govuk-table">
+  <caption class="govuk-table__caption govuk-table__caption--s">{% translate "Backlog by element" %}</caption>
+  <tbody class="govuk-table__body">{% for element, cost in summary.by_element %}
+    <tr class="govuk-table__row"><th scope="row" class="govuk-table__header govuk-!-font-weight-regular">{{ element }}</th><td class="govuk-table__cell govuk-table__cell--numeric">£{{ cost|floatformat:0|intcomma }}</td></tr>
+  {% empty %}<tr class="govuk-table__row"><td class="govuk-table__cell">–</td></tr>{% endfor %}</tbody>
+</table>
+</div>
+</div>
+<table class="govuk-table">
+  <caption class="govuk-table__caption govuk-table__caption--s">{% translate "By year due (overdue work counts in this year)" %}</caption>
+  <thead class="govuk-table__head"><tr class="govuk-table__row">{% for y, v in years %}<th scope="col" class="govuk-table__header govuk-table__header--numeric">{{ y }}</th>{% endfor %}<th scope="col" class="govuk-table__header govuk-table__header--numeric">{% translate "Later" %}</th></tr></thead>
+  <tbody class="govuk-table__body"><tr class="govuk-table__row">{% for y, v in years %}<td class="govuk-table__cell govuk-table__cell--numeric">{% if v %}£{{ v|floatformat:0|intcomma }}{% else %}–{% endif %}</td>{% endfor %}<td class="govuk-table__cell govuk-table__cell--numeric">{% if later %}£{{ later|floatformat:0|intcomma }}{% else %}–{% endif %}</td></tr></tbody>
+</table>
+<h2 class="govuk-heading-m">{% blocktranslate count n=count %}{{ n }} item{% plural %}{{ n }} items{% endblocktranslate %}</h2>
+<table class="govuk-table govuk-table--small-text-until-tablet">
+  <thead class="govuk-table__head"><tr class="govuk-table__row">
+    <th scope="col" class="govuk-table__header">{% translate "Property" %}</th>
+    <th scope="col" class="govuk-table__header">{% translate "Element and work" %}</th>
+    <th scope="col" class="govuk-table__header">{% translate "Condition" %}</th>
+    <th scope="col" class="govuk-table__header">{% translate "Priority" %}</th>
+    <th scope="col" class="govuk-table__header">{% translate "Year" %}</th>
+    <th scope="col" class="govuk-table__header govuk-table__header--numeric">{% translate "Cost" %}</th>
+  </tr></thead>
+  <tbody class="govuk-table__body">{% for i in items %}
+    <tr class="govuk-table__row">
+      <td class="govuk-table__cell"><a class="govuk-link" href="{{ i.survey.get_absolute_url }}#items">{{ i.survey.property.reference }}</a><br><span class="govuk-body-s">{{ i.survey.property.name }}</span></td>
+      <td class="govuk-table__cell"><strong>{{ i.get_element_display }}</strong>{% if i.location %}, {{ i.location }}{% endif %}<br>{{ i.description }}{% if i.job %}<br><a class="govuk-link govuk-body-s" href="{{ i.job.get_absolute_url }}">{{ i.status_label }}: {{ i.job.reference }}</a>{% endif %}</td>
+      <td class="govuk-table__cell">{% include "maintenance/_grade.html" with g=i.grade %}</td>
+      <td class="govuk-table__cell">{{ i.priority }}</td>
+      <td class="govuk-table__cell">{{ i.due_year|default:"–" }}</td>
+      <td class="govuk-table__cell govuk-table__cell--numeric">{% if i.estimated_cost %}£{{ i.estimated_cost|floatformat:0|intcomma }}{% else %}–{% endif %}</td>
+    </tr>
+  {% empty %}<tr class="govuk-table__row"><td class="govuk-table__cell" colspan="6">{% translate "No work outstanding." %}</td></tr>{% endfor %}</tbody>
+</table>
+{% if count > 500 %}<p class="govuk-body-s">{% translate "The first 500 are shown. Download to Excel for all of them." %}</p>{% endif %}
+{% endblock %}

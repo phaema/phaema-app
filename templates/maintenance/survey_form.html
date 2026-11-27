@@ -1,0 +1,17 @@
+{% extends "base.html" %}{% load i18n %}
+{% block title %}{% translate "Add a condition survey" %}: {{ property.reference }}{% endblock %}
+{% block help_page %}maintenance{% endblock %}
+{% block breadcrumbs %}<nav class="govuk-breadcrumbs" aria-label="Breadcrumb"><ol class="govuk-breadcrumbs__list"><li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="{% url 'maintenance:surveys' %}">{% translate "Condition surveys" %}</a></li><li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="{% url 'maintenance:property' property.pk %}">{{ property.reference }}</a></li></ol></nav>{% endblock %}
+{% block content %}
+<span class="govuk-caption-l">{{ property.reference }} {{ property.name }}</span>
+<h1 class="govuk-heading-l">{% translate "Add a condition survey" %}</h1>
+<div class="govuk-grid-row"><div class="govuk-grid-column-two-thirds">
+<p class="govuk-body">{% translate "Record the survey first, then add the work it found, element by element. When every item is in, finish the survey: the property takes its overall grade, and components named on items take the grades found." %}</p>
+<form method="post" enctype="multipart/form-data" novalidate>{% csrf_token %}
+  {% include "core/_form_errors.html" %}
+  {% for field in form %}{% include "core/_field.html" %}{% endfor %}
+  <button class="govuk-button" data-module="govuk-button">{% translate "Add the survey" %}</button>
+  <a class="govuk-link govuk-!-margin-left-3" href="{% url 'maintenance:property' property.pk %}">{% translate "Cancel" %}</a>
+</form>
+</div></div>
+{% endblock %}

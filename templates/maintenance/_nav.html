@@ -4,6 +4,8 @@
   <a class="govuk-link" href="{% url 'maintenance:reports' %}"{% if section == "reports" %} aria-current="page"{% endif %}>{% translate "Repair reports" %}</a>
   <a class="govuk-link" href="{% url 'maintenance:planned' %}"{% if section == "planned" %} aria-current="page"{% endif %}>{% translate "Planned maintenance" %}</a>
   <a class="govuk-link" href="{% url 'maintenance:components' %}"{% if section == "components" %} aria-current="page"{% endif %}>{% translate "Components" %}</a>
+  <a class="govuk-link" href="{% url 'maintenance:surveys' %}"{% if section == "surveys" %} aria-current="page"{% endif %}>{% translate "Condition surveys" %}</a>
+  <a class="govuk-link" href="{% url 'maintenance:backlog' %}"{% if section == "backlog" %} aria-current="page"{% endif %}>{% translate "Backlog" %}</a>
   <a class="govuk-link" href="{% url 'maintenance:forecast' %}"{% if section == "forecast" %} aria-current="page"{% endif %}>{% translate "Lifecycle forecast" %}</a>
   <a class="govuk-link" href="{% url 'maintenance:contractors' %}"{% if section == "contractors" %} aria-current="page"{% endif %}>{% translate "Contractors" %}</a>
   <a class="govuk-link" href="{% url 'maintenance:contracts' %}"{% if section == "contracts" %} aria-current="page"{% endif %}>{% translate "Contracts" %}</a>
