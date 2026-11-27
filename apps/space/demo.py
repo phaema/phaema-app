@@ -61,6 +61,7 @@ def load(today=None):
             "cost_centre": cc, "active": True})
     civic = _civic_centre()
     _costs(today)
+    _liaison(occ["Housing Services"])
     if Space.objects.filter(building=civic).exists():
         return Space.objects.filter(building=civic).count()
     start = date(today.year - 2, 4, 1)
@@ -146,7 +147,26 @@ def _costs(today):
                     defaults={"amount": (Decimal(amount) * factor).quantize(Decimal("1")), "source": source})
 
 
+LIAISON = "demo.liaison"
+
+
+def _liaison(housing):
+    """A department's property liaison, with no PHAEMA role, for trying the departments' pages."""
+    from django.contrib.auth import get_user_model
+
+    user, created = get_user_model().objects.get_or_create(username=LIAISON, defaults={
+        "first_name": "Priya", "last_name": "Shah", "email": "priya.shah@example.org"})
+    if created:
+        user.set_unusable_password()
+        user.save()
+    housing.liaison = user
+    housing.save(update_fields=["liaison"])
+
+
 def remove():
+    from django.contrib.auth import get_user_model
+
+    get_user_model().objects.filter(username=LIAISON).delete()
     demo = Property.objects.filter(reference__startswith="DM-")
     UseFigure.objects.filter(building__in=demo).delete()
     BuildingCost.objects.filter(building__in=demo).delete()

@@ -95,7 +95,12 @@ releases with release notes and a security support period for each will start be
   Dependabot proposes updates.
 - The code is open, so any council, supplier or security tester can review it.
 - Data stays where the council chooses: its own servers, or UK or EU hosting. PHAEMA sends nothing to the project or
-  to third parties. Optional map tiles from Ordnance Survey or OpenStreetMap are loaded by the user's browser.
+  to third parties, except emails to tenants through GOV.UK Notify if the council switches on emailing demands or
+  the tenant portal (Notify acts as the council's processor). Optional map tiles from Ordnance Survey or
+  OpenStreetMap are loaded by the user's browser.
+- The tenant portal, if switched on, is the only part used by people outside the council: invitation only, a
+  one-time code emailed at each sign-in (stored as a keyed hash, 15 minutes, 5 tries, rate limited), the tenant's own
+  agreements only, its own Content-Security-Policy, no caching, and no access to staff pages, the admin or the API.
 
 **Servers set up by the installer** (`deploy/install-server.sh`)
 
