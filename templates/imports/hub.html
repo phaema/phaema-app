@@ -25,6 +25,11 @@
     </tr>
     {% endfor %}
     {% if is_administrator %}<tr class="govuk-table__row">
+      <td class="govuk-table__cell"><a class="govuk-link" href="{% url 'imports:upload' 'documents' %}">{% translate "Documents" %}</a></td>
+      <td class="govuk-table__cell">{% translate "Documents from another system in bulk: a zip file of PDFs and drawings with an index saying which agreement, title or property each belongs to." %}</td>
+      <td class="govuk-table__cell"><a class="govuk-link" href="{% url 'imports:documents-template' %}">{% translate "Index template" %}</a></td>
+    </tr>
+    <tr class="govuk-table__row">
       <td class="govuk-table__cell"><a class="govuk-link" href="{% url 'properties:inspire-upload' %}">{% translate "Land Registry boundaries" %}</a></td>
       <td class="govuk-table__cell">{% translate "HM Land Registry INSPIRE Index Polygons (GML), to show title boundaries on the map." %}</td>
       <td class="govuk-table__cell"></td>

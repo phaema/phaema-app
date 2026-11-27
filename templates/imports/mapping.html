@@ -1,0 +1,60 @@
+{% extends "base.html" %}{% load i18n %}
+{% block title %}{% translate "Match your columns" %}: {{ adapter.title }}{% endblock %}
+{% block help_page %}import-export{% endblock %}
+{% block breadcrumbs %}
+<nav class="govuk-breadcrumbs" aria-label="Breadcrumb"><ol class="govuk-breadcrumbs__list">
+  <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="{% url 'imports:hub' %}">{% translate "Import" %}</a></li>
+  <li class="govuk-breadcrumbs__list-item">{{ adapter.title }}</li>
+</ol></nav>
+{% endblock %}
+{% block content %}
+<span class="govuk-caption-l">{{ filename }}</span>
+<h1 class="govuk-heading-l">{% translate "Match your columns to PHAEMA's" %}</h1>
+<div class="govuk-grid-row"><div class="govuk-grid-column-two-thirds">
+{% if error %}
+<div class="govuk-error-summary" data-module="govuk-error-summary"><div role="alert">
+  <h2 class="govuk-error-summary__title">{% translate "There is a problem" %}</h2>
+  <div class="govuk-error-summary__body"><p class="govuk-body">{{ error }}</p></div>
+</div></div>
+{% endif %}
+<p class="govuk-body">{% translate "This file's columns are not named as in the PHAEMA template, which is usual for an export from another system. Say which PHAEMA column each of your columns fills. Leave a column unmatched to ignore it. Columns marked * must be matched." %}</p>
+<form method="post" novalidate>{% csrf_token %}
+  <input type="hidden" name="action" value="map"><input type="hidden" name="token" value="{{ token }}">
+  {% if sheets|length > 1 %}
+  <div class="govuk-form-group">
+    <label class="govuk-label govuk-label--s" for="sheet">{% translate "The file holds" %}</label>
+    <select class="govuk-select" id="sheet" name="sheet">
+      {% for name, label, cols in sheets %}<option value="{{ name }}"{% if name == sheet %} selected{% endif %}>{{ label }}</option>{% endfor %}
+    </select>
+    <div class="govuk-hint">{% translate "If you change this, select Check the file to see that sheet's columns." %}</div>
+  </div>
+  {% else %}<input type="hidden" name="sheet" value="{{ sheet }}">{% endif %}
+  <table class="govuk-table">
+    <thead class="govuk-table__head"><tr class="govuk-table__row">
+      <th scope="col" class="govuk-table__header">{% translate "Your column" %}</th>
+      <th scope="col" class="govuk-table__header">{% translate "PHAEMA column" %}</th>
+    </tr></thead>
+    <tbody class="govuk-table__body">
+    {% for i, heading, chosen in rows %}
+      <tr class="govuk-table__row">
+        <th scope="row" class="govuk-table__header"><label for="map-{{ i }}">{{ heading }}</label></th>
+        <td class="govuk-table__cell"><select class="govuk-select" id="map-{{ i }}" name="map:{{ i }}">
+          <option value="">{% translate "Ignore this column" %}</option>
+          {% for name, label, cols in sheets %}{% if name == sheet %}{% for field, h, req in cols %}<option value="{{ field }}"{% if field == chosen %} selected{% endif %}>{{ h }}{% if req %} *{% endif %}</option>{% endfor %}{% endif %}{% endfor %}
+        </select></td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  <div class="govuk-form-group">
+    <label class="govuk-label" for="save_as">{% translate "Save this matching as (optional)" %}</label>
+    <div class="govuk-hint">{% translate "For example “Old system: lease export”. The next file with the same columns is matched for you." %}</div>
+    <input class="govuk-input govuk-!-width-two-thirds" id="save_as" name="save_as" type="text" maxlength="80">
+  </div>
+  <div class="govuk-button-group">
+    <button class="govuk-button" data-module="govuk-button">{% translate "Check the file" %}</button>
+    <a class="govuk-link" href="{{ request.path }}">{% translate "Cancel" %}</a>
+  </div>
+</form>
+</div></div>
+{% endblock %}

@@ -27,6 +27,10 @@ Everything since 0.9.0 (10 to 27 November 2026).
   (Manage data, API tokens), or set `PHAEMA_API_PASSWORD_SIGN_IN=True` while you move them over.
 
 ### Added
+- Files exported from another system can be imported as they are: their columns are matched to PHAEMA's on
+  screen, and the matching can be saved and is used again for the next file with the same columns. Documents can
+  be brought across in bulk as a zip file with an index (agreement documents, title documents, floor plans and
+  building documents), checked first and kept as a migration run. Help, Importing and exporting.
 - Moving from another system: a **trial run** of any import (properties, parties, leases, receipts and the rest)
   that imports and then undoes it; **control totals** (rows and money or area columns) compared three ways, old
   system, file and PHAEMA; a downloadable **check report** of every row with its problems and warnings;

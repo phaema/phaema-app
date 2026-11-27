@@ -133,15 +133,18 @@ def handle(request, adapter, template_name, done_url):
             messages.error(request, _("That import has expired. Please upload the file again."))
             return redirect(request.path)
         mode = MigrationRun.Mode.TRIAL if "trial" in request.POST else MigrationRun.Mode.LIVE
+        if mode == MigrationRun.Mode.TRIAL and not adapter.supports_trial:
+            raise PermissionDenied
+        mapping = stored.get("mapping")
         with _open(stored) as fh:
-            outcome = adapter.check(fh)
+            outcome = adapter.check(fh, mapping)
             if not outcome.ok:
                 _forget(request, key)
                 messages.error(request, _("The records changed since the preview. Please upload the file again."))
                 return redirect(request.path)
             expected = migration.expected_from(request.POST, outcome.controls)
             fh.seek(0)
-            record, outcome = migration.run(adapter, fh, mode, request.user, expected)
+            record, outcome = migration.run(adapter, fh, mode, request.user, expected, mapping)
         if mode == MigrationRun.Mode.TRIAL:
             stored["expected"] = {k: str(v) for k, v in expected.items()}
             request.session[_session_key(key)] = stored
@@ -156,30 +159,155 @@ def handle(request, adapter, template_name, done_url):
             messages.warning(request, _("Some control totals do not match. See the import record."))
         return redirect(done_url)
 
+    if request.method == "POST" and request.POST.get("action") == "map":
+        stored = _stored(request, key)
+        if not stored or stored.get("token") != request.POST.get("token"):
+            messages.error(request, _("That import has expired. Please upload the file again."))
+            return redirect(request.path)
+        mapping, error = _mapping_from(request, adapter)
+        if error:
+            return _mapping_page(request, adapter, template_name, stored, error=error)
+        name = request.POST.get("save_as", "").strip()[:80]
+        if name:
+            from .models import ImportMapping
+
+            sheet = next(iter(mapping))
+            ImportMapping.objects.update_or_create(kind=key, name=name, defaults={
+                "sheet": sheet, "mapping": mapping[sheet], "created_by": request.user})
+        stored["mapping"] = mapping
+        with _open(stored) as fh:
+            return _preview(request, adapter, template_name, ctx, fh, stored)
+
     if request.method == "POST" and request.FILES.get("file"):
         uploaded = request.FILES["file"]
-        try:
-            if uploaded.size > MAX_BYTES:
-                raise ValidationError(_("The file must be smaller than 10 MB."))
-            outcome = adapter.check(uploaded)
-            if not outcome.rows:
-                raise ValidationError(_("The file has no rows to import."))
-        except ValidationError as exc:
-            ctx["file_error"] = " ".join(exc.messages)
-        else:
-            _forget(request, key)
-            token = uuid.uuid4().hex
-            uploaded.seek(0)
-            ext = os.path.splitext(uploaded.name)[1].lower()
-            path = default_storage.save(f"{IMPORT_DIR}/{token}{ext}", uploaded)
-            request.session[_session_key(key)] = {"token": token, "path": path, "name": uploaded.name,
-                                                  "ok": outcome.ok}
-            ctx.update(result=outcome.result, outcome=outcome, filename=uploaded.name, check_token=token)
-            if outcome.ok:
-                ctx["token"] = token
+        if uploaded.size > adapter.max_bytes:
+            ctx["file_error"] = _("The file must be smaller than %(n)s MB.") % {"n": adapter.max_bytes // 1048576}
+            return render(request, template_name, ctx)
+        _forget(request, key)
+        token = uuid.uuid4().hex
+        ext = os.path.splitext(uploaded.name)[1].lower()
+        path = default_storage.save(f"{IMPORT_DIR}/{token}{ext}", uploaded)
+        stored = {"token": token, "path": path, "name": uploaded.name}
+        saved = request.POST.get("mapping", "")
+        if saved.isdigit() and adapter.supports_mapping:
+            from .models import ImportMapping
+
+            chosen = ImportMapping.objects.filter(kind=key, pk=int(saved)).first()
+            if chosen:
+                stored["mapping"] = {chosen.sheet: chosen.mapping}
+                ctx["mapping_used"] = chosen
+        with _open(stored) as fh:
+            return _preview(request, adapter, template_name, ctx, fh, stored)
     elif request.method == "POST":
         ctx["file_error"] = _("Choose a file to upload.")
+    if adapter.supports_mapping:
+        from .models import ImportMapping
+
+        ctx["mappings"] = ImportMapping.objects.filter(kind=key)
     return render(request, template_name, ctx)
+
+
+def _preview(request, adapter, template_name, ctx, fh, stored):
+    """Check the stored file and show the preview; or, if its headings are not PHAEMA's, the page for matching
+    them, after trying the saved matchings."""
+    from .engine import MissingColumns
+    from .models import ImportMapping
+
+    key = adapter.key
+    try:
+        try:
+            outcome = adapter.check(fh, stored.get("mapping"))
+        except MissingColumns as exc:
+            if not adapter.supports_mapping or stored.get("mapping"):
+                raise
+            fits = next((m for m in ImportMapping.objects.filter(kind=key) if m.fits(exc.headings)), None)
+            if fits is None:
+                request.session[_session_key(key)] = stored
+                return _mapping_page(request, adapter, template_name, stored, exc)
+            stored["mapping"] = {fits.sheet: fits.mapping}
+            ctx["mapping_used"] = fits
+            fh.seek(0)
+            outcome = adapter.check(fh, stored["mapping"])
+        if not outcome.rows:
+            raise ValidationError(_("The file has no rows to import."))
+    except ValidationError as exc:
+        _forget_file(stored)
+        request.session.pop(_session_key(key), None)
+        ctx["file_error"] = " ".join(exc.messages)
+        if adapter.supports_mapping:
+            ctx["mappings"] = ImportMapping.objects.filter(kind=key)
+        return render(request, template_name, ctx)
+    stored["ok"] = outcome.ok
+    request.session[_session_key(key)] = stored
+    ctx.update(result=outcome.result, outcome=outcome, filename=stored["name"], check_token=stored["token"])
+    if outcome.ok:
+        ctx["token"] = stored["token"]
+    return render(request, template_name, ctx)
+
+
+def _forget_file(stored):
+    if stored.get("path") and default_storage.exists(stored["path"]):
+        default_storage.delete(stored["path"])
+
+
+def _mapping_page(request, adapter, template_name, stored, exc=None, error=""):
+    """Match the file's headings to PHAEMA's columns."""
+    from .engine import MissingColumns
+
+    if exc is None:  # showing the page again after a mistake: read the headings again
+        with _open(stored) as fh:
+            try:
+                adapter.check(fh)
+            except MissingColumns as again:
+                exc = again
+    sheets = adapter.sheet_columns()
+    sheet = request.POST.get("sheet") or (exc.sheet if exc else sheets[0][0])
+    headings = exc.headings if exc else []
+    current = {k: v for k, v in request.POST.items() if k.startswith("map:")}
+    known = {}
+    for name, _label, cols in sheets:
+        if name == sheet:
+            known = {h.lower(): f for f, h, _r in cols} | {f: f for f, _h, _r in cols}
+    rows = [(i, h, current.get(f"map:{i}", known.get(h.strip().lower(), ""))) for i, h in enumerate(headings) if h]
+    return render(request, "imports/mapping.html", {
+        "adapter": adapter, "workbook": adapter, "sheets": sheets, "sheet": sheet, "rows": rows,
+        "token": stored["token"], "filename": stored["name"], "error": error})
+
+
+def _mapping_from(request, adapter):
+    """The matching chosen on the page: {sheet: {heading, lower case: field}}, or an error to show."""
+    from .engine import MissingColumns
+
+    sheets = {name: cols for name, _label, cols in adapter.sheet_columns()}
+    sheet = request.POST.get("sheet", "")
+    if sheet not in sheets:
+        return None, _("Choose what the file holds.")
+    stored = _stored(request, adapter.key)
+    headings = []
+    with _open(stored) as fh:
+        try:
+            adapter.check(fh)
+        except MissingColumns as exc:
+            headings = exc.headings
+        except ValidationError:
+            pass
+    fields = {f for f, _h, _r in sheets[sheet]}
+    mapping, used = {}, {}
+    for i, heading in enumerate(headings):
+        field = request.POST.get(f"map:{i}", "")
+        if not field or not heading:
+            continue
+        if field not in fields:
+            return None, _("Choose PHAEMA columns from the lists.")
+        if field in used:
+            return None, _("%(a)s and %(b)s are both matched to the same PHAEMA column.") % {
+                "a": used[field], "b": heading}
+        used[field] = heading
+        mapping[heading.strip().lower()] = field
+    missing = [h for f, h, req in sheets[sheet] if req and f not in used]
+    if missing:
+        return None, _("Match a column to each required PHAEMA column: %(m)s.") % {"m": ", ".join(missing)}
+    return {sheet: mapping}, ""
 
 
 @importers_only
@@ -203,7 +331,7 @@ def check_report(request, key):
     if not stored or stored.get("token") != request.GET.get("token"):
         raise Http404
     with _open(stored) as fh:
-        outcome = adapter.check(fh)
+        outcome = adapter.check(fh, stored.get("mapping"))
     response = HttpResponse(report(outcome, title=adapter.title, filename=stored["name"]),
                             content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
     response["Content-Disposition"] = f'attachment; filename="phaema-{key}-check.xlsx"'
@@ -278,3 +406,28 @@ def run_sign_off(request, pk):
     else:
         messages.success(request, _("Signed off."))
     return redirect(record)
+
+
+@importers_only
+@require_POST
+def mapping_delete(request, key, pk):
+    from .models import ImportMapping
+
+    _adapter(request, key)
+    if not is_administrator(request.user):
+        raise PermissionDenied
+    ImportMapping.objects.filter(kind=key, pk=pk).delete()
+    messages.success(request, _("Saved matching deleted."))
+    return redirect(_upload_url(key))
+
+
+@importers_only
+def documents_template(request):
+    from . import documents
+
+    if not is_administrator(request.user):
+        raise PermissionDenied
+    response = HttpResponse(documents.template(),
+                            content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+    response["Content-Disposition"] = 'attachment; filename="phaema-documents-index.xlsx"'
+    return response

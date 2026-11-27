@@ -63,6 +63,10 @@ class Outcome:
     def warning_count(self):
         return sum(1 for r in self.rows if r.warnings)
 
+    @property
+    def error_count(self):
+        return sum(1 for r in self.rows if r.errors)
+
 
 def _number(text):
     try:
@@ -74,6 +78,8 @@ def _number(text):
 class WorkbookAdapter:
     """One of the workbooks in sheets.py (parties, leases, receipts and so on)."""
 
+    supports_trial, supports_mapping, max_bytes = True, True, 10 * 1024 * 1024
+
     def __init__(self, cls):
         self.cls, self.key, self.title, self.description = cls, cls.key, cls.title, cls.description
 
@@ -83,8 +89,13 @@ class WorkbookAdapter:
 
         return reverse("imports:template", args=[self.key])
 
-    def check(self, uploaded):
-        workbook = self.cls()
+    def sheet_columns(self):
+        """[(sheet name, label, [(field, heading, required)])], for matching another system's columns."""
+        return [(sh.name, sh.label, [(c.field, c.heading, c.required) for c in sh.columns])
+                for sh in self.cls().instances]
+
+    def check(self, uploaded, mapping=None):
+        workbook = self.cls(mapping=mapping)
         result, prepared = workbook.validate(uploaded)
         rows = [Row(r.sheet, r.number, r.reference, r.action, r.changed, r.errors, r.warnings) for r in result.rows]
         controls, filled = [], {}
@@ -124,6 +135,7 @@ class PropertyAdapter:
 
     key, title = "properties", "Properties"
     description = "Estates, sites, buildings, units and land, with addresses, UPRNs, areas and managing surveyors."
+    supports_trial, supports_mapping, max_bytes = True, True, 10 * 1024 * 1024
     TOTALS = [("site_area_ha", "site area (ha)", 4), ("gia_sqm", "GIA (m²)", 2), ("nia_sqm", "NIA (m²)", 2)]
 
     @property
@@ -132,11 +144,16 @@ class PropertyAdapter:
 
         return reverse("properties:import-template")
 
-    def check(self, uploaded):
+    def sheet_columns(self):
+        from apps.properties.importer import COLUMNS
+
+        return [("Properties", "Properties", [(f, h, req) for h, f, req, _g in COLUMNS])]
+
+    def check(self, uploaded, mapping=None):
         from apps.properties import importer
         from apps.properties.models import Property
 
-        data = importer.read_rows(uploaded)
+        data = importer.read_rows(uploaded, (mapping or {}).get("Properties"))
         result, prepared = importer.validate(data)
         by_number = dict(data)
         rows = []
@@ -181,10 +198,12 @@ def adapters_for(user):
     """Every import this person may run, in the order to import them."""
     from apps.core.roles import is_administrator
 
+    from .documents import DocumentsAdapter
     from .views import _available
 
     found = [PropertyAdapter()] if is_administrator(user) else []
-    return found + [WorkbookAdapter(cls) for cls in _available(user)]
+    found += [WorkbookAdapter(cls) for cls in _available(user)]
+    return found + ([DocumentsAdapter()] if is_administrator(user) else [])
 
 
 def fingerprint(uploaded):
@@ -204,11 +223,11 @@ def expected_from(post, controls):
     return out
 
 
-def run(adapter, uploaded, mode, user, expected=None):
+def run(adapter, uploaded, mode, user, expected=None, mapping=None):
     """Check and import a file for real or as a trial, and keep the run with its report. The file must be clean."""
     expected = expected or {}
     sha = fingerprint(uploaded)
-    outcome = adapter.check(uploaded)
+    outcome = adapter.check(uploaded, mapping)
     if not outcome.ok:
         raise ValueError("The file has problems: check it again.")
     with transaction.atomic():

@@ -28,10 +28,10 @@
     {% endfor %}
     </tbody>
   </table>
-  <p class="govuk-body">{% translate "A trial run imports the file and then undoes it, so you can see exactly what PHAEMA would hold, with nothing saved. Each trial and import is kept under Migration runs with its report, for an administrator to sign off." %}</p>
+  <p class="govuk-body">{% if adapter.supports_trial %}{% translate "A trial run imports the file and then undoes it, so you can see exactly what PHAEMA would hold, with nothing saved. " %}{% endif %}{% translate "Each import is kept under Migration runs with its report, for an administrator to sign off." %}</p>
   <div class="govuk-button-group">
     <button class="govuk-button" name="confirm" value="1" data-module="govuk-button">{% translate "Import these records" %}</button>
-    <button class="govuk-button govuk-button--secondary" name="trial" value="1" data-module="govuk-button">{% translate "Trial run first" %}</button>
+    {% if adapter.supports_trial %}<button class="govuk-button govuk-button--secondary" name="trial" value="1" data-module="govuk-button">{% translate "Trial run first" %}</button>{% endif %}
     <a class="govuk-link" href="{{ request.path }}">{% translate "Cancel" %}</a>
   </div>
 </form>

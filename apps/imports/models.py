@@ -51,3 +51,30 @@ class MigrationRun(models.Model):
     @property
     def mismatches(self):
         return [c for c in self.controls if c.get("matches") is False]
+
+
+class ImportMapping(models.Model):
+    """How another system's export headings match PHAEMA's columns, saved so the next export from the same system
+    imports without matching them again."""
+
+    kind = models.CharField(_("import"), max_length=40)
+    sheet = models.CharField(_("sheet"), max_length=60)
+    name = models.CharField(_("name"), max_length=80, help_text=_("For example \"Old system: lease export\"."))
+    mapping = models.JSONField(_("columns"), default=dict)  # {the file's heading, lower case: PHAEMA field}
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True,
+                                   related_name="+")
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["kind", "name"]
+        unique_together = [("kind", "name")]
+        verbose_name = _("saved column matching")
+        verbose_name_plural = _("saved column matchings")
+
+    def __str__(self):
+        return self.name
+
+    def fits(self, headings):
+        """True if every heading this matching names is in the file."""
+        have = {h.strip().lower() for h in headings}
+        return bool(self.mapping) and set(self.mapping) <= have

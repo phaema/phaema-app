@@ -69,7 +69,21 @@ was lost or changed on the way.
   Excel report. An administrator other than the person who ran it can **sign it off** with a note, for example
   which old-system reports they checked against. A sign-off cannot be undone.
 
-A sensible order for a migration is: properties, parties, leases and breaks, then the rest; a trial run of each
+- **Files exported from another system.** You do not have to retype an export into the PHAEMA template. Upload
+  it as it is: if its columns are not named as PHAEMA's, PHAEMA asks you to match each of your columns to a PHAEMA
+  column (or ignore it). Give the matching a name, such as "Old system: lease export", to save it: the next file
+  with the same columns is matched for you, and you can also choose a saved matching when you upload. Matching
+  works for CSV files and for Excel files with one sheet. Values still have to be in a form PHAEMA accepts, such
+  as dd/mm/yyyy dates and the wording of fixed choices.
+- **Documents in bulk.** Under **Import**, **Documents**, upload a zip file holding the documents and an index
+  (download the **Index template**, fill it in and save it in the zip as `index.xlsx`). Each row names a file in
+  the zip, what it is attached to (an agreement, a title, a floor plan or a building document), the record's
+  reference, the type of document, a description and a date. Every row is checked first: the file must be in the
+  zip, the record must exist, and the file must be one that record's own upload page would accept. A document
+  already held under the same file name is a warning. Up to 500 documents and 50 MB go in one zip; split larger
+  sets. There is no trial run for documents.
+
+A sensible order for a migration is: properties, parties, leases and breaks, then the rest, and documents last; a trial run of each
 file; correct the old system or the file until the totals match; import; then a second person signs off each run.
 
 ### Properties
