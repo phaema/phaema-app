@@ -35,9 +35,11 @@ class Command(BaseCommand):
             from apps.leases.indexation import update_all
 
             indices = update_all()
+        from apps.portal.models import SignInCode
         from apps.portal.reminders import send_certificate_reminders
 
         emails += send_certificate_reminders()
+        SignInCode.purge()
         jobs = 0
         if ModuleSettings.load().maintenance_enabled:
             from apps.maintenance.workflow import auto_raise

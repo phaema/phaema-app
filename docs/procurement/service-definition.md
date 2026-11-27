@@ -6,13 +6,13 @@ that choice, it says so.
 
 | Question | Answer |
 | --- | --- |
-| What it is | Property holding and estate management for councils in England and Wales: property register and maps, leases and licences, rent and service charges, cases and approvals, valuations, maintenance and compliance, projects, space and costs, estates strategy, reports and an open API |
-| Who it is for | Council estates, property, finance and facilities teams |
+| What it is | Property holding and estate management for councils in England and Wales: property register and maps, leases and licences, rent and service charges, cases and approvals, valuations, maintenance and compliance, projects, space and costs, estates strategy, reports and an open API; an optional tenant portal for the council's tenants, and pages for departments occupying council buildings |
+| Who it is for | Council estates, property, finance and facilities teams; their tenants (through the tenant portal, if switched on) and departmental property liaisons |
 | Licence | GNU Affero General Public License v3.0 or later (AGPL-3.0). No licence fee. The council may use, study, change and share it; changes it offers to others over a network must be shared under the same licence |
 | Current version | 0.9.x alpha. Beta (1.0.0-beta) follows a pilot council; 1.0 follows an independent penetration test. See [CHANGELOG.md](../../CHANGELOG.md) |
 | Deployment | The council's own servers (Linux with Docker), its cloud tenancy (any UK or EU region), or a supplier's hosting. A one-step installer sets up HTTPS, a firewall, automatic security updates and nightly backups |
 | Technology | Python and Django 5.2 (long-term support), PostgreSQL with PostGIS, GOV.UK Design System, server-rendered pages that work without JavaScript for most tasks |
-| Data location | Wherever the council installs it. PHAEMA sends nothing to the project or to third parties. Map tiles (OpenStreetMap, or Ordnance Survey with the council's key) are loaded by the user's browser |
+| Data location | Wherever the council installs it. PHAEMA sends nothing to the project or to third parties, except emails to tenants through GOV.UK Notify if the council switches on emailing demands or the tenant portal. Map tiles (OpenStreetMap, or Ordnance Survey with the council's key) are loaded by the user's browser |
 | Sign-in | PHAEMA accounts with two-step sign-in (required for administrators by default), or single sign-on with the council's accounts (OpenID Connect: Microsoft Entra ID, Keycloak and others) |
 | Access control | Roles (administrator, surveyor, contributor, viewer) and access areas (ledger, service charges, valuations, compliance, maintenance), enforced on every page, download, report and API call; outside users have an access end date |
 | Audit | A change log of who changed what and when, which the database refuses to alter or delete through the application; database server administrators remain able to alter data, so access to the database server should be restricted and logged |
