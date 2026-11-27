@@ -25,6 +25,8 @@ signed-in users.
 
 ## Demonstration data
 
-Training and test copies of PHAEMA may hold demonstration data for two fictional districts, Exampleton and
-Northfield. All of it is made up: references start with DM- or DL- (Northfield's are DM-N and DL-05), postcodes start
-ZZ99 or ZZ98 and phone numbers are from the range set aside for drama.
+Training and test copies of PHAEMA may hold demonstration data for four fictional districts: Exampleton, Northfield,
+Westbrook and Kingsmere. All of it is made up: references start with DM- or DL- (Northfield's are DM-N and DL-05,
+Westbrook's DM-W and DL-06, Kingsmere's DM-K and DL-07), postcodes start ZZ96 to ZZ99 and phone numbers are from the
+range set aside for drama. Westbrook and Kingsmere follow Northfield's layout with their own names, rents and dates,
+so there is more to search, filter and report on. The examples in this manual use Exampleton and Northfield.

@@ -71,24 +71,24 @@ def test_demo_helpers():
 
 
 def test_demo_leases_are_valid(demo):
-    assert Lease.objects.count() == 47  # Exampleton 22, Northfield 24
+    assert Lease.objects.count() == 95  # Exampleton 23, and 24 in each of Northfield, Westbrook and Kingsmere
     for obj in Lease.objects.all():
         obj.full_clean()
         assert obj.properties.exists()
-    assert Lease.objects.filter(direction="in").count() == 2
+    assert Lease.objects.filter(direction="in").count() == 4  # the Exampleton enterprise centre and three hubs
     # The signed leases have several pages, so the PDF reader has pages to move through and wording to find.
     signed = Lease.objects.get(reference="DL-0001").documents.get(document_type="lease").file.read()
     assert signed.count(b"/Type /Page ") == 4 and b"/Count 4 " in signed and b"Quiet enjoyment" in signed
     call_command("load_demo_data", verbosity=0)  # repeatable
-    assert Lease.objects.count() == 47 and BreakOption.objects.count() == 5
+    assert Lease.objects.count() == 95 and BreakOption.objects.count() == 11
 
 
 def test_lease_pages_and_filters(client, officer, demo):
     client.force_login(officer)
     url = reverse("leases:list")
     resp = client.get(url)
-    assert resp.status_code == 200 and resp.context["paginator"].count == 47
-    assert client.get(url, {"direction": "in"}).context["paginator"].count == 2
+    assert resp.status_code == 200 and resp.context["paginator"].count == 95
+    assert client.get(url, {"direction": "in"}).context["paginator"].count == 4
     expiring = client.get(url, {"expiring": "12"}).context["page_obj"]
     today = date.today()
     assert all(today <= lease.term_end <= add_months(today, 12) for lease in expiring)
@@ -108,6 +108,6 @@ def test_lease_pages_and_filters(client, officer, demo):
 def test_lease_api(client, officer, demo):
     client.force_login(officer)
     data = client.get("/api/leases/?page=1").json()
-    assert data["count"] == 47
+    assert data["count"] == 95
     l3 = next(r for r in data["results"] if r["reference"] == "DL-0003")
     assert l3["breaks"][0]["notice_deadline"]

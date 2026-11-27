@@ -172,7 +172,7 @@ def build_records():
             use_class="E(g)(i)", address_line_1=f"Suite {i}, Enterprise Way", postcode="ZZ99 6EW",
             nia_sqm=Decimal(nia), gia_sqm=Decimal(nia) * Decimal("1.08"))
 
-    # 7. The second district, Northfield
+    # 7. The other districts: Northfield, Westbrook and Kingsmere
     from apps.properties import demo_north
 
     demo_north.add_records(add, rect)
@@ -217,14 +217,11 @@ DEMO_PORTFOLIOS = {
     "DM-S04": "Waste and environmental services", "DM-S05": "Community", "DM-S06": "Surplus",
     "DM-S07": "Economic development", "DM-S08": "Parks and open spaces", "DM-S09": "Children's services",
     "DM-S10": "Farms and rural estate", "DM-S11": "Parks and open spaces",
-    "DM-N01": "Investment", "DM-N01-L01": "Highways and transport", "DM-N02": "Investment", "DM-N03": "Libraries",
-    "DM-N04": "Leisure", "DM-N05": "Community", "DM-N06": "Regeneration and development", "DM-N07": "Investment",
-    "DM-N08": "Parks and open spaces", "DM-N09": "Markets", "DM-N10": "Farms and rural estate",
-    "DM-N11": "Highways and transport", "DM-N12": "Economic development",
 }
 
-from apps.properties import demo_north  # noqa: E402  (Northfield, the second district)
+from apps.properties import demo_north  # noqa: E402  (Northfield, Westbrook and Kingsmere)
 
+DEMO_PORTFOLIOS.update(demo_north.PORTFOLIOS)
 TITLES += demo_north.TITLES
 
 # Fictional managing surveyors. They cannot sign in (no password is set).
@@ -389,7 +386,7 @@ class Command(BaseCommand):
         self.stdout.write(self.style.SUCCESS(
             f"Demo data loaded: {created} properties added, {updated} refreshed, {len(TITLES)} titles, "
             f"{lease_count} leases and licences, {charge_count} rent charges, {case_count} cases, "
-            f"{job_count} maintenance jobs, across Exampleton and Northfield."
+            f"{job_count} maintenance jobs, across Exampleton, Northfield, Westbrook and Kingsmere."
         ))
 
     def load_surveyors(self, refs):

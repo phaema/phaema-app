@@ -46,7 +46,7 @@ The first start takes several minutes while it builds. When it says PHAEMA is ru
 
 Choose a username and a password of at least 12 characters. Then open **http://localhost:8000** in your browser and sign in.
 
-To try PHAEMA with example records, load the demonstration estate of Demonstration District Council, covering two fictional districts, Exampleton and Northfield:
+To try PHAEMA with example records, load the demonstration estate of Demonstration District Council, covering four fictional districts, Exampleton, Northfield, Westbrook and Kingsmere:
 
 ```
 ./phaema.sh demo-data
