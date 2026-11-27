@@ -27,6 +27,11 @@ Everything since 0.9.0 (10 to 27 November 2026).
   (Manage data, API tokens), or set `PHAEMA_API_PASSWORD_SIGN_IN=True` while you move them over.
 
 ### Added
+- Moving from another system: a **trial run** of any import (properties, parties, leases, receipts and the rest)
+  that imports and then undoes it; **control totals** (rows and money or area columns) compared three ways, old
+  system, file and PHAEMA; a downloadable **check report** of every row with its problems and warnings;
+  **warnings** for possible duplicate parties and properties; and **migration runs** kept with their reports and
+  signed off by a second administrator. Help, Importing and exporting.
 - Tenant portal (optional, off by default) at `/tenant/`: tenants the estates team invites sign in with a code
   emailed each time and see, for their own agreements, the rent account with arrears by age, interest and the next
   credit control step, demands with Pay now links, the statement, key dates, documents the council shares, service

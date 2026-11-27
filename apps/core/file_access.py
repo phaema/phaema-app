@@ -27,7 +27,7 @@ RULES = {
     "valuations.Valuation": "valuations",
     "valuations.AuditReview": "valuations",
 }
-SERVED_ELSEWHERE = {"projects.GatewayDecision", "projects.ProjectDocument"}
+SERVED_ELSEWHERE = {"imports.MigrationRun", "projects.GatewayDecision", "projects.ProjectDocument"}
 
 
 def file_fields():

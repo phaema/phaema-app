@@ -29,6 +29,7 @@ class Column:
     required: bool = False
     guidance: str = ""
     example: str = ""
+    total: bool = False  # a figure to reconcile: the file's total against PHAEMA's after importing
 
 
 @dataclass
@@ -39,6 +40,7 @@ class RowResult:
     action: str = "create"  # create, update, unchanged
     changed: list = field(default_factory=list)
     errors: list = field(default_factory=list)
+    warnings: list = field(default_factory=list)  # worth a look, but not a reason to refuse the file
 
 
 @dataclass
@@ -63,6 +65,10 @@ class ImportResult:
     @property
     def error_count(self):
         return sum(1 for r in self.rows if r.errors)
+
+    @property
+    def warning_count(self):
+        return sum(1 for r in self.rows if r.warnings)
 
     def summary(self):
         """[(sheet label, created, updated, unchanged)]"""
@@ -114,6 +120,9 @@ class Sheet:
         if kind == "user":
             return find_user(text)
         raise ValueError(f"unknown column type {kind}")
+
+    def warn(self, obj, values, result):
+        """Things worth a look that do not stop the import, such as a possible duplicate. Add to result.warnings."""
 
     def check(self, obj, values, deferred, result):
         """Extra checks across columns. Add messages to result.errors."""
@@ -168,6 +177,8 @@ class Sheet:
                     result.changed.append(c.heading)
                 setattr(obj, c.field, value)
             self.check(obj, values, deferred, result)
+            if not result.errors:
+                self.warn(obj, values, result)
             if not result.errors:
                 try:
                     obj.full_clean(exclude=self.clean_exclude(obj), validate_unique=not obj.pk)

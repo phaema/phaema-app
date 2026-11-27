@@ -49,7 +49,7 @@ class ComponentSheet(Sheet):
         Column("Condition", "condition", "choice", example="B: satisfactory, minor deterioration",
                guidance="A good, B satisfactory, C poor, D bad."),
         Column("Condition assessed", "condition_on", "date", example="01/09/2026"),
-        Column("Replacement cost", "replacement_cost", "decimal", example="38000"),
+        Column("Replacement cost", "replacement_cost", "decimal", total=True, example="38000"),
         Column("Capital", "capital", "bool", example="Yes",
                guidance="Yes if replacing it is capital spending (the default), No for revenue."),
         Column("Notes", "notes"),

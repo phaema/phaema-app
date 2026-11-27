@@ -28,7 +28,7 @@
       <th scope="col" class="govuk-table__header">{% translate "Result" %}</th>
     </tr></thead>
     <tbody class="govuk-table__body">
-    {% for r in result.rows %}
+    {% for r in outcome.rows %}
       <tr class="govuk-table__row">
         <td class="govuk-table__cell">{{ r.number }}</td>
         <td class="govuk-table__cell">{{ r.reference|default:"–" }}</td>
@@ -38,20 +38,13 @@
           {% elif r.action == "create" %}<strong class="govuk-tag govuk-tag--green">{% translate "New" %}</strong>
           {% elif r.action == "update" %}<strong class="govuk-tag govuk-tag--blue">{% translate "Update" %}</strong> <span class="govuk-body-s">{{ r.changed|join:", " }}</span>
           {% else %}<strong class="govuk-tag govuk-tag--grey">{% translate "No change" %}</strong>{% endif %}
+          {% if r.warnings %}<ul class="govuk-list govuk-body-s govuk-!-margin-top-1">{% for w in r.warnings %}<li><strong class="govuk-tag govuk-tag--yellow">{% translate "Check" %}</strong> {{ w }}</li>{% endfor %}</ul>{% endif %}
         </td>
       </tr>
     {% endfor %}
     </tbody>
   </table>
-  {% if result.ok %}
-  <form method="post">{% csrf_token %}
-    <input type="hidden" name="token" value="{{ token }}">
-    <div class="govuk-button-group">
-      <button class="govuk-button" name="confirm" value="1" data-module="govuk-button">{% translate "Import these properties" %}</button>
-      <a class="govuk-link" href="{% url 'properties:import' %}">{% translate "Cancel" %}</a>
-    </div>
-  </form>
-  {% endif %}
+  {% include "imports/_run_form.html" %}
   <h2 class="govuk-heading-m">{% translate "Upload a different file" %}</h2>
 {% else %}
   <p class="govuk-body">{% translate "Add or update many properties at once from an Excel or CSV file. You will see a preview and can check it before anything is saved." %}</p>
