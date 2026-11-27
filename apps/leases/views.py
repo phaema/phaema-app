@@ -456,3 +456,33 @@ def ifrs16_pack(request):
     response = HttpResponse(content, content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
     response["Content-Disposition"] = f'attachment; filename="IFRS 16 data pack {ifrs16.year_label(year).replace("/", "-")}.xlsx"'
     return response
+
+
+@login_required
+def messages_page(request, pk):
+    """Messages with the tenant through the tenant portal: read and answer. Administrators and surveyors."""
+    from django.contrib import messages as flash
+    from django.core.exceptions import PermissionDenied
+    from django.shortcuts import get_object_or_404, redirect
+    from django.utils.translation import gettext as _
+
+    from apps.core.roles import is_administrator, is_surveyor
+    from apps.portal import messaging
+
+    lease = get_object_or_404(Lease.objects.select_related("counterparty"), pk=pk)
+    if not (is_administrator(request.user) or is_surveyor(request.user)):
+        raise PermissionDenied
+    if request.method == "POST":
+        text = request.POST.get("text", "").strip()[:4000]
+        case = lease.cases.filter(pk=request.POST.get("case") or 0, how_received="portal").first()
+        if not text:
+            flash.error(request, _("Write the reply."))
+        else:
+            messaging.reply(lease, request.user, text, case)
+            flash.success(request, _("Reply sent. The tenant has been emailed that there is a reply."))
+        return redirect("leases:messages", pk=lease.pk)
+    thread = list(lease.portal_messages.select_related("case", "author", "account"))
+    return render(request, "leases/messages.html", {
+        "object": lease, "thread": thread, "staff_view": True,
+        "answerers": sorted(messaging.answerers(lease), key=lambda u: u.get_full_name() or u.username),
+        "cases": lease.cases.filter(how_received="portal").select_related("case_type")})

@@ -1,0 +1,22 @@
+{% extends "portal/base.html" %}{% load i18n %}
+{% block title %}{% translate "Messages" %} {{ lease.reference }}{% endblock %}
+{% block content %}
+<a class="govuk-back-link" href="{% url 'portal:agreement' lease.pk %}">{{ lease.reference }}</a>
+<div class="govuk-grid-row"><div class="govuk-grid-column-two-thirds">
+{% include "portal/_errors.html" %}
+<span class="govuk-caption-l">{{ lease.reference }}</span>
+<h1 class="govuk-heading-l">{% translate "Messages" %}</h1>
+<p class="govuk-body">{% translate "Messages go to the surveyor who manages your premises, or whoever is covering for them. We email you when there is a reply. For anything urgent, such as a repair that puts someone at risk, phone the council." %}</p>
+{% include "portal/_thread.html" %}
+<form method="post" novalidate>{% csrf_token %}
+  {% if form.case.field.queryset.exists %}<div class="govuk-form-group"><label class="govuk-label" for="id_case">{{ form.case.label }}</label>
+    <select class="govuk-select" id="id_case" name="case"><option value="">{% translate "The agreement" %}</option>{% for c in form.case.field.queryset %}<option value="{{ c.pk }}"{% if form.case.value|stringformat:"s" == c.pk|stringformat:"s" %} selected{% endif %}>{{ c.display_reference }} {{ c.case_type.name }}</option>{% endfor %}</select></div>{% endif %}
+  <div class="govuk-form-group{% if form.text.errors %} govuk-form-group--error{% endif %}">
+    <label class="govuk-label govuk-label--s" for="id_text">{{ form.text.label }}</label>
+    {% for e in form.text.errors %}<p class="govuk-error-message">{{ e }}</p>{% endfor %}
+    <textarea class="govuk-textarea" id="id_text" name="text" rows="5">{{ form.text.value|default:'' }}</textarea>
+  </div>
+  <button class="govuk-button" data-module="govuk-button" data-prevent-double-click="true">{% translate "Send" %}</button>
+</form>
+</div></div>
+{% endblock %}

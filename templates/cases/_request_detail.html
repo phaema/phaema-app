@@ -10,4 +10,4 @@
 <h2 class="govuk-heading-m">{% translate "Documents" %}</h2>
 {% if documents %}<ul class="govuk-list">{% for d in documents %}<li><a class="govuk-link" href="{% url doc_url case.pk d.pk %}">{{ d.description }}</a>, {{ d.created_at|date:"j M Y" }}</li>{% endfor %}</ul>
 {% else %}<p class="govuk-body">{% translate "None yet." %}</p>{% endif %}
-<p class="govuk-body">{% translate "To add something or ask a question, contact the estates team and quote the reference." %}</p>
+{% if message_url %}<p class="govuk-body"><a class="govuk-link" href="{{ message_url }}">{% translate "Send a message about this request" %}</a></p>{% else %}<p class="govuk-body">{% translate "To add something or ask a question, contact the estates team and quote the reference." %}</p>{% endif %}

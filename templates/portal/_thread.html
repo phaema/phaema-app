@@ -1,0 +1,11 @@
+{% load i18n %}{# A message thread. Shared by the tenant portal and the staff page. #}
+{% if thread %}
+<ol class="govuk-list phaema-thread">
+{% for m in thread %}
+  <li{% if forloop.last %} id="latest"{% endif %} class="govuk-inset-text govuk-!-margin-top-2 govuk-!-margin-bottom-2"{% if m.direction == "out" %} style="border-left-color: #1d70b8"{% endif %}>
+    <p class="govuk-body-s govuk-!-margin-bottom-1"><strong>{{ m.sender }}</strong>{% if m.direction == "out" and staff_view %} ({% translate "to the tenant" %}){% endif %} · {{ m.created_at|date:"j M Y H:i" }}{% if m.case %} · {% blocktranslate with ref=m.case.display_reference %}about {{ ref }}{% endblocktranslate %}{% endif %}</p>
+    <p class="govuk-body govuk-!-margin-bottom-0">{{ m.text|linebreaksbr }}</p>
+  </li>
+{% endfor %}
+</ol>
+{% else %}<p class="govuk-body">{% translate "No messages yet." %}</p>{% endif %}

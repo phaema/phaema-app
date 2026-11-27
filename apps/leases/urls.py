@@ -10,6 +10,7 @@ urlpatterns = [
     path("<int:pk>/", views.LeaseDetailView.as_view(), name="detail"),
     path("<int:pk>/files/", views.lease_files, name="files"),
     path("documents/<int:pk>/share/", views.document_share, name="document-share"),
+    path("<int:pk>/messages/", views.messages_page, name="messages"),
     path("events/", event_views.EventListView.as_view(), name="events"),
     path("events/<int:pk>/", event_views.event_detail, name="event"),
     path("<int:lease_pk>/events/add/", event_views.event_add, name="event-add"),

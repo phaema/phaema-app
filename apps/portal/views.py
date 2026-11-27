@@ -7,6 +7,7 @@ from django.conf import settings
 from django.core.cache import cache
 from django.http import FileResponse, Http404
 from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
 from django.utils import timezone
 from django.utils.translation import gettext as _
 from django.views.decorators.cache import never_cache
@@ -111,6 +112,18 @@ def _lease(request, pk):
     return get_object_or_404(access.agreements_for(request.portal_account), pk=pk)
 
 
+def _plan_view(lease, today):
+    """The tenant's payment plan, if one is in place or was broken recently: instalments and progress."""
+    from apps.ledger import creditcontrol
+
+    plan = creditcontrol.active_plan(lease) or lease.payment_plans.filter(status="broken").order_by("-agreed_on").first()
+    if plan is None:
+        return None
+    state = creditcontrol.plan_state(plan, today)
+    return {"plan": plan, "state": state, "instalments": list(plan.instalments.all()),
+            "paid": max(plan.amount - state.remaining, 0)}
+
+
 def _statement_line(line):
     if line.kind == "receipt":
         return {"when": line.when, "receipt": True, "credited": line.credit, "balance": line.balance}
@@ -164,6 +177,17 @@ def agreement(request, pk):
         ctx.update(_money_view(lease, settings_row, today))
     from apps.cases import requests as asks
 
+    ctx["insurance"] = {"who": lease.get_insurance_display(), "tenant": lease.insurance == lease.Insurance.TENANT,
+                        "certificate": lease.insurance_certificate()}
+    ctx["unread"] = lease.portal_messages.filter(direction="out", read_at__isnull=True).count()
+    if account.finance:
+        from apps.leases.models import deposit_account
+
+        rows, balance = deposit_account(lease)
+        if rows:
+            ctx["deposit_rows"], ctx["deposit_balance"] = rows, balance
+        if settings_row.rent_ledger_enabled:
+            ctx["plan"] = _plan_view(lease, today)
     ctx["can_ask"] = asks.tenant_types().exists()
     ctx["requests"] = list(asks.tenant_cases(account).filter(lease=lease)[:20])
     ctx["request_url"] = "portal:request"
@@ -228,7 +252,8 @@ def request_detail(request, pk):
     case = get_object_or_404(asks.tenant_cases(request.portal_account), pk=pk)
     return render(request, "portal/request_detail.html", {
         "case": case, "progress": asks.progress(case), "documents": asks.shared_documents(case),
-        "doc_url": "portal:request-document"})
+        "doc_url": "portal:request-document",
+        "message_url": f"{reverse('portal:messages', args=[case.lease_id])}?case={case.pk}"})
 
 
 @tenant_required
@@ -366,6 +391,73 @@ def certificate(request, pk, req_pk):
                                notes=_("Uploaded in the tenant portal by %(name)s.") % {"name": account.name})
         return render(request, "portal/certificate_sent.html", {"lease": lease, "cert": cert})
     return render(request, "portal/certificate.html", {"lease": lease, "req": req, "form": form})
+
+
+@tenant_required
+def messages_page(request, pk):
+    """Messages with the estates team about this agreement, answered by the managing surveyor or their cover."""
+    from django import forms
+
+    from apps.cases import requests as asks
+
+    from . import messaging
+    from .models import PortalMessage
+
+    account = request.portal_account
+    lease = _lease(request, pk)
+    cases = asks.tenant_cases(account).filter(lease=lease)
+
+    class MessageForm(forms.Form):
+        case = forms.ModelChoiceField(cases, required=False, label=_("About"), empty_label=_("The agreement"))
+        text = forms.CharField(widget=forms.Textarea(attrs={"rows": 5}), max_length=4000, label=_("Your message"))
+
+    form = MessageForm(request.POST or None, initial={"case": request.GET.get("case")})
+    if request.method == "POST" and form.is_valid():
+        messaging.from_tenant(lease, account, form.cleaned_data["text"], form.cleaned_data["case"])
+        return redirect(f"{reverse('portal:messages', args=[lease.pk])}#latest")
+    thread = list(lease.portal_messages.select_related("case", "author", "account"))
+    lease.portal_messages.filter(direction=PortalMessage.Direction.TO_TENANT, read_at__isnull=True) \
+        .update(read_at=timezone.now())
+    return render(request, "portal/messages.html", {"lease": lease, "thread": thread, "form": form})
+
+
+@tenant_required
+def insurance(request, pk):
+    """Send the tenant's insurance certificate, where the tenant insures. Filed with the agreement's documents."""
+    from django import forms
+
+    from apps.core.files import validate_pdf
+    from apps.leases.models import LeaseDocument
+
+    account = request.portal_account
+    lease = _lease(request, pk)
+    if lease.insurance != lease.Insurance.TENANT:
+        raise Http404
+
+    class InsuranceForm(forms.Form):
+        insurer = forms.CharField(max_length=120, label=_("Insurer"))
+        valid_until = forms.DateField(label=_("Cover runs until"), widget=forms.DateInput(attrs={"type": "date"}))
+        file = forms.FileField(label=_("The certificate or schedule"), validators=[validate_pdf],
+                               help_text=_("PDF, up to 25 MB"))
+
+        def clean_valid_until(self):
+            day = self.cleaned_data["valid_until"]
+            if day < date.today():
+                raise forms.ValidationError(_("This cover has already run out. Send the current certificate."))
+            return day
+
+    form = InsuranceForm(request.POST or None, request.FILES or None)
+    if request.method == "POST" and form.is_valid():
+        d = form.cleaned_data
+        upload = d["file"]
+        doc = LeaseDocument(lease=lease, document_type=LeaseDocument.DocumentType.INSURANCE,
+                            description=(_("Insurance certificate from the tenant: %(insurer)s")
+                                         % {"insurer": d["insurer"]})[:200],
+                            document_date=date.today(), review_date=d["valid_until"], file=upload,
+                            original_filename=upload.name[:255], shared_with_tenant=True, portal_account=account)
+        doc.save()
+        return render(request, "portal/insurance_sent.html", {"lease": lease, "doc": doc})
+    return render(request, "portal/insurance.html", {"lease": lease, "form": form})
 
 
 @tenant_required

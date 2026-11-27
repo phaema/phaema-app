@@ -63,6 +63,26 @@ For each agreement the council lets to them:
 Agreements stay visible for 12 months after they end, so deposit and dilapidations can be settled. Agreements still
 at heads of terms are never shown.
 
+## Messages
+
+Tenants can send the estates team a message about an agreement, or about one of their requests, from **Messages
+with the estates team** on the agreement page. It goes to the managing surveyor of the property and anyone
+[covering for them](users-and-roles.md) that day; if no one manages the property, to the administrators. They are
+emailed that there is a message (the text stays in PHAEMA) and see **Message from a tenant** on their dashboard.
+
+Open the agreement and choose the link to the messages, read the thread and **Send the reply**. The tenant is emailed
+through GOV.UK Notify that there is a reply, and sees it in the portal. Administrators and surveyors can reply.
+
+## Insurance, rent deposit and payment plan
+
+- **Insurance**: tenants see who insures under their agreement. Where the tenant insures, they see the date of the
+  latest certificate you hold and can **send your insurance certificate** (insurer, when the cover runs until, and
+  a PDF). It is filed with the agreement's documents as an insurance certificate, marked as sent by the tenant, with
+  the cover end date as its date for review, so it comes up on the dashboard before it runs out.
+- **Rent deposit** (finance rights): the balance held and every movement, as on the agreement's deposit account.
+- **Payment plan** (finance rights): when a plan is in place or was recently not kept, the arrears it covers, how
+  much is paid off and still to pay, whether it is on track or behind, and the instalments.
+
 ## Sharing documents
 
 Documents are not shared unless you choose. On the agreement, under **Documents**, choose **Share with tenant**
