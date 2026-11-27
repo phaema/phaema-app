@@ -193,9 +193,23 @@ def build(user, today=None, viewer=None):
                             f"{case.display_reference} {case.case_type.name}", case.get_absolute_url(),
                             case.get_how_received_display()))
 
-    # Repairs reported by tenants and council departments, waiting to be looked at.
+    # Certificates tenants sent in the tenant portal, waiting to be checked.
     from .access import can_use
 
+    if can_use(user, "compliance"):
+        from apps.compliance.models import Certificate
+
+        sent = Certificate.objects.filter(portal_account__isnull=False, checked_on__isnull=True).select_related(
+            "requirement__kind", "requirement__property")
+        if not is_administrator(user):
+            sent = sent.filter(requirement__property__managing_surveyor=user)
+        for cert in sent[:20]:
+            prop = cert.requirement.property
+            now.append(Item(None, _("Certificate from a tenant to check"), "estate",
+                            f"{cert.requirement.kind.name}, {prop.name}",
+                            reverse("compliance:property", args=[prop.pk]), cert.portal_account.name))
+
+    # Repairs reported by tenants and council departments, waiting to be looked at.
     if can_use(user, "maintenance"):
         from apps.maintenance.reports import queue_for
 

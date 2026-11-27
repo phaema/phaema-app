@@ -1,0 +1,23 @@
+{% extends "portal/base.html" %}{% load i18n %}
+{% block title %}{% translate "Ask about your service charge" %}{% endblock %}
+{% block content %}
+<a class="govuk-back-link" href="{% url 'portal:agreement' lease.pk %}">{{ lease.reference }}</a>
+<div class="govuk-grid-row"><div class="govuk-grid-column-two-thirds">
+{% include "portal/_errors.html" %}
+<span class="govuk-caption-l">{{ year.schedule.name }} {{ year.label }}</span>
+<h1 class="govuk-heading-l">{% translate "Ask about your service charge" %}</h1>
+<p class="govuk-body">{% translate "The estates team will look into it and reply. You can follow your question under Requests on the agreement page." %}</p>
+<form method="post" novalidate>{% csrf_token %}
+  <div class="govuk-form-group">
+    <label class="govuk-label" for="id_heading">{{ form.heading.label }}</label>
+    <select class="govuk-select" id="id_heading" name="heading">{% for value, label in form.heading.field.choices %}<option value="{{ value }}"{% if form.heading.value == value %} selected{% endif %}>{{ label }}</option>{% endfor %}</select>
+  </div>
+  <div class="govuk-form-group{% if form.question.errors %} govuk-form-group--error{% endif %}">
+    <label class="govuk-label" for="id_question">{{ form.question.label }}</label>
+    {% for e in form.question.errors %}<p class="govuk-error-message">{{ e }}</p>{% endfor %}
+    <textarea class="govuk-textarea" id="id_question" name="question" rows="5">{{ form.question.value|default:'' }}</textarea>
+  </div>
+  <button class="govuk-button" data-module="govuk-button" data-prevent-double-click="true">{% translate "Send the question" %}</button>
+</form>
+</div></div>
+{% endblock %}

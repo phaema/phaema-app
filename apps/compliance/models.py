@@ -51,6 +51,7 @@ class Requirement(TimeStampedModel):
     responsible_reason = models.CharField(_("why"), max_length=200, blank=True)
     notes = models.TextField(_("notes"), blank=True)
     active = models.BooleanField(_("active"), default=True)
+    tenant_reminded_on = models.DateField(_("tenant last reminded"), null=True, blank=True, editable=False)
 
     class Meta:
         ordering = ["property__reference", "kind__order"]
@@ -96,6 +97,11 @@ class Certificate(TimeStampedModel):
     job = models.ForeignKey("maintenance.Job", on_delete=models.SET_NULL, null=True, blank=True,
                             related_name="certificates", verbose_name=_("job"))
     notes = models.TextField(_("notes"), blank=True)
+    portal_account = models.ForeignKey("portal.PortalAccount", on_delete=models.SET_NULL, null=True, blank=True,
+                                       related_name="certificates", verbose_name=_("uploaded by (tenant portal)"))
+    checked_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True,
+                                   related_name="+", verbose_name=_("checked by"))
+    checked_on = models.DateField(_("checked"), null=True, blank=True)
 
     class Meta:
         ordering = ["-issued_on", "-pk"]

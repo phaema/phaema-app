@@ -8,7 +8,7 @@
 <p class="govuk-body"><a class="govuk-link" href="{{ property.get_absolute_url }}">{% translate "Property record" %}</a>{% if maintenance_on %} · <a class="govuk-link" href="{% url 'maintenance:property' property.pk %}">{% translate "Maintenance" %}</a>{% endif %}</p>
 
 <h2 class="govuk-heading-m">{% translate "Certificates" %}</h2>
-{% include "compliance/_status_table.html" with rows=reqs empty=_("No certificates set up for this property yet.") hide_property=True %}
+{% include "compliance/_status_table.html" with rows=reqs empty=_("No certificates set up for this property yet.") hide_property=True can_check=editable %}
 
 {% if editable %}
 {% if reqs %}<details class="govuk-details" data-module="govuk-details"><summary class="govuk-details__summary"><span class="govuk-details__summary-text">{% translate "Record a certificate" %}</span></summary><div class="govuk-details__text">

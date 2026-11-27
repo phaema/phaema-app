@@ -198,8 +198,10 @@ def _days_in_force(lease, year):
 def reconcile(year):
     actual = actual_total(year)
     share_list, _area, _void = shares(year.schedule)
-    demanded = dict(Charge.objects.filter(service_year=year).values("lease").annotate(t=Sum("net"))
-                    .values_list("lease", "t"))
+    # What was charged on account (and any credits against those demands). Balancing charges and credits raised
+    # at reconciliation have no period and are left out, so the statement still shows the balance after it.
+    demanded = dict(Charge.objects.filter(service_year=year, period_start__isnull=False).values("lease")
+                    .annotate(t=Sum("net")).values_list("lease", "t"))
     lines = []
     for s in share_list:
         days = _days_in_force(s.member.lease, year)

@@ -24,8 +24,8 @@ choose **Add**, pick the tenant, and enter the person's name and their own email
 
 - **Finance**: the account, balance, overdue amounts, demands with **Pay now**, the statement, and asking to change
   contact details for demands.
-- **Facilities**: [reporting repairs](repair-reports.md) and following them, and later certificates and service
-  charges. On its own it also shows key dates and shared documents.
+- **Facilities**: [reporting repairs](repair-reports.md), service charge budgets and statements, and certificates
+  the tenant provides. It also shows key dates and shared documents.
 
 PHAEMA emails an invitation when you save. To send it again, tick the account and choose **Send the invitation
 email again**. To stop someone signing in, untick **Active**: they are signed out at their next click. Accounts are
@@ -52,6 +52,11 @@ For each agreement the council lets to them:
 - **Requests**: **Make a request** for a consent, such as to assign, underlet or alter the premises, with guidance
   and a list of documents to attach for each kind. It opens a case at once, and the tenant follows its stage, target
   date and decision. See [requests from tenants and departments](cases.md#requests-from-tenants-and-departments).
+- **Service charges** (facilities rights, with the service charge module on): the budget and year-end statements
+  you have issued, and a way to query a line. See [service charges](service-charges.md#in-the-tenant-portal).
+- **Certificates you provide** (facilities rights, with the compliance module on): certificates the tenant must
+  arrange, such as a gas safety record, with their status, and a way to send a new one. Tenants are reminded by email
+  before they run out. See [compliance](compliance.md#certificates-tenants-provide).
 - **Repairs** (facilities rights, with the maintenance module on): **Report a repair**, and each report's progress,
   target date and who pays. See [repair reports](repair-reports.md).
 

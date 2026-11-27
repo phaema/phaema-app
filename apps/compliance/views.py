@@ -129,6 +129,12 @@ def _do(request, prop, action):
                                       priority=post.get("priority", "medium"))
         messages.success(request, _("%(kind)s recorded, valid until %(d)s.")
                          % {"kind": req.kind.name, "d": cert.expires_on.strftime("%-d %B %Y")})
+    elif action == "check_certificate":
+        cert = get_object_or_404(Certificate, pk=post.get("certificate"), requirement__property=prop,
+                                 portal_account__isnull=False, checked_on__isnull=True)
+        cert.checked_by, cert.checked_on = request.user, date.today()
+        cert.save(update_fields=["checked_by", "checked_on", "updated_at"])
+        messages.success(request, _("Certificate marked as checked."))
     elif action == "responsible":
         req = get_object_or_404(Requirement, pk=post.get("requirement"), property=prop)
         if post.get("responsible") in Requirement.Responsible.values:

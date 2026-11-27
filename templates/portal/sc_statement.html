@@ -1,0 +1,7 @@
+{% extends "portal/base.html" %}{% load i18n %}
+{% block title %}{% translate "Service charge statement" %} {{ year.label }}{% endblock %}
+{% block content %}
+<a class="govuk-back-link" href="{% url 'portal:agreement' lease.pk %}">{{ lease.reference }}</a>
+{% include "servicecharges/_statement_body.html" %}
+<p class="govuk-body"><a class="govuk-link" href="{% url 'portal:sc-query' lease.pk year.pk %}">{% translate "Query a line of this statement" %}</a></p>
+{% endblock %}

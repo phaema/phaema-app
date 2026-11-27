@@ -1,0 +1,38 @@
+{% extends "portal/base.html" %}{% load i18n %}
+{% block title %}{{ req.kind.name }}{% endblock %}
+{% block content %}
+<a class="govuk-back-link" href="{% url 'portal:agreement' lease.pk %}">{{ lease.reference }}</a>
+<div class="govuk-grid-row"><div class="govuk-grid-column-two-thirds">
+{% include "portal/_errors.html" %}
+<span class="govuk-caption-l">{{ req.property.name }}</span>
+<h1 class="govuk-heading-l">{% blocktranslate with kind=req.kind.name %}Send your {{ kind }}{% endblocktranslate %}</h1>
+<p class="govuk-body">{% blocktranslate with months=req.kind.valid_months %}Under your agreement you arrange this and send the council a copy. It lasts {{ months }} months from the date of the inspection. The estates team checks every certificate you send.{% endblocktranslate %}</p>
+<form method="post" enctype="multipart/form-data" novalidate>{% csrf_token %}
+  <div class="govuk-form-group{% if form.issued_on.errors %} govuk-form-group--error{% endif %}">
+    <label class="govuk-label" for="id_issued_on">{{ form.issued_on.label }}</label>
+    {% for e in form.issued_on.errors %}<p class="govuk-error-message">{{ e }}</p>{% endfor %}
+    <input class="govuk-input govuk-input--width-10" id="id_issued_on" name="issued_on" type="date" value="{{ form.issued_on.value|default:'' }}">
+  </div>
+  <div class="govuk-form-group"><fieldset class="govuk-fieldset"><legend class="govuk-fieldset__legend">{{ form.result.label }}</legend>
+    <div class="govuk-radios govuk-radios--small" data-module="govuk-radios">{% for value, label in form.result.field.choices %}<div class="govuk-radios__item"><input class="govuk-radios__input" id="result-{{ value }}" name="result" type="radio" value="{{ value }}"{% if form.result.value|default:"ok" == value %} checked{% endif %}><label class="govuk-label govuk-radios__label" for="result-{{ value }}">{{ label }}</label></div>{% endfor %}</div>
+  </fieldset></div>
+  <div class="govuk-form-group{% if form.carried_out_by.errors %} govuk-form-group--error{% endif %}">
+    <label class="govuk-label" for="id_carried_out_by">{{ form.carried_out_by.label }}</label>
+    <div class="govuk-hint">{{ form.carried_out_by.help_text }}</div>
+    {% for e in form.carried_out_by.errors %}<p class="govuk-error-message">{{ e }}</p>{% endfor %}
+    <input class="govuk-input" id="id_carried_out_by" name="carried_out_by" maxlength="200" value="{{ form.carried_out_by.value|default:'' }}">
+  </div>
+  <div class="govuk-form-group">
+    <label class="govuk-label" for="id_reference">{{ form.reference.label }}</label>
+    <input class="govuk-input govuk-input--width-20" id="id_reference" name="reference" maxlength="60" value="{{ form.reference.value|default:'' }}">
+  </div>
+  <div class="govuk-form-group{% if form.file.errors %} govuk-form-group--error{% endif %}">
+    <label class="govuk-label" for="id_file">{{ form.file.label }}</label>
+    <div class="govuk-hint" id="file-hint">{{ form.file.help_text }}</div>
+    {% for e in form.file.errors %}<p class="govuk-error-message">{{ e }}</p>{% endfor %}
+    <div class="govuk-drop-zone" data-module="govuk-file-upload" data-i18n.choose-file-button="{% translate 'Choose file' %}" data-i18n.drop-instruction="{% translate 'or drop file here' %}" data-i18n.no-file-chosen="{% translate 'No file chosen' %}"><input class="govuk-file-upload" id="id_file" name="file" type="file" aria-describedby="file-hint"></div>
+  </div>
+  <button class="govuk-button" data-module="govuk-button" data-prevent-double-click="true">{% translate "Send the certificate" %}</button>
+</form>
+</div></div>
+{% endblock %}

@@ -134,6 +134,14 @@ Each lease has a printable **service charge statement** for the year, linked fro
 schedule's budget and actual costs by heading, the tenant's share, the days and any cap applied, what was paid on
 account, and the balance. Before the year is reconciled it is marked as a draft.
 
+### In the tenant portal
+
+Tenants with a [tenant portal](tenant-portal.md) account with facilities rights see the same budget statement once
+you record **budget issued to tenants** on the year, and the same year-end statement once the year is reconciled and
+you record **year-end statements issued**. Nothing is shown before then. From either, they can **query a line**: this
+opens a **Service charge query or dispute** case on their agreement, received through the tenant portal, which they
+can follow under Requests.
+
 ## Worked example
 
 **Northfield Business Park services** shares the cost of the gatehouse security, roads, landscaping, CCTV and waste

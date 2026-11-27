@@ -53,6 +53,19 @@ expiry from the usual period, or enter the date on the certificate. For an EPC o
 | Expires soon | Expires within 60 days: book the next inspection |
 | Expired, Missing or Unsatisfactory | Shown red on the dashboard and the compliance page |
 
+### Certificates tenants provide
+
+Where a certificate is the tenant's to arrange (**Tenant (council keeps a copy)**), tenants with a
+[tenant portal](tenant-portal.md) account with facilities rights see it on their agreement page, with its status and
+expiry, and can **send a new one**: the date, the result, who carried it out, the certificate number and the file.
+It is recorded at once, marked **Sent in the tenant portal** and **Waiting to be checked**; the managing surveyor (or
+an administrator) sees **Certificate from a tenant to check** on their dashboard and chooses **Mark as checked** on
+this page once they have looked at it.
+
+PHAEMA emails those tenants, through GOV.UK Notify, when such a certificate is missing, has run out or runs out in
+the next 30 days, at most once every 30 days for each certificate, with a link to send the new one. The daily tasks
+send these reminders.
+
 ### Remedial actions
 
 Type any actions from the certificate or assessment, one per line, with a priority: high (7 days), medium (30

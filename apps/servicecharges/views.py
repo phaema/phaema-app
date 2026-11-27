@@ -150,21 +150,13 @@ def year_matrix(request, pk):
 
 @service_view
 def budget_statement(request, pk, member_pk):
-    from apps.leases.workflow import PERIODS
+    from .tenant import budget_context
 
     year = get_object_or_404(ScheduleYear.objects.select_related("schedule"), pk=pk)
     member = get_object_or_404(ScheduleMember.objects.select_related("lease", "lease__counterparty"),
                                pk=member_pk, schedule=year.schedule)
     _check_member(request, member)
-    share = next(s for s in apportion.shares(year.schedule)[0] if s.member.pk == member.pk)
-    annual = apportion.on_account_annual(year, share)
-    periods = PERIODS.get(member.lease.rent_frequency)
-    return render(request, "servicecharges/budget_statement.html", {
-        "year": year, "member": member, "share": share, "annual": annual, "today": date.today(),
-        "per_payment": (annual / periods).quantize(Decimal("0.01")) if periods else None,
-        "rows": [(h, b) for h, b, _a in apportion.by_heading(year) if b],
-        "budget": apportion.budget_total(year),
-    })
+    return render(request, "servicecharges/budget_statement.html", budget_context(year, member))
 
 
 @finance_only
@@ -201,14 +193,10 @@ def reconcile(request, pk):
 
 @service_view
 def statement(request, pk, member_pk):
+    from .tenant import statement_context
+
     year = get_object_or_404(ScheduleYear.objects.select_related("schedule"), pk=pk)
     member = get_object_or_404(ScheduleMember.objects.select_related("lease", "lease__counterparty"),
                                pk=member_pk, schedule=year.schedule)
     _check_member(request, member)
-    recon = apportion.reconcile(year)
-    line = next(line for line in recon.lines if line.share.member.pk == member.pk)
-    return render(request, "servicecharges/statement.html", {
-        "year": year, "member": member, "line": line, "recon": recon, "today": date.today(),
-        "percent": (line.share.share * 100).quantize(Decimal("0.01")),
-        "balancing": Charge.objects.filter(service_year=year, lease=member.lease, period_start__isnull=True),
-    })
+    return render(request, "servicecharges/statement.html", statement_context(year, member))
