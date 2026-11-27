@@ -90,6 +90,10 @@ TYPES = [
         (A, "Consultation: services, ward members, partners and occupiers"),
         (D, "Outcome: the asset strategy decided, with who decided and the minute reference"),
         (C, "Start what follows: a project, a disposal or the next review")]),
+    ("space_request", "Space request from a department", "strategy", 28, False, None, "", None, [
+        ACK, (A, "Check the department's space, headcount and costs"),
+        (A, "Options: other council space, shared space, or an Asset Challenge"),
+        (D, "Agree the change, or refer it to an Asset Challenge"), (C, "Record the change in Space and occupiers")]),
     ("new_letting", "New letting or licence application", "enquiry", None, False, None, "", None, [
         ACK, (A, "Check availability and terms"),
         (A, "Heads of terms covering every item the RICS Code for leasing business premises requires"),
@@ -256,6 +260,34 @@ def add_checklist(case_type, item_model):
         for n, (heading, label, guidance, kind, checks, choices) in enumerate(CHECKLIST_BY_CODE.get(case_type.code, []))])
 
 
+# Requests tenants can make in the tenant portal, and council departments on their building pages.
+TENANT_REQUESTS = {
+    "assignment": ("Tell us who you want to assign to, and when.",
+                   "Details of the proposed new tenant\nTheir latest accounts or references"),
+    "underletting": ("Tell us which part you want to underlet, to whom, and on what terms.",
+                     "Details of the proposed undertenant\nThe draft underlease terms"),
+    "alterations": ("Describe the works and when you want to do them.",
+                    "Drawings of the works\nSpecification or method statement\nYour contractor's insurance"),
+    "change_of_use": ("Tell us the use you want and why.", ""),
+    "signage": ("Describe the sign, its size and where it will go.", "A drawing or photo of the sign"),
+    "charging": ("Tell us who the lender is.", "The lender's details"),
+    "sharing": ("Tell us who will share the premises and how.", ""),
+    "planning_consent": ("Describe the planning application you want to make.", "The draft application and drawings"),
+}
+DEPARTMENT_REQUESTS = {
+    "space_request": ("Tell us what you need: more space, space you can give back, a move or an alteration, how many "
+                      "people it affects and by when.", ""),
+}
+
+
+def request_defaults(code):
+    """Whether tenants or departments can ask for a shipped case type, and its guidance."""
+    tenant, dept = TENANT_REQUESTS.get(code), DEPARTMENT_REQUESTS.get(code)
+    guidance, documents = tenant or dept or ("", "")
+    return {"tenant_can_start": bool(tenant), "department_can_start": bool(dept), "request_guidance": guidance,
+            "request_documents": documents}
+
+
 def ensure_case_types():
     from .models import CaseType, CaseTypeChecklistItem, CaseTypeTask
 
@@ -268,6 +300,7 @@ def ensure_case_types():
             "heads_of_terms": code in HEADS_OF_TERMS,
             "asset_challenge": code == "asset_challenge",
             "visit_parts": visit_parts_for(code, group),
+            **request_defaults(code),
             "order": i * 10})
         if created:
             CaseTypeTask.objects.bulk_create([CaseTypeTask(case_type=case_type, stage=stage, description=text,

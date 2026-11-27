@@ -16,6 +16,22 @@ has a reference such as **CAS-2026-0042/DM-E01-U04**: the year, a number, and th
   **Start a case for this event** on an event's page.
 - **Requests and other work**: select **Cases**, then **Start a case**, or **Start a case** on an agreement or
   property page. Choose the type, link the agreement or property, and record how and when it arrived.
+- **Requests from tenants and departments**: tenants can ask for consents in the [tenant portal](tenant-portal.md),
+  and council departments' property liaisons can make space requests on their
+  [buildings pages](occupier-contacts.md). See [requests from tenants and departments](#requests-from-tenants-and-departments).
+
+## Requests from tenants and departments
+
+A request opens a case straight away, received **Tenant portal** or **Council department**, with its tasks and
+target date, owned by the property's managing surveyor (administrators see requests with no one to deal with them on
+their dashboard). What the person wrote is filed as received correspondence, with the documents they attached.
+
+The person who asked sees where it has got to (the stage, on hold, or the decision), the target date for a decision,
+the decision with its reasons and conditions, and documents. They see the documents they sent, and any others only
+when you choose **Share with the person who asked** next to the document on the case. Notes, tasks, approvals and
+anything else on the case stay internal. No fees are shown or taken: deal with any fee as now.
+
+Which case types tenants and departments can ask for is set on each case type (see below).
 
 ## Stages
 
@@ -299,7 +315,13 @@ council's legal officer, who can add notes, documents and correspondence to that
 
 ## Fees
 
-A case type can have a **fixed fee**, set by an administrator in **Manage data**, then **Case types**. On the case,
+A case type can have a **fixed fee**, set by an administrator in **Manage data**, then **Case types**.
+
+Each case type also says whether **tenants can ask for this in the tenant portal** and whether **council departments
+can ask for this**, with **guidance for people asking** and **documents to attach** (one per line), both shown on the
+request form. PHAEMA ships with the landlord's consents (assign, underlet, alterations, change of use, signage,
+charge, sharing and planning applications) open to tenants, and a **Space request from a department** type open to
+departments. On the case,
 an administrator selects **Charge the fee to the tenant**, which raises it on the tenant's
 [rent account](rent-ledger.md) as an invoice that goes to finance with the next export.
 

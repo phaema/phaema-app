@@ -1,0 +1,9 @@
+{% extends "base.html" %}{% load i18n %}
+{% block title %}{{ case.display_reference }}{% endblock %}
+{% block help_page %}occupier-contacts{% endblock %}
+{% block breadcrumbs %}<div class="govuk-breadcrumbs"><ol class="govuk-breadcrumbs__list">
+  <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="{% url 'occupier:home' %}">{% translate "Your buildings" %}</a></li>
+  {% if case.property %}<li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="{% url 'occupier:building' case.property_id %}">{{ case.property.name }}</a></li>{% endif %}</ol></div>{% endblock %}
+{% block content %}
+{% include "cases/_request_detail.html" %}
+{% endblock %}

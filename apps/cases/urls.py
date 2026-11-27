@@ -8,6 +8,7 @@ app_name = "cases"
 urlpatterns = [
     path("", views.CaseListView.as_view(), name="list"),
     path("new/", views.case_new, name="new"),
+    path("documents/<int:pk>/share/", views.document_share, name="document-share"),
     path("<int:pk>/", views.case_detail, name="detail"),
     path("<int:pk>/site-visit/", views.site_visit_sheet, name="site-visit"),
     path("<int:pk>/visits/start/", visit_views.visit_start, name="visit-start"),

@@ -1,0 +1,7 @@
+{% extends "portal/base.html" %}{% load i18n %}
+{% block title %}{% translate "Request sent" %}{% endblock %}
+{% block content %}
+<div class="govuk-panel govuk-panel--confirmation"><h1 class="govuk-panel__title">{% translate "Request sent" %}</h1><div class="govuk-panel__body">{% translate "Your reference" %}<br><strong>{{ case.display_reference }}</strong></div></div>
+<p class="govuk-body">{% translate "The estates team will acknowledge it and you can follow progress on the agreement page." %}</p>
+<p class="govuk-body"><a class="govuk-link" href="{% url 'portal:agreement' lease.pk %}">{% translate "Back to the agreement" %}</a></p>
+{% endblock %}

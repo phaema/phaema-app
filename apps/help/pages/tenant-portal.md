@@ -49,6 +49,9 @@ For each agreement the council lets to them:
 - **Key dates**: rent review, break dates and notice deadlines, option dates and expiry still to come.
 - **Documents**: only the ones you share.
 - **Contact details for demands**, with a way to ask for a change.
+- **Requests**: **Make a request** for a consent, such as to assign, underlet or alter the premises, with guidance
+  and a list of documents to attach for each kind. It opens a case at once, and the tenant follows its stage, target
+  date and decision. See [requests from tenants and departments](cases.md#requests-from-tenants-and-departments).
 - **Repairs** (facilities rights, with the maintenance module on): **Report a repair**, and each report's progress,
   target date and who pays. See [repair reports](repair-reports.md).
 

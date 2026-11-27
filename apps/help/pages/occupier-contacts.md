@@ -38,6 +38,13 @@ about it. Until then it shows as **Waiting to be checked**. Every figure records
 
 People who can see, read only, cannot record figures.
 
+## Making a request
+
+Property liaisons can choose **Make a request** on a building page to ask the estates team for more space, to give
+space back, a move or an alteration. Say what you need, how many people it affects and by when, and attach anything
+useful. It goes straight to the estates team as a case; you can follow where it has got to, the target date and the
+decision on the building page. People who can see, read only, can follow requests but not make them.
+
 ## Reporting a repair
 
 If the council's maintenance module is on, the building page has a **Repairs** section. Property liaisons can choose

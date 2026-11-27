@@ -13,5 +13,8 @@ urlpatterns = [
     path("agreements/<int:pk>/", views.agreement, name="agreement"),
     path("agreements/<int:pk>/contact/", views.contact, name="contact"),
     path("agreements/<int:pk>/repair/", views.repair, name="repair"),
+    path("agreements/<int:pk>/request/", views.request_new, name="request-new"),
+    path("requests/<int:pk>/", views.request_detail, name="request"),
+    path("requests/<int:pk>/documents/<int:doc>/", views.request_document, name="request-document"),
     path("documents/<int:pk>/", views.document, name="document"),
 ]

@@ -77,6 +77,12 @@
 </dl>
 {% else %}<p class="govuk-body">{% translate "No dates coming up." %}</p>{% endif %}
 
+{% if can_ask or requests %}
+<h2 class="govuk-heading-m">{% translate "Requests" %}</h2>
+{% if can_ask %}<p class="govuk-body"><a class="govuk-button govuk-button--secondary" href="{% url 'portal:request-new' lease.pk %}">{% translate "Make a request" %}</a></p>{% endif %}
+{% include "cases/_request_list.html" %}
+{% endif %}
+
 {% if can_report %}
 <h2 class="govuk-heading-m">{% translate "Repairs" %}</h2>
 <p class="govuk-body"><a class="govuk-button govuk-button--secondary" href="{% url 'portal:repair' lease.pk %}">{% translate "Report a repair" %}</a></p>
