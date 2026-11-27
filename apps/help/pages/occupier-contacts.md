@@ -38,6 +38,14 @@ about it. Until then it shows as **Waiting to be checked**. Every figure records
 
 People who can see, read only, cannot record figures.
 
+## Reporting a repair
+
+If the council's maintenance module is on, the building page has a **Repairs** section. Property liaisons can choose
+**Report a repair**: say where the problem is and what is wrong, tick the box if anyone may be at risk, and add up to
+3 photos. The estates team looks at every report and decides what happens. You can follow each report on the building
+page: its progress, the target date and any reply. People who can see, read only, can follow reports but not make
+them. In an emergency, phone the emergency services or the council's out of hours number first.
+
 ## If something is wrong
 
 Floor areas, which spaces you hold and capacity are kept by the estates team. If any of them look wrong, contact

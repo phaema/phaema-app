@@ -1,0 +1,11 @@
+{% extends "portal/base.html" %}{% load i18n %}
+{% block title %}{% translate "Report a repair" %}{% endblock %}
+{% block content %}
+<a class="govuk-back-link" href="{% url 'portal:agreement' lease.pk %}">{{ lease.reference }}</a>
+<div class="govuk-grid-row"><div class="govuk-grid-column-two-thirds">
+{% include "portal/_errors.html" %}
+<h1 class="govuk-heading-l">{% translate "Report a repair" %}</h1>
+<p class="govuk-body">{% translate "The estates team looks at every report and decides what happens, including whether the repair is the council's or yours under the agreement. You can follow it on the agreement page." %}</p>
+{% include "maintenance/_repair_form.html" %}
+</div></div>
+{% endblock %}

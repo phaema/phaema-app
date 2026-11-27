@@ -10,7 +10,7 @@ class MaintenanceConfig(AppConfig):
     def ready(self):
         from apps.core import audit
 
-        from .models import Component, Contract, Contractor, Job, JobDocument, PlannedTask
+        from .models import Component, Contract, Contractor, Job, JobDocument, PlannedTask, RepairReport
 
-        for model in (Component, Contract, Contractor, Job, JobDocument, PlannedTask):
+        for model in (Component, Contract, Contractor, Job, JobDocument, PlannedTask, RepairReport):
             audit.register(model)

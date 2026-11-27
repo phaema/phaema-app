@@ -162,7 +162,32 @@ def agreement(request, pk):
            "waiting_change": lease.contact_changes.filter(status=ContactChange.Status.WAITING).first()}
     if account.finance and settings_row.rent_ledger_enabled:
         ctx.update(_money_view(lease, settings_row, today))
+    if account.facilities and settings_row.maintenance_enabled:
+        ctx["can_report"] = True
+        ctx["repairs"] = list(lease.repair_reports.select_related("job").order_by("-created_at")[:20])
     return render(request, "portal/agreement.html", ctx)
+
+
+def _repairs_on():
+    from apps.maintenance.reports import enabled
+
+    return enabled()
+
+
+@tenant_required
+def repair(request, pk):
+    """Report a repair: the shared form, into the estates team's triage queue."""
+    from apps.maintenance import reports
+
+    account = request.portal_account
+    if not (account.facilities and _repairs_on()):
+        raise Http404
+    lease = _lease(request, pk)
+    form = reports.RepairForm(request.POST or None, request.FILES or None, properties=lease.properties.all())
+    if request.method == "POST" and form.is_valid():
+        report = reports.submit(form, source="tenant", reporter_name=account.name, lease=lease, account=account)
+        return render(request, "portal/repair_sent.html", {"lease": lease, "report": report})
+    return render(request, "portal/repair.html", {"lease": lease, "form": form})
 
 
 @tenant_required

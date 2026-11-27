@@ -182,6 +182,18 @@ def build(user, today=None, viewer=None):
                         reverse("admin:portal_contactchange_change", args=[change.pk]),
                         _("Asked in the tenant portal")))
 
+    # Repairs reported by tenants and council departments, waiting to be looked at.
+    from .access import can_use
+
+    if can_use(user, "maintenance"):
+        from apps.maintenance.reports import queue_for
+
+        for report in queue_for(user)[:20]:
+            now.append(Item(None, _("Repair report to look at"), "estate",
+                            f"{report.reference} {report.property.name}: {report.location}",
+                            reverse("maintenance:report", args=[report.pk]),
+                            _("Someone may be at risk") if report.danger else report.get_source_display()))
+
     # API tokens the person made that end soon, so the other system does not stop without warning.
     if is_administrator(user):
         from .models import ApiToken

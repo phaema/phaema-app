@@ -24,8 +24,8 @@ choose **Add**, pick the tenant, and enter the person's name and their own email
 
 - **Finance**: the account, balance, overdue amounts, demands with **Pay now**, the statement, and asking to change
   contact details for demands.
-- **Facilities**: for repairs, certificates and service charges as they are added to the portal. On its own it
-  shows key dates and shared documents.
+- **Facilities**: [reporting repairs](repair-reports.md) and following them, and later certificates and service
+  charges. On its own it also shows key dates and shared documents.
 
 PHAEMA emails an invitation when you save. To send it again, tick the account and choose **Send the invitation
 email again**. To stop someone signing in, untick **Active**: they are signed out at their next click. Accounts are
@@ -49,6 +49,8 @@ For each agreement the council lets to them:
 - **Key dates**: rent review, break dates and notice deadlines, option dates and expiry still to come.
 - **Documents**: only the ones you share.
 - **Contact details for demands**, with a way to ask for a change.
+- **Repairs** (facilities rights, with the maintenance module on): **Report a repair**, and each report's progress,
+  target date and who pays. See [repair reports](repair-reports.md).
 
 Agreements stay visible for 12 months after they end, so deposit and dilapidations can be settled. Agreements still
 at heads of terms are never shown.
