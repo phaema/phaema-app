@@ -9,12 +9,15 @@ Run `python manage.py migrate` after every update; the installer's update script
 
 ## Unreleased
 
-Everything since 0.9.0 (10 to 26 November 2026).
+Everything since 0.9.0 (10 to 27 November 2026).
 
 ### Before updating
 - If your proxy or a customisation loads scripts, fonts or map tiles from another address, list it in
   `PHAEMA_CSP_IMG_SOURCES` or `PHAEMA_CSP_CONNECT_SOURCES`, or set `PHAEMA_CSP_REPORT_ONLY=True` first and check the
   browser console.
+- New Python package `notifications-python-client` (GOV.UK Notify): the installer's update script installs it. To
+  send emails to tenants, set `PHAEMA_NOTIFY_API_KEY` and `PHAEMA_NOTIFY_TEMPLATE_ID`; without them, emails are
+  recorded in PHAEMA but not sent. Never set `PHAEMA_PORTAL_SHOW_CODES` on a live site.
 - The new database trigger means a retention purge of the change log needs `SET LOCAL phaema.audit_purge = 'on'`
   in the same transaction (technical manual, Audit trail).
 - Letter templates may now use only `{% if %}`, `{% for %}`, `{% comment %}` and the formatting filters listed in
@@ -24,6 +27,21 @@ Everything since 0.9.0 (10 to 26 November 2026).
   (Manage data, API tokens), or set `PHAEMA_API_PASSWORD_SIGN_IN=True` while you move them over.
 
 ### Added
+- Tenant portal (optional, off by default) at `/tenant/`: tenants the estates team invites sign in with a code
+  emailed each time and see, for their own agreements, the rent account with arrears by age, interest and the next
+  credit control step, demands with Pay now links, the statement, key dates, documents the council shares, service
+  charge budgets and statements, certificates they must provide, their rent deposit and payment plan; they can ask
+  to change contact details, report repairs, make requests, send certificates and insurance documents, query a
+  service charge line and message the estates team (#112, #117, #119).
+- Emailing demands through GOV.UK Notify: each tenant gets their charges, the total, anything overdue and a Pay now
+  link to the council's payment page; every email is kept as a record (#110).
+- Repair reports from tenants and departments, with photos, into a triage queue under Maintenance where estates
+  raise a job, link to an open job, mark it the tenant's to repair or close it, with a reply the reporter sees (#113).
+- Requests that open a case, from tenants (consents such as assign, underlet, alterations and change of use) and
+  departments (space requests); each case type says who can ask, with guidance and documents to attach (#115).
+- Messages between tenants and the estates team, answered by the managing surveyor or whoever is covering for them;
+  certificate reminders to tenants by email; certificates and insurance documents sent by tenants for estates to
+  check (#117, #119).
 - Departments can see their own buildings: a department's property liaison, and read-only people such as the head of
   service, sign in without a role and see the buildings their department uses, the stacking plan and their own
   space, people and capacity. The liaison records headcount, which the building's managing surveyor checks from
@@ -60,6 +78,8 @@ Everything since 0.9.0 (10 to 26 November 2026).
   0.30.0, python-docx 1.2.0 and pytest-django 4.14.0 (#107). Django stays on 5.2, the long-term support release.
 
 ### Fixed
+- Year-end service charge statements showed a zero balance once the year was reconciled, because the balancing
+  charges were counted as paid on account (#117).
 - The API description at `/api/schema/` builds without warnings: both sign-in methods are described, shared choice
   lists have one name, and break notice dates are typed; a test keeps it that way (#104).
 - Credit notes allocated to the right charges, and service charge credits (#78).
@@ -90,7 +110,9 @@ Everything since 0.9.0 (10 to 26 November 2026).
 
 ### Documentation
 - Manuals, test programme, e-learning, tour and website brought up to date with each feature (#55, #60, #66, #72,
-  #74, #77, #91, #93, #102).
+  #74, #77, #91, #93, #102, #111, #114, #116, #118, #120).
+- Procurement pack: data protection impact assessment annex, record of processing, retention periods, security
+  answers and a second accessibility statement for the tenant portal and emails to tenants (#121).
 - Test programme: new tests for browser protections (U11), the locked change log (U12) and Welsh (CY1 to CY5).
 
 ## 0.9.0 (10 November 2026)

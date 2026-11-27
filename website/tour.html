@@ -178,12 +178,13 @@ p { margin: 0 0 .9em; max-width: 60ch; }
     ["repairs", "Maintenance", "Repairs and works orders", 1],
     ["compliance", "Compliance", "Certificates and the Golden Thread", 1],
     ["space", "Space and occupiers", "Who occupies what, and what it costs", 1],
+    ["portal", "Tenant portal", "Tenants&#8217; account, repairs, requests and messages", 1],
     ["reports", "Reports and open data", "Reports, exports and the API"]
   ];
   var S = [
     {id: "welcome", ch: "intro", t: 9, html:
       '<div class="scene"><div class="scene__text"><p class="eyebrow">Open-source estate management for councils</p>' +
-      '<h1>PHAEMA</h1><p class="lede">Property Holding and Estate Management Application: one open system for a council&#8217;s property, leases, casework, projects, rents, repairs, compliance, valuations and the use of its buildings.</p>' +
+      '<h1>PHAEMA</h1><p class="lede">Property Holding and Estate Management Application: one open system for a council&#8217;s property, leases, casework, projects, rents, repairs, compliance, valuations and the use of its buildings, with a portal for its tenants.</p>' +
       '<p>No licence fee, built in the open, and designed by a chartered surveyor around how estates teams actually work.</p>' +
       '<div class="cta"><a class="button" href="#hub">Explore the modules</a><a class="button button--quiet" href="#for-councils">For councils</a></div></div>' +
       shot("my-work", "A surveyor&#8217;s My work page: overdue items, events in the next 90 days, open cases and managed properties.", "My work: each surveyor&#8217;s day on one page.") + '</div>'},
@@ -194,7 +195,7 @@ p { margin: 0 0 .9em; max-width: 60ch; }
       '<div><h3>Costly lock-in</h3><p>Each council pays separately for proprietary systems, and changing supplier means changing system.</p></div></div>' +
       rel([["hub", "How PHAEMA joins it up"], ["why-open", "Why open source helps"]]) + '</div></div>'},
     {id: "hub", ch: "intro", t: 14, html:
-      '<div class="scene scene--text" style="max-width:none"><div class="scene__text"><p class="eyebrow">One property record at the centre</p><h2>Fourteen parts, one system. Choose one to jump to it.</h2>' +
+      '<div class="scene scene--text" style="max-width:none"><div class="scene__text"><p class="eyebrow">One property record at the centre</p><h2>Fifteen parts, one system. Choose one to jump to it.</h2>' +
       '<div class="hub">' + MODULES.map(function (m) {
         return '<a class="tile' + (m[3] ? ' tile--opt' : '') + '" href="#' + m[0] + '"><b>' + m[1] + '</b><small>' + m[2] + '</small></a>';
       }).join('') + '</div><p class="key"><i></i>Optional modules: each council switches them on when it is ready, or keeps its existing system.</p></div></div>'},
@@ -349,6 +350,7 @@ p { margin: 0 0 .9em; max-width: 60ch; }
     {id: "repairs", ch: "buildings", t: 10, html:
       '<div class="scene"><div class="scene__text"><p class="eyebrow">Maintenance &middot; optional</p><h2>Repairs that know the lease</h2>' +
       '<p>Who pays is worked out from the lease repairing terms. Works orders go to contractors, with approval above a set value, and recharges reach the rent account. Site hazards show before anyone visits.</p>' +
+      '<p>Repairs reported by tenants and departments wait in a triage queue until the estates team decides what becomes a job.</p>' +
       rel([["compliance", "Statutory checks"], ["service", "Costs to the service charge"]]) + '</div>' +
       shot("repairs-3", "A repair job showing the Before you visit panel with site hazards.", "Before you visit: hazards first.") + '</div>'},
     {id: "compliance", ch: "buildings", t: 10, html:
@@ -362,6 +364,18 @@ p { margin: 0 0 .9em; max-width: 60ch; }
       '<p>The property report sets the occupation out floor by floor, ready to check on site.</p>' +
       rel([["space-costs", "What it costs"], ["register", "The building"], ["site-visit", "Checking on site"]]) + '</div>' +
       shot("space", "A stacking plan of an invented civic centre: three floors, with each occupier a coloured block sized by its area, shared space grey and vacant space hatched.", "The stacking plan.") + '</div>'},
+    {id: "departments", ch: "buildings", t: 11, html:
+      '<div class="scene"><div class="scene__text"><p class="eyebrow">Space and occupiers &middot; for departments</p><h2>Departments see their own buildings</h2>' +
+      '<p>Each department&#8217;s property liaison, and the head of service to read, sign in without a PHAEMA role and see only their own buildings: the stacking plan, their space, people and capacity, and the estates contact.</p>' +
+      '<p>They keep their headcount up to date, report repairs and ask for more space, or give some back. The managing surveyor checks and decides from their dashboard.</p>' +
+      rel([["space", "The stacking plan"], ["portal", "The tenant portal"]]) + '</div>' +
+      shot("tour-departments", "A department&#8217;s view of an invented civic centre: the estates contact and a stacking plan of three floors.", "What a department&#8217;s liaison sees.") + '</div>'},
+    {id: "portal", ch: "buildings", t: 12, html:
+      '<div class="scene"><div class="scene__text"><p class="eyebrow">Tenant portal &middot; optional</p><h2>Tenants help themselves</h2>' +
+      '<p>Tenants the estates team invites sign in with a code emailed each time and see only their own agreements: what they owe and why, demands with a Pay now link to the council&#8217;s payment page, key dates, the documents you choose to share, service charges, deposit and payment plan.</p>' +
+      '<p>They report repairs with photos, ask for consents, send certificates and message the managing surveyor. Everything waits for the estates team to decide, and demands and reminders go by email through GOV.UK Notify.</p>' +
+      rel([["rents", "Rents and arrears"], ["repairs", "Repairs"], ["departments", "Departments"]]) + '</div>' +
+      shot("tour-portal", "An invented tenant&#8217;s agreement in the tenant portal: balance, overdue amount, next step and demands with Pay now links.", "A tenant&#8217;s agreement in the portal.") + '</div>'},
     {id: "reports", ch: "control", t: 10, html:
       '<div class="scene"><div class="scene__text"><p class="eyebrow">Reports and open data</p><h2>Your data, out whenever you want it</h2>' +
       '<p>Ready-made and custom reports to Excel and CSV, the Transparency Code land and assets list in one click, imports from spreadsheets, an open API and a change log of every edit.</p>' +
@@ -387,9 +401,9 @@ p { margin: 0 0 .9em; max-width: 60ch; }
       rel([["roadmap", "What comes next"], ["try", "Try it"]]) + '</div></div>'},
     {id: "roadmap", ch: "open", t: 11, html:
       '<div class="scene scene--text"><div class="scene__text"><p class="eyebrow">Where it is going</p><h2>Built, in testing, then connectors</h2>' +
-      '<div class="cols"><div><h3>Now: testing</h3><ul><li>Pilot councils run the test programme</li><li>Public test site, reset every 48 hours</li><li>Independent penetration test and accessibility audit</li></ul></div>' +
-      '<div><h3>Next: connectors</h3><ul><li>Email through the council&#8217;s mailbox</li><li>Ordnance Survey, UPRN and EPC lookups</li><li>Map layers for QGIS and other GIS</li><li>GOV.UK Notify for tenants</li></ul></div>' +
-      '<div><h3>Later</h3><ul><li>Tenant and contractor portals</li><li>Condition surveys</li><li>Welsh translation</li></ul></div></div>' +
+      '<div class="cols"><div><h3>Now: testing</h3><ul><li>Pilot councils run the test programme</li><li>Public test site, reset every 48 hours</li><li>A pilot of the tenant portal with a few tenants</li><li>Independent penetration test and accessibility audit</li></ul></div>' +
+      '<div><h3>Next: connectors</h3><ul><li>Email through the council&#8217;s mailbox</li><li>Ordnance Survey, UPRN and EPC lookups</li><li>Map layers for QGIS and other GIS</li><li>Texts and letters through GOV.UK Notify (email is built)</li></ul></div>' +
+      '<div><h3>Later</h3><ul><li>A contractor portal</li><li>Condition surveys</li><li>Welsh translation reviewed</li></ul></div></div>' +
       '<p>Connectors use open standards, so they work with Microsoft 365 or with open-source alternatives such as Nextcloud.</p>' +
       rel([["for-councils", "For councils"], ["hub", "Back to the modules"]]) + '</div></div>'},
     {id: "for-councils", ch: "councils", t: 13, html:

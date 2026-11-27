@@ -32,7 +32,8 @@ PHAEMA is in alpha (0.9.x). The first eight weeks built the core (below); the fe
 | 26 November 2026 | Letter templates limited to merge fields, if, for and formatting filters; API description builds without warnings | Done |
 | 26 November 2026 | External review fixes: file access by record, API model checks, bulk changes in the change log | Done |
 | 27 November 2026 | Departments see their own buildings: property liaisons record headcount for the managing surveyor to check | Done |
-| Before beta | Tenant portal with GOV.UK Notify e-billing; then repair reports and requests shared by tenants and departments | Planned |
+| 27 November 2026 | Emailing demands through GOV.UK Notify; tenant portal in three phases (account, demands and documents; repairs, requests, service charges and certificates; messages, insurance, deposit and payment plans); repair reports and requests shared by tenants and departments; procurement pack sections for the portal | Done |
+| Before live use of the tenant portal | Pilot with a few tenants; CREST penetration test of `/tenant/`; independent accessibility audit | Planned |
 | Before beta | Microsoft 365 email and calendar; property events pipeline; annual health check; site visit sheet level B; repository mirror | Planned |
 
 ## Future work
@@ -61,11 +62,11 @@ Integrations with other systems are one optional module in the main repository, 
 1. **Single sign-on (OpenID Connect): built**, see [the set-up guide](single-sign-on.md); still to be proved against a council's live tenant. Staff sign in with their council account (Microsoft Entra ID, Keycloak, openDesk, Google). Groups map to roles and access areas; two-factor and password rules come from the provider; people disabled there can no longer sign in, and any open PHAEMA session ends within the session limit (10 hours, or 2 hours without use); one local administrator is kept as a backup sign-in.
 2. **Ordnance Survey and EPC lookups.** OS Places address search and UPRN when adding a property (free to councils under the Public Sector Geospatial Agreement), OS NGD building footprints, vector map tiles; energy ratings and certificate expiry from the EPC register by UPRN.
 3. **Map layers for GIS.** OGC API Features and WFS layers of properties, leases, projects and proposed sites, following access areas and confidentiality, for QGIS, ArcGIS, Cadcorp, MapInfo, GeoServer and Lizmap; read-only PostGIS views for internal GIS teams.
-4. **GOV.UK Notify.** Rent demands, arrears reminders and key-date letters to tenants by text, email or post, with "pay now" links to the council's own payment platform.
+4. **GOV.UK Notify: email built.** Demands with "pay now" links, tenant portal invitations and codes, reply notices and certificate reminders go by email through Notify once a council adds its key. Still to come: arrears reminders and key-date letters by text or post, and emails in Welsh and English.
 5. **Chat notifications and approvals.** Reminders, approvals waiting and missed milestones sent to Teams, Matrix (Element, Tchap) or Nextcloud Talk; approve cases and works orders from Teams.
 6. **Documents.** Case and project documents kept in the council's SharePoint or Nextcloud, with PHAEMA holding the link; letters edited in the browser with Word online or Collabora; OpenDocument (.odt) output alongside Word.
 7. **As councils ask:** filing email to a case or project from any mailbox (IMAP); calendar entries added directly (CalDAV or Outlook), beyond the existing calendar feed; planning constraints on maps; Companies House checks on tenant companies; FixMyStreet Pro reports into maintenance; links to Open Digital Planning (BOPS) applications.
 
 ### Other later releases
 
-Estate casework, live finance/legal/CRM connectors, tenant and contractor portals, condition surveys and lifecycle planning, full Golden Thread information management (ISO 19650, COBie, IFC), review of the Welsh translation by a qualified translator (see [translating](translating.md)).
+Estate casework, live finance/legal/CRM connectors, a contractor portal, more of the departments' stages (occupancy surveys, the yearly April check, a building safety summary, costs to the department), condition surveys and lifecycle planning, full Golden Thread information management (ISO 19650, COBie, IFC), review of the Welsh translation by a qualified translator (see [translating](translating.md)).

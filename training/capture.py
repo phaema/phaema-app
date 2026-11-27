@@ -91,6 +91,16 @@ def _record(kind, key):
         return get_user_model().objects.get(username=key).pk
     if kind == "casetype":
         return CaseType.objects.get(code=key).pk
+    if kind == "run":  # latest: the newest demand run
+        from apps.ledger.models import DemandRun
+
+        return DemandRun.objects.order_by("-pk").first().pk
+    if kind == "repair":  # a lease reference: its newest repair report from the tenant portal
+        from apps.maintenance.models import RepairReport
+
+        return RepairReport.objects.filter(lease__reference=key).order_by("-pk").first().pk
+    if kind == "request":  # a lease reference: its newest request made in the tenant portal
+        return Case.objects.filter(lease__reference=key, how_received="portal").order_by("-pk").first().pk
     raise ValueError(f"Unknown record kind {kind}")
 
 

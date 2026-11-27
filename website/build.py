@@ -57,6 +57,8 @@ BRINGS_TOGETHER = [
      "headcount up to date."),
     ("Rents and service charges, if wanted", "Optional ledgers that feed the council's finance system, or leave this "
      "to the systems it already has."),
+    ("A tenant portal, if wanted", "Tenants see their account, demands and documents, report repairs, ask for "
+     "consents and message the estates team, so fewer calls and emails."),
 ]
 
 WHO_FOR = [
@@ -142,8 +144,14 @@ CAPABILITIES = [
      "and the changes in the year, ready for the discount rate."),
     ("Service charges", "Budgets, apportionment by floor area with caps, actual costs and year-end reconciliation on "
      "the RICS service charge timetable."),
+    ("Tenant portal", "An optional, separate area where tenants the estates team invites sign in with a code emailed "
+     "each time. They see their own rent account, arrears, demands with Pay now links to the council's payment page, "
+     "statement, key dates, shared documents, service charges, certificates they must provide, deposit and payment "
+     "plan; they report repairs, ask for consents, send certificates and message the managing surveyor. Demands "
+     "and reminders go by email through GOV.UK Notify."),
     ("Maintenance", "Repairs with target dates, who pays under the lease, works orders and their approval, recharges, "
-     "planned maintenance and component lifecycles."),
+     "planned maintenance and component lifecycles. Repairs reported by tenants and departments wait in a triage "
+     "queue until estates decide what becomes a job."),
     ("Compliance", "Fire, gas, electrical, water, asbestos, lift and EPC certificates with remedial actions, Golden "
      "Thread information and site hazards shown before every visit."),
     ("Asset valuation", "The rolling valuation programme, internal or external valuers, Red Book records, impairment "
@@ -212,22 +220,26 @@ ROADMAP = [
         "A procurement and information governance pack for councils' assessments",
         "Scoped API tokens for other systems, with password sign-in to the API off",
         "Letter templates in a limited language that cannot print other data or read files",
+        "Tenant portal: rent account, demands with Pay now, documents, repairs, requests, service charges, certificates and messages",
+        "Demands and tenant emails through GOV.UK Notify",
+        "Repair reports and requests from tenants and departments, triaged by estates",
     ]),
     ("now", "Now: testing", [
         "A major test programme run by council staff",
         "Feedback from testers on the public test site",
         "Fixing what testing finds, and preparing for an independent penetration test and accessibility audit",
+        "A pilot of the tenant portal with a few tenants",
     ]),
     ("next", "Next: connectors", [
         "Email sent through the council's own mailbox",
         "Ordnance Survey address, UPRN and EPC lookups",
         "Map layers for QGIS, ArcGIS and other GIS",
-        "Texts and letters to tenants through GOV.UK Notify",
+        "Texts and letters to tenants through GOV.UK Notify (email is built)",
         "Notifications in Teams, Matrix or Nextcloud Talk",
         "Documents kept in SharePoint or Nextcloud",
     ]),
     ("later", "Later", [
-        "Tenant and contractor portals",
+        "A contractor portal",
         "Condition surveys and lifecycle planning",
         "Full Golden Thread information management",
         "Live finance, legal and CRM connectors",
@@ -389,7 +401,7 @@ BODY = r'''<div class="top"><div class="wrap top__inner">
 
   <div class="wrap band">
     <h2>Where the project is</h2>
-    <p class="band__lead">All fourteen modules are built and documented, with nearly 600 automated tests, a user manual, a technical manual and e-learning for five roles. A public test site is running. Next come testing by pilot councils, independent security and accessibility checks, and connectors to the systems councils already use.</p>
+    <p class="band__lead">All fifteen modules are built and documented, including the tenant portal, with over 700 automated tests, a user manual, a technical manual and e-learning for five roles. A public test site is running. Next come testing by pilot councils, a pilot of the tenant portal, independent security and accessibility checks, and connectors to the systems councils already use.</p>
     <p><a href="#roadmap">See the roadmap</a></p>
   </div>
 
