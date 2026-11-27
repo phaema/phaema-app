@@ -703,6 +703,9 @@ class LeaseDocument(TimeStampedModel):
         _("date for review"), null=True, blank=True, db_index=True,
         help_text=_("When the document should next be looked at, for example when an insurance certificate "
                     "runs out. Shown on the dashboard as it comes due."))
+    shared_with_tenant = models.BooleanField(
+        _("shared with the tenant"), default=False,
+        help_text=_("Tenants with a portal account can see and download this document."))
 
     class Meta:
         ordering = ["document_type", "-document_date"]

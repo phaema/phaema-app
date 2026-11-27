@@ -22,8 +22,9 @@ def _client():
     return NotificationsAPIClient(settings.PHAEMA_NOTIFY_API_KEY)
 
 
-def send(email: OutgoingEmail):
-    """Pass a saved email to Notify, if a key is set, and record what happened."""
+def send(email: OutgoingEmail, body=None):
+    """Pass a saved email to Notify, if a key is set, and record what happened. `body` sends different text from the
+    one recorded, for emails such as sign-in codes whose secret part must not be kept."""
     if not configured():
         email.status = OutgoingEmail.Status.RECORDED
         email.save(update_fields=["status"])
@@ -31,7 +32,7 @@ def send(email: OutgoingEmail):
     try:
         response = _client().send_email_notification(
             email_address=email.to, template_id=settings.PHAEMA_NOTIFY_TEMPLATE_ID,
-            personalisation={"subject": email.subject, "body": email.body}, reference=f"phaema-{email.pk}")
+            personalisation={"subject": email.subject, "body": body if body is not None else email.body}, reference=f"phaema-{email.pk}")
     except Exception as exc:  # the client raises HTTPError and others; any failure is recorded, not raised
         email.status, email.error = OutgoingEmail.Status.FAILED, str(exc)[:2000]
         email.save(update_fields=["status", "error"])

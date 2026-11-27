@@ -169,6 +169,19 @@ def build(user, today=None, viewer=None):
                         f"{count.building.reference} {count.occupier.name}: {count.people}",
                         reverse("space:headcount-check", args=[count.pk]), count.building.name))
 
+    # Contact details for demands that tenants asked to change in the tenant portal: for the managing surveyor of
+    # the property, or any administrator if no one manages it.
+    from apps.portal.models import ContactChange
+
+    waiting = ContactChange.objects.filter(status=ContactChange.Status.WAITING).select_related("lease")
+    if not is_administrator(user):
+        waiting = waiting.filter(lease__properties__managing_surveyor=user)
+    for change in waiting.distinct()[:20]:
+        now.append(Item(None, _("Contact change from a tenant to check"), "estate",
+                        f"{change.lease.reference} {change.contact_name or change.email}",
+                        reverse("admin:portal_contactchange_change", args=[change.pk]),
+                        _("Asked in the tenant portal")))
+
     # API tokens the person made that end soon, so the other system does not stop without warning.
     if is_administrator(user):
         from .models import ApiToken

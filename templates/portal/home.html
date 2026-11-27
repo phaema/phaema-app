@@ -1,0 +1,24 @@
+{% extends "portal/base.html" %}{% load i18n %}
+{% block title %}{% translate "Your agreements" %}{% endblock %}
+{% block content %}
+<h1 class="govuk-heading-l">{% translate "Your agreements" %}</h1>
+{% if settings.portal_welcome %}<div class="govuk-inset-text">{{ settings.portal_welcome|linebreaksbr }}</div>{% endif %}
+<table class="govuk-table">
+  <thead class="govuk-table__head"><tr class="govuk-table__row">
+    <th scope="col" class="govuk-table__header">{% translate "Agreement" %}</th>
+    <th scope="col" class="govuk-table__header">{% translate "Premises" %}</th>
+    {% if rows.0.1 is not None %}<th scope="col" class="govuk-table__header govuk-table__header--numeric">{% translate "Balance" %}</th>
+    <th scope="col" class="govuk-table__header govuk-table__header--numeric">{% translate "Overdue" %}</th>{% endif %}
+  </tr></thead>
+  <tbody class="govuk-table__body">
+  {% for lease, balance, overdue in rows %}
+  <tr class="govuk-table__row">
+    <td class="govuk-table__cell"><a class="govuk-link" href="{% url 'portal:agreement' lease.pk %}">{{ lease.reference }}</a></td>
+    <td class="govuk-table__cell">{{ lease.premises_description|default:"" }}{% if not lease.premises_description %}{% for p in lease.properties.all %}{{ p.name }}{% if not forloop.last %}, {% endif %}{% endfor %}{% endif %}</td>
+    {% if balance is not None %}<td class="govuk-table__cell govuk-table__cell--numeric">£{{ balance|floatformat:"2g" }}</td>
+    <td class="govuk-table__cell govuk-table__cell--numeric">{% if overdue %}<strong>£{{ overdue|floatformat:"2g" }}</strong>{% else %}–{% endif %}</td>{% endif %}
+  </tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

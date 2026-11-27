@@ -55,14 +55,18 @@ def _money(amount):
     return f"£{amount:,.2f}"
 
 
-def pay_link(settings, demand):
+def payment_url(settings, reference, amount, account):
+    """The council's payment page with the reference, amount and agreement filled in, or "" if none is set."""
     if not settings.payment_link:
         return ""
-    values = {"reference": demand.reference, "amount": f"{demand.total:.2f}", "account": demand.lease.reference}
     link = settings.payment_link
-    for key, value in values.items():
+    for key, value in {"reference": reference, "amount": f"{amount:.2f}", "account": account}.items():
         link = link.replace("{" + key + "}", quote(str(value), safe=""))
     return link
+
+
+def pay_link(settings, demand):
+    return payment_url(settings, demand.reference, demand.total, demand.lease.reference)
 
 
 def compose(demand, settings=None):
@@ -94,6 +98,12 @@ def _compose(demand, settings):
     if link:
         lines += [_("Pay now: %(link)s") % {"link": link}, ""]
     lines += [_("Please quote %(ref)s when you pay.") % {"ref": demand.reference}, ""]
+    if settings.tenant_portal_enabled:
+        from django.conf import settings as conf
+        from django.urls import reverse
+
+        lines += [_("You can see your account and demands online at %(url)s") % {
+            "url": conf.PHAEMA_BASE_URL.rstrip("/") + reverse("portal:sign-in")}, ""]
     contact = " · ".join(x for x in (settings.department, settings.letter_email, settings.letter_phone) if x)
     if contact:
         lines += [_("If you have a question about these charges, contact %(contact)s.") % {"contact": contact}, ""]

@@ -71,7 +71,7 @@ class DepositInline(RoleInlineMixin, admin.TabularInline):
 class DocumentInline(RoleInlineMixin, admin.TabularInline):
     model = LeaseDocument
     extra = 1
-    fields = ("document_type", "file", "description", "document_date", "review_date")
+    fields = ("document_type", "file", "description", "document_date", "review_date", "shared_with_tenant")
 
 
 @admin.register(Lease)
