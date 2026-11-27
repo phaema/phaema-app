@@ -26,7 +26,17 @@ from apps.reports.export import csv_response, xlsx_response
 from apps.reports.mixins import ExportMixin
 
 from . import library, responsibility, workflow
-from .models import Category, Component, Contract, Contractor, Job, JobDocument, PlannedTask, Responsibility
+from .models import (
+    Category,
+    Component,
+    Contract,
+    Contractor,
+    ContractorAccount,
+    Job,
+    JobDocument,
+    PlannedTask,
+    Responsibility,
+)
 
 maintenance_view = module_view("maintenance", "maintenance/off.html")  # switched on for the council and opened by an access area
 
@@ -484,10 +494,44 @@ def contractors(request):
                                                              "today": today, "soon": today + timedelta(days=30)})
 
 
+class PortalAccountForm(forms.ModelForm):
+    class Meta:
+        model = ContractorAccount
+        fields = ["name", "email"]
+
+
 @maintenance_view
 def contractor_detail(request, pk):
+    from . import contractor_portal
+
     contractor = get_object_or_404(Contractor, pk=pk)
+    can_manage = _can_raise(request.user)
+    form = PortalAccountForm()
+    if request.method == "POST":
+        if not can_manage:
+            raise PermissionDenied
+        action = request.POST.get("action")
+        if action == "add_account":
+            form = PortalAccountForm(request.POST)
+            if form.is_valid():
+                account = form.save(commit=False)
+                account.contractor = contractor
+                account.save()
+                contractor_portal.invite(account, request.user)
+                messages.success(request, _("Account added and invitation sent to %(e)s.") % {"e": account.email})
+                return redirect(contractor)
+        elif action in ("invite", "stop", "restart"):
+            account = get_object_or_404(ContractorAccount, pk=request.POST.get("account"), contractor=contractor)
+            if action == "invite":
+                contractor_portal.invite(account, request.user)
+                messages.success(request, _("Invitation sent again."))
+            else:
+                account.active = action == "restart"
+                account.save(update_fields=["active", "updated_at"])
+            return redirect(contractor)
     return render(request, "maintenance/contractor_detail.html", {
+        "portal_on": contractor_portal.enabled(), "portal_accounts": contractor.portal_accounts.all(),
+        "account_form": form, "can_manage": can_manage,
         "section": "contractors", "contractor": contractor, "today": date.today(),
         "jobs": contractor.jobs.select_related("property").order_by("-year", "-number")[:50],
         "contracts": contractor.contracts.all(),

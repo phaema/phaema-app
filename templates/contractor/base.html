@@ -1,0 +1,35 @@
+{% load static i18n %}<!DOCTYPE html>
+{% get_current_language as LANG %}
+<html lang="{{ LANG }}" class="govuk-template">
+<head>
+  <meta charset="utf-8">
+  <title>{% block title %}{% translate "Contractor portal" %}{% endblock %} – {{ organisation_name|default:"PHAEMA" }}</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="noindex">
+  <link rel="stylesheet" href="{% static 'vendor/govuk-frontend/govuk-frontend.min.css' %}">
+  <link rel="stylesheet" href="{% static 'css/phaema.css' %}">
+</head>
+<body class="govuk-template__body">
+  <script nonce="{{ request.csp_nonce }}">document.body.className += ' js-enabled' + ('noModule' in HTMLScriptElement.prototype ? ' govuk-frontend-supported' : '');</script>
+  <a href="#main-content" class="govuk-skip-link" data-module="govuk-skip-link">{% translate "Skip to main content" %}</a>
+  <header class="phaema-header" role="banner">
+    <div class="govuk-width-container phaema-header__inner">
+      <a href="{% url 'contractor:home' %}" class="phaema-header__brand">{{ organisation_name|default:"PHAEMA" }}</a>
+      <span class="phaema-header__org">{% translate "Contractor portal" %}</span>
+      {% if request.contractor_account %}
+      <nav class="phaema-header__nav" aria-label="{% translate 'Account' %}">
+        <span class="phaema-header__user">{{ request.contractor_account.name }}, {{ request.contractor_account.contractor.name }}</span>
+        <form method="post" action="{% url 'contractor:sign-out' %}" class="phaema-header__logout">{% csrf_token %}<button type="submit">{% translate "Sign out" %}</button></form>
+      </nav>
+      {% endif %}
+    </div>
+  </header>
+  <div class="govuk-width-container">
+    <main class="govuk-main-wrapper" id="main-content" role="main">
+      {% block content %}{% endblock %}
+    </main>
+  </div>
+  <footer class="govuk-footer" role="contentinfo"><div class="govuk-width-container"><p class="govuk-body-s">{% translate "For contractors working for the council. Ask the officer named on the works order if anything looks wrong." %}</p></div></footer>
+  <script type="module" nonce="{{ request.csp_nonce }}">import { initAll } from "{% static 'vendor/govuk-frontend/govuk-frontend.min.js' %}"; initAll();</script>
+</body>
+</html>

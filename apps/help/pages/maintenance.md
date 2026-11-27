@@ -112,6 +112,32 @@ Administrators add contractors under **Manage data**, with contact details, out 
 liability cover, insurance expiry date and accreditations. A contractor's page shows their jobs, contracts and
 spend in the last 12 months.
 
+## Contractor portal
+
+With the contractor portal switched on (**Manage data**, **Module settings**, **Contractor portal**), people at
+your contractors can sign in at `/contractor/` to deal with the works orders sent to their firm. They sign in with
+a code emailed to them each time, through GOV.UK Notify, and never see any other firm's jobs, or a job before its
+order is issued.
+
+**Giving access.** On a contractor's page, under **Contractor portal**, select **Add a person** and enter their
+name and email address. PHAEMA emails them an invitation. Each person needs their own address. **Stop access**
+stops them signing in at once; **Send the invitation again** if it went astray. Works order emails tell the firm
+they can answer in the portal once it has an account.
+
+**What contractors do.** For each order they see the property and its address, the priority and target date, the
+order value, the details, the officer to contact and the **Before you visit** hazards. They can:
+
+- **Accept** the order, with the date they expect to attend, or **decline** it with a reason. A decline emails the
+  job's owner, who chooses another contractor and issues the order again.
+- Add **progress notes**, each with a photo if they like.
+- Report the **work done**: the date, what was done, the cost before VAT, their invoice reference and up to ten
+  certificates or other files. The job is marked completed with those details, the files are added to its
+  documents, and the job's owner is emailed. Check the work and the cost as for any completed job before closing
+  it or raising a recharge.
+
+Everything a contractor sends appears on the job under **From the contractor**, and the change log names the person
+and the portal.
+
 ## Contracts
 
 The contracts register records service contracts, such as fire alarm servicing or water hygiene, with their

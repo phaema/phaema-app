@@ -81,9 +81,16 @@ def issue_order(job, email_contractor=True, on=None):
     if needs_order_approval(job):
         raise ValueError(f"Orders over £{approval_limit():,.0f} need your supervisor's approval first.")
     job.status, job.ordered_on = Job.Status.ORDERED, on or date.today()
-    job.save(update_fields=["status", "ordered_on", "updated_at"])
+    job.contractor_response, job.contractor_response_at, job.attend_on = "", None, None  # a new order: a new answer
+    job.save(update_fields=["status", "ordered_on", "contractor_response", "contractor_response_at", "attend_on",
+                            "updated_at"])
     if email_contractor and job.contractor.email:
-        body = render_to_string("maintenance/email/works_order.txt", {"job": job, "settings": ModuleSettings.load()})
+        from . import contractor_portal
+
+        portal = (contractor_portal.portal_url() if contractor_portal.enabled()
+                  and job.contractor.portal_accounts.filter(active=True).exists() else "")
+        body = render_to_string("maintenance/email/works_order.txt", {"job": job, "settings": ModuleSettings.load(),
+                                                                      "portal_url": portal})
         send_mail(f"Works order {job.reference}: {job.title}", body, settings.DEFAULT_FROM_EMAIL,
                   [job.contractor.email], fail_silently=True)
         return True

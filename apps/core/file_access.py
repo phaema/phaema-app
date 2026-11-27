@@ -21,6 +21,7 @@ RULES = {
     "cases.CaseDocument": "",
     "cases.SiteVisitPhoto": "",
     "maintenance.JobDocument": "maintenance",
+    "maintenance.JobUpdate": "maintenance",
     "maintenance.RepairPhoto": "maintenance",
     "compliance.Certificate": "compliance",
     "compliance.BuildingDocument": "compliance",
