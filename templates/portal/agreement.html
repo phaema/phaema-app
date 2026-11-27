@@ -1,0 +1,95 @@
+{% extends "portal/base.html" %}{% load i18n %}
+{% block title %}{{ lease.reference }}{% endblock %}
+{% block content %}
+<a class="govuk-back-link" href="{% url 'portal:home' %}">{% translate "Your agreements" %}</a>
+<span class="govuk-caption-l">{% translate "Agreement" %}</span>
+<h1 class="govuk-heading-l">{{ lease.reference }}: {% if lease.premises_description %}{{ lease.premises_description }}{% else %}{% for p in lease.properties.all %}{{ p.name }}{% if not forloop.last %}, {% endif %}{% endfor %}{% endif %}</h1>
+
+{% if account %}
+<h2 class="govuk-heading-m">{% translate "Your account" %}</h2>
+<dl class="govuk-summary-list">
+  <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Balance" %}</dt><dd class="govuk-summary-list__value">£{{ account.balance|floatformat:"2g" }}{% if account.balance < 0 %} ({% translate "in credit" %}){% endif %}</dd></div>
+  <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Overdue" %}</dt><dd class="govuk-summary-list__value">{% if account.overdue %}<strong>£{{ account.overdue|floatformat:"2g" }}</strong>{% else %}{% translate "Nothing overdue" %}{% endif %}</dd></div>
+  {% for label, amount in aged %}<div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% blocktranslate %}Overdue {{ label }}{% endblocktranslate %}</dt><dd class="govuk-summary-list__value">£{{ amount|floatformat:"2g" }}</dd></div>{% endfor %}
+  {% if interest %}<div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Interest on late payment" %}</dt><dd class="govuk-summary-list__value">{% blocktranslate with amount=interest.total|floatformat:"2g" %}£{{ amount }} so far, not yet charged. It keeps building up until the overdue amount is paid.{% endblocktranslate %}</dd></div>{% endif %}
+  {% if plan %}<div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Payment plan" %}</dt><dd class="govuk-summary-list__value">{% translate "You have a payment plan agreed with the council. Keep to it and no further action is taken." %}</dd></div>
+  {% elif next_step %}<div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Next step if not paid" %}</dt><dd class="govuk-summary-list__value">{{ next_step.name }}</dd></div>{% endif %}
+</dl>
+{% if pay_all %}<a class="govuk-button" href="{{ pay_all }}" rel="noopener">{% blocktranslate with amount=account.balance|floatformat:"2g" %}Pay the balance of £{{ amount }}{% endblocktranslate %}</a>{% endif %}
+
+{% if demands %}
+<table class="govuk-table">
+  <caption class="govuk-table__caption govuk-table__caption--m">{% translate "Demands to pay" %}</caption>
+  <thead class="govuk-table__head"><tr class="govuk-table__row">
+    <th scope="col" class="govuk-table__header">{% translate "Reference" %}</th>
+    <th scope="col" class="govuk-table__header">{% translate "Details" %}</th>
+    <th scope="col" class="govuk-table__header">{% translate "Due" %}</th>
+    <th scope="col" class="govuk-table__header govuk-table__header--numeric">{% translate "Still to pay" %}</th>
+    <th scope="col" class="govuk-table__header"><span class="govuk-visually-hidden">{% translate "Pay" %}</span></th>
+  </tr></thead>
+  <tbody class="govuk-table__body">
+  {% for d in demands %}
+  <tr class="govuk-table__row">
+    <td class="govuk-table__cell">{{ d.charge.reference }}</td>
+    <td class="govuk-table__cell">{{ d.charge.description }}</td>
+    <td class="govuk-table__cell">{{ d.charge.due_date|date:"j M Y" }}{% if d.overdue %} <strong class="govuk-tag govuk-tag--red">{% translate "Overdue" %}</strong>{% endif %}</td>
+    <td class="govuk-table__cell govuk-table__cell--numeric">£{{ d.outstanding|floatformat:"2g" }}</td>
+    <td class="govuk-table__cell" style="white-space: nowrap">{% if d.pay %}<a class="govuk-link" href="{{ d.pay }}" rel="noopener">{% translate "Pay now" %}<span class="govuk-visually-hidden"> {{ d.charge.reference }}</span></a>{% endif %}</td>
+  </tr>
+  {% endfor %}
+  </tbody>
+</table>
+<p class="govuk-body-s">{% translate "Please quote the reference when you pay. Payments can take a few days to show here." %}</p>
+{% endif %}
+
+<details class="govuk-details">
+  <summary class="govuk-details__summary"><span class="govuk-details__summary-text">{% translate "Statement: every charge and payment" %}</span></summary>
+  <div class="govuk-details__text">
+  <table class="govuk-table">
+    <thead class="govuk-table__head"><tr class="govuk-table__row">
+      <th scope="col" class="govuk-table__header">{% translate "Date" %}</th>
+      <th scope="col" class="govuk-table__header">{% translate "Details" %}</th>
+      <th scope="col" class="govuk-table__header govuk-table__header--numeric">{% translate "Charged" %}</th>
+      <th scope="col" class="govuk-table__header govuk-table__header--numeric">{% translate "Paid or credited" %}</th>
+      <th scope="col" class="govuk-table__header govuk-table__header--numeric">{% translate "Balance" %}</th>
+    </tr></thead>
+    <tbody class="govuk-table__body">
+    {% for line in lines %}
+    <tr class="govuk-table__row">
+      <td class="govuk-table__cell">{{ line.when|date:"j M Y" }}</td>
+      <td class="govuk-table__cell">{% if line.receipt %}{% translate "Payment received" %}{% else %}{{ line.details }}{% endif %}</td>
+      <td class="govuk-table__cell govuk-table__cell--numeric">{% if line.charged %}£{{ line.charged|floatformat:"2g" }}{% endif %}</td>
+      <td class="govuk-table__cell govuk-table__cell--numeric">{% if line.credited %}£{{ line.credited|floatformat:"2g" }}{% endif %}</td>
+      <td class="govuk-table__cell govuk-table__cell--numeric">£{{ line.balance|floatformat:"2g" }}</td>
+    </tr>
+    {% empty %}<tr class="govuk-table__row"><td class="govuk-table__cell" colspan="5">{% translate "Nothing yet." %}</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  </div>
+</details>
+{% endif %}
+
+<h2 class="govuk-heading-m">{% translate "Key dates" %}</h2>
+{% if key_dates %}
+<dl class="govuk-summary-list">
+{% for when, label, kind in key_dates %}<div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{{ when|date:"j F Y" }}</dt><dd class="govuk-summary-list__value">{{ label }}</dd></div>{% endfor %}
+</dl>
+{% else %}<p class="govuk-body">{% translate "No dates coming up." %}</p>{% endif %}
+
+<h2 class="govuk-heading-m">{% translate "Documents" %}</h2>
+{% if documents %}
+<ul class="govuk-list">
+{% for d in documents %}<li><a class="govuk-link" href="{% url 'portal:document' d.pk %}">{{ d.description|default:d.get_document_type_display }}</a>{% if d.document_date %}, {{ d.document_date|date:"j M Y" }}{% endif %} (PDF)</li>{% endfor %}
+</ul>
+{% else %}<p class="govuk-body">{% translate "The council has not shared any documents for this agreement yet." %}</p>{% endif %}
+
+{% if request.portal_account.finance %}
+<h2 class="govuk-heading-m">{% translate "Contact details for demands" %}</h2>
+{% with b=lease.billing %}
+<p class="govuk-body">{{ b.name|default:"" }}{% if b.email %}<br>{{ b.email }}{% endif %}{% if b.phone %}<br>{{ b.phone }}{% endif %}{% if b.address %}<br>{{ b.address|linebreaksbr }}{% endif %}</p>
+{% endwith %}
+{% if waiting_change %}<p class="govuk-body">{% blocktranslate with day=waiting_change.created_at|date:"j F Y" %}You asked to change these on {{ day }}. The estates team will check the change before it is made.{% endblocktranslate %}</p>
+{% else %}<p class="govuk-body"><a class="govuk-link" href="{% url 'portal:contact' lease.pk %}">{% translate "Ask to change these details" %}</a></p>{% endif %}
+{% endif %}
+{% endblock %}

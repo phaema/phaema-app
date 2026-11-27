@@ -67,6 +67,7 @@ urlpatterns = [
     path("valuations/", include("apps.valuations.urls")),
     path("space/", include("apps.space.urls")),
     path("occupier/", include("apps.space.liaison_urls")),
+    path("tenant/", include("apps.portal.urls")),
     path("strategy/", include("apps.strategy.urls")),
     path("documents/", include("apps.documents.urls")),
     path("open-data/", opendata.index, name="open-data"),
