@@ -1,0 +1,30 @@
+{% load i18n %}
+{% if mapping_used %}<div class="govuk-inset-text">{% blocktranslate with n=mapping_used.name %}Your columns were matched to PHAEMA's using the saved matching “{{ n }}”.{% endblocktranslate %}</div>{% endif %}
+<form method="post" enctype="multipart/form-data" novalidate>
+  {% csrf_token %}
+  <div class="govuk-form-group{% if file_error %} govuk-form-group--error{% endif %}">
+    {% if adapter.key == "documents" %}
+    <label class="govuk-label govuk-label--s" for="file">{% translate "Zip file of documents, with index.xlsx or index.csv" %}</label>
+    <div class="govuk-hint">{% translate "Up to 500 documents and 50 MB in one zip." %}</div>
+    {% else %}
+    <label class="govuk-label govuk-label--s" for="file">{% translate "Spreadsheet (.xlsx or .csv)" %}</label>
+    <div class="govuk-hint">{% translate "A CSV file holds one sheet only. Use Excel to import several sheets together. A file exported from another system can be used as it is: if its columns are not PHAEMA's, you match them next." %}</div>
+    {% endif %}
+    {% if file_error %}<p id="file-error" class="govuk-error-message"><span class="govuk-visually-hidden">{% translate "Error:" %}</span> {{ file_error }}</p>{% endif %}
+    <div class="govuk-drop-zone" data-module="govuk-file-upload"><input class="govuk-file-upload{% if file_error %} govuk-file-upload--error{% endif %}" id="file" name="file" type="file" accept="{% if adapter.key == 'documents' %}.zip{% else %}.xlsx,.csv{% endif %}"{% if file_error %} aria-describedby="file-error"{% endif %}></div>
+  </div>
+  {% if mappings %}
+  <div class="govuk-form-group">
+    <label class="govuk-label" for="mapping">{% translate "Saved column matching" %}</label>
+    <div class="govuk-hint">{% translate "Left as it is, PHAEMA uses a saved matching that fits the file's columns, if one does." %}</div>
+    <select class="govuk-select" id="mapping" name="mapping"><option value="">{% translate "Choose automatically" %}</option>{% for m in mappings %}<option value="{{ m.pk }}">{{ m.name }}</option>{% endfor %}</select>
+  </div>
+  {% endif %}
+  <button class="govuk-button govuk-button--secondary" data-module="govuk-button">{% translate "Upload and check" %}</button>
+</form>
+{% if mappings and is_administrator %}
+<details class="govuk-details" data-module="govuk-details"><summary class="govuk-details__summary"><span class="govuk-details__summary-text">{% translate "Saved column matchings" %}</span></summary><div class="govuk-details__text">
+  <ul class="govuk-list">{% for m in mappings %}<li>{{ m.name }} <span class="govuk-body-s">({{ m.mapping|length }} {% translate "columns" %})</span>
+    <form method="post" action="{% url 'imports:mapping-delete' adapter.key m.pk %}" class="phaema-inline-form">{% csrf_token %}<button class="govuk-button govuk-button--warning govuk-!-margin-bottom-0 govuk-!-margin-left-2" data-module="govuk-button">{% translate "Delete" %}</button></form></li>{% endfor %}</ul>
+</div></details>
+{% endif %}
