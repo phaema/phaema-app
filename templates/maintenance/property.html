@@ -29,6 +29,17 @@
 </table>
 {% else %}<p class="govuk-body">{% translate "No components recorded yet." %}</p>{% endif %}
 
+<h2 class="govuk-heading-m" id="surveys">{% translate "Condition surveys" %}</h2>
+{% if editable %}<p class="govuk-body"><a class="govuk-link" href="{% url 'maintenance:survey-new' property.pk %}">{% translate "Add a condition survey" %}</a></p>{% endif %}
+{% if survey_info.surveys %}
+<table class="govuk-table"><tbody class="govuk-table__body">{% for s in survey_info.surveys %}
+  <tr class="govuk-table__row"><td class="govuk-table__cell"><a class="govuk-link" href="{{ s.get_absolute_url }}">{{ s.surveyed_on|date:"j M Y" }}</a> {{ s.get_kind_display }}{% if s.status == "draft" %} <strong class="govuk-tag govuk-tag--yellow">{% translate "Being entered" %}</strong>{% endif %}<br><span class="govuk-body-s">{{ s.surveyor }}</span></td>
+  <td class="govuk-table__cell">{% include "maintenance/_grade.html" with g=s.overall_grade %}</td>
+  <td class="govuk-table__cell govuk-body-s">{% translate "Next due" %} {{ s.next_due|date:"M Y"|default:"–" }}</td></tr>
+{% endfor %}</tbody></table>
+<p class="govuk-body">{% blocktranslate with t=survey_info.backlog|floatformat:0|intcomma n=survey_info.open_items|length %}{{ n }} items still to do; backlog (priorities 1 to 3) £{{ t }}.{% endblocktranslate %}</p>
+{% else %}<p class="govuk-body">{% translate "No condition survey recorded." %}</p>{% endif %}
+
 <h2 class="govuk-heading-m" id="planned-tasks">{% translate "Planned maintenance" %}</h2>
 {% include "maintenance/_task_table.html" with tasks=tasks empty=_("No planned tasks yet.") actions=editable hide_property=True %}
 {% if editable and library %}

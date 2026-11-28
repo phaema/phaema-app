@@ -1,0 +1,38 @@
+{% extends "base.html" %}{% load i18n %}
+{% block title %}{% translate "Condition surveys" %}{% endblock %}
+{% block help_page %}maintenance{% endblock %}
+{% block content %}
+<h1 class="govuk-heading-xl govuk-!-margin-bottom-4">{% translate "Condition surveys" %}</h1>
+{% include "maintenance/_nav.html" %}
+<p class="govuk-body">{% translate "When each building and site was last surveyed, and when the next survey is due (usually every five years). Open a property's maintenance page to add a survey." %} <a class="govuk-link" href="{% url 'maintenance:backlog' %}">{% translate "See the backlog" %}</a>.</p>
+<ul class="govuk-list phaema-inline-list">
+  <li><a class="govuk-link" href="?{% if state != '' %}{% endif %}">{% translate "All" %}</a></li>
+  <li><a class="govuk-link" href="?state=never">{% translate "Never surveyed" %} ({{ counts.never }})</a></li>
+  <li><a class="govuk-link" href="?state=overdue">{% translate "Overdue" %} ({{ counts.overdue }})</a></li>
+  <li><a class="govuk-link" href="?state=due">{% translate "Due within a year" %} ({{ counts.due }})</a></li>
+  <li><a class="govuk-link" href="?state=ok">{% translate "Up to date" %} ({{ counts.ok }})</a></li>
+</ul>
+<form method="get" class="phaema-inline-fields govuk-!-margin-bottom-4">{% if state %}<input type="hidden" name="state" value="{{ state }}">{% endif %}
+  {% include "core/_place_filters.html" %}
+  <button class="govuk-button govuk-button--secondary govuk-!-margin-bottom-0" data-module="govuk-button">{% translate "Show" %}</button>
+</form>
+<table class="govuk-table">
+  <thead class="govuk-table__head"><tr class="govuk-table__row">
+    <th scope="col" class="govuk-table__header">{% translate "Property" %}</th>
+    <th scope="col" class="govuk-table__header">{% translate "Last survey" %}</th>
+    <th scope="col" class="govuk-table__header">{% translate "Condition" %}</th>
+    <th scope="col" class="govuk-table__header">{% translate "Next due" %}</th>
+  </tr></thead>
+  <tbody class="govuk-table__body">
+  {% for r in rows %}
+    <tr class="govuk-table__row">
+      <td class="govuk-table__cell"><a class="govuk-link" href="{% url 'maintenance:property' r.property.pk %}#surveys">{{ r.property.reference }}</a> {{ r.property.name }}</td>
+      <td class="govuk-table__cell">{% if r.survey %}<a class="govuk-link" href="{{ r.survey.get_absolute_url }}">{{ r.survey.surveyed_on|date:"j M Y" }}</a>{% else %}<strong class="govuk-tag govuk-tag--grey">{% translate "Never" %}</strong>{% endif %}</td>
+      <td class="govuk-table__cell">{% include "maintenance/_grade.html" with g=r.survey.overall_grade %}</td>
+      <td class="govuk-table__cell">{{ r.due|date:"j M Y"|default:"–" }}{% if r.state == "overdue" %} <strong class="govuk-tag govuk-tag--red">{% translate "Overdue" %}</strong>{% elif r.state == "due" %} <strong class="govuk-tag govuk-tag--yellow">{% translate "Due soon" %}</strong>{% endif %}</td>
+    </tr>
+  {% empty %}<tr class="govuk-table__row"><td class="govuk-table__cell" colspan="4">{% translate "Nothing to show." %}</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

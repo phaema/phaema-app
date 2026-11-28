@@ -27,6 +27,11 @@ Everything since 0.9.0 (10 to 27 November 2026).
   (Manage data, API tokens), or set `PHAEMA_API_PASSWORD_SIGN_IN=True` while you move them over.
 
 ### Added
+- Condition surveys and backlog maintenance: dated surveys of buildings and sites with the work found element by
+  element (condition grade, priority 1 to 4, cost, year due, component); finishing a survey updates the property's
+  grade and, if wanted, its components'; jobs raised from items; a survey programme showing what is never
+  surveyed, overdue or due; a backlog page by priority, element and year with an Excel download; and an import for
+  survey firms' spreadsheets. Help, Maintenance.
 - Files exported from another system can be imported as they are: their columns are matched to PHAEMA's on
   screen, and the matching can be saved and is used again for the next file with the same columns. Documents can
   be brought across in bulk as a zip file with an index (agreement documents, title documents, floor plans and
