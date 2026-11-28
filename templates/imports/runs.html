@@ -1,0 +1,14 @@
+{% extends "base.html" %}{% load i18n %}
+{% block title %}{% translate "Migration runs" %}{% endblock %}
+{% block help_page %}import-export{% endblock %}
+{% block breadcrumbs %}
+<nav class="govuk-breadcrumbs" aria-label="Breadcrumb"><ol class="govuk-breadcrumbs__list">
+  <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="{% url 'imports:hub' %}">{% translate "Import" %}</a></li>
+  <li class="govuk-breadcrumbs__list-item">{% translate "Migration runs" %}</li>
+</ol></nav>
+{% endblock %}
+{% block content %}
+<h1 class="govuk-heading-l">{% translate "Migration runs" %}</h1>
+<p class="govuk-body">{% translate "Trial runs and imports, newest first, with their control totals and sign-off." %}</p>
+{% if runs %}{% include "imports/_runs_table.html" %}{% else %}<p class="govuk-body">{% translate "No trial runs or imports yet." %}</p>{% endif %}
+{% endblock %}

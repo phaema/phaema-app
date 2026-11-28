@@ -27,6 +27,11 @@ Everything since 0.9.0 (10 to 27 November 2026).
   (Manage data, API tokens), or set `PHAEMA_API_PASSWORD_SIGN_IN=True` while you move them over.
 
 ### Added
+- Moving from another system: a **trial run** of any import (properties, parties, leases, receipts and the rest)
+  that imports and then undoes it; **control totals** (rows and money or area columns) compared three ways, old
+  system, file and PHAEMA; a downloadable **check report** of every row with its problems and warnings;
+  **warnings** for possible duplicate parties and properties; and **migration runs** kept with their reports and
+  signed off by a second administrator. Help, Importing and exporting.
 - Map layers for desktop GIS: PHAEMA's property boundaries as an OGC API - Features service at `/api/ogc/`, for
   QGIS, ArcGIS and other GIS, signed in with an API token. Two layers (every property, and top-level holdings
   only), in WGS 84 or British National Grid, with paging, bounding box and simple filters. Help, Maps.

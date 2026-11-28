@@ -29,7 +29,7 @@ class ReceiptSheet(Sheet):
                guidance="The finance system's unique reference for the payment. A payment already in PHAEMA "
                         "is not imported twice."),
         Column("Date received", "received_on", "date", required=True, example="25/03/2026"),
-        Column("Amount", "amount", "decimal", required=True, example="3000.00",
+        Column("Amount", "amount", "decimal", required=True, total=True, example="3000.00",
                guidance="In pounds, including VAT. A negative amount records a refund or a returned payment."),
         Column("Lease reference", "lease", "lease", example="EX-L-001",
                guidance="The agreement the payment is for. If blank, PHAEMA uses the invoice reference or the "

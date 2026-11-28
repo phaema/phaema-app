@@ -31,5 +31,8 @@
     </tr>{% endif %}
   </tbody>
 </table>
+<h2 class="govuk-heading-m">{% translate "Migration runs" %}</h2>
+<p class="govuk-body">{% translate "Every trial run and import is kept with its report and control totals, so you can show what was moved from the old system and who checked it." %} <a class="govuk-link" href="{% url 'imports:runs' %}">{% translate "See all migration runs" %}</a>.</p>
+{% if runs %}{% include "imports/_runs_table.html" %}{% endif %}
 <p class="govuk-body">{% translate "To take data out of PHAEMA, use the Excel and CSV links on any list, or" %} <a class="govuk-link" href="{% url 'reports:list' %}">{% translate "build a report" %}</a>.</p>
 {% endblock %}

@@ -1,0 +1,23 @@
+{% load i18n %}
+<table class="govuk-table">
+  <thead class="govuk-table__head"><tr class="govuk-table__row">
+    <th scope="col" class="govuk-table__header">{% translate "When" %}</th>
+    <th scope="col" class="govuk-table__header">{% translate "Import" %}</th>
+    <th scope="col" class="govuk-table__header">{% translate "File" %}</th>
+    <th scope="col" class="govuk-table__header govuk-table__header--numeric">{% translate "Rows" %}</th>
+    <th scope="col" class="govuk-table__header">{% translate "Totals" %}</th>
+    <th scope="col" class="govuk-table__header">{% translate "Signed off" %}</th>
+  </tr></thead>
+  <tbody class="govuk-table__body">
+  {% for run in runs %}
+    <tr class="govuk-table__row">
+      <td class="govuk-table__cell"><a class="govuk-link" href="{{ run.get_absolute_url }}">{{ run.run_at|date:"j M Y H:i" }}</a></td>
+      <td class="govuk-table__cell">{{ run.title }}<br>{% if run.mode == "trial" %}<strong class="govuk-tag govuk-tag--grey">{% translate "Trial" %}</strong>{% else %}<strong class="govuk-tag govuk-tag--blue">{% translate "Imported" %}</strong>{% endif %}</td>
+      <td class="govuk-table__cell govuk-body-s">{{ run.filename }}</td>
+      <td class="govuk-table__cell govuk-table__cell--numeric">{{ run.rows }}</td>
+      <td class="govuk-table__cell">{% if run.mismatches %}<strong class="govuk-tag govuk-tag--red">{% translate "Do not match" %}</strong>{% elif run.reconciled %}<strong class="govuk-tag govuk-tag--green">{% translate "Match the old system" %}</strong>{% else %}<strong class="govuk-tag govuk-tag--grey">{% translate "File matches PHAEMA" %}</strong>{% endif %}</td>
+      <td class="govuk-table__cell govuk-body-s">{% if run.signed_off_at %}{{ run.signed_off_by.get_full_name|default:run.signed_off_by.username }}, {{ run.signed_off_at|date:"j M Y" }}{% else %}–{% endif %}</td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
