@@ -29,6 +29,7 @@ class Column:
     required: bool = False
     guidance: str = ""
     example: str = ""
+    total: bool = False  # a figure to reconcile: the file's total against PHAEMA's after importing
 
 
 @dataclass
@@ -39,6 +40,7 @@ class RowResult:
     action: str = "create"  # create, update, unchanged
     changed: list = field(default_factory=list)
     errors: list = field(default_factory=list)
+    warnings: list = field(default_factory=list)  # worth a look, but not a reason to refuse the file
 
 
 @dataclass
@@ -63,6 +65,10 @@ class ImportResult:
     @property
     def error_count(self):
         return sum(1 for r in self.rows if r.errors)
+
+    @property
+    def warning_count(self):
+        return sum(1 for r in self.rows if r.warnings)
 
     def summary(self):
         """[(sheet label, created, updated, unchanged)]"""
@@ -114,6 +120,9 @@ class Sheet:
         if kind == "user":
             return find_user(text)
         raise ValueError(f"unknown column type {kind}")
+
+    def warn(self, obj, values, result):
+        """Things worth a look that do not stop the import, such as a possible duplicate. Add to result.warnings."""
 
     def check(self, obj, values, deferred, result):
         """Extra checks across columns. Add messages to result.errors."""
@@ -169,6 +178,8 @@ class Sheet:
                 setattr(obj, c.field, value)
             self.check(obj, values, deferred, result)
             if not result.errors:
+                self.warn(obj, values, result)
+            if not result.errors:
                 try:
                     obj.full_clean(exclude=self.clean_exclude(obj), validate_unique=not obj.pk)
                 except ValidationError as exc:
@@ -187,15 +198,25 @@ class Sheet:
         return values.get(self.reference_field, ("", ""))[0].lower()
 
 
+class MissingColumns(ValidationError):
+    """The file's headings do not include a required column: the person can match their columns to PHAEMA's."""
+
+    def __init__(self, message, sheet=None, headings=None):
+        super().__init__(message)
+        self.sheet, self.headings = sheet, headings or []
+
+
 class Workbook:
     """A set of sheets imported together."""
     title = ""
     sheets = []  # Sheet classes, in save order
     optional = ()  # names of sheets that may be left out
 
-    def __init__(self):
+    def __init__(self, mapping=None):
         self.context = {}
         self.instances = [cls(self.context) for cls in self.sheets]
+        # {sheet name: {the file's heading, lower case: PHAEMA field}}, for files from another system
+        self.mapping = mapping or {}
 
     def read(self, uploaded):
         """Return {sheet name: [(row number, {field: (text, raw)})]}."""
@@ -206,7 +227,8 @@ class Workbook:
             table = list(csv.reader(io.StringIO(text)))
             if not table:
                 raise ValidationError("The file is empty.")
-            sheet = self._sheet_for_headings(table[0])
+            mapped = [i for i in self.instances if i.name in self.mapping]
+            sheet = mapped[0] if len(mapped) == 1 else self._sheet_for_headings(table[0])
             return {sheet.name: self._rows(sheet, table)}
         if not name.endswith(".xlsx"):
             raise ValidationError("Upload an Excel (.xlsx) or CSV (.csv) file.")
@@ -223,7 +245,12 @@ class Workbook:
                 if table:
                     found[sheet.name] = self._rows(sheet, table)
         if not found:
-            if len(self.instances) == 1:
+            mapped = [i for i in self.instances if i.name in self.mapping]
+            if len(mapped) == 1:
+                table = [list(r) for r in wb.worksheets[0].iter_rows(values_only=True)]
+                if table:
+                    found[mapped[0].name] = self._rows(mapped[0], table)
+            elif len(self.instances) == 1:
                 table = [list(r) for r in wb.worksheets[0].iter_rows(values_only=True)]
                 if table:
                     found[self.instances[0].name] = self._rows(self.instances[0], table)
@@ -240,10 +267,13 @@ class Workbook:
     def _rows(self, sheet, table):
         by_heading = {c.heading.lower(): c.field for c in sheet.columns}
         by_heading.update({c.field: c.field for c in sheet.columns})
-        headers = [by_heading.get(str(h or "").strip().lower().rstrip("*").strip()) for h in table[0]]
+        by_heading.update(self.mapping.get(sheet.name, {}))
+        headers = [by_heading.get(str(h or "").strip().lower().rstrip("*").strip()) or None for h in table[0]]
         missing = [c.heading for c in sheet.columns if c.required and c.field not in headers]
         if missing:
-            raise ValidationError(f"{sheet.name} sheet: missing column(s) {', '.join(missing)}. Use the PHAEMA template.")
+            raise MissingColumns(f"{sheet.name} sheet: missing column(s) {', '.join(missing)}. Use the PHAEMA "
+                                 "template, or match your columns to PHAEMA's.", sheet.name,
+                                 [str(h or "").strip() for h in table[0]])
         rows = []
         for number, raw_row in enumerate(table[1:], start=2):
             values = {}

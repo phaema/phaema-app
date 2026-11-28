@@ -49,7 +49,7 @@ class ComponentSheet(Sheet):
         Column("Condition", "condition", "choice", example="B: satisfactory, minor deterioration",
                guidance="A good, B satisfactory, C poor, D bad."),
         Column("Condition assessed", "condition_on", "date", example="01/09/2026"),
-        Column("Replacement cost", "replacement_cost", "decimal", example="38000"),
+        Column("Replacement cost", "replacement_cost", "decimal", total=True, example="38000"),
         Column("Capital", "capital", "bool", example="Yes",
                guidance="Yes if replacing it is capital spending (the default), No for revenue."),
         Column("Notes", "notes"),
@@ -120,7 +120,7 @@ class SurveyItemSheet(Sheet):
         Column("Priority", "priority", "int", required=True, example="2",
                guidance="1 urgent (within a year), 2 essential (within two years), 3 desirable (within five years), "
                         "4 long term."),
-        Column("Estimated cost", "estimated_cost", "decimal", example="48000"),
+        Column("Estimated cost", "estimated_cost", "decimal", total=True, example="48000"),
         Column("Capital", "capital", "bool", example="Yes"),
         Column("Year due", "due_year", "int", example="2027", guidance="Left blank, set from the priority."),
         Column("Component", "component", "component", example="Main hall roof",

@@ -32,6 +32,18 @@ Everything since 0.9.0 (10 to 27 November 2026).
   grade and, if wanted, its components'; jobs raised from items; a survey programme showing what is never
   surveyed, overdue or due; a backlog page by priority, element and year with an Excel download; and an import for
   survey firms' spreadsheets. Help, Maintenance.
+- Files exported from another system can be imported as they are: their columns are matched to PHAEMA's on
+  screen, and the matching can be saved and is used again for the next file with the same columns. Documents can
+  be brought across in bulk as a zip file with an index (agreement documents, title documents, floor plans and
+  building documents), checked first and kept as a migration run. Help, Importing and exporting.
+- Moving from another system: a **trial run** of any import (properties, parties, leases, receipts and the rest)
+  that imports and then undoes it; **control totals** (rows and money or area columns) compared three ways, old
+  system, file and PHAEMA; a downloadable **check report** of every row with its problems and warnings;
+  **warnings** for possible duplicate parties and properties; and **migration runs** kept with their reports and
+  signed off by a second administrator. Help, Importing and exporting.
+- Map layers for desktop GIS: PHAEMA's property boundaries as an OGC API - Features service at `/api/ogc/`, for
+  QGIS, ArcGIS and other GIS, signed in with an API token. Two layers (every property, and top-level holdings
+  only), in WGS 84 or British National Grid, with paging, bounding box and simple filters. Help, Maps.
 - Tenant portal (optional, off by default) at `/tenant/`: tenants the estates team invites sign in with a code
   emailed each time and see, for their own agreements, the rent account with arrears by age, interest and the next
   credit control step, demands with Pay now links, the statement, key dates, documents the council shares, service

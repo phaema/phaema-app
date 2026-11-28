@@ -1,7 +1,5 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 import json
-import os
-import uuid
 from datetime import date, timedelta
 
 from django.contrib import messages
@@ -11,8 +9,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.gis.db.models.functions import AsGeoJSON, Transform
 from django.contrib.gis.geos import Point, Polygon
-from django.core.exceptions import PermissionDenied, ValidationError
-from django.core.files.storage import default_storage
+from django.core.exceptions import PermissionDenied
 from django.db.models import Q
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
@@ -435,55 +432,14 @@ def import_template(request):
     return response
 
 
-IMPORT_DIR = "imports"
-
 
 @administrators_only
 @require_http_methods(["GET", "POST"])
 def import_properties(request):
-    ctx = {}
-    if request.method == "POST" and "confirm" in request.POST:
-        token = request.POST.get("token", "")
-        stored = request.session.get("property_import", {})
-        if stored.get("token") != token or not default_storage.exists(stored.get("path", "")):
-            messages.error(request, _("That import has expired. Please upload the file again."))
-            return redirect("properties:import")
-        with default_storage.open(stored["path"], "rb") as fh:
-            fh.name = stored["name"]
-            rows = importer.read_rows(fh)
-        result, prepared = importer.validate(rows)
-        default_storage.delete(stored["path"])
-        request.session.pop("property_import", None)
-        if not result.ok:
-            messages.error(request, _("The data changed since the preview. Please upload the file again."))
-            return redirect("properties:import")
-        importer.apply([(obj, parent) for (obj, parent), r in zip(prepared, result.rows) if r.action != "unchanged"])
-        messages.success(request, _("Import complete: %(c)s properties added and %(u)s updated.")
-                         % {"c": result.count("create"), "u": result.count("update")})
-        return redirect("properties:list")
+    from apps.imports.migration import PropertyAdapter
+    from apps.imports.views import handle
 
-    if request.method == "POST" and request.FILES.get("file"):
-        uploaded = request.FILES["file"]
-        try:
-            if uploaded.size > 10 * 1024 * 1024:
-                raise ValidationError(_("The file must be smaller than 10 MB."))
-            rows = importer.read_rows(uploaded)
-            result, _prepared = importer.validate(rows)
-        except ValidationError as exc:
-            ctx["file_error"] = " ".join(exc.messages)
-        else:
-            ctx["result"] = result
-            if result.ok:
-                ext = os.path.splitext(uploaded.name)[1].lower()
-                token = uuid.uuid4().hex
-                uploaded.seek(0)
-                path = default_storage.save(f"{IMPORT_DIR}/{token}{ext}", uploaded)
-                request.session["property_import"] = {"token": token, "path": path, "name": uploaded.name}
-                ctx["token"] = token
-            ctx["filename"] = uploaded.name
-    elif request.method == "POST":
-        ctx["file_error"] = _("Choose a file to upload.")
-    return render(request, "properties/import.html", ctx)
+    return handle(request, PropertyAdapter(), "properties/import.html", reverse("properties:list"))
 
 
 @login_required

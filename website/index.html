@@ -10,21 +10,23 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&display=swap">
 <style>
-/* Layout: a single-column estates "terrier" page; the one bold device is the red edging of a title plan. */
+/* Layout: an estates "terrier" page in the PHAEMA house style (see claude/design-website-home-page.md):
+   navy bands, one green action colour, screenshots in browser frames. Red is kept for the logo mark only. */
 :root {
   --paper: #f6f8f7; --sheet: #ffffff; --ink: #13233a; --muted: #4a5864; --line: #cfd6d8;
   --edge: #c1272d; --survey: #2c6a3e; --link: #1b5c89; --tint: #e8efec; --focus: #ffdd00; --on-survey: #ffffff;
   --amber: #8a5a00;
+  --navy: #13233a; --on-navy: #f6f8f7; --on-navy-muted: #cfd6d8; --go-navy: #7fc78f;
   --display: "Bricolage Grotesque", "Arial Narrow", Arial, sans-serif;
   --body: "Atkinson Hyperlegible", Verdana, Arial, sans-serif;
   --mono: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
 }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
   --paper: #0e151d; --sheet: #15202b; --ink: #e6ecef; --muted: #a9b5be; --line: #2d3b48;
-  --edge: #ff6f69; --survey: #7fc78f; --link: #86bfe9; --tint: #1a2732; --on-survey: #0e151d; --amber: #f2c46d; color-scheme: dark; } }
+  --edge: #ff6f69; --survey: #7fc78f; --link: #86bfe9; --tint: #1a2732; --on-survey: #0e151d; --amber: #f2c46d; --navy: #0a1018; color-scheme: dark; } }
 :root[data-theme="dark"] {
   --paper: #0e151d; --sheet: #15202b; --ink: #e6ecef; --muted: #a9b5be; --line: #2d3b48;
-  --edge: #ff6f69; --survey: #7fc78f; --link: #86bfe9; --tint: #1a2732; --on-survey: #0e151d; --amber: #f2c46d; color-scheme: dark; }
+  --edge: #ff6f69; --survey: #7fc78f; --link: #86bfe9; --tint: #1a2732; --on-survey: #0e151d; --amber: #f2c46d; --navy: #0a1018; color-scheme: dark; }
 * { box-sizing: border-box; }
 body { margin: 0; background: var(--paper); color: var(--ink); font: 1.0625rem/1.6 var(--body); }
 .wrap { max-width: 1140px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
@@ -41,14 +43,18 @@ p { margin: 0 0 1em; max-width: 68ch; }
 .skip { position: absolute; left: -9999px; top: 0; z-index: 20; }
 .skip:focus { left: 16px; top: 8px; background: var(--focus); color: #0b0c0c; padding: 8px 12px; }
 
-.top { background: var(--ink); color: var(--paper); position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; }
-body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--ink); }
+.top { background: var(--navy); color: var(--on-navy); position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--navy); }
 .top__inner { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 28px; padding-block: 12px; }
-.brand { color: var(--paper); text-decoration: none; font-family: var(--display); font-weight: 800; font-size: 1.35rem; letter-spacing: .14em; display: inline-flex; align-items: center; gap: 10px; }
+#site-nav { flex: 1; }
+.nav__cta { margin-left: auto; }
+.brand { color: var(--on-navy); text-decoration: none; font-family: var(--display); font-weight: 800; font-size: 1.35rem; letter-spacing: .14em; display: inline-flex; align-items: center; gap: 10px; }
 .brand__mark { width: 18px; height: 14px; border: 2.5px solid var(--edge); display: inline-block; }
 .nav { list-style: none; display: flex; flex-wrap: wrap; gap: 4px 20px; margin: 0; padding: 0; }
-.nav a { color: var(--paper); font-weight: 700; font-size: 1rem; }
-.nav a[aria-current="page"] { text-decoration: none; border-bottom: 3px solid var(--edge); }
+.nav { align-items: center; }
+.nav a { color: var(--on-navy-muted); font-weight: 700; font-size: .97rem; text-decoration: none; }
+.nav a:hover { color: var(--on-navy); text-decoration: underline; }
+.nav a[aria-current="page"] { color: var(--on-navy); border-bottom: 3px solid var(--go-navy); }
 
 .view { padding-block: 48px 64px; scroll-margin-top: 120px; }
 .hero { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); gap: 48px; align-items: center; }
@@ -58,17 +64,9 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 .fine { font-size: .92rem; color: var(--muted); }
 .cta { display: flex; flex-wrap: wrap; gap: 12px; margin: 1.5em 0; }
 .button { display: inline-block; background: var(--survey); color: var(--on-survey); font-weight: 700; text-decoration: none; padding: 12px 20px; border-radius: 3px; box-shadow: 0 3px 0 rgba(0,0,0,.35); }
-.button--quiet { background: transparent; color: var(--link); box-shadow: inset 0 0 0 2px var(--link); }
+.button--quiet { background: var(--sheet); color: var(--survey); box-shadow: inset 0 0 0 2px var(--survey); }
 .status-line { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; color: var(--muted); font-size: .98rem; }
 .pill { font-weight: 700; font-size: .85rem; padding: 2px 10px; border: 2px solid var(--amber); color: var(--amber); letter-spacing: .06em; text-transform: uppercase; }
-
-/* The title plan: a screenshot "edged red", as on a Land Registry plan */
-.plan { margin: 0; min-width: 0; }
-.plan__sheet { background: var(--sheet); border: 1px solid var(--line); padding: 14px; position: relative; }
-.plan__sheet::after { content: ""; position: absolute; inset: 7px; border: 3px solid var(--edge); pointer-events: none; }
-.plan__sheet img { display: block; width: 100%; height: auto; }
-.plan figcaption { display: flex; gap: 10px; align-items: center; font-size: .95rem; color: var(--muted); margin-top: 10px; }
-.plan__key { width: 26px; height: 14px; border: 3px solid var(--edge); flex: none; }
 
 .band { margin-top: 48px; padding-block: 28px; border-top: 3px solid var(--ink); border-bottom: 1px solid var(--line); }
 .band__lead { font-size: 1.25rem; }
@@ -92,13 +90,16 @@ h3.sub { margin-top: 40px; font-size: 1.45rem; font-weight: 800; }
 .shots figcaption { font-size: .95rem; color: var(--muted); margin-top: 8px; }
 
 /* Roadmap: four stages, the way a title plan marks land edged, hatched and outlined */
-.stages { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 20px; margin-block: 24px 28px; align-items: start; }
+.stages { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; margin-block: 24px 28px; align-items: start; }
 .stage { background: var(--sheet); border: 1px solid var(--line); padding: 18px 20px; min-width: 0; }
 .stage h3 { display: flex; align-items: center; gap: 10px; font-size: 1.15rem; }
 .stage__mark { width: 22px; height: 12px; flex: none; border: 3px solid var(--muted); }
 .stage--done .stage__mark { border-color: var(--survey); background: var(--survey); }
-.stage--now { border: 3px solid var(--edge); }
-.stage--now .stage__mark { border-color: var(--edge); }
+.stage--done { grid-column: 1 / -1; }
+.stage--done ul { columns: 3; column-gap: 40px; }
+.stage--done li { break-inside: avoid; }
+.stage--now { border: 3px solid var(--amber); }
+.stage--now .stage__mark { border-color: var(--amber); }
 .stage--next .stage__mark { border-style: dashed; border-color: var(--link); }
 .stage--later .stage__mark { border-style: dotted; }
 .stage ul { margin: 0; padding-left: 1.1em; font-size: .97rem; }
@@ -113,7 +114,93 @@ pre { font: .95rem/1.5 var(--mono); background: var(--sheet); border: 1px solid 
 .scroll { overflow-x: auto; max-width: 100%; }
 .copy { user-select: all; }
 
-.foot { border-top: 1px solid var(--line); padding-block: 24px 40px; color: var(--muted); font-size: .92rem; }
+.foot { background: #0e151d; color: #a9b5be; padding-block: 56px 32px; font-size: .95rem; }
+.foot a { color: #a9b5be; }
+.foot a:hover { color: #f6f8f7; }
+.foot__cols { display: grid; grid-template-columns: 2fr 1fr 1fr 1.3fr; gap: 32px; }
+.foot h2 { font-family: var(--body); font-size: 1rem; font-weight: 700; color: #f6f8f7; margin: 0 0 10px; letter-spacing: 0; }
+.foot ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.foot__brand { display: flex; align-items: center; gap: 10px; color: #f6f8f7; font-family: var(--display); font-weight: 800; letter-spacing: .14em; font-size: 1.2rem; }
+.foot__brand .brand__mark { border-color: #ff6f69; }
+.foot__fine { border-top: 1px solid #2d3b48; margin-top: 40px; padding-top: 16px; font-size: .85rem; max-width: none; }
+
+/* House style (November 2026): navy bands, one green action colour, screenshots in browser frames */
+.nav__cta a { background: var(--go-navy); color: #0e151d; text-decoration: none; padding: 6px 14px; border-radius: 3px; }
+.nav__cta a[aria-current="page"] { border-bottom: 0; box-shadow: inset 0 -3px 0 #0e151d; }
+.menu { display: none; margin-left: auto; font: 700 1rem var(--body); color: var(--on-navy); background: transparent; border: 2px solid var(--on-navy-muted); border-radius: 3px; padding: 6px 14px; min-height: 44px; cursor: pointer; }
+.menu::before { content: "☰ "; }
+.menu[aria-expanded="true"]::before { content: "✕ "; }
+
+.view--home { padding-block: 0; }
+.section { padding-block: 88px; }
+.section--tight { padding-top: 0; }
+.eyebrow { margin: 0 0 .5em; font-weight: 700; color: var(--survey); font-size: .9rem; letter-spacing: .07em; text-transform: uppercase; }
+.strong { font-weight: 700; }
+.textlink { font-weight: 700; padding: 12px 4px; }
+
+.hero-band { position: relative; overflow: hidden; border-bottom: 1px solid var(--line); }
+.plot { position: absolute; inset: 0; width: 100%; height: 100%; stroke: var(--line); opacity: .6; pointer-events: none; }
+.hero-band .hero { position: relative; padding-block: 72px 80px; }
+.hero h1 { font-size: clamp(2.5rem, 5.4vw, 4.25rem); line-height: 1.02; margin-top: .3em; }
+.hero .lede { font-size: 1.3rem; max-width: 30em; }
+
+.browser { margin: 0; min-width: 0; }
+.browser__frame { background: var(--sheet); border: 1px solid var(--line); border-radius: 10px; overflow: hidden; box-shadow: 0 24px 60px rgba(19,35,58,.18), 0 4px 12px rgba(19,35,58,.08); }
+.browser__bar { display: flex; align-items: center; gap: 8px; padding: 10px 14px; background: var(--tint); border-bottom: 1px solid var(--line); }
+.browser__bar span { width: 10px; height: 10px; border-radius: 50%; background: var(--line); }
+.browser__bar .browser__url { width: auto; height: auto; border-radius: 4px; flex: 1; margin-left: 10px; background: var(--sheet); color: var(--muted); font-size: .75rem; padding: 2px 12px; }
+.browser img { display: block; width: 100%; height: auto; }
+.browser figcaption { font-size: .9rem; color: var(--muted); margin-top: 12px; }
+
+.navy-band { background: var(--navy); color: var(--on-navy); }
+.navy-band a:not(.button) { color: var(--on-navy); }
+.numbers { list-style: none; margin: 0 auto; padding-block: 36px; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 24px; }
+.numbers li { display: flex; flex-direction: column; gap: 6px; color: var(--on-navy-muted); font-size: .95rem; }
+.num { font-family: var(--display); font-weight: 800; font-size: 2.75rem; line-height: 1; color: var(--on-navy); }
+.num--go { color: var(--go-navy); }
+
+.feature { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: 48px; align-items: center; margin-top: 72px; }
+.feature--flip .feature__text { order: 2; }
+.feature__text h3 { font-size: 1.75rem; }
+.shot { border: 1px solid var(--line); border-radius: 8px; overflow: hidden; box-shadow: 0 12px 32px rgba(19,35,58,.12); min-width: 0; }
+.shot img { display: block; width: 100%; height: auto; }
+
+.tint-band { background: var(--tint); }
+.families { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 20px; margin-block: 32px 28px; }
+.family { background: var(--sheet); border-radius: 8px; padding: 24px; border-top: 4px solid var(--fam); min-width: 0; }
+.family svg { fill: none; stroke: var(--fam); stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.family h3 { margin-top: 12px; }
+.family p { font-size: .95rem; color: var(--muted); margin: 0; }
+.family--property { --fam: var(--survey); }
+.family--leases { --fam: var(--link); }
+.family--buildings { --fam: var(--amber); }
+.family--strategy { --fam: var(--ink); }
+
+.founder { display: flex; flex-wrap: wrap; gap: 40px; align-items: center; background: var(--sheet); border: 1px solid var(--line); border-radius: 12px; padding: 44px; }
+.founder img { flex: none; width: 160px; height: 160px; border-radius: 50%; object-fit: cover; border: 4px solid var(--tint); box-shadow: 0 6px 18px rgba(19,35,58,.15); }
+.founder > div { flex: 1 1 420px; min-width: 0; }
+.founder blockquote { margin: 0; }
+.founder blockquote p { font-family: var(--display); font-weight: 600; font-size: clamp(1.35rem, 2.4vw, 1.75rem); line-height: 1.3; max-width: none; margin: 0; }
+.founder__name { margin: 16px 0 0; color: var(--muted); }
+
+.sheet-band { background: var(--sheet); border-block: 1px solid var(--line); }
+.steps { list-style: none; margin: 32px 0 28px; padding: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.step { border-top: 6px dashed var(--line); padding: 18px 24px 0 0; min-width: 0; }
+.step--done { border-top: 6px solid var(--survey); }
+.step--now { border-top: 6px solid var(--amber); }
+.step__when { display: block; font-weight: 700; font-size: .85rem; letter-spacing: .07em; text-transform: uppercase; color: var(--muted); }
+.step--done .step__when { color: var(--survey); }
+.step--now .step__when { color: var(--amber); }
+.step__what { display: block; font-family: var(--display); font-weight: 600; font-size: 1.4rem; margin: 4px 0 6px; }
+.step p { font-size: .95rem; color: var(--muted); }
+
+.pilot { display: flex; flex-wrap: wrap; gap: 24px 40px; align-items: center; justify-content: space-between; padding-block: 72px; }
+.pilot > div:first-child { flex: 1 1 480px; min-width: 0; }
+.pilot p { color: var(--on-navy-muted); margin: 0; }
+.pilot .cta { margin: 0; }
+.button--onnavy { background: var(--go-navy); color: #0e151d; box-shadow: 0 3px 0 rgba(0,0,0,.45); }
+.button--quiet-onnavy { background: transparent; color: var(--on-navy); box-shadow: inset 0 0 0 2px var(--on-navy-muted); }
+
 
 @media (max-width: 960px) {
   .hero { grid-template-columns: minmax(0, 1fr); }
@@ -121,10 +208,33 @@ pre { font: .95rem/1.5 var(--mono); background: var(--sheet); border: 1px solid 
   .resources, .benefits, .involve { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .three { grid-template-columns: minmax(0, 1fr); gap: 8px; }
   .four { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .stage--done ul { columns: 2; }
+  .numbers, .families, .steps { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .steps { row-gap: 28px; }
+  .feature { grid-template-columns: minmax(0, 1fr); gap: 24px; margin-top: 56px; }
+  .feature--flip .feature__text { order: 0; }
+  .foot__cols { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .has-menu .menu { display: inline-block; }
+  .has-menu #site-nav { display: none; flex-basis: 100%; }
+  .has-menu #site-nav.is-open { display: block; }
+  .has-menu .nav { flex-direction: column; align-items: stretch; gap: 0; padding-block: 8px; }
+  .has-menu .nav a { display: block; padding: 10px 0; }
+  .has-menu .nav a[aria-current="page"] { border-bottom: 0; box-shadow: inset 4px 0 0 var(--go-navy); padding-left: 12px; }
+  .has-menu .nav__cta { margin: 8px 0 0; }
+  .has-menu .nav__cta a { display: inline-block; padding: 10px 16px; }
 }
 @media (max-width: 600px) {
   .modules, .shots, .stages, .resources, .benefits, .involve, .involve.two, .four, .split { grid-template-columns: minmax(0, 1fr); }
   .view { padding-block: 28px 40px; }
+  .view--home { padding-block: 0; }
+  .stage--done ul { columns: 1; }
+  .numbers, .families, .steps, .foot__cols { grid-template-columns: minmax(0, 1fr); }
+  .numbers { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .section { padding-block: 56px; }
+  .section--tight { padding-top: 0; }
+  .hero-band .hero { padding-block: 40px 48px; }
+  .founder { padding: 28px; gap: 24px; }
+  .founder img { width: 112px; height: 112px; }
 }
 @media (prefers-reduced-motion: no-preference) { html { scroll-behavior: smooth; } }
 </style>
@@ -133,51 +243,140 @@ pre { font: .95rem/1.5 var(--mono); background: var(--sheet); border: 1px solid 
 <a class="skip" href="#main">Skip to content</a>
 <div class="top"><div class="wrap top__inner">
   <a class="brand" href="#about" aria-label="PHAEMA home"><span class="brand__mark" aria-hidden="true"></span>PHAEMA</a>
-  <nav aria-label="Sections"><ul class="nav">
+  <button class="menu" type="button" aria-expanded="false" aria-controls="site-nav" hidden>Menu</button>
+  <nav aria-label="Sections" id="site-nav"><ul class="nav">
     <li><a href="#about">About</a></li>
     <li><a href="#councils">For councils</a></li>
     <li><a href="#capabilities">What it does</a></li>
     <li><a href="#security">Security</a></li>
-    <li><a href="#open-source">Why Open Source</a></li>
+    <li><a href="#open-source">Why open source</a></li>
     <li><a href="tour.html">Tour</a></li>
     <li><a href="#roadmap">Roadmap</a></li>
     <li><a href="#resources">Resources</a></li>
-    <li><a href="#take-part">Take part</a></li>
+    <li class="nav__cta"><a href="#take-part">Take part</a></li>
   </ul></nav>
 </div></div>
 
 <main id="main">
-<section class="view" id="about" aria-labelledby="h-about">
-  <div class="wrap hero">
-    <div class="hero__text">
-      <p class="kicker">Open-source Property Holding and Estate Management Application for councils in England and Wales</p>
-      <h1 id="h-about">One open system for council estates.</h1>
-      <p class="lede">Many councils run their estate across a terrier, a lease database, compliance spreadsheets, a valuation workbook and separate project trackers. PHAEMA (Property Holding and Estate Management Application) brings the property register, leases, casework, projects, rents, service charges, repairs, compliance and asset valuations into one system, built around the property and the lease. There is no licence fee, the code is open, and councils are invited to pilot it.</p>
-      <div class="cta">
-        <a class="button" href="mailto:stuart@phaema.co.uk?subject=PHAEMA%20pilot%20council">Become a pilot council</a>
-        <a class="button" href="https://demo.phaema.co.uk">Try the test site</a>
-        <a class="button button--quiet" href="tour.html">Watch the tour</a>
+<section class="view view--home" id="about" aria-labelledby="h-about">
+  <div class="hero-band">
+    <svg class="plot" aria-hidden="true" focusable="false" viewBox="0 0 1440 640" preserveAspectRatio="xMidYMid slice"><g fill="none" stroke-width="1.5">
+      <path d="M760 40 L1010 20 L1060 210 L820 250 Z"/><path d="M1010 20 L1300 60 L1290 230 L1060 210"/>
+      <path d="M820 250 L1060 210 L1090 420 L850 460 Z"/><path d="M1060 210 L1290 230 L1340 400 L1090 420"/>
+      <path d="M850 460 L1090 420 L1120 620 L880 640"/><path d="M1090 420 L1340 400 L1420 600 L1120 620"/>
+      <path d="M1300 60 L1440 40 M1290 230 L1440 220 M1340 400 L1440 390" stroke-dasharray="6 6"/></g></svg>
+    <div class="wrap hero">
+      <div class="hero__text">
+        <p class="status-line"><span class="pill">Alpha · in testing</span> Open source, for councils in England and Wales</p>
+        <h1 id="h-about">One open system for council estates.</h1>
+        <p class="lede">Terrier, leases, casework, compliance and valuations in one place, built around the property and the lease. No licence fee, ever.</p>
+        <div class="cta">
+          <a class="button" href="mailto:stuart@phaema.co.uk?subject=PHAEMA%20pilot%20council">Become a pilot council</a>
+          <a class="button button--quiet" href="https://demo.phaema.co.uk">Try the test site</a>
+          <a class="textlink" href="tour.html">Watch the tour <span aria-hidden="true">→</span></a>
+        </div>
       </div>
-      <p class="status-line"><span class="pill">Alpha</span> In testing, November 2026. Not yet ready for live estate management.</p>
+      <figure class="browser">
+        <div class="browser__frame">
+          <div class="browser__bar" aria-hidden="true"><span></span><span></span><span></span><span class="browser__url">demo.phaema.co.uk</span></div>
+          <img src="img/my-work.jpg" width="1920" height="1230" alt="PHAEMA's My work dashboard for a surveyor: items that need attention, upcoming events, open cases and the properties they manage.">
+        </div>
+        <figcaption>My work: one surveyor's overdue items, the next 90 days, cases and properties. Fictional demonstration data.</figcaption>
+      </figure>
     </div>
-    <figure class="plan">
-      <div class="plan__sheet"><img src="img/my-work.jpg" width="1920" height="1230" alt="PHAEMA's My work dashboard for a surveyor: items that need attention, upcoming events, open cases and the properties they manage."></div>
-      <figcaption><span class="plan__key" aria-hidden="true"></span>My work: one surveyor's overdue items, next 90 days, cases and properties.</figcaption>
-    </figure>
   </div>
 
-  <div class="wrap band">
+  <div class="navy-band"><ul class="wrap numbers" aria-label="PHAEMA in numbers">
+    <li><span class="num">15</span><span>modules built and documented</span></li>
+    <li><span class="num">700+</span><span>automated tests on every change</span></li>
+    <li><span class="num">5</span><span>roles with their own e-learning</span></li>
+    <li><span class="num num--go">£0</span><span>licence fee, now or later</span></li>
+  </ul></div>
+
+  <div class="wrap section">
+    <p class="eyebrow">See it in action</p>
+    <h2>Built for the way estates teams actually work.</h2>
+    <div class="feature">
+      <div class="feature__text">
+        <h3>Every property, on the map and on the record</h3>
+        <p>Sites, blocks and units with Land Registry boundaries, UPRNs, photos, floor plans and the full history of what happened to each one.</p>
+        <p><a class="strong" href="tour.html#register">See the property register in the tour</a></p>
+      </div>
+      <div class="shot"><img src="img/property.jpg" width="1920" height="1230" loading="lazy" alt="A property record for Northfield Business Park with a photo and a location map of its units."></div>
+    </div>
+    <div class="feature feature--flip">
+      <div class="feature__text">
+        <h3>No missed break dates or rent reviews</h3>
+        <p>Every lease carries its key dates, each assigned to a named surveyor, with reminders well before notice deadlines and a case opened when work starts.</p>
+        <p><a class="strong" href="tour.html#leases">See leases and key dates in the tour</a></p>
+      </div>
+      <div class="shot"><img src="img/leases-2.jpg" width="1280" height="800" loading="lazy" alt="A lease record listing the break notice, rent review, break and expiry dates, each assigned to a surveyor."></div>
+    </div>
+    <div class="feature">
+      <div class="feature__text">
+        <h3>Tenants help themselves</h3>
+        <p>An optional portal where tenants see what they owe, pay through the council's own payment page, download demands and report repairs, so fewer calls reach the estates team.</p>
+        <p><a class="strong" href="tour.html#portal">See the tenant portal in the tour</a></p>
+      </div>
+      <div class="shot"><img src="img/tour-portal.jpg" width="1920" height="1230" loading="lazy" alt="The tenant portal showing a tenant's balance, the amount overdue, the next step and a button to pay."></div>
+    </div>
+  </div>
+
+  <div class="tint-band"><div class="wrap section">
+    <h2>Fifteen modules, one record of the estate</h2>
+    <p class="lede">Switch on what you need. Rents and service charges are optional; the council's finance system keeps the general ledger.</p>
+    <div class="families">
+      <div class="family family--property">
+        <svg aria-hidden="true" focusable="false" width="36" height="36" viewBox="0 0 24 24"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>
+        <h3>Property</h3><p>Terrier and map · sites, blocks and floor plans · documents · space and occupation costs</p>
+      </div>
+      <div class="family family--leases">
+        <svg aria-hidden="true" focusable="false" width="36" height="36" viewBox="0 0 24 24"><path d="M7 3h7l5 5v13H7z"/><path d="M14 3v5h5M10 13h6M10 17h6"/></svg>
+        <h3>Leases and income</h3><p>Leases and key dates · rents and service charges · credit control · tenant portal</p>
+      </div>
+      <div class="family family--buildings">
+        <svg aria-hidden="true" focusable="false" width="36" height="36" viewBox="0 0 24 24"><path d="M12 3l8 3v6c0 4.5-3.4 8-8 9-4.6-1-8-4.5-8-9V6z"/><path d="M9 12l2 2 4-4"/></svg>
+        <h3>Buildings</h3><p>Repairs and planned maintenance · compliance certificates · Golden Thread · site visits</p>
+      </div>
+      <div class="family family--strategy">
+        <svg aria-hidden="true" focusable="false" width="36" height="36" viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>
+        <h3>Strategy and value</h3><p>Cases and projects · asset valuation · estate strategy and the Asset Challenge · reports</p>
+      </div>
+    </div>
+    <p><a class="strong" href="#capabilities">See everything PHAEMA does</a></p>
+  </div></div>
+
+  <div class="wrap section">
+    <div class="founder">
+      <img src="img/stuart.jpg" width="320" height="320" alt="Stuart Planner">
+      <div>
+        <p class="eyebrow">Designed by a chartered surveyor</p>
+        <blockquote><p>“I wanted to develop a system surveyors actually wanted to use to help them day to day.”</p></blockquote>
+        <p class="founder__name">Stuart Planner MRICS · Founder, PHAEMA</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="wrap section section--tight">
+    <h2>Safe to adopt</h2>
+    <div class="four">
+      <div><h3>Free to use</h3><p>No licence fee, ever. Councils pay only for hosting and any support they choose, and can run it themselves or have any supplier host it.</p></div>
+      <div><h3>Your data, your servers</h3><p>Hosted by the council or a UK or EU supplier. Open code, open standards and exports in open formats, so there is no lock-in.</p></div>
+      <div><h3>Accessible by design</h3><p>Built on the GOV.UK Design System and aiming for WCAG 2.2 AA, with dark, high-contrast and large-text settings, and a Welsh (Cymraeg) interface.</p></div>
+      <div><h3>Secure by design</h3><p>Two-step sign-in, optional single sign-on, access by role and area, and a log of every change. <a href="#security">What is done, and what comes before live use</a>.</p></div>
+    </div>
+  </div>
+
+  <div class="sheet-band"><div class="wrap section">
     <h2>Where the project is</h2>
-    <p class="band__lead">All fifteen modules are built and documented, including the tenant portal, with over 700 automated tests, a user manual, a technical manual and e-learning for five roles. A public test site is running. Next come testing by pilot councils, a pilot of the tenant portal, independent security and accessibility checks, and connectors to the systems councils already use.</p>
-    <p><a href="#roadmap">See the roadmap</a></p>
-  </div>
-
-  <div class="wrap four">
-    <div><h3>Free to use</h3><p>No licence fee, ever. Councils pay only for hosting and any support they choose, and can run it themselves or have any supplier host it.</p></div>
-    <div><h3>Built by surveyors</h3><p>Covers the day-to-day work of public sector estate and asset management, to the professional standards: heads of terms to the RICS leasing code, 1954 Act notice dates, service charges to the RICS 2nd edition, Red Book valuation records and Golden Thread building information.</p></div>
-    <div><h3>Accessible by design</h3><p>Built on the GOV.UK Design System and aiming for WCAG 2.2 AA, with dark, high-contrast and large-text settings, and a Welsh (Cymraeg) interface the council can offer.</p></div>
-    <div><h3>Secure by design</h3><p>Two-step sign-in, optional single sign-on, access by role and area, a log of every change, and hosting in the UK or EU. <a href="#security">What is done, and what comes before live use</a>.</p></div>
-  </div>
+    <ol class="steps">
+      <li class="step step--done"><span class="step__when">Done</span><span class="step__what">Built</span><p>All fifteen modules, manuals, e-learning for five roles and a public test site.</p></li>
+      <li class="step step--now"><span class="step__when">Now</span><span class="step__what">Testing</span><p>Pilot councils, a pilot of the tenant portal, an independent penetration test and accessibility audit.</p></li>
+      <li class="step"><span class="step__when">Next</span><span class="step__what">Connectors</span><p>Council mailboxes, Ordnance Survey, GIS, GOV.UK Notify texts and letters, Teams and SharePoint.</p></li>
+      <li class="step"><span class="step__when">Later</span><span class="step__what">Wider reach</span><p>A contractor portal, condition surveys, and finance, legal and CRM connectors.</p></li>
+    </ol>
+    <p><a class="strong" href="#roadmap">See the roadmap</a></p>
+  </div></div>
 </section>
 
 <section class="view" id="councils" aria-labelledby="h-councils">
@@ -369,8 +568,28 @@ cd phaema-app
 </section>
 </main>
 
+<aside class="navy-band pilot-band" aria-labelledby="h-pilot"><div class="wrap pilot">
+  <div>
+    <h2 id="h-pilot">Help shape PHAEMA as a pilot council</h2>
+    <p>Run the test programme with your own staff and data, decide which connectors come first, and get help setting up and bringing records across.</p>
+  </div>
+  <div class="cta">
+    <a class="button button--onnavy" href="mailto:stuart@phaema.co.uk?subject=PHAEMA%20pilot%20council">Become a pilot council</a>
+    <a class="button button--quiet-onnavy" href="https://demo.phaema.co.uk">Try the test site</a>
+  </div>
+</div></aside>
+
 <footer class="foot"><div class="wrap">
-  <p>PHAEMA is free software under the GNU Affero General Public License v3.0. It is in alpha and not yet ready for live estate management. Screenshots show fictional demonstration data. Updated November 2026. Contact: stuart@phaema.co.uk.</p>
+  <div class="foot__cols">
+    <div>
+      <p class="foot__brand"><span class="brand__mark" aria-hidden="true"></span>PHAEMA</p>
+      <p>Property Holding and Estate Management Application. In alpha and not yet ready for live estate management. Updated November 2026.</p>
+    </div>
+    <div><h2>Project</h2><ul><li><a href="#councils">For councils</a></li><li><a href="#capabilities">What it does</a></li><li><a href="#security">Security</a></li><li><a href="#roadmap">Roadmap</a></li><li><a href="#take-part">Take part</a></li></ul></div>
+    <div><h2>Use it</h2><ul><li><a href="https://demo.phaema.co.uk">Test site</a></li><li><a href="tour.html">Tour</a></li><li><a href="training/index.html">Training</a></li><li><a href="docs/user-manual.html">User manual</a></li><li><a href="https://github.com/phaema/phaema-app">Code on GitHub</a></li></ul></div>
+    <div><h2>Contact</h2><ul><li><a href="mailto:stuart@phaema.co.uk">stuart@phaema.co.uk</a></li><li><a href="https://github.com/phaema/phaema-app/blob/main/LICENSE">GNU AGPL v3.0 licence</a></li></ul></div>
+  </div>
+  <p class="foot__fine">PHAEMA is free software under the GNU Affero General Public License v3.0. Screenshots show fictional demonstration data.</p>
 </div></footer>
 
 <script>
@@ -383,6 +602,21 @@ cd phaema-app
     if (!el || !el.classList.contains('view')) id = 'about';
     views.forEach(function (v) { v.hidden = v.id !== id; });
     links.forEach(function (a) { if (a.getAttribute('href') === '#' + id) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current'); });
+    var band = document.querySelector('.pilot-band');
+    if (band) band.hidden = id === 'take-part';
+  }
+  var menu = document.querySelector('.menu');
+  var nav = document.getElementById('site-nav');
+  if (menu && nav) {
+    menu.hidden = false;
+    document.documentElement.classList.add('has-menu');
+    menu.addEventListener('click', function () {
+      var open = menu.getAttribute('aria-expanded') !== 'true';
+      menu.setAttribute('aria-expanded', String(open));
+      nav.classList.toggle('is-open', open);
+    });
+    links.forEach(function (a) { a.addEventListener('click', function () {
+      menu.setAttribute('aria-expanded', 'false'); nav.classList.remove('is-open'); }); });
   }
   window.addEventListener('hashchange', function () { show(); window.scrollTo(0, 0); });
   show();

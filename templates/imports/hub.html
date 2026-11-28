@@ -25,11 +25,19 @@
     </tr>
     {% endfor %}
     {% if is_administrator %}<tr class="govuk-table__row">
+      <td class="govuk-table__cell"><a class="govuk-link" href="{% url 'imports:upload' 'documents' %}">{% translate "Documents" %}</a></td>
+      <td class="govuk-table__cell">{% translate "Documents from another system in bulk: a zip file of PDFs and drawings with an index saying which agreement, title or property each belongs to." %}</td>
+      <td class="govuk-table__cell"><a class="govuk-link" href="{% url 'imports:documents-template' %}">{% translate "Index template" %}</a></td>
+    </tr>
+    <tr class="govuk-table__row">
       <td class="govuk-table__cell"><a class="govuk-link" href="{% url 'properties:inspire-upload' %}">{% translate "Land Registry boundaries" %}</a></td>
       <td class="govuk-table__cell">{% translate "HM Land Registry INSPIRE Index Polygons (GML), to show title boundaries on the map." %}</td>
       <td class="govuk-table__cell"></td>
     </tr>{% endif %}
   </tbody>
 </table>
+<h2 class="govuk-heading-m">{% translate "Migration runs" %}</h2>
+<p class="govuk-body">{% translate "Every trial run and import is kept with its report and control totals, so you can show what was moved from the old system and who checked it." %} <a class="govuk-link" href="{% url 'imports:runs' %}">{% translate "See all migration runs" %}</a>.</p>
+{% if runs %}{% include "imports/_runs_table.html" %}{% endif %}
 <p class="govuk-body">{% translate "To take data out of PHAEMA, use the Excel and CSV links on any list, or" %} <a class="govuk-link" href="{% url 'reports:list' %}">{% translate "build a report" %}</a>.</p>
 {% endblock %}

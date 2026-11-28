@@ -10,7 +10,7 @@ from apps.core import account_requests, cover_views, handover_views, password_re
 from apps.core import views as core_views
 from apps.leases import event_views
 from apps.leases.api import LeaseViewSet, PartyViewSet
-from apps.properties import opendata
+from apps.properties import ogc, opendata
 from apps.properties.api import PropertyViewSet, TitleViewSet
 
 router = DefaultRouter()
@@ -77,6 +77,12 @@ urlpatterns = [
     path("calendar/<str:token>.ics", event_views.calendar_feed, name="calendar-feed"),
     path("admin/login/", two_step_views.admin_login_redirect),
     path("admin/", admin.site.urls),
+    path("api/ogc/", ogc.LandingPage.as_view(), name="ogc-landing"),
+    path("api/ogc/conformance", ogc.Conformance.as_view(), name="ogc-conformance"),
+    path("api/ogc/collections", ogc.Collections.as_view(), name="ogc-collections"),
+    path("api/ogc/collections/<slug:cid>", ogc.Collection.as_view(), name="ogc-collection"),
+    path("api/ogc/collections/<slug:cid>/items", ogc.Items.as_view(), name="ogc-items"),
+    path("api/ogc/collections/<slug:cid>/items/<str:reference>", ogc.Items.as_view(), name="ogc-item"),
     path("api/", include(router.urls)),
     path("api/schema/", SpectacularAPIView.as_view(), name="api-schema"),
     path("api/docs/", SpectacularSwaggerView.as_view(url_name="api-schema"), name="api-docs"),
