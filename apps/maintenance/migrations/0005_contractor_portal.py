@@ -10,7 +10,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("maintenance", "0003_repair_reports"),
+        ("maintenance", "0004_condition_surveys"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 

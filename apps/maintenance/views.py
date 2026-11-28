@@ -25,7 +25,7 @@ from apps.properties.models import Property
 from apps.reports.export import csv_response, xlsx_response
 from apps.reports.mixins import ExportMixin
 
-from . import library, responsibility, workflow
+from . import library, responsibility, surveys, workflow
 from .models import (
     Category,
     Component,
@@ -417,6 +417,7 @@ def property_maintenance(request, pk):
         "library": [t for t in library.TASKS if t[1] not in have], "contractors": Contractor.objects.filter(active=True),
         "replace_soon": [c for c in components if c.replace_year and c.replace_year <= today.year + 5],
         "can_raise": _can_raise(request.user), "safety": _safety(prop),
+        "survey_info": surveys.property_summary(prop),
     })
 
 

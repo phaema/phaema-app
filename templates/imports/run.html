@@ -1,0 +1,85 @@
+{% extends "base.html" %}{% load i18n %}
+{% block title %}{{ run.title }}: {{ run.get_mode_display }}{% endblock %}
+{% block help_page %}import-export{% endblock %}
+{% block breadcrumbs %}
+<nav class="govuk-breadcrumbs" aria-label="Breadcrumb"><ol class="govuk-breadcrumbs__list">
+  <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="{% url 'imports:hub' %}">{% translate "Import" %}</a></li>
+  <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="{% url 'imports:runs' %}">{% translate "Migration runs" %}</a></li>
+  <li class="govuk-breadcrumbs__list-item">{{ run.run_at|date:"j M Y H:i" }}</li>
+</ol></nav>
+{% endblock %}
+{% block content %}
+<span class="govuk-caption-l">{{ run.title }}</span>
+<h1 class="govuk-heading-l">{% if run.mode == "trial" %}{% translate "Trial run" %}{% else %}{% translate "Import" %}{% endif %}: {{ run.filename }}</h1>
+{% if run.mode == "trial" %}<div class="govuk-inset-text">{% translate "Nothing was saved. These are the figures PHAEMA would hold if this file were imported." %}</div>{% endif %}
+<dl class="govuk-summary-list">
+  <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Run by" %}</dt><dd class="govuk-summary-list__value">{{ run.run_by.get_full_name|default:run.run_by.username }}, {{ run.run_at|date:"j F Y H:i" }}</dd></div>
+  <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "File fingerprint" %}</dt><dd class="govuk-summary-list__value govuk-body-s"><code>{{ run.file_sha256 }}</code><br>{% translate "SHA-256: proves which file was imported." %}</dd></div>
+  <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Rows" %}</dt><dd class="govuk-summary-list__value">{{ run.rows }}{% if run.warnings %} ({% blocktranslate count n=run.warnings %}{{ n }} with a warning{% plural %}{{ n }} with warnings{% endblocktranslate %}){% endif %}</dd></div>
+  <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Report" %}</dt><dd class="govuk-summary-list__value"><a class="govuk-link" href="{% url 'imports:run-report' run.pk %}">{% translate "Download the report (Excel)" %}</a></dd></div>
+</dl>
+<table class="govuk-table">
+  <caption class="govuk-table__caption govuk-table__caption--m">{% translate "Records" %}</caption>
+  <thead class="govuk-table__head"><tr class="govuk-table__row">
+    <th scope="col" class="govuk-table__header">{% translate "Sheet" %}</th>
+    <th scope="col" class="govuk-table__header govuk-table__header--numeric">{% translate "New" %}</th>
+    <th scope="col" class="govuk-table__header govuk-table__header--numeric">{% translate "Updated" %}</th>
+    <th scope="col" class="govuk-table__header govuk-table__header--numeric">{% translate "Unchanged" %}</th>
+  </tr></thead>
+  <tbody class="govuk-table__body">
+  {% for label, c, u, n in run.summary %}
+    <tr class="govuk-table__row"><th scope="row" class="govuk-table__header">{{ label }}</th><td class="govuk-table__cell govuk-table__cell--numeric">{{ c }}</td><td class="govuk-table__cell govuk-table__cell--numeric">{{ u }}</td><td class="govuk-table__cell govuk-table__cell--numeric">{{ n }}</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+<table class="govuk-table">
+  <caption class="govuk-table__caption govuk-table__caption--m">{% translate "Control totals" %}</caption>
+  <thead class="govuk-table__head"><tr class="govuk-table__row">
+    <th scope="col" class="govuk-table__header">{% translate "Total" %}</th>
+    <th scope="col" class="govuk-table__header govuk-table__header--numeric">{% translate "Old system" %}</th>
+    <th scope="col" class="govuk-table__header govuk-table__header--numeric">{% translate "In the file" %}</th>
+    <th scope="col" class="govuk-table__header govuk-table__header--numeric">{% if run.mode == "trial" %}{% translate "PHAEMA would hold" %}{% else %}{% translate "In PHAEMA" %}{% endif %}</th>
+    <th scope="col" class="govuk-table__header">{% translate "Result" %}</th>
+  </tr></thead>
+  <tbody class="govuk-table__body">
+  {% for c in run.controls %}
+    <tr class="govuk-table__row">
+      <th scope="row" class="govuk-table__header">{{ c.label }}</th>
+      <td class="govuk-table__cell govuk-table__cell--numeric">{% if c.expected %}{{ c.expected|floatformat:c.places }}{% else %}–{% endif %}</td>
+      <td class="govuk-table__cell govuk-table__cell--numeric">{{ c.in_file|floatformat:c.places }}</td>
+      <td class="govuk-table__cell govuk-table__cell--numeric">{{ c.in_phaema|floatformat:c.places }}</td>
+      <td class="govuk-table__cell">{% if c.matches %}<strong class="govuk-tag govuk-tag--green">{% translate "Matches" %}</strong>{% else %}<strong class="govuk-tag govuk-tag--red">{% translate "Does not match" %}</strong>{% endif %}</td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% if run.mismatches %}<p class="govuk-body">{% translate "Where the file and PHAEMA differ, a value was changed on the way in (for example rounding, or a blank cell that kept an existing value). Where the old system differs, the file is not the whole of the old system's records. Check the rows in the report." %}</p>{% endif %}
+
+{% if can_import %}
+<h2 class="govuk-heading-m">{% translate "Import this file" %}</h2>
+<p class="govuk-body">{% translate "The file you tried is still waiting. Import it for real, with the same old-system figures." %}</p>
+<form method="post" action="{{ upload_url }}">{% csrf_token %}
+  <input type="hidden" name="token" value="{{ token }}">
+  {% for key, value in expected.items %}<input type="hidden" name="expected:{{ key }}" value="{{ value }}">{% endfor %}
+  <button class="govuk-button" name="confirm" value="1" data-module="govuk-button">{% translate "Import these records" %}</button>
+</form>
+{% endif %}
+
+<h2 class="govuk-heading-m">{% translate "Sign-off" %}</h2>
+{% if run.signed_off_at %}
+  <p class="govuk-body">{% blocktranslate with who=run.signed_off_by.get_full_name|default:run.signed_off_by.username when=run.signed_off_at|date:"j F Y" %}Signed off by {{ who }} on {{ when }}.{% endblocktranslate %}</p>
+  {% if run.sign_off_note %}<div class="govuk-inset-text">{{ run.sign_off_note|linebreaksbr }}</div>{% endif %}
+{% elif can_sign_off %}
+  <p class="govuk-body">{% translate "Sign off when you have checked the control totals and the report, and are satisfied the records are right. It records your name and the date, and cannot be undone." %}</p>
+  <form method="post" action="{% url 'imports:run-sign-off' run.pk %}">{% csrf_token %}
+    <div class="govuk-form-group">
+      <label class="govuk-label" for="note">{% translate "Note (optional)" %}</label>
+      <div class="govuk-hint">{% translate "For example which reports you checked against, or what was corrected." %}</div>
+      <textarea class="govuk-textarea" id="note" name="note" rows="3"></textarea>
+    </div>
+    <button class="govuk-button govuk-button--secondary" data-module="govuk-button">{% translate "Sign off this run" %}</button>
+  </form>
+{% else %}
+  <p class="govuk-body">{% translate "Not signed off yet. An administrator other than the person who ran it signs it off." %}</p>
+{% endif %}
+{% endblock %}

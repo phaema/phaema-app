@@ -106,6 +106,49 @@ Uniclass 2015 code and NRM3 element if you use them, the year installed and expe
 **Lifecycle forecast** shows when components fall due for replacement over 5 to 30 years, and the cost each year,
 split between capital and revenue. Download it to Excel for the capital programme.
 
+## Condition surveys and backlog maintenance
+
+A condition survey records the state of a building or site on a date, and the work it found, element by element.
+
+**Adding a survey.** On a property's maintenance page, under **Condition surveys**, select **Add a condition
+survey**. Enter the kind of survey (full, visual inspection, desktop review or specialist), the date, the surveyor
+and firm, the overall condition grade and, if you have it, the report as a PDF. The next survey is due five years
+later unless you give another date.
+
+**The work found.** Add each item: the element (roof, structure, external walls, heating and so on), where it is,
+the work needed, its condition grade (A to D), its priority, the estimated cost and whether it is capital. If the
+item is about a component in the register, choose it. Priorities follow the usual public sector scale:
+
+| Priority | Meaning | Falls due |
+|---|---|---|
+| 1 Urgent | Health and safety, or needed to keep the building open | Within a year |
+| 2 Essential | To stop serious deterioration | Within two years |
+| 3 Desirable | To stop further deterioration | Within five years |
+| 4 Long term | Can wait | Beyond five years |
+
+The year due is set from the priority unless you enter one.
+
+**Finishing.** When every item is in, select **Finish the survey**. The property takes the survey's overall
+condition and date (unless a later survey has already been finished), and, if you leave the box ticked, each
+component named on an item takes the worst grade found for it. A finished survey can be reopened to correct it.
+
+**Acting on items.** Select **Raise a job** on an item to open a repair job for it, with the element, cost,
+component and survey details filled in. Priority 1 items become urgent jobs, priority 2 routine and the rest
+planned. The item shows as done when its job is completed. You can also mark an item **Done** (for example work
+done by a tenant) or **Not needed** (for example a building being closed), with a note.
+
+**Condition surveys** (in the maintenance menu) is the survey programme: every building and top-level site, when
+it was last surveyed, its grade, and when the next survey is due, with filters for never surveyed, overdue and due
+within a year.
+
+**Backlog** totals the work still to do across the estate: by priority, by element and by year due, with overdue
+work counted in this year. Backlog maintenance is the work of priorities 1 to 3; priority 4 is shown beside it.
+Filter by priority, building or surveyor, and download the list to Excel for the asset management plan.
+
+**Importing a survey.** Survey firms usually supply their findings as a spreadsheet. Under **Import**, **Condition
+surveys**, upload one row per item. Rows with the same property and survey date become one survey, which is added
+as being entered so you can check it and finish it.
+
 ## Contractors
 
 Administrators add contractors under **Manage data**, with contact details, out of hours number, insurer, public

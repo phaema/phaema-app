@@ -22,13 +22,14 @@ RULES = {
     "cases.SiteVisitPhoto": "",
     "maintenance.JobDocument": "maintenance",
     "maintenance.JobUpdate": "maintenance",
+    "maintenance.ConditionSurvey": "maintenance",
     "maintenance.RepairPhoto": "maintenance",
     "compliance.Certificate": "compliance",
     "compliance.BuildingDocument": "compliance",
     "valuations.Valuation": "valuations",
     "valuations.AuditReview": "valuations",
 }
-SERVED_ELSEWHERE = {"projects.GatewayDecision", "projects.ProjectDocument"}
+SERVED_ELSEWHERE = {"imports.MigrationRun", "projects.GatewayDecision", "projects.ProjectDocument"}
 
 
 def file_fields():
