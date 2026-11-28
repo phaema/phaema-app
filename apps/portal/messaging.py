@@ -14,6 +14,7 @@ from django.utils import timezone, translation
 from django.utils.translation import gettext as _
 
 from apps.core import notify
+from apps.core.audit import audited_update
 from apps.core.models import Cover, ModuleSettings, OutgoingEmail
 
 from .models import PortalAccount, PortalMessage
@@ -56,8 +57,8 @@ def from_tenant(lease, account, text, case=None):
 def reply(lease, user, text, case=None):
     """Answer the tenant. Marks their earlier messages answered and tells them by email that there is a reply."""
     now = timezone.now()
-    lease.portal_messages.filter(direction=PortalMessage.Direction.FROM_TENANT, answered_at__isnull=True) \
-        .update(answered_at=now)
+    audited_update(lease.portal_messages.filter(direction=PortalMessage.Direction.FROM_TENANT,
+                                                answered_at__isnull=True), answered_at=now)
     message = PortalMessage.objects.create(lease=lease, case=case, direction=PortalMessage.Direction.TO_TENANT,
                                            author=user, text=text)
     asked = set(lease.portal_messages.filter(direction="in").values_list("account_id", flat=True))

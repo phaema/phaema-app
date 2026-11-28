@@ -77,6 +77,14 @@ def test_staff_reply_tells_the_tenant_and_shows_in_the_portal(world, client):
     thread = client.get(f"/tenant/agreements/{lease.pk}/messages/").content.decode()
     assert "Answer about the yard" in thread and "Sam" in thread
     assert "new reply" not in client.get(f"/tenant/agreements/{lease.pk}/").content.decode()
+    # Answering and reading are both in the change log.
+    from django.contrib.contenttypes.models import ContentType
+
+    from apps.core.models import AuditEntry
+
+    changed = [e.changes for e in AuditEntry.objects.filter(
+        content_type=ContentType.objects.get_for_model(PortalMessage), action="update")]
+    assert any("answered_at" in c for c in changed) and any("read_at" in c for c in changed)
 
 
 def test_messages_with_no_surveyor_go_to_administrators(world, client, make_user):

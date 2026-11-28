@@ -13,7 +13,10 @@ from django.db.models.signals import post_delete, post_save, pre_save
 
 from .middleware import get_current_user, get_current_via
 
-_EXCLUDED = {"created_at", "updated_at", "created_by", "updated_by", "key_hash"}
+# Fields never written to the change log. last_sign_in is operational metadata, decided deliberately (review of
+# 28 November 2026): it changes on every sign-in, says nothing about the estate, and staff and portal sign-ins are
+# already in the security log. Sign-in timestamps are set with a plain QuerySet.update() for the same reason.
+_EXCLUDED = {"created_at", "updated_at", "created_by", "updated_by", "key_hash", "last_sign_in"}
 
 
 def _snapshot(instance):

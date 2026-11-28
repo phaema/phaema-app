@@ -139,6 +139,13 @@ def test_reminders_for_missing_and_running_out_certificates(portal):
     assert email.to == "fay@tenant.example" and "do not have a copy" in email.body
     assert re.search(rf"/tenant/agreements/{portal['lease'].pk}/certificates/{req.pk}/", email.body)
     assert send_certificate_reminders(today) == 0  # not again within 30 days
+    from django.contrib.contenttypes.models import ContentType
+
+    from apps.core.models import AuditEntry
+
+    logged = AuditEntry.objects.filter(content_type=ContentType.objects.get_for_model(req), object_id=str(req.pk),
+                                       action="update")
+    assert any(e.changes.get("tenant_reminded_on", [None, None])[1] == str(today) for e in logged)
     Certificate.objects.create(requirement=req, issued_on=today - timedelta(days=345))  # runs out in about 20 days
     assert send_certificate_reminders(today + timedelta(days=31)) == 1
     req.refresh_from_db()

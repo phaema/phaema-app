@@ -11,6 +11,7 @@ from django.utils import translation
 from django.utils.translation import gettext as _
 
 from apps.core import notify
+from apps.core.audit import audited_update
 from apps.core.models import ModuleSettings, OutgoingEmail
 
 AHEAD = 30
@@ -77,5 +78,5 @@ def send_certificate_reminders(today=None):
             sent += 1
             emailed = True
         if emailed:
-            Requirement.objects.filter(pk=req.pk).update(tenant_reminded_on=today)
+            audited_update(Requirement.objects.filter(pk=req.pk), tenant_reminded_on=today)
     return sent

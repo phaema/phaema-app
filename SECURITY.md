@@ -78,8 +78,9 @@ releases with release notes and a security support period for each will start be
   record, print debugging data, load code or read files.
 - Sign-in attempts are limited after repeated wrong passwords, per account and per connection, on the sign-in page,
   the admin site and the API.
-- A change log records who changed what, and when, across properties, leases, cases, finance, access areas, cover
-  for absence and two-step sign-in, including changes made in bulk. A database trigger refuses to change or delete
+- A change log records who changed what, and when, across properties, leases, cases, finance, maintenance (including
+  condition surveys and contractors' updates), the tenant portal, access areas, cover for absence and two-step
+  sign-in, including changes made in bulk. Sign-in times are not logged there; sign-ins are in the security log. A database trigger refuses to change or delete
   change log entries, so they cannot be altered through PHAEMA or its ordinary database connection. This protects
   the log against alteration through the application; it is not absolute: someone with administrator rights over the
   database server can still change the data and its controls, so councils should restrict that access, keep

@@ -14,6 +14,7 @@ from django.views.decorators.cache import never_cache
 from django.views.decorators.http import require_POST
 
 from apps.core import notify
+from apps.core.audit import audited_update
 from apps.core.models import ModuleSettings
 from apps.core.throttle import client_ip
 from apps.leases.models import LeaseDocument
@@ -77,6 +78,7 @@ def code(request):
                 request.session.pop(PENDING_KEY, None)
                 request.session.pop(SHOWN_KEY, None)
                 access.sign_in(request, row.account)
+                # Not audited on purpose: see core.audit._EXCLUDED.
                 PortalAccount.objects.filter(pk=row.account_id).update(last_sign_in=timezone.now())
                 return redirect("portal:home")
             form.add_error("code", _("That code is not right, has been used or has run out. Check the latest "
@@ -416,8 +418,8 @@ def messages_page(request, pk):
         messaging.from_tenant(lease, account, form.cleaned_data["text"], form.cleaned_data["case"])
         return redirect(f"{reverse('portal:messages', args=[lease.pk])}#latest")
     thread = list(lease.portal_messages.select_related("case", "author", "account"))
-    lease.portal_messages.filter(direction=PortalMessage.Direction.TO_TENANT, read_at__isnull=True) \
-        .update(read_at=timezone.now())
+    audited_update(lease.portal_messages.filter(direction=PortalMessage.Direction.TO_TENANT, read_at__isnull=True),
+                   read_at=timezone.now())
     return render(request, "portal/messages.html", {"lease": lease, "thread": thread, "form": form})
 
 

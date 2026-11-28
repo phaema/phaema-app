@@ -9,7 +9,7 @@ Run `python manage.py migrate` after every update; the installer's update script
 
 ## Unreleased
 
-Everything since 0.9.0 (10 to 27 November 2026).
+Everything since 0.9.0 (10 to 28 November 2026).
 
 ### Before updating
 - If your proxy or a customisation loads scripts, fonts or map tiles from another address, list it in
@@ -110,6 +110,14 @@ Everything since 0.9.0 (10 to 27 November 2026).
 - Credit notes allocated to the right charges, and service charge credits (#78).
 
 ### Security
+- The change log now also records condition surveys and their findings, contractors' progress notes and
+  completions, and contractor portal accounts; a tenant's message being answered or read; and the date a tenant
+  was reminded about a certificate. Sign-in times are deliberately not logged: they say nothing about the estate and
+  sign-ins are in the security log. Each is covered by a test.
+- Bulk document imports refuse a zip that would unzip to more than 500 MB in all, holds a document over 50 MB or an
+  index over 5 MB, or holds more than 550 files, before anything in it is read.
+- The tests now check that a database from the last release upgrades cleanly: they build one with that release's
+  code and demo data, then run this version's migrations and demo data over it.
 - Uploaded files now open only for people who can open the record they belong to: files held by valuations,
   compliance or maintenance need that module, and files that belong to no record are not served. Before, anyone
   signed in could open a file whose address they knew (#108).

@@ -10,7 +10,23 @@ class MaintenanceConfig(AppConfig):
     def ready(self):
         from apps.core import audit
 
-        from .models import Component, Contract, Contractor, Job, JobDocument, PlannedTask, RepairReport
+        from .models import (
+            Component,
+            ConditionSurvey,
+            Contract,
+            Contractor,
+            ContractorAccount,
+            Job,
+            JobDocument,
+            JobUpdate,
+            PlannedTask,
+            RepairReport,
+            SurveyItem,
+        )
 
-        for model in (Component, Contract, Contractor, Job, JobDocument, PlannedTask, RepairReport):
+        # Condition surveys and their findings drive capital spending decisions, and contractors' updates are
+        # evidence of the work done, so all of them go in the change log. Contractor sign-in codes do not: they
+        # are short-lived secrets, and a sign-in is recorded on the account's last_sign_in (see core.audit).
+        for model in (Component, ConditionSurvey, Contract, Contractor, ContractorAccount, Job, JobDocument,
+                      JobUpdate, PlannedTask, RepairReport, SurveyItem):
             audit.register(model)
