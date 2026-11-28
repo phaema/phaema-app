@@ -104,6 +104,12 @@ def test_accept_note_and_complete(client, setup, settings, mailoutbox):
     # A finished job takes no more changes.
     assert client.post(url, {"action": "note", "text": "More"}).status_code == 404
 
+    # Contractors' updates and the account are in the change log; signing in is not (core.audit._EXCLUDED).
+    assert len(_logged(JobUpdate, "create")) == 3
+    assert _logged(ContractorAccount, "create") and not _logged(ContractorAccount, field="last_sign_in")
+    setup["account"].refresh_from_db()
+    assert setup["account"].last_sign_in is not None
+
     # The officer sees it all on the job.
     client.force_login(setup["officer"])
     page = client.get(f"/maintenance/jobs/{job.pk}/").content.decode()
@@ -147,3 +153,15 @@ def test_works_order_email_mentions_the_portal(setup, mailoutbox):
     workflow.issue_order(job)
     assert "/contractor/sign-in/" in mailoutbox[-1].body
     assert Job.objects.filter(contractor=setup["fixit"]).count() == 3
+
+
+def _logged(model, action=None, field=None):
+    """Change log entries for a model, optionally of one action or touching one field."""
+    from django.contrib.contenttypes.models import ContentType
+
+    from apps.core.models import AuditEntry
+
+    rows = AuditEntry.objects.filter(content_type=ContentType.objects.get_for_model(model))
+    if action:
+        rows = rows.filter(action=action)
+    return [r for r in rows if field is None or field in r.changes]

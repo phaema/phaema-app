@@ -253,6 +253,7 @@ def code(request):
                 request.session.cycle_key()
                 request.session[SESSION_KEY] = row.account_id
                 request.session[SEEN_KEY] = int(time.time())
+                # Not audited on purpose: see core.audit._EXCLUDED.
                 ContractorAccount.objects.filter(pk=row.account_id).update(last_sign_in=timezone.now())
                 return redirect("contractor:home")
             form.add_error("code", _("That code is not right, has been used or has run out. Check the latest email, "

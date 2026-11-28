@@ -40,6 +40,13 @@ COLUMNS = [
     ("Date", "date", False, "The document's date, dd/mm/yyyy."),
 ]
 MAX_FILES = 500
+# Limits on what the zip holds once unzipped, checked from the zip's own listing before anything is read, so a small
+# upload cannot expand into something that fills the server's memory or disk. Python's zipfile never returns more
+# than an entry's listed size (a mismatch fails its checksum), so the listing can be trusted for this.
+MAX_ENTRIES = MAX_FILES + 50           # documents, the index and a few stray files such as __MACOSX entries
+MAX_EXPANDED = 500 * 1024 * 1024       # everything in the zip, unzipped
+MAX_DOCUMENT = 50 * 1024 * 1024        # any one document
+MAX_INDEX = 5 * 1024 * 1024            # index.xlsx or index.csv
 
 
 def _choice(choices, text):
@@ -51,6 +58,23 @@ def _choice(choices, text):
             return value
     raise ValueError(f"'{text}' is not a type for this kind of document. Use one of: "
                      + ", ".join(str(label) for _v, label in choices) + ".")
+
+
+def _check_sizes(archive):
+    entries = [info for info in archive.infolist() if not info.is_dir()]
+    if len(entries) > MAX_ENTRIES:
+        raise ValidationError(f"The zip holds {len(entries)} files. Send at most {MAX_FILES} documents in one zip.")
+    if sum(info.file_size for info in entries) > MAX_EXPANDED:
+        raise ValidationError(f"The documents in the zip come to more than {MAX_EXPANDED // 1024 ** 2} MB once "
+                              "unzipped. Split them across several zips.")
+    for info in entries:
+        if info.filename.lower() in ("index.xlsx", "index.csv"):
+            if info.file_size > MAX_INDEX:
+                raise ValidationError(f"The index is larger than {MAX_INDEX // 1024 ** 2} MB once unzipped. It "
+                                      "should only list the documents.")
+        elif info.file_size > MAX_DOCUMENT:
+            raise ValidationError(f"{info.filename} is larger than {MAX_DOCUMENT // 1024 ** 2} MB once unzipped. "
+                                  "Add very large documents one at a time.")
 
 
 def _index(archive):
@@ -104,6 +128,7 @@ class DocumentsAdapter:
             archive = zipfile.ZipFile(uploaded)
         except zipfile.BadZipFile:
             raise ValidationError("This file could not be opened as a zip file.") from None
+        _check_sizes(archive)
         index, names = _index(archive)
         if len(index) > MAX_FILES:
             raise ValidationError(f"The index lists {len(index)} documents. Send at most {MAX_FILES} in one zip.")

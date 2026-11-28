@@ -130,3 +130,30 @@ def test_documents_for_administrators_only(client, make_user):
     client.force_login(make_user("surv", "Surveyors"))
     assert client.get("/import/documents/").status_code in (403, 404)
     assert client.get("/import/documents/index-template.xlsx").status_code in (403, 404)
+
+
+def test_document_zip_limits_once_unzipped(admin, monkeypatch):
+    from django.core.exceptions import ValidationError
+
+    from apps.imports import documents
+
+    pdf = placeholder_pdf("Lease", ["Fictional"])
+    row = [["a.pdf", "Agreement document", "L-1", "", "", ""]]
+    adapter = documents.DocumentsAdapter()
+
+    def refused(upload):
+        with pytest.raises(ValidationError) as exc:
+            adapter.check(upload)
+        return " ".join(exc.value.messages)
+
+    monkeypatch.setattr(documents, "MAX_DOCUMENT", len(pdf) - 1)
+    assert "a.pdf is larger than" in refused(_zip(row, {"a.pdf": pdf}))
+    monkeypatch.setattr(documents, "MAX_DOCUMENT", 50 * 1024 * 1024)
+    monkeypatch.setattr(documents, "MAX_EXPANDED", len(pdf))
+    assert "once unzipped" in refused(_zip(row, {"a.pdf": pdf}))
+    monkeypatch.setattr(documents, "MAX_EXPANDED", 500 * 1024 * 1024)
+    monkeypatch.setattr(documents, "MAX_INDEX", 10)
+    assert "The index is larger than" in refused(_zip(row, {"a.pdf": pdf}))
+    monkeypatch.setattr(documents, "MAX_INDEX", 5 * 1024 * 1024)
+    monkeypatch.setattr(documents, "MAX_ENTRIES", 1)
+    assert "holds 2 files" in refused(_zip(row, {"a.pdf": pdf}))

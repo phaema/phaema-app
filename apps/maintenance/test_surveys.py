@@ -77,6 +77,9 @@ def test_enter_finish_and_raise_a_job(client, setup):
     assert paint.state == "not_needed" and not surveys.open_items().exists()
     page = client.get(f"/maintenance/property/{b.pk}/").content.decode()
     assert "Condition surveys" in page and "A Surveyor MRICS" in page
+    # Surveys and their findings feed spending decisions, so every change is in the change log.
+    assert _logged(ConditionSurvey, "create") and _logged(SurveyItem, "create")
+    assert _logged(SurveyItem, "update", "state")
 
 
 def test_a_later_grade_is_not_overwritten(setup):
@@ -168,3 +171,15 @@ def test_demo_has_surveys(db):
     assert surveys.open_items().filter(priority__in=SurveyItem.BACKLOG).exists()
     assert Property.objects.get(reference="DM-N03").condition_grade == "C"
     assert ConditionSurvey.objects.get(property__reference="DM-K09").next_due < date.today() + timedelta(days=1)
+
+
+def _logged(model, action=None, field=None):
+    """Change log entries for a model, optionally of one action or touching one field."""
+    from django.contrib.contenttypes.models import ContentType
+
+    from apps.core.models import AuditEntry
+
+    rows = AuditEntry.objects.filter(content_type=ContentType.objects.get_for_model(model))
+    if action:
+        rows = rows.filter(action=action)
+    return [r for r in rows if field is None or field in r.changes]

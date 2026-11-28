@@ -54,6 +54,52 @@ jobs:
           COVERAGE_CORE: sysmon
           COVERAGE_MINIMUM: "90"  # measured 95% on 26 November 2026
 
+  # A council's database from the last release upgrades cleanly: build it with that release's code and demo data,
+  # then run this version's migrations over it and load this version's demo data on top.
+  upgrade:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    services:
+      db:
+        image: postgis/postgis:16-3.4
+        env:
+          POSTGRES_DB: phaema
+          POSTGRES_USER: phaema
+          POSTGRES_PASSWORD: phaema
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U phaema" --health-interval 5s --health-timeout 5s --health-retries 20
+    env:
+      DATABASE_URL: postgis://phaema:phaema@localhost:5432/phaema
+      SECRET_KEY: ci-only-not-secret-0000000000000000000000000000000000
+      DEBUG: "True"
+      PHAEMA_FETCH_INDICES: "False"
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          persist-credentials: false
+          fetch-depth: 0  # the release tags
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0  # v7.1.0
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: sudo apt-get update && sudo apt-get install -y gdal-bin
+      - name: The last release, with its demo data
+        run: |
+          release=$(git tag --sort=-v:refname | head -n 1)
+          echo "Upgrading from $release"
+          git checkout --quiet "$release"
+          pip install -r requirements.txt
+          python manage.py migrate --verbosity 0
+          python manage.py load_demo_data
+      - name: Upgrade to this version
+        run: |
+          git checkout --quiet "$GITHUB_SHA"
+          pip install -r requirements.txt
+          python manage.py migrate
+          python manage.py load_demo_data
+          python manage.py check
+
   # Style and common mistakes (Ruff, configured in ruff.toml).
   lint:
     runs-on: ubuntu-24.04
