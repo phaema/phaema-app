@@ -402,7 +402,7 @@ BODY = r'''<div class="top"><div class="wrap top__inner">
       <figure class="browser">
         <div class="browser__frame">
           <div class="browser__bar" aria-hidden="true"><span></span><span></span><span></span><span class="browser__url">demo.phaema.co.uk</span></div>
-          <img src="img/my-work.jpg" width="1920" height="1230" alt="PHAEMA's My work dashboard for a surveyor: items that need attention, upcoming events, open cases and the properties they manage.">
+          <img src="img/my-work.jpg" width="1920" height="1200" alt="PHAEMA's My work dashboard for a surveyor: items that need attention, upcoming events, open cases and the properties they manage.">
         </div>
         <figcaption>My work: one surveyor's overdue items, the next 90 days, cases and properties. Fictional demonstration data.</figcaption>
       </figure>
@@ -425,7 +425,7 @@ BODY = r'''<div class="top"><div class="wrap top__inner">
         <p>Sites, blocks and units with Land Registry boundaries, UPRNs, photos, floor plans and the full history of what happened to each one.</p>
         <p><a class="strong" href="tour.html#register">See the property register in the tour</a></p>
       </div>
-      <div class="shot"><img src="img/property.jpg" width="1920" height="1230" loading="lazy" alt="A property record for Northfield Business Park with a photo and a location map of its units."></div>
+      <div class="shot"><img src="img/property.jpg" width="1920" height="1200" loading="lazy" alt="A property record for Northfield Business Park with a photo and a location map of its units."></div>
     </div>
     <div class="feature feature--flip">
       <div class="feature__text">
@@ -433,7 +433,7 @@ BODY = r'''<div class="top"><div class="wrap top__inner">
         <p>Every lease carries its key dates, each assigned to a named surveyor, with reminders well before notice deadlines and a case opened when work starts.</p>
         <p><a class="strong" href="tour.html#leases">See leases and key dates in the tour</a></p>
       </div>
-      <div class="shot"><img src="img/leases-2.jpg" width="1280" height="800" loading="lazy" alt="A lease record listing the break notice, rent review, break and expiry dates, each assigned to a surveyor."></div>
+      <div class="shot"><img src="img/leases-2.jpg" width="1920" height="1200" loading="lazy" alt="A lease record listing the break notice, rent review, break and expiry dates, each assigned to a surveyor."></div>
     </div>
     <div class="feature">
       <div class="feature__text">
@@ -441,7 +441,7 @@ BODY = r'''<div class="top"><div class="wrap top__inner">
         <p>An optional portal where tenants see what they owe, pay through the council's own payment page, download demands and report repairs, so fewer calls reach the estates team.</p>
         <p><a class="strong" href="tour.html#portal">See the tenant portal in the tour</a></p>
       </div>
-      <div class="shot"><img src="img/tour-portal.jpg" width="1920" height="1230" loading="lazy" alt="The tenant portal showing a tenant's balance, the amount overdue, the next step and a button to pay."></div>
+      <div class="shot"><img src="img/tour-portal.jpg" width="1920" height="1200" loading="lazy" alt="The tenant portal showing a tenant's balance, the amount overdue, the next step and a button to pay."></div>
     </div>
   </div>
 
@@ -537,10 +537,10 @@ __WAYS__
 __CAPABILITIES__
     </div>
     <div class="shots">
-      <figure><img src="img/project.jpg" width="1920" height="1230" loading="lazy" alt="A development project at its business case phase, showing the five phases, project details and a map."><figcaption>A development project at its business case gateway.</figcaption></figure>
-      <figure><img src="img/case.jpg" width="1920" height="1230" loading="lazy" alt="A licence for alterations case at the assessing stage, with key dates, target date and linked agreement."><figcaption>A consent case with its statutory target date.</figcaption></figure>
-      <figure><img src="img/compliance.jpg" width="1920" height="1230" loading="lazy" alt="The compliance overview listing certificates by status, with expired and missing certificates first."><figcaption>Compliance across every building.</figcaption></figure>
-      <figure><img src="img/estate.jpg" width="1920" height="1230" loading="lazy" alt="The whole estate dashboard with vacancy, rent roll and lease event figures."><figcaption>The whole estate at a glance.</figcaption></figure>
+      <figure><img src="img/project.jpg" width="1920" height="1200" loading="lazy" alt="A development project at its business case phase, showing the five phases, project details and a map."><figcaption>A development project at its business case gateway.</figcaption></figure>
+      <figure><img src="img/case.jpg" width="1920" height="1200" loading="lazy" alt="A licence for alterations case at the assessing stage, with key dates, target date and linked agreement."><figcaption>A consent case with its statutory target date.</figcaption></figure>
+      <figure><img src="img/compliance.jpg" width="1920" height="1200" loading="lazy" alt="The compliance overview listing certificates by status, with expired and missing certificates first."><figcaption>Compliance across every building.</figcaption></figure>
+      <figure><img src="img/estate.jpg" width="1920" height="1200" loading="lazy" alt="The whole estate dashboard with vacancy, rent roll and lease event figures."><figcaption>The whole estate at a glance.</figcaption></figure>
     </div>
     <p class="fine">Screenshots show fictional demonstration data.</p>
   </div>
