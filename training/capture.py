@@ -9,7 +9,8 @@ such as a details summary to open): dest is "training" (saved as
 static/training/img/<name>.jpg, with the highlight box in training/boxes.json) or "website" (website/img/<name>.jpg).
 The script signs each user in by making a Django session for them (so it needs the same DATABASE_URL and settings as
 the server), opens the page at 1280 by 800, scrolls the selected part into view and records where it is.
-Needs Playwright (pip install playwright) and Chrome or Chromium.
+Start the server with PHAEMA_ENFORCE_TWO_STEP=False: administrators must otherwise set up two-step sign-in first,
+and every page sends them to that instead. Needs Playwright (pip install playwright) and Chrome or Chromium.
 """
 import json
 import os
@@ -36,6 +37,8 @@ def _record(kind, key):
     """The database number of a demonstration record named by its reference, so the addresses in course.py work
     on any copy of the demonstration data. {kind:key} in an address is replaced by the number (or, for leasefile,
     by the file's whole address)."""
+    import re
+
     from django.contrib.auth import get_user_model
 
     from apps.cases.models import Case, CaseType, SiteVisit
@@ -53,6 +56,14 @@ def _record(kind, key):
         _prefix, year, number = ref.split("-")[:3]
         return model.objects.get(year=int(year), number=int(number)).pk
 
+    def case(key):
+        """A case by its reference, or by its title (the first with that title, so the Exampleton or Northfield
+        one). Most demonstration case numbers depend on the date the data was loaded, because the rent review,
+        break and expiry cases are made first, so course.py names those cases by title."""
+        if re.fullmatch(r"CAS-\d{4}-\d+", key):
+            return numbered(Case, key)
+        return Case.objects.filter(title=key).order_by("year", "number").first().pk
+
     if kind == "property":
         return Property.objects.get(reference=key).pk
     if kind == "lease":
@@ -65,9 +76,9 @@ def _record(kind, key):
         lease, filename = key.split("/")
         return LeaseDocument.objects.filter(lease__reference=lease, original_filename=filename).first().file.url
     if kind == "case":
-        return numbered(Case, key)
+        return case(key)
     if kind == "visit":
-        return SiteVisit.objects.filter(case_id=numbered(Case, key)).order_by("visited_on").first().pk
+        return SiteVisit.objects.filter(case_id=case(key)).order_by("visited_on").first().pk
     if kind == "project":
         return numbered(Project, key)
     if kind == "job":
