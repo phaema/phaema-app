@@ -45,8 +45,8 @@ BRINGS_TOGETHER = [
      "areas and titles."),
     ("Lease and key-date records", "Leases, licences and wayleaves, with rent reviews, breaks, expiries and notice "
      "deadlines that remind the right people."),
-    ("Compliance and the Golden Thread", "Certificates, remedial actions and building information for every "
-     "building."),
+    ("Buildings and compliance", "Repairs and works orders, condition surveys and the backlog they find, "
+     "certificates, remedial actions and Golden Thread information for every building."),
     ("Asset valuation", "The rolling programme, Red Book records and the year-end schedule for finance."),
     ("Projects, acquisitions and disposals", "Gateways, budgets, risks and the register changes completion needs."),
     ("Estate strategy", "Each property's holding purpose, asset strategy and suitability, the Asset Challenge, the "
@@ -151,7 +151,9 @@ CAPABILITIES = [
      "and reminders go by email through GOV.UK Notify."),
     ("Maintenance", "Repairs with target dates, who pays under the lease, works orders and their approval, recharges, "
      "planned maintenance and component lifecycles. Repairs reported by tenants and departments wait in a triage "
-     "queue until estates decide what becomes a job."),
+     "queue until estates decide what becomes a job. Condition surveys record what each building needs and when, "
+     "building a costed backlog by priority and element, and an optional contractor portal lets contractors see "
+     "their works orders, accept them, give a date to attend, add photos and certificates, and report completion."),
     ("Compliance", "Fire, gas, electrical, water, asbestos, lift and EPC certificates with remedial actions, Golden "
      "Thread information and site hazards shown before every visit."),
     ("Asset valuation", "The rolling valuation programme, internal or external valuers, Red Book records, impairment "
@@ -170,7 +172,9 @@ CAPABILITIES = [
      "step."),
     ("Reports and open data", "Ready-made and custom reports to Excel and CSV, the Transparency Code land and assets "
      "list, an open API and a change log of every edit. The whole estate can be exported in the layout of the "
-     "Government Property Data Standard, with a table of how complete the records are."),
+     "Government Property Data Standard, with a table of how complete the records are. Properties and sites are "
+     "published as map layers for QGIS, ArcGIS and other GIS (OGC API - Features). A migration toolkit brings records "
+     "across from another system with trial runs, control totals, an exception report and sign-off."),
 ]
 
 OPEN_SOURCE = [
@@ -223,6 +227,10 @@ ROADMAP = [
         "Tenant portal: rent account, demands with Pay now, documents, repairs, requests, service charges, certificates and messages",
         "Demands and tenant emails through GOV.UK Notify",
         "Repair reports and requests from tenants and departments, triaged by estates",
+        "Condition surveys, a costed maintenance backlog and lifecycle forecast",
+        "A contractor portal for works orders: accept, attend, photos, certificates and completion",
+        "Map layers for QGIS, ArcGIS and other GIS (OGC API - Features), by API token",
+        "A migration toolkit: trial runs, column mapping, control totals, documents and sign-off",
     ]),
     ("now", "Now: testing", [
         "A major test programme run by council staff",
@@ -233,14 +241,11 @@ ROADMAP = [
     ("next", "Next: connectors", [
         "Email sent through the council's own mailbox",
         "Ordnance Survey address, UPRN and EPC lookups",
-        "Map layers for QGIS, ArcGIS and other GIS",
         "Texts and letters to tenants through GOV.UK Notify (email is built)",
         "Notifications in Teams, Matrix or Nextcloud Talk",
         "Documents kept in SharePoint or Nextcloud",
     ]),
     ("later", "Later", [
-        "A contractor portal",
-        "Condition surveys and lifecycle planning",
         "Full Golden Thread information management",
         "Live finance, legal and CRM connectors",
         "Welsh translation reviewed by a qualified translator",
@@ -297,6 +302,67 @@ def esc(s):
     return html.escape(s, quote=True)
 
 
+# Simple line icons (24 by 24, drawn with the card's colour). No emoji, no third-party logos.
+ICONS = {
+    "pin": '<path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/>',
+    "doc": '<path d="M7 3h7l5 5v13H7z"/><path d="M14 3v5h5M10 13h6M10 17h6"/>',
+    "shield": '<path d="M12 3l8 3v6c0 4.5-3.4 8-8 9-4.6-1-8-4.5-8-9V6z"/><path d="M9 12l2 2 4-4"/>',
+    "chart": '<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>',
+    "calendar": '<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/>',
+    "pound": '<path d="M16 6.5A4 4 0 0 0 9 9v4.5M6 13.5h8M6 20h12M9 13.5c0 2.8-.9 4.8-3 6.5"/>',
+    "clipboard": '<rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4V3h6v1M9 10h6M9 14h6M9 18h3"/>',
+    "building": '<path d="M4 21V5l8-3v19M12 9h8v12M7 8h2M7 12h2M7 16h2M15 13h2M15 17h2M2 21h20"/>',
+    "users": '<circle cx="9" cy="8" r="3.5"/><path d="M2 20c0-3.5 3-6 7-6s7 2.5 7 6M16 4.5a3.5 3.5 0 0 1 0 7M18 14c2.3.7 4 2.9 4 6"/>',
+    "phone": '<rect x="7" y="2" width="10" height="20" rx="2"/><path d="M11 18h2"/>',
+    "lock": '<rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/>',
+    "key": '<circle cx="8" cy="15" r="4"/><path d="M11 12l9-9M16 7l3 3M14 9l2 2"/>',
+    "list": '<path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/>',
+    "plug": '<path d="M9 2v6M15 2v6M6 8h12v3a6 6 0 0 1-12 0zM12 17v5"/>',
+    "globe": '<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.5 3.8 5.5 3.8 9s-1.3 6.5-3.8 9c-2.5-2.5-3.8-5.5-3.8-9S9.5 5.5 12 3z"/>',
+    "server": '<rect x="3" y="4" width="18" height="7" rx="1.5"/><rect x="3" y="13" width="18" height="7" rx="1.5"/><path d="M7 7.5h.01M7 16.5h.01"/>',
+    "eye": '<path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>',
+    "code": '<path d="M8 6l-6 6 6 6M16 6l6 6-6 6M14 4l-4 16"/>',
+    "share": '<circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="6" r="2.5"/><circle cx="18" cy="18" r="2.5"/><path d="M8.2 10.8l7.6-3.6M8.2 13.2l7.6 3.6"/>',
+    "unlock": '<rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 7.5-2"/>',
+    "book": '<path d="M4 4h6a2 2 0 0 1 2 2v14a2 2 0 0 0-2-2H4zM20 4h-6a2 2 0 0 0-2 2v14a2 2 0 0 1 2-2h6z"/>',
+    "play": '<circle cx="12" cy="12" r="9"/><path d="M10 8l6 4-6 4z"/>',
+    "cap": '<path d="M2 9l10-5 10 5-10 5zM6 11v5c3 2 9 2 12 0v-5M22 9v6"/>',
+    "check": '<rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 12l3 3 5-6"/>',
+    "help": '<circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.7M12 17h.01"/>',
+    "route": '<circle cx="6" cy="19" r="2"/><circle cx="18" cy="5" r="2"/><path d="M8 19h8a3 3 0 0 0 0-6H8a3 3 0 0 1 0-6h8"/>',
+    "map": '<path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2zM9 4v14M15 6v14"/>',
+    "layers": '<path d="M12 3l9 5-9 5-9-5zM3 13l9 5 9-5"/>',
+}
+
+
+def icon(name, size=32):
+    return (f'<svg class="icon" aria-hidden="true" focusable="false" width="{size}" height="{size}" '
+            f'viewBox="0 0 24 24">{ICONS[name]}</svg>')
+
+
+def cards(items, icons, tone="go"):
+    """Cards with a line icon and a coloured top edge, one for each (title, description)."""
+    return "\n".join(f'      <div class="card tone-{tone}">{icon(i)}<h3>{esc(t)}</h3><p>{esc(d)}</p></div>'
+                     for (t, d), i in zip(items, icons, strict=True))
+
+
+# Which family each capability belongs to, for its card colour on What it does (as on the home page).
+FAMILIES = [
+    ("Property", "go", ["Property register", "Document library", "Space and occupiers"]),
+    ("Leases and income", "link", ["Leases and key dates", "Rents and arrears", "Service charges", "Tenant portal"]),
+    ("Buildings", "amber", ["Maintenance", "Compliance"]),
+    ("Strategy and value", "ink", ["Cases and approvals", "Projects", "Asset valuation", "Estate strategy",
+                                   "Reports and open data", "People and access"]),
+]
+CAPABILITY_ICONS = {
+    "Property register": "pin", "Document library": "doc", "Space and occupiers": "building",
+    "Leases and key dates": "calendar", "Rents and arrears": "pound", "Service charges": "list",
+    "Tenant portal": "users", "Maintenance": "shield", "Compliance": "check", "Cases and approvals": "clipboard",
+    "Projects": "route", "Asset valuation": "chart", "Estate strategy": "map", "Reports and open data": "layers",
+    "People and access": "key",
+}
+
+
 def link(key, text, cls=""):
     url = LINKS.get(key, "")
     if not url:
@@ -306,11 +372,20 @@ def link(key, text, cls=""):
 
 
 def capability_list():
-    return "\n".join(f'      <article><h3>{esc(t)}</h3><p>{esc(d)}</p></article>' for t, d in CAPABILITIES)
+    text = dict(CAPABILITIES)
+    named = [t for _f, _tone, titles in FAMILIES for t in titles]
+    if sorted(named) != sorted(text):
+        raise SystemExit("Every capability in CAPABILITIES needs a place in FAMILIES")
+    out = []
+    for family, tone, titles in FAMILIES:
+        out.append(f'    <h3 class="sub family-title tone-{tone}">{esc(family)}</h3>\n    <div class="cards">')
+        out.append(cards([(t, text[t]) for t in titles], [CAPABILITY_ICONS[t] for t in titles], tone))
+        out.append("    </div>")
+    return "\n".join(out)
 
 
 def open_source_list():
-    return "\n".join(f'      <div><h3>{esc(t)}</h3><p>{esc(d)}</p></div>' for t, d in OPEN_SOURCE)
+    return cards(OPEN_SOURCE, ["pound", "unlock", "eye", "share", "book", "server"])
 
 
 def roadmap_columns():
@@ -322,11 +397,21 @@ def roadmap_columns():
     return "\n".join(out)
 
 
+RESOURCE_ICONS = ["shield", "clipboard", "play", "globe", "cap", "book", "help", "doc", "check", "code", "route",
+                  "plug"]
+
+
 def resource_list():
     rows = []
-    for title, desc, key, text in RESOURCES:
-        rows.append(f'      <li><h3>{esc(title)}</h3><p>{esc(desc)}</p><p class="go">{link(key, text)}</p></li>')
+    for (title, desc, key, text), i in zip(RESOURCES, RESOURCE_ICONS, strict=True):
+        rows.append(f'      <li class="card tone-link">{icon(i)}<h3>{esc(title)}</h3><p>{esc(desc)}</p>'
+                    f'<p class="go">{link(key, text)}</p></li>')
     return "\n".join(rows)
+
+
+def ways_list():
+    return "\n".join(f'      <li><span class="ways__n" aria-hidden="true">{n}</span><h3>{esc(t)}</h3><p>{esc(d)}</p></li>'
+                     for n, (t, d) in enumerate(WAYS, 1))
 
 
 def titled_list(items, tag="div"):
@@ -346,7 +431,7 @@ def pilot_href():
 
 
 def involve_list():
-    return "\n".join(f'      <div><h3>{esc(w)}</h3><p>{esc(d)}</p></div>' for w, d in INVOLVE)
+    return cards(INVOLVE, ["building", "map", "code", "layers", "server"])
 
 
 def test_site_cta(cls="button"):
@@ -459,7 +544,7 @@ BODY = r'''<div class="top"><div class="wrap top__inner">
       </div>
       <div class="family family--buildings">
         <svg aria-hidden="true" focusable="false" width="36" height="36" viewBox="0 0 24 24"><path d="M12 3l8 3v6c0 4.5-3.4 8-8 9-4.6-1-8-4.5-8-9V6z"/><path d="M9 12l2 2 4-4"/></svg>
-        <h3>Buildings</h3><p>Repairs and planned maintenance · compliance certificates · Golden Thread · site visits</p>
+        <h3>Buildings</h3><p>Repairs and planned maintenance · condition surveys · contractor portal · compliance and Golden Thread</p>
       </div>
       <div class="family family--strategy">
         <svg aria-hidden="true" focusable="false" width="36" height="36" viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>
@@ -493,34 +578,55 @@ BODY = r'''<div class="top"><div class="wrap top__inner">
   <div class="sheet-band"><div class="wrap section">
     <h2>Where the project is</h2>
     <ol class="steps">
-      <li class="step step--done"><span class="step__when">Done</span><span class="step__what">Built</span><p>All fifteen modules, manuals, e-learning for five roles and a public test site.</p></li>
+      <li class="step step--done"><span class="step__when">Done</span><span class="step__what">Built</span><p>All fifteen modules, a contractor portal, condition surveys, GIS map layers, manuals, e-learning and a public test site.</p></li>
       <li class="step step--now"><span class="step__when">Now</span><span class="step__what">Testing</span><p>Pilot councils, a pilot of the tenant portal, an independent penetration test and accessibility audit.</p></li>
-      <li class="step"><span class="step__when">Next</span><span class="step__what">Connectors</span><p>Council mailboxes, Ordnance Survey, GIS, GOV.UK Notify texts and letters, Teams and SharePoint.</p></li>
-      <li class="step"><span class="step__when">Later</span><span class="step__what">Wider reach</span><p>A contractor portal, condition surveys, and finance, legal and CRM connectors.</p></li>
+      <li class="step"><span class="step__when">Next</span><span class="step__what">Connectors</span><p>Council mailboxes, Ordnance Survey, GOV.UK Notify texts and letters, Teams and SharePoint.</p></li>
+      <li class="step"><span class="step__when">Later</span><span class="step__what">Wider reach</span><p>Full Golden Thread information management, and finance, legal and CRM connectors.</p></li>
     </ol>
     <p><a class="strong" href="#roadmap">See the roadmap</a></p>
   </div></div>
 </section>
 
-<section class="view" id="councils" aria-labelledby="h-councils">
-  <div class="wrap">
-    <h2 id="h-councils">PHAEMA for councils</h2>
-    <p class="lede">Estates teams often work across several systems and a lot of spreadsheets, each bought, supported and kept up to date separately. PHAEMA puts the estate in one place, with no licence fee, so the money goes on hosting, support and improvements that every council shares.</p>
-    <h3 class="sub">What it brings together</h3>
-    <div class="benefits">
+<section class="view view--page" id="councils" aria-labelledby="h-councils">
+  <div class="page-head page-head--split">
+    <svg class="plot" aria-hidden="true" focusable="false" viewBox="0 0 1440 400" preserveAspectRatio="xMidYMid slice"><g fill="none" stroke-width="1.5"><path d="M900 30 L1120 10 L1160 180 L940 210 Z"/><path d="M1120 10 L1380 50 L1370 200 L1160 180"/><path d="M940 210 L1160 180 L1190 380 L960 400"/><path d="M1160 180 L1370 200 L1420 380 L1190 380"/><path d="M1380 50 L1440 45 M1370 200 L1440 195" stroke-dasharray="6 6"/></g></svg>
+    <div class="wrap page-head__inner">
+      <div>
+        <p class="eyebrow">For councils</p>
+        <h2 class="page-title" id="h-councils">PHAEMA for councils</h2>
+        <p class="lede">Estates teams often work across several systems and a lot of spreadsheets, each bought, supported and kept up to date separately. PHAEMA puts the estate in one place, with no licence fee, so the money goes on hosting, support and improvements that every council shares.</p>
+      </div>
+      <figure class="browser">
+        <div class="browser__frame">
+          <div class="browser__bar" aria-hidden="true"><span></span><span></span><span></span><span class="browser__url">demo.phaema.co.uk</span></div>
+          <img src="img/estate.jpg" width="1920" height="1200" loading="lazy" alt="The whole estate dashboard with vacancy, rent roll and lease event figures.">
+        </div>
+        <figcaption>The whole estate at a glance. Fictional demonstration data.</figcaption>
+      </figure>
+    </div>
+  </div>
+  <div class="wrap section">
+    <h2>What it brings together</h2>
+    <div class="cards">
 __BRINGS__
     </div>
-    <h3 class="sub">Who it is for</h3>
-    <div class="involve two">
+  </div>
+  <div class="tint-band"><div class="wrap section">
+    <h2>Who it is for</h2>
+    <div class="four who">
 __WHO_FOR__
     </div>
-    <h3 class="sub">Ways to use PHAEMA</h3>
-    <div class="involve">
+  </div></div>
+  <div class="wrap section">
+    <h2>Ways to use PHAEMA</h2>
+    <ol class="ways">
 __WAYS__
-    </div>
-    <div class="band">
-      <h3>What it costs</h3>
-      <p>No licence fee, now or later. The costs are a modest server, the staff time to bring records across and train people, and any support the council chooses to buy.</p>
+    </ol>
+    <div class="panel panel--go">
+      <div>
+        <h3>What it costs</h3>
+        <p>No licence fee, now or later. The costs are a modest server, the staff time to bring records across and train people, and any support the council chooses to buy.</p>
+      </div>
       <div class="cta">
         <a class="button" href="__PILOT__">Become a pilot council</a>
         <a class="button button--quiet" href="#security">Read about security</a>
@@ -529,82 +635,169 @@ __WAYS__
   </div>
 </section>
 
-<section class="view" id="capabilities" aria-labelledby="h-capabilities">
-  <div class="wrap">
-    <h2 id="h-capabilities">What PHAEMA does</h2>
-    <p class="lede">The optional modules (rents, service charges, maintenance, compliance, valuation, and space and costing) can each be switched on when a council is ready, or left to the systems it already has.</p>
-    <div class="modules">
-__CAPABILITIES__
+<section class="view view--page" id="capabilities" aria-labelledby="h-capabilities">
+  <div class="page-head">
+    <svg class="plot" aria-hidden="true" focusable="false" viewBox="0 0 1440 400" preserveAspectRatio="xMidYMid slice"><g fill="none" stroke-width="1.5"><path d="M900 30 L1120 10 L1160 180 L940 210 Z"/><path d="M1120 10 L1380 50 L1370 200 L1160 180"/><path d="M940 210 L1160 180 L1190 380 L960 400"/><path d="M1160 180 L1370 200 L1420 380 L1190 380"/><path d="M1380 50 L1440 45 M1370 200 L1440 195" stroke-dasharray="6 6"/></g></svg>
+    <div class="wrap page-head__inner">
+      <div>
+        <p class="eyebrow">What it does</p>
+        <h2 class="page-title" id="h-capabilities">What PHAEMA does</h2>
+        <p class="lede">Fifteen modules around one record of the estate. The optional modules (rents, service charges, maintenance, compliance, valuation, and space and costing) can each be switched on when a council is ready, or left to the systems it already has.</p>
+      </div>
     </div>
+  </div>
+  <div class="wrap section">
+    <p class="eyebrow">New in November 2026</p>
+    <h2>Buildings, contractors and moving in</h2>
+    <div class="feature">
+      <div class="feature__text">
+        <h3>Condition surveys and the backlog</h3>
+        <p>Record what each building needs, with condition grades, priorities, years and costs. The work found builds a costed maintenance backlog by priority and element, and any item can become a job in one step.</p>
+      </div>
+      <div class="shot"><img src="img/condition-survey.jpg" width="1920" height="1200" loading="lazy" alt="A full condition survey of a leisure centre, with the surveyor, overall condition C and the work found by element, priority, year and cost."></div>
+    </div>
+    <div class="feature feature--flip">
+      <div class="feature__text">
+        <h3>A portal for contractors</h3>
+        <p>If the council wants it, contractors sign in with a code by email and see only their own works orders. They accept the job, give a date to attend, read the site hazards, add photos and certificates and report completion, and the council officer is told.</p>
+      </div>
+      <div class="shot"><img src="img/contractor-portal.jpg" width="1920" height="1200" loading="lazy" alt="A works order in the contractor portal: the address, priority, target date, order value, council officer and the hazards to read before visiting."></div>
+    </div>
+    <div class="feature">
+      <div class="feature__text">
+        <h3>Bringing records across</h3>
+        <p>Records from the old system go in through a trial run first. PHAEMA checks every row, compares control totals with the old system's figures, keeps a report of exceptions, and asks a second administrator to sign off the real import.</p>
+      </div>
+      <div class="shot"><img src="img/migration-run.jpg" width="1920" height="1200" loading="lazy" alt="A trial import of leases with the records it would add and control totals for rows and annual rent that match the old system."></div>
+    </div>
+    <div class="panel panel--link gis">
+      <div>
+        <h3>Map layers for your GIS</h3>
+        <p>Properties and sites are published as map layers for QGIS, ArcGIS and other GIS, using the open OGC API - Features standard, in British National Grid or longitude and latitude. Each GIS connects with its own read-only API token.</p>
+      </div>
+      <pre class="scroll" tabindex="0"><code>https://your-phaema.example.gov.uk/api/ogc/</code></pre>
+    </div>
+  </div>
+  <div class="tint-band"><div class="wrap section">
+    <h2>Every module</h2>
+__CAPABILITIES__
+  </div></div>
+  <div class="wrap section">
+    <h2>A closer look</h2>
     <div class="shots">
-      <figure><img src="img/project.jpg" width="1920" height="1200" loading="lazy" alt="A development project at its business case phase, showing the five phases, project details and a map."><figcaption>A development project at its business case gateway.</figcaption></figure>
-      <figure><img src="img/case.jpg" width="1920" height="1200" loading="lazy" alt="A licence for alterations case at the assessing stage, with key dates, target date and linked agreement."><figcaption>A consent case with its statutory target date.</figcaption></figure>
-      <figure><img src="img/compliance.jpg" width="1920" height="1200" loading="lazy" alt="The compliance overview listing certificates by status, with expired and missing certificates first."><figcaption>Compliance across every building.</figcaption></figure>
-      <figure><img src="img/estate.jpg" width="1920" height="1200" loading="lazy" alt="The whole estate dashboard with vacancy, rent roll and lease event figures."><figcaption>The whole estate at a glance.</figcaption></figure>
+      <figure><div class="shot"><img src="img/project.jpg" width="1920" height="1200" loading="lazy" alt="A development project at its business case phase, showing the five phases, project details and a map."></div><figcaption>A development project at its business case gateway.</figcaption></figure>
+      <figure><div class="shot"><img src="img/case.jpg" width="1920" height="1200" loading="lazy" alt="A licence for alterations case at the assessing stage, with key dates, target date and linked agreement."></div><figcaption>A consent case with its statutory target date.</figcaption></figure>
+      <figure><div class="shot"><img src="img/compliance.jpg" width="1920" height="1200" loading="lazy" alt="The compliance overview listing certificates by status, with expired and missing certificates first."></div><figcaption>Compliance across every building.</figcaption></figure>
+      <figure><div class="shot"><img src="img/backlog.jpg" width="1920" height="1200" loading="lazy" alt="Backlog maintenance across the estate: the total, and the backlog by priority and by building element."></div><figcaption>The maintenance backlog by priority and element.</figcaption></figure>
     </div>
     <p class="fine">Screenshots show fictional demonstration data.</p>
   </div>
 </section>
 
-<section class="view" id="security" aria-labelledby="h-security">
-  <div class="wrap">
-    <h2 id="h-security">Security and assurance</h2>
-    <p class="lede">What protects PHAEMA today, what will be done before councils use it for live work, and how a council can check it for itself.</p>
-    <h3 class="sub">In place now</h3>
-    <div class="benefits">
+<section class="view view--page" id="security" aria-labelledby="h-security">
+  <div class="page-head page-head--split">
+    <svg class="plot" aria-hidden="true" focusable="false" viewBox="0 0 1440 400" preserveAspectRatio="xMidYMid slice"><g fill="none" stroke-width="1.5"><path d="M900 30 L1120 10 L1160 180 L940 210 Z"/><path d="M1120 10 L1380 50 L1370 200 L1160 180"/><path d="M940 210 L1160 180 L1190 380 L960 400"/><path d="M1160 180 L1370 200 L1420 380 L1190 380"/><path d="M1380 50 L1440 45 M1370 200 L1440 195" stroke-dasharray="6 6"/></g></svg>
+    <div class="wrap page-head__inner">
+      <div>
+        <p class="eyebrow">Security and assurance</p>
+        <h2 class="page-title" id="h-security">Security and assurance</h2>
+        <p class="lede">What protects PHAEMA today, what will be done before councils use it for live work, and how a council can check it for itself.</p>
+      </div>
+      <figure class="browser">
+        <div class="browser__frame">
+          <div class="browser__bar" aria-hidden="true"><span></span><span></span><span></span><span class="browser__url">demo.phaema.co.uk</span></div>
+          <img src="img/tour-two-step.jpg" width="1280" height="800" loading="lazy" alt="Setting up two-step sign-in with an authenticator app.">
+        </div>
+        <figcaption>Two-step sign-in, required for administrators. Fictional demonstration data.</figcaption>
+      </figure>
+    </div>
+  </div>
+  <div class="wrap section">
+    <h2>In place now</h2>
+    <div class="cards">
 __SECURE_NOW__
     </div>
-    <div class="band split">
-      <div>
-        <h3>Before live use</h3>
-        <ul class="ticks">__BEFORE_LIVE__</ul>
+    <div class="split split--panels">
+      <div class="panel panel--amber">
+        <div>
+          <h3>Before live use</h3>
+          <ul class="ticks">__BEFORE_LIVE__</ul>
+        </div>
       </div>
-      <div>
-        <h3>Check it yourself</h3>
-        <p>Councils and their suppliers are welcome to review the code or test their own installation. Please report security problems privately to __EMAIL_LINK__.</p>
-        <p>__SECURITY_LINK__ · __TECH_LINK__</p>
+      <div class="panel panel--go">
+        <div>
+          <h3>Check it yourself</h3>
+          <p>Councils and their suppliers are welcome to review the code or test their own installation. Please report security problems privately to __EMAIL_LINK__.</p>
+          <p class="links">__SECURITY_LINK__ · __TECH_LINK__</p>
+        </div>
       </div>
     </div>
   </div>
 </section>
 
-<section class="view" id="open-source" aria-labelledby="h-open-source">
-  <div class="wrap">
-    <h2 id="h-open-source">Why open source</h2>
-    <p class="lede">Councils already pay, separately, for estates systems that do much the same job. Open source lets them pay once, together, and own the result.</p>
-    <div class="benefits">
+<section class="view view--page" id="open-source" aria-labelledby="h-open-source">
+  <div class="page-head">
+    <svg class="plot" aria-hidden="true" focusable="false" viewBox="0 0 1440 400" preserveAspectRatio="xMidYMid slice"><g fill="none" stroke-width="1.5"><path d="M900 30 L1120 10 L1160 180 L940 210 Z"/><path d="M1120 10 L1380 50 L1370 200 L1160 180"/><path d="M940 210 L1160 180 L1190 380 L960 400"/><path d="M1160 180 L1370 200 L1420 380 L1190 380"/><path d="M1380 50 L1440 45 M1370 200 L1440 195" stroke-dasharray="6 6"/></g></svg>
+    <div class="wrap page-head__inner">
+      <div>
+        <p class="eyebrow">Why open source</p>
+        <h2 class="page-title" id="h-open-source">Pay once, together, and own the result</h2>
+        <p class="lede">Councils already pay, separately, for estates systems that do much the same job. Open source lets them pay once, together, and own the result.</p>
+      </div>
+    </div>
+  </div>
+  <div class="wrap section">
+    <div class="cards">
 __OPEN_SOURCE__
     </div>
-    <div class="band licence">
-      <h3>The licence</h3>
-      <p>PHAEMA is licensed under the GNU Affero General Public License v3.0. Anyone may use, study, change and share it. Anyone who runs a changed version as an online service must publish their changes under the same licence, which keeps every improvement available to all councils.</p>
-      <p>__LICENCE_LINK__ · __LICENSING_LINK__</p>
-    </div>
   </div>
+  <div class="navy-band"><div class="wrap section licence">
+    <h2>The licence</h2>
+    <p class="lede">PHAEMA is licensed under the GNU Affero General Public License v3.0. Anyone may use, study, change and share it. Anyone who runs a changed version as an online service must publish their changes under the same licence, which keeps every improvement available to all councils.</p>
+    <p class="links">__LICENCE_LINK__ · __LICENSING_LINK__</p>
+  </div></div>
 </section>
 
-<section class="view" id="roadmap" aria-labelledby="h-roadmap">
-  <div class="wrap">
-    <h2 id="h-roadmap">Roadmap</h2>
-    <p class="lede">What is built, what is being tested now, and what comes next. Councils taking part help decide the order.</p>
+<section class="view view--page" id="roadmap" aria-labelledby="h-roadmap">
+  <div class="page-head">
+    <svg class="plot" aria-hidden="true" focusable="false" viewBox="0 0 1440 400" preserveAspectRatio="xMidYMid slice"><g fill="none" stroke-width="1.5"><path d="M900 30 L1120 10 L1160 180 L940 210 Z"/><path d="M1120 10 L1380 50 L1370 200 L1160 180"/><path d="M940 210 L1160 180 L1190 380 L960 400"/><path d="M1160 180 L1370 200 L1420 380 L1190 380"/><path d="M1380 50 L1440 45 M1370 200 L1440 195" stroke-dasharray="6 6"/></g></svg>
+    <div class="wrap page-head__inner">
+      <div>
+        <p class="eyebrow">Roadmap</p>
+        <h2 class="page-title" id="h-roadmap">Roadmap</h2>
+        <p class="lede">What is built, what is being tested now, and what comes next. Councils taking part help decide the order.</p>
+      </div>
+    </div>
+  </div>
+  <div class="wrap section">
     <div class="stages">
 __ROADMAP__
     </div>
     <p>Connectors will be one optional module, off by default and built on open standards, so the same connector works with Microsoft 365 or with open-source alternatives such as Nextcloud, Matrix and Keycloak.</p>
-    <p>__ROADMAP_LINK__ · __INTEGRATIONS_LINK__</p>
+    <p class="links">__ROADMAP_LINK__ · __INTEGRATIONS_LINK__</p>
   </div>
 </section>
 
-<section class="view" id="resources" aria-labelledby="h-resources">
-  <div class="wrap">
-    <h2 id="h-resources">Resources</h2>
-    <p class="lede">Everything you need to try PHAEMA, learn it, test it or run it.</p>
-    <ul class="resources">
+<section class="view view--page" id="resources" aria-labelledby="h-resources">
+  <div class="page-head">
+    <svg class="plot" aria-hidden="true" focusable="false" viewBox="0 0 1440 400" preserveAspectRatio="xMidYMid slice"><g fill="none" stroke-width="1.5"><path d="M900 30 L1120 10 L1160 180 L940 210 Z"/><path d="M1120 10 L1380 50 L1370 200 L1160 180"/><path d="M940 210 L1160 180 L1190 380 L960 400"/><path d="M1160 180 L1370 200 L1420 380 L1190 380"/><path d="M1380 50 L1440 45 M1370 200 L1440 195" stroke-dasharray="6 6"/></g></svg>
+    <div class="wrap page-head__inner">
+      <div>
+        <p class="eyebrow">Resources</p>
+        <h2 class="page-title" id="h-resources">Resources</h2>
+        <p class="lede">Everything you need to try PHAEMA, learn it, test it or run it.</p>
+      </div>
+    </div>
+  </div>
+  <div class="wrap section">
+    <ul class="cards resources">
 __RESOURCES__
     </ul>
-    <div class="band run">
-      <h3>Run it on your own computer</h3>
-      <p>You need Docker (or Colima on a Mac) and Git. Mac users can follow the __MAC_LINK__.</p>
+    <div class="panel panel--ink run">
+      <div>
+        <h3>Run it on your own computer</h3>
+        <p>You need Docker (or Colima on a Mac) and Git. Mac users can follow the __MAC_LINK__.</p>
+      </div>
       <pre class="scroll" tabindex="0"><code>git clone https://github.com/phaema/phaema-app.git
 cd phaema-app
 ./phaema.sh start
@@ -613,22 +806,30 @@ cd phaema-app
   </div>
 </section>
 
-<section class="view" id="take-part" aria-labelledby="h-take-part">
-  <div class="wrap">
-    <h2 id="h-take-part">Take part</h2>
-    <p class="lede">PHAEMA is built by a chartered surveyor with a very small team. Every tester, reviewer and contributor makes it better for every council.</p>
-    <div class="involve">
-__INVOLVE__
-    </div>
-    <div class="band">
-      <h3>Get in touch</h3>
-      __CONTACT__
-      <div class="cta">
-        <a class="button" href="__NEW_ISSUE__">Raise an issue</a>
-        <a class="button button--quiet" href="__CONTRIBUTING__">How to contribute</a>
+<section class="view view--page" id="take-part" aria-labelledby="h-take-part">
+  <div class="page-head">
+    <svg class="plot" aria-hidden="true" focusable="false" viewBox="0 0 1440 400" preserveAspectRatio="xMidYMid slice"><g fill="none" stroke-width="1.5"><path d="M900 30 L1120 10 L1160 180 L940 210 Z"/><path d="M1120 10 L1380 50 L1370 200 L1160 180"/><path d="M940 210 L1160 180 L1190 380 L960 400"/><path d="M1160 180 L1370 200 L1420 380 L1190 380"/><path d="M1380 50 L1440 45 M1370 200 L1440 195" stroke-dasharray="6 6"/></g></svg>
+    <div class="wrap page-head__inner">
+      <div>
+        <p class="eyebrow">Take part</p>
+        <h2 class="page-title" id="h-take-part">Take part</h2>
+        <p class="lede">PHAEMA is built by a chartered surveyor with a very small team. Every tester, reviewer and contributor makes it better for every council.</p>
       </div>
     </div>
   </div>
+  <div class="wrap section">
+    <div class="cards">
+__INVOLVE__
+    </div>
+  </div>
+  <div class="navy-band"><div class="wrap section touch">
+    <h2>Get in touch</h2>
+    __CONTACT__
+    <div class="cta">
+      <a class="button button--onnavy" href="__NEW_ISSUE__">Raise an issue</a>
+      <a class="button button--quiet-onnavy" href="__CONTRIBUTING__">How to contribute</a>
+    </div>
+  </div></div>
 </section>
 </main>
 
@@ -790,10 +991,6 @@ h3.sub { margin-top: 40px; font-size: 1.45rem; font-weight: 800; }
 .stage ul { margin: 0; padding-left: 1.1em; font-size: .97rem; }
 .stage li { margin-bottom: .45em; }
 
-.resources { list-style: none; margin: 24px 0 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0 32px; }
-.resources li { border-top: 1px solid var(--line); padding-block: 18px 8px; min-width: 0; display: flex; flex-direction: column; }
-.resources p { font-size: 1rem; }
-.resources .go { margin-top: auto; font-weight: 700; }
 .soon { display: inline-block; font-size: .9rem; font-weight: 700; color: var(--muted); border: 2px dotted var(--muted); padding: 1px 8px; }
 pre { font: .95rem/1.5 var(--mono); background: var(--sheet); border: 1px solid var(--line); padding: 14px 16px; margin: 0; }
 .scroll { overflow-x: auto; max-width: 100%; }
@@ -886,11 +1083,63 @@ pre { font: .95rem/1.5 var(--mono); background: var(--sheet); border: 1px solid 
 .button--onnavy { background: var(--go-navy); color: #0e151d; box-shadow: 0 3px 0 rgba(0,0,0,.45); }
 .button--quiet-onnavy { background: transparent; color: var(--on-navy); box-shadow: inset 0 0 0 2px var(--on-navy-muted); }
 
+/* Inner pages (November 2026): a page head, card grids with line icons, panels */
+.view--page { padding-block: 0; }
+.page-head { position: relative; overflow: hidden; background: var(--tint); border-bottom: 1px solid var(--line); }
+.page-head .plot { opacity: .8; }
+.page-head__inner { position: relative; padding-block: 64px 56px; }
+.page-head--split .page-head__inner { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); gap: 48px; align-items: center; }
+.page-title { font-size: clamp(2.3rem, 4.8vw, 3.6rem); line-height: 1.04; letter-spacing: -.02em; }
+.page-head .lede { max-width: 34em; margin: 0; }
+.page-head .browser figcaption { margin-bottom: 0; }
+
+.cards { list-style: none; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; margin: 28px 0 0; }
+.card { background: var(--sheet); border: 1px solid var(--line); border-top: 4px solid var(--tone); border-radius: 8px; padding: 22px 24px; min-width: 0; display: flex; flex-direction: column; }
+.card .icon { fill: none; stroke: var(--tone); stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+.card h3 { margin: 12px 0 .4em; font-size: 1.2rem; }
+.card p { font-size: 1rem; color: var(--muted); margin: 0; }
+.card .go { margin-top: auto; padding-top: 14px; font-weight: 700; color: var(--ink); }
+.tone-go { --tone: var(--survey); }
+.tone-link { --tone: var(--link); }
+.tone-amber { --tone: var(--amber); }
+.tone-ink { --tone: var(--ink); }
+.family-title { display: flex; align-items: center; gap: 12px; margin-top: 44px; }
+.family-title::before { content: ""; width: 28px; height: 6px; border-radius: 3px; background: var(--tone); }
+.tint-band .card { border-color: transparent; border-top-color: var(--tone); }
+
+.who > div { border-top: 4px solid var(--survey); padding-top: 14px; min-width: 0; }
+.ways { list-style: none; padding: 0; margin: 28px 0 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; }
+.ways li { background: var(--sheet); border: 1px solid var(--line); border-radius: 8px; padding: 24px; min-width: 0; }
+.ways p { font-size: 1rem; color: var(--muted); margin: 0; }
+.ways__n { display: inline-grid; place-items: center; width: 40px; height: 40px; border-radius: 50%; background: var(--survey); color: var(--on-survey); font-family: var(--display); font-weight: 800; font-size: 1.2rem; margin-bottom: 12px; }
+.ways li:last-child { border: 2px solid var(--survey); }
+
+.panel { display: flex; flex-wrap: wrap; gap: 20px 40px; align-items: center; justify-content: space-between; background: var(--sheet); border: 1px solid var(--line); border-left: 6px solid var(--tone, var(--survey)); border-radius: 8px; padding: 28px 32px; margin-top: 40px; }
+.panel > div:first-child { flex: 1 1 420px; min-width: 0; }
+.panel h3 { font-size: 1.45rem; font-weight: 800; }
+.panel p:last-child { margin-bottom: 0; }
+.panel .cta { margin: 0; }
+.panel pre { flex: 1 1 460px; min-width: 0; }
+.panel--go { --tone: var(--survey); }
+.panel--link { --tone: var(--link); }
+.panel--amber { --tone: var(--amber); }
+.panel--ink { --tone: var(--ink); }
+.split--panels { margin-top: 40px; gap: 20px; }
+.split--panels .panel { margin-top: 0; align-items: flex-start; height: 100%; }
+.links { font-weight: 700; }
+.navy-band .lede { color: var(--on-navy-muted); }
+.navy-band .links a, .touch a { color: var(--on-navy); }
+.touch p { color: var(--on-navy-muted); }
+.shots .shot { margin: 0; }
+.resources.cards { margin-top: 0; }
+@media (min-width: 961px) { .cards > :last-child:nth-child(3n+1) { grid-column: 1 / -1; } }
 
 @media (max-width: 960px) {
+  .page-head--split .page-head__inner { grid-template-columns: minmax(0, 1fr); }
+  .cards, .ways { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .hero { grid-template-columns: minmax(0, 1fr); }
   .stages { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .resources, .benefits, .involve { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .benefits, .involve { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .three { grid-template-columns: minmax(0, 1fr); gap: 8px; }
   .four { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .stage--done ul { columns: 2; }
@@ -909,7 +1158,10 @@ pre { font: .95rem/1.5 var(--mono); background: var(--sheet); border: 1px solid 
   .has-menu .nav__cta a { display: inline-block; padding: 10px 16px; }
 }
 @media (max-width: 600px) {
-  .modules, .shots, .stages, .resources, .benefits, .involve, .involve.two, .four, .split { grid-template-columns: minmax(0, 1fr); }
+  .cards, .ways { grid-template-columns: minmax(0, 1fr); }
+  .page-head__inner { padding-block: 40px 36px; }
+  .panel { padding: 22px; }
+  .modules, .shots, .stages, .benefits, .involve, .involve.two, .four, .split { grid-template-columns: minmax(0, 1fr); }
   .view { padding-block: 28px 40px; }
   .view--home { padding-block: 0; }
   .stage--done ul { columns: 1; }
@@ -932,10 +1184,12 @@ def build(artifact=False):
             .replace("__ROADMAP__", roadmap_columns())
             .replace("__RESOURCES__", resource_list())
             .replace("__INVOLVE__", involve_list())
-            .replace("__BRINGS__", titled_list(BRINGS_TOGETHER))
+            .replace("__BRINGS__", cards(BRINGS_TOGETHER, ["pin", "calendar", "shield", "pound", "clipboard", "chart",
+                                                           "building", "doc", "users"]))
             .replace("__WHO_FOR__", titled_list(WHO_FOR))
-            .replace("__WAYS__", titled_list(WAYS))
-            .replace("__SECURE_NOW__", titled_list(SECURE_NOW))
+            .replace("__WAYS__", ways_list())
+            .replace("__SECURE_NOW__", cards(SECURE_NOW, ["phone", "lock", "key", "users", "list", "plug", "globe",
+                                                          "server", "shield", "eye"]))
             .replace("__BEFORE_LIVE__", plain_list(BEFORE_LIVE))
             .replace("__PILOT__", pilot_href())
             .replace("__SECURITY_LINK__", link("security", "Security policy"))

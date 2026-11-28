@@ -2,61 +2,125 @@
 <html lang="en-GB">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Integrations review · PHAEMA</title>
 <meta name="description" content="The market review behind the connectors plan, including Microsoft 365 and open-source alternatives.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&display=swap">
 <style>
+/* The PHAEMA house style (claude/design-website-home-page.md): navy header and bands, one green action colour,
+   red only in the logo mark. Shares its header, pilot band and footer with the website. */
 :root { --paper:#f6f8f7; --sheet:#fff; --ink:#13233a; --muted:#4a5864; --line:#cfd6d8; --edge:#c1272d;
-  --survey:#2c6a3e; --link:#1b5c89; --tint:#e8efec; --focus:#ffdd00;
+  --survey:#2c6a3e; --on-survey:#fff; --link:#1b5c89; --tint:#e8efec; --focus:#ffdd00; --amber:#8a5a00;
+  --navy:#13233a; --on-navy:#f6f8f7; --on-navy-muted:#cfd6d8; --go-navy:#7fc78f;
   --display:"Bricolage Grotesque","Arial Narrow",Arial,sans-serif; --body:"Atkinson Hyperlegible",Verdana,Arial,sans-serif; }
 @media (prefers-color-scheme: dark) { :root { --paper:#0e151d; --sheet:#15202b; --ink:#e6ecef; --muted:#a9b5be;
-  --line:#2d3b48; --edge:#ff6f69; --survey:#7fc78f; --link:#86bfe9; --tint:#1a2732; } }
+  --line:#2d3b48; --edge:#ff6f69; --survey:#7fc78f; --on-survey:#0e151d; --link:#86bfe9; --tint:#1a2732;
+  --amber:#f2c46d; --navy:#0a1018; color-scheme:dark; } }
 * { box-sizing:border-box; }
 body { margin:0; background:var(--paper); color:var(--ink); font:1.0625rem/1.6 var(--body); }
 a { color:var(--link); text-underline-offset:.15em; }
-a:focus-visible { outline:3px solid var(--focus); background:var(--focus); color:#0b0c0c; }
-.skip { position:absolute; left:-9999px; } .skip:focus { left:16px; top:8px; background:var(--focus); color:#0b0c0c; padding:8px 12px; }
-.top { background:#13233a; color:#f6f8f7; }
-.top__inner { max-width:1180px; margin:0 auto; padding:12px 16px; display:flex; flex-wrap:wrap; gap:6px 24px; align-items:center; }
-.brand { color:#f6f8f7; text-decoration:none; font:800 1.3rem var(--display); letter-spacing:.14em; display:inline-flex; gap:10px; align-items:center; }
-.brand__mark { width:18px; height:14px; border:2.5px solid #c1272d; display:inline-block; }
-.top nav a { color:#f6f8f7; font-weight:700; margin-right:18px; }
-.layout { max-width:1180px; margin:0 auto; padding:32px 16px 64px; display:grid; grid-template-columns:260px minmax(0,1fr); gap:48px; }
-.toc { position:sticky; top:16px; align-self:start; max-height:calc(100vh - 32px); overflow:auto; font-size:.95rem; }
-.toc h2 { font:800 1rem var(--display); text-transform:uppercase; letter-spacing:.08em; color:var(--muted); }
+a:hover { text-decoration-thickness:3px; }
+a:focus-visible { outline:3px solid var(--focus); outline-offset:0; background:var(--focus); color:#0b0c0c; box-shadow:0 4px 0 #0b0c0c; }
+.skip { position:absolute; left:-9999px; } .skip:focus { left:16px; top:8px; z-index:20; background:var(--focus); color:#0b0c0c; padding:8px 12px; }
+.wrap { max-width:1180px; margin:0 auto; padding-left:max(16px, env(safe-area-inset-left, 0px)); padding-right:max(16px, env(safe-area-inset-right, 0px)); }
+
+.top { background:var(--navy); color:var(--on-navy); }
+.top__inner { display:flex; flex-wrap:wrap; align-items:center; gap:8px 28px; padding-block:12px; }
+.brand { color:var(--on-navy); text-decoration:none; font:800 1.35rem var(--display); letter-spacing:.14em; display:inline-flex; gap:10px; align-items:center; }
+.brand__mark { width:18px; height:14px; border:2.5px solid var(--edge); display:inline-block; }
+.nav { list-style:none; display:flex; flex-wrap:wrap; gap:4px 20px; margin:0; padding:0; flex:1; align-items:center; }
+.nav a { color:var(--on-navy-muted); font-weight:700; font-size:.97rem; text-decoration:none; }
+.nav a:hover { color:var(--on-navy); text-decoration:underline; }
+.nav a[aria-current="page"] { color:var(--on-navy); border-bottom:3px solid var(--go-navy); }
+.nav__cta { margin-left:auto; }
+.nav__cta a { background:var(--go-navy); color:#0e151d; padding:6px 14px; border-radius:3px; }
+
+.page-head { background:var(--tint); border-bottom:1px solid var(--line); }
+.page-head .wrap { padding-block:48px 40px; }
+.eyebrow { margin:0 0 .5em; font-weight:700; color:var(--survey); font-size:.9rem; letter-spacing:.07em; text-transform:uppercase; }
+.eyebrow a { color:inherit; }
+.page-head h1 { font:800 clamp(2.2rem,4.8vw,3.4rem)/1.05 var(--display); letter-spacing:-.02em; margin:0 0 .35em; }
+.lede { font-size:1.2rem; max-width:40em; margin:0 0 1.2em; }
+.meta { color:var(--muted); display:flex; flex-wrap:wrap; gap:10px 20px; align-items:center; margin:0; }
+.button { display:inline-block; background:var(--survey); color:var(--on-survey); font-weight:700; text-decoration:none; padding:10px 18px; border-radius:3px; box-shadow:0 3px 0 rgba(0,0,0,.35); }
+.button--quiet { background:var(--sheet); color:var(--survey); box-shadow:inset 0 0 0 2px var(--survey); }
+
+.layout { display:grid; grid-template-columns:270px minmax(0,1fr); gap:40px; padding-block:40px 72px; }
+.toc { position:sticky; top:16px; align-self:start; max-height:calc(100vh - 32px); overflow:auto; font-size:.95rem;
+  background:var(--sheet); border:1px solid var(--line); border-top:4px solid var(--survey); border-radius:8px; padding:18px 20px; }
+.toc h2 { font:700 .85rem var(--body); text-transform:uppercase; letter-spacing:.08em; color:var(--muted); margin:0 0 .6em; border:0; padding:0; }
 .toc ul { list-style:none; padding:0; margin:0; } .toc li { margin:.45em 0; }
-article { background:var(--sheet); border:1px solid var(--line); border-top:4px solid var(--edge); padding:32px clamp(18px,4vw,48px); min-width:0; }
-h1, h2, h3 { font-family:var(--display); line-height:1.15; margin:1.6em 0 .5em; }
-h1 { font-size:clamp(2rem,4.5vw,3rem); margin-top:0; } h2 { font-size:1.7rem; border-top:1px solid var(--line); padding-top:1em; }
-h3 { font-size:1.25rem; }
-.meta { color:var(--muted); display:flex; flex-wrap:wrap; gap:8px 20px; align-items:center; }
-.button { display:inline-block; background:var(--survey); color:#fff; font-weight:700; text-decoration:none; padding:8px 16px; border-radius:3px; }
-@media (prefers-color-scheme: dark) { .button { color:#0e151d; } }
+article { background:var(--sheet); border:1px solid var(--line); border-radius:8px; padding:36px clamp(18px,4vw,52px); min-width:0;
+  box-shadow:0 12px 32px rgba(19,35,58,.06); }
+article > :first-child { margin-top:0; }
+h1, h2, h3 { font-family:var(--display); line-height:1.15; margin:1.6em 0 .5em; text-wrap:balance; }
+article h2 { font-size:1.75rem; font-weight:800; border-top:1px solid var(--line); padding-top:1em; }
+article h2:first-child { border-top:0; padding-top:0; }
+article h3 { font-size:1.25rem; font-weight:600; }
 p, li { max-width:75ch; }
-code { font-family:ui-monospace,Menlo,Consolas,monospace; font-size:.9em; background:var(--tint); padding:0 .25em; }
-pre { background:var(--tint); padding:12px; overflow:auto; } pre code { background:none; padding:0; }
-.table { overflow-x:auto; margin:1em 0; }
+code { font-family:ui-monospace,Menlo,Consolas,monospace; font-size:.9em; background:var(--tint); padding:0 .25em; border-radius:3px; }
+pre { background:var(--tint); padding:14px 16px; overflow:auto; border-radius:6px; } pre code { background:none; padding:0; }
+.table { overflow-x:auto; margin:1.2em 0; }
 table { border-collapse:collapse; width:100%; font-size:.95rem; }
-th, td { border:1px solid var(--line); padding:6px 10px; text-align:left; vertical-align:top; }
+th, td { border:1px solid var(--line); padding:7px 10px; text-align:left; vertical-align:top; }
 th { background:var(--tint); }
-figure { margin:1.5em 0; } img { max-width:100%; height:auto; border:1px solid var(--line); }
-figcaption { color:var(--muted); font-size:.92rem; margin-top:.4em; }
-article > img { display:block; margin:1em 0; }
-.foot { color:var(--muted); font-size:.92rem; margin-top:3em; border-top:1px solid var(--line); padding-top:1em; }
-@media (max-width:900px) { .layout { grid-template-columns:minmax(0,1fr); } .toc { position:static; max-height:none; } }
-@media print { .top, .toc, .meta .button { display:none; } .layout { display:block; padding:0; } article { border:0; } }
+blockquote { margin:1.2em 0; padding:12px 18px; border-left:5px solid var(--survey); background:var(--tint); border-radius:0 6px 6px 0; }
+figure { margin:1.6em 0; }
+img { max-width:100%; height:auto; border:1px solid var(--line); border-radius:6px; }
+figcaption { color:var(--muted); font-size:.92rem; margin-top:.5em; }
+article > img { display:block; margin:1.2em 0; }
+.fine { color:var(--muted); font-size:.92rem; margin-top:3em; border-top:1px solid var(--line); padding-top:1em; }
+
+.pilot-band { background:var(--navy); color:var(--on-navy); }
+.pilot { display:flex; flex-wrap:wrap; gap:24px 40px; align-items:center; justify-content:space-between; padding-block:64px; }
+.pilot > div:first-child { flex:1 1 480px; min-width:0; }
+.pilot h2 { font:800 clamp(1.75rem,3.4vw,2.5rem)/1.1 var(--display); margin:0 0 .4em; }
+.pilot p { color:var(--on-navy-muted); margin:0; }
+.pilot .cta { display:flex; flex-wrap:wrap; gap:12px; }
+.button--onnavy { background:var(--go-navy); color:#0e151d; box-shadow:0 3px 0 rgba(0,0,0,.45); }
+.button--quiet-onnavy { background:transparent; color:var(--on-navy); box-shadow:inset 0 0 0 2px var(--on-navy-muted); }
+.foot { background:#0e151d; color:#a9b5be; padding-block:56px 32px; font-size:.95rem; }
+.foot a { color:#a9b5be; } .foot a:hover { color:#f6f8f7; }
+.foot__cols { display:grid; grid-template-columns:2fr 1fr 1fr 1.3fr; gap:32px; }
+.foot h2 { font:700 1rem var(--body); color:#f6f8f7; margin:0 0 10px; }
+.foot ul { list-style:none; margin:0; padding:0; display:grid; gap:6px; }
+.foot__brand { display:flex; align-items:center; gap:10px; color:#f6f8f7; font:800 1.2rem var(--display); letter-spacing:.14em; }
+.foot__brand .brand__mark { border-color:#ff6f69; }
+.foot__fine { border-top:1px solid #2d3b48; margin-top:40px; padding-top:16px; font-size:.85rem; max-width:none; }
+
+@media (max-width:900px) {
+  .layout { grid-template-columns:minmax(0,1fr); gap:24px; }
+  .toc { position:static; max-height:none; }
+  .nav { flex-basis:100%; gap:4px 16px; }
+  .nav__cta { margin-left:0; }
+  .foot__cols { grid-template-columns:repeat(2,minmax(0,1fr)); }
+}
+@media (max-width:600px) { .foot__cols { grid-template-columns:minmax(0,1fr); } .page-head .wrap { padding-block:32px 28px; } }
+@media print { .top, .toc, .meta .button, .pilot-band, .foot { display:none; } .page-head { background:none; }
+  .layout { display:block; padding:0; } article { border:0; box-shadow:none; } }
 </style>
 </head>
 <body>
 <a class="skip" href="#doc">Skip to the document</a>
-<header class="top"><div class="top__inner">
+<header class="top"><div class="wrap top__inner">
   <a class="brand" href="../index.html"><span class="brand__mark" aria-hidden="true"></span>PHAEMA</a>
-  <nav aria-label="Website"><a href="../index.html">Website</a><a href="../index.html#resources">All resources</a><a href="../tour.html">Tour</a></nav>
+  <ul class="nav" aria-label="Website">
+    <li><a href="../index.html#councils">For councils</a></li><li><a href="../index.html#capabilities">What it does</a></li>
+    <li><a href="../index.html#security">Security</a></li><li><a href="../tour.html">Tour</a></li>
+    <li><a href="../index.html#roadmap">Roadmap</a></li><li><a href="../index.html#resources" aria-current="page">Resources</a></li>
+    <li class="nav__cta"><a href="../index.html#take-part">Take part</a></li>
+  </ul>
 </div></header>
-<div class="layout">
+<main>
+<div class="page-head"><div class="wrap">
+  <p class="eyebrow"><a href="../index.html#resources">Resources</a></p>
+  <h1>Integrations review</h1>
+  <p class="lede">The market review behind the connectors plan, including Microsoft 365 and open-source alternatives.</p>
+  <p class="meta"><span>Updated 12 November 2026</span><a class="button" href="integrations-review.pdf" download>Download PDF</a></p>
+</div></div>
+<div class="wrap layout">
   <nav class="toc" aria-label="Contents"><h2>Contents</h2><ul>
 <li><a href="#summary">Summary</a></li>
 <li><a href="#the-market">The market</a></li>
@@ -69,8 +133,6 @@ article > img { display:block; margin:1em 0; }
 <li><a href="#sources">Sources</a></li>
   </ul></nav>
   <article id="doc">
-    <h1>Integrations review</h1>
-    <p class="meta"><span>Updated 12 November 2026</span><a class="button" href="integrations-review.pdf" download>Download PDF</a></p>
 <p><strong>Progress since this review was written (5 November 2026).</strong> The first item in the plan, standard sign-in with OpenID Connect, has been built as an optional connector: staff can sign in with Microsoft 365 (Entra ID), Keycloak or another OpenID Connect service, roles and access areas can follow the council&#39;s groups, and people outside the council can keep a PHAEMA sign-in. It is tested against a stand-in sign-in service and has not yet been proved on a council&#39;s live tenant. The other connectors below are not yet built. The rest of this review is as written on 5 November.</p>
 <h2 id="summary">Summary</h2>
 <p>Some councils, almost all in mainland Europe, are leaving Microsoft 365 for open-source and European alternatives. In England and Wales, Microsoft 365 will remain the norm for some years. The alternatives councils are moving to are built on <strong>open standards</strong>: OpenID Connect for sign-in, IMAP and SMTP for email, iCalendar and CalDAV for calendars, WebDAV and WOPI for documents, Matrix for chat, and OGC web services for maps.</p>
@@ -162,9 +224,32 @@ article > img { display:block; margin:1em 0; }
 <li><p><a href="https://www.mysociety.org/tag/integration/">mySociety: FixMyStreet Pro integration</a></p></li>
 </ul>
 
-    <p class="foot">PHAEMA is free software under the GNU Affero General Public License v3.0. Screenshots show fictional
-    demonstration data. Questions or corrections: <a href="mailto:stuart@phaema.co.uk">stuart@phaema.co.uk</a>.</p>
+    <p class="fine">Screenshots show fictional demonstration data. Questions or corrections:
+    <a href="mailto:stuart@phaema.co.uk">stuart@phaema.co.uk</a>.</p>
   </article>
 </div>
+</main>
+<aside class="pilot-band" aria-labelledby="h-pilot"><div class="wrap pilot">
+  <div>
+    <h2 id="h-pilot">Help shape PHAEMA as a pilot council</h2>
+    <p>Run the test programme with your own staff and data, decide which connectors come first, and get help setting up and bringing records across.</p>
+  </div>
+  <div class="cta">
+    <a class="button button--onnavy" href="mailto:stuart@phaema.co.uk?subject=PHAEMA%20pilot%20council">Become a pilot council</a>
+    <a class="button button--quiet-onnavy" href="https://demo.phaema.co.uk">Try the test site</a>
+  </div>
+</div></aside>
+<footer class="foot"><div class="wrap">
+  <div class="foot__cols">
+    <div>
+      <p class="foot__brand"><span class="brand__mark" aria-hidden="true"></span>PHAEMA</p>
+      <p>Property Holding and Estate Management Application. In alpha and not yet ready for live estate management.</p>
+    </div>
+    <div><h2>Project</h2><ul><li><a href="../index.html#councils">For councils</a></li><li><a href="../index.html#capabilities">What it does</a></li><li><a href="../index.html#security">Security</a></li><li><a href="../index.html#roadmap">Roadmap</a></li><li><a href="../index.html#take-part">Take part</a></li></ul></div>
+    <div><h2>Use it</h2><ul><li><a href="https://demo.phaema.co.uk">Test site</a></li><li><a href="../tour.html">Tour</a></li><li><a href="../training/index.html">Training</a></li><li><a href="user-manual.html">User manual</a></li><li><a href="https://github.com/phaema/phaema-app">Code on GitHub</a></li></ul></div>
+    <div><h2>Contact</h2><ul><li><a href="mailto:stuart@phaema.co.uk">stuart@phaema.co.uk</a></li><li><a href="https://github.com/phaema/phaema-app/blob/main/LICENSE">GNU AGPL v3.0 licence</a></li></ul></div>
+  </div>
+  <p class="foot__fine">PHAEMA is free software under the GNU Affero General Public License v3.0. Screenshots show fictional demonstration data.</p>
+</div></footer>
 </body>
 </html>
