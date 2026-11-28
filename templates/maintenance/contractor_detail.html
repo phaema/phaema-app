@@ -19,5 +19,27 @@
 <ul class="govuk-list">{% for c in contracts %}<li>{{ c.title }} · {% translate "re-tender or benchmark by" %} {{ c.retender_due|date:"M Y" }}</li>{% empty %}<li>{% translate "None." %}</li>{% endfor %}</ul>
 <h2 class="govuk-heading-m">{% translate "Jobs" %}</h2>
 {% include "maintenance/_job_table.html" with jobs=jobs empty=_("No jobs yet.") %}
+{% if portal_on %}
+<h2 class="govuk-heading-m" id="portal">{% translate "Contractor portal" %}</h2>
+<p class="govuk-body">{% translate "People at this firm who can sign in at /contractor/ to accept or decline works orders, add progress notes and photos, and report work done." %}</p>
+{% if portal_accounts %}
+<table class="govuk-table"><tbody class="govuk-table__body">{% for a in portal_accounts %}
+  <tr class="govuk-table__row"><td class="govuk-table__cell">{{ a.name }}<br><span class="govuk-body-s">{{ a.email }}</span></td>
+  <td class="govuk-table__cell govuk-body-s">{% if not a.active %}<strong class="govuk-tag govuk-tag--grey">{% translate "Stopped" %}</strong>{% elif a.last_sign_in %}{% translate "Last signed in" %} {{ a.last_sign_in|date:"j M Y" }}{% else %}{% translate "Not signed in yet" %}{% endif %}</td>
+  <td class="govuk-table__cell">{% if can_manage %}<form method="post">{% csrf_token %}<input type="hidden" name="account" value="{{ a.pk }}">
+    {% if a.active %}<button class="govuk-button govuk-button--secondary govuk-!-margin-bottom-0" name="action" value="invite" data-module="govuk-button">{% translate "Send the invitation again" %}</button>
+    <button class="govuk-button govuk-button--warning govuk-!-margin-bottom-0" name="action" value="stop" data-module="govuk-button">{% translate "Stop access" %}</button>
+    {% else %}<button class="govuk-button govuk-button--secondary govuk-!-margin-bottom-0" name="action" value="restart" data-module="govuk-button">{% translate "Allow access again" %}</button>{% endif %}
+  </form>{% endif %}</td></tr>
+{% endfor %}</tbody></table>
+{% endif %}
+{% if can_manage %}
+<details class="govuk-details" data-module="govuk-details"{% if account_form.errors %} open{% endif %}><summary class="govuk-details__summary"><span class="govuk-details__summary-text">{% translate "Add a person" %}</span></summary><div class="govuk-details__text">
+<form method="post" novalidate>{% csrf_token %}<input type="hidden" name="action" value="add_account">
+  {% with form=account_form %}{% include "core/_form_errors.html" %}{% for field in form %}{% include "core/_field.html" %}{% endfor %}{% endwith %}
+  <button class="govuk-button" data-module="govuk-button">{% translate "Add and send the invitation" %}</button>
+</form></div></details>
+{% endif %}
+{% endif %}
 </div></div>
 {% endblock %}

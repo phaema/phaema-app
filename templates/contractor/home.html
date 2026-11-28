@@ -1,0 +1,11 @@
+{% extends "contractor/base.html" %}{% load i18n %}
+{% block title %}{% translate "Your works orders" %}{% endblock %}
+{% block content %}
+<h1 class="govuk-heading-l">{% translate "Your works orders" %}</h1>
+<h2 class="govuk-heading-m">{% translate "Waiting for your answer" %}</h2>
+{% include "contractor/_jobs.html" with jobs=waiting empty=_("No new orders.") %}
+<h2 class="govuk-heading-m">{% translate "In hand" %}</h2>
+{% include "contractor/_jobs.html" with jobs=in_hand empty=_("Nothing in hand.") %}
+<h2 class="govuk-heading-m">{% translate "Done recently" %}</h2>
+{% include "contractor/_jobs.html" with jobs=done empty=_("Nothing yet.") %}
+{% endblock %}

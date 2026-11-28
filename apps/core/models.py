@@ -92,6 +92,11 @@ class ModuleSettings(models.Model):
     space_costing_enabled = models.BooleanField(
         _("space and costing: show costs"), default=False,
         help_text=_("Also share each building's costs between its occupiers. Needs space and costing on."))
+    contractor_portal_enabled = models.BooleanField(
+        _("contractor portal"), default=False,
+        help_text=_("Let people at contractors the council invites sign in at /contractor/ to accept or decline works "
+                    "orders, add progress notes and photos, and report work done with the cost, invoice reference and "
+                    "certificates. Sign-in codes are emailed through GOV.UK Notify."))
     tenant_portal_enabled = models.BooleanField(
         _("tenant portal"), default=False,
         help_text=_("Let tenants the estates team invites sign in at /tenant/ to see their account, demands, key dates "

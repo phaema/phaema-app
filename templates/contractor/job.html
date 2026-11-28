@@ -1,0 +1,68 @@
+{% extends "contractor/base.html" %}{% load i18n humanize %}
+{% block title %}{{ job.reference }}{% endblock %}
+{% block content %}
+<a href="{% url 'contractor:home' %}" class="govuk-back-link">{% translate "Your works orders" %}</a>
+<span class="govuk-caption-l">{% translate "Works order" %} {{ job.reference }}</span>
+<h1 class="govuk-heading-l">{{ job.title }}</h1>
+{% if job.status == "cancelled" %}<div class="govuk-warning-text"><span class="govuk-warning-text__icon" aria-hidden="true">!</span><strong class="govuk-warning-text__text">{% translate "This order has been cancelled. Do not carry out the work." %}</strong></div>{% endif %}
+{% if job.contractor_response == "declined" %}<div class="govuk-inset-text">{% translate "You declined this order." %}</div>{% endif %}
+<dl class="govuk-summary-list">
+  <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Where" %}</dt><dd class="govuk-summary-list__value">{{ job.property.name }}<br>{{ job.property.address_line_1 }}{% if job.property.town %}, {{ job.property.town }}{% endif %} {{ job.property.postcode }}</dd></div>
+  <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Priority" %}</dt><dd class="govuk-summary-list__value">{{ job.get_priority_display }}</dd></div>
+  <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Target date" %}</dt><dd class="govuk-summary-list__value">{{ job.target_date|date:"j F Y"|default:"–" }}</dd></div>
+  {% if job.estimate %}<div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Order value" %}</dt><dd class="govuk-summary-list__value">£{{ job.estimate|floatformat:2|intcomma }} {% translate "before VAT" %}</dd></div>{% endif %}
+  {% if job.description %}<div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Details" %}</dt><dd class="govuk-summary-list__value">{{ job.description|linebreaksbr }}</dd></div>{% endif %}
+  <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Council officer" %}</dt><dd class="govuk-summary-list__value">{{ job.owner.get_full_name|default:job.owner.username|default:"–" }}{% if job.owner.email %}, <a class="govuk-link" href="mailto:{{ job.owner.email }}">{{ job.owner.email }}</a>{% endif %}</dd></div>
+  {% if job.attend_on %}<div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "You expect to attend" %}</dt><dd class="govuk-summary-list__value">{{ job.attend_on|date:"j F Y" }}</dd></div>{% endif %}
+</dl>
+{% if safety %}
+<div class="govuk-warning-text"><span class="govuk-warning-text__icon" aria-hidden="true">!</span><strong class="govuk-warning-text__text">{% translate "Before you visit" %}</strong></div>
+{% for p, text in safety.hazards %}<p class="govuk-body"><strong>{{ p.reference }} {{ p.name }}:</strong> {{ text|linebreaksbr }}</p>{% empty %}<p class="govuk-body">{% translate "No site hazards recorded." %}</p>{% endfor %}
+{% if safety.compliance %}<p class="govuk-body">{% if safety.asbestos.register or safety.asbestos.certificate %}{% translate "The council holds asbestos information for this building. Ask the officer for the register before any work that disturbs the fabric." %}{% else %}{% translate "No asbestos information is held. Assume asbestos may be present in buildings built before 2000 until checked." %}{% endif %}</p>{% endif %}
+{% endif %}
+
+{% if is_open and not job.contractor_response %}
+<h2 class="govuk-heading-m">{% translate "Can you take this job?" %}</h2>
+<form method="post" novalidate>{% csrf_token %}<input type="hidden" name="action" value="accept">
+  {% with form=accept_form %}{% include "portal/_errors.html" %}{% for field in form %}{% include "core/_field.html" %}{% endfor %}{% endwith %}
+  <button class="govuk-button" data-module="govuk-button">{% translate "Accept the order" %}</button>
+</form>
+<details class="govuk-details" data-module="govuk-details"{% if decline_form.errors %} open{% endif %}><summary class="govuk-details__summary"><span class="govuk-details__summary-text">{% translate "Decline the order" %}</span></summary><div class="govuk-details__text">
+<form method="post" novalidate>{% csrf_token %}<input type="hidden" name="action" value="decline">
+  {% with form=decline_form %}{% include "portal/_errors.html" %}{% for field in form %}{% include "core/_field.html" %}{% endfor %}{% endwith %}
+  <button class="govuk-button govuk-button--warning" data-module="govuk-button">{% translate "Decline" %}</button>
+</form></div></details>
+{% endif %}
+
+<h2 class="govuk-heading-m" id="updates">{% translate "Updates" %}</h2>
+{% for u in updates %}
+<div class="govuk-!-margin-bottom-4"><p class="govuk-body govuk-!-margin-bottom-1"><strong>{{ u.get_kind_display }}</strong> <span class="govuk-body-s">{{ u.created_at|date:"j M Y H:i" }}{% if u.account %}, {{ u.account.name }}{% endif %}</span></p>
+{% if u.text %}<p class="govuk-body">{{ u.text|linebreaksbr }}</p>{% endif %}
+{% if u.photo %}<img src="{% url 'contractor:photo' job.pk u.pk %}" alt="{% translate 'Photo with this update' %}" class="phaema-photo-thumb" style="max-width:240px;height:auto">{% endif %}</div>
+{% empty %}<p class="govuk-body">{% translate "None yet." %}</p>{% endfor %}
+
+{% if is_open and job.contractor_response == "accepted" %}
+<details class="govuk-details" data-module="govuk-details"{% if note_form.errors %} open{% endif %}><summary class="govuk-details__summary"><span class="govuk-details__summary-text">{% translate "Add a progress note or photo" %}</span></summary><div class="govuk-details__text">
+<form method="post" enctype="multipart/form-data" novalidate>{% csrf_token %}<input type="hidden" name="action" value="note">
+  {% with form=note_form %}{% include "portal/_errors.html" %}{% for field in form %}{% include "core/_field.html" %}{% endfor %}{% endwith %}
+  <button class="govuk-button govuk-button--secondary" data-module="govuk-button">{% translate "Add" %}</button>
+</form></div></details>
+
+<h2 class="govuk-heading-m">{% translate "Work done" %}</h2>
+<p class="govuk-body">{% translate "When the work is finished, tell us what was done, the cost and your invoice reference, and add any certificates (for example a gas safety record or electrical certificate)." %}</p>
+<form method="post" enctype="multipart/form-data" novalidate>{% csrf_token %}<input type="hidden" name="action" value="complete">
+  {% with form=complete_form %}{% include "portal/_errors.html" %}{% for field in form %}{% include "core/_field.html" %}{% endfor %}{% endwith %}
+  <div class="govuk-form-group">
+    <label class="govuk-label" for="certificates">{% translate "Certificates and other documents (optional)" %}</label>
+    <div class="govuk-hint">{% translate "Up to ten files: PDF, Word, Excel or photos." %}</div>
+    <div class="govuk-drop-zone" data-module="govuk-file-upload"><input class="govuk-file-upload" id="certificates" name="certificates" type="file" multiple></div>
+  </div>
+  <button class="govuk-button" data-module="govuk-button">{% translate "Send: the work is done" %}</button>
+</form>
+{% endif %}
+
+{% if documents %}
+<h2 class="govuk-heading-m">{% translate "Documents" %}</h2>
+<ul class="govuk-list">{% for d in documents %}<li><a class="govuk-link" href="{% url 'contractor:document' job.pk d.pk %}">{{ d.description }}</a></li>{% endfor %}</ul>
+{% endif %}
+{% endblock %}

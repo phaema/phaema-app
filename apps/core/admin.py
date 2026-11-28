@@ -14,6 +14,7 @@ class ModuleSettingsAdmin(admin.ModelAdmin):
                                 "compliance_enabled", "golden_thread_enabled", "valuation_enabled",
                                 "space_enabled", "space_costing_enabled", "open_data_enabled"]}),
         ("Tenant portal", {"fields": ["tenant_portal_enabled", "portal_welcome"]}),
+        ("Contractor portal", {"fields": ["contractor_portal_enabled"]}),
         ("Rent ledger", {"fields": ["invoicing", "invoice_prefix", "next_invoice_number", "vat_rate",
                                     "rent_income_code", "service_charge_income_code", "vat_code_standard",
                                     "vat_code_exempt"]}),

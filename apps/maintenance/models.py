@@ -260,6 +260,10 @@ class Job(TimeStampedModel):
     completion_notes = models.TextField(_("work done"), blank=True)
     actual_cost = models.DecimalField(_("final cost (£, net)"), max_digits=12, decimal_places=2, null=True, blank=True)
     invoice_reference = models.CharField(_("contractor's invoice"), max_length=60, blank=True)
+    contractor_response = models.CharField(_("contractor's answer"), max_length=10, blank=True, choices=[
+        ("accepted", _("Accepted")), ("declined", _("Declined"))])
+    contractor_response_at = models.DateTimeField(_("answered"), null=True, blank=True)
+    attend_on = models.DateField(_("contractor expects to attend"), null=True, blank=True)
     approval_status = models.CharField(_("order approval"), max_length=10, blank=True,
                                        choices=[("pending", _("Waiting")), ("approved", _("Approved")),
                                                 ("returned", _("Returned"))])
@@ -337,6 +341,7 @@ class JobDocument(TimeStampedModel):
     description = models.CharField(_("description"), max_length=200)
     file = models.FileField(_("file"), upload_to=_job_document_path, validators=[validate_case_file])
     original_filename = models.CharField(_("original file name"), max_length=255, blank=True)
+    from_contractor = models.BooleanField(_("sent by the contractor"), default=False)
 
     class Meta:
         ordering = ["created_at"]
@@ -436,6 +441,127 @@ class RepairPhoto(models.Model):
         super().save(*args, **kwargs)
 
 
+
+# ------------------------------------------------------------------ contractor portal
+
+
+class ContractorAccount(TimeStampedModel):
+    """A person at a contractor who may sign in at /contractor/ to see and answer the works orders sent to their
+    firm. Not a PHAEMA user: no role, and no staff page."""
+
+    contractor = models.ForeignKey(Contractor, on_delete=models.CASCADE, related_name="portal_accounts",
+                                   verbose_name=_("contractor"))
+    name = models.CharField(_("name"), max_length=200)
+    email = models.EmailField(_("email"), unique=True,
+                              help_text=_("Sign-in codes are sent here. Each person needs their own address."))
+    active = models.BooleanField(_("active"), default=True, help_text=_("Untick to stop this person signing in."))
+    invited_by = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL,
+                                   related_name="+", verbose_name=_("invited by"))
+    invited_at = models.DateTimeField(_("invitation sent"), null=True, blank=True)
+    last_sign_in = models.DateTimeField(_("last signed in"), null=True, blank=True)
+
+    class Meta:
+        ordering = ["contractor__name", "name"]
+        verbose_name = _("contractor portal account")
+        verbose_name_plural = _("contractor portal accounts")
+
+    def __str__(self):
+        return f"{self.name} ({self.contractor})"
+
+    def save(self, *args, **kwargs):
+        self.email = self.email.strip().lower()
+        super().save(*args, **kwargs)
+
+
+class ContractorSignInCode(models.Model):
+    """A one-time sign-in code for the contractor portal, kept only as a keyed hash."""
+
+    MINUTES = 15
+    TRIES = 5
+
+    account = models.ForeignKey(ContractorAccount, on_delete=models.CASCADE, related_name="codes")
+    code_hash = models.CharField(max_length=64)
+    created_at = models.DateTimeField(auto_now_add=True)
+    expires_at = models.DateTimeField()
+    tries = models.PositiveSmallIntegerField(default=0)
+    used_at = models.DateTimeField(null=True, blank=True)
+
+    @staticmethod
+    def digest(account_id, code):
+        import hashlib
+        import hmac
+
+        return hmac.new(settings.SECRET_KEY.encode(), f"contractor-code:{account_id}:{code}".encode(),
+                        hashlib.sha256).hexdigest()
+
+    @classmethod
+    def issue(cls, account):
+        import secrets
+        from datetime import timedelta
+
+        from django.utils import timezone
+
+        account.codes.filter(used_at__isnull=True).update(used_at=timezone.now())
+        code = f"{secrets.randbelow(1_000_000):06d}"
+        row = cls.objects.create(account=account, code_hash=cls.digest(account.pk, code),
+                                 expires_at=timezone.now() + timedelta(minutes=cls.MINUTES))
+        return row, code
+
+    @classmethod
+    def purge(cls):
+        from datetime import timedelta
+
+        from django.utils import timezone
+
+        return cls.objects.filter(created_at__lt=timezone.now() - timedelta(days=1)).delete()[0]
+
+    def matches(self, code):
+        import hmac
+
+        from django.utils import timezone
+
+        if self.used_at or self.expires_at < timezone.now() or self.tries >= self.TRIES:
+            return False
+        self.tries += 1
+        ok = hmac.compare_digest(self.code_hash, self.digest(self.account_id, code.strip()))
+        if ok:
+            self.used_at = timezone.now()
+        self.save(update_fields=["tries", "used_at"])
+        return ok
+
+
+def _update_photo_path(instance, filename):
+    return f"maintenance/{instance.job_id}/updates/{uuid.uuid4().hex}.jpg"
+
+
+class JobUpdate(models.Model):
+    """What a contractor said about a job in the portal: accepted, declined, progress (with a photo) or done."""
+
+    class Kind(models.TextChoices):
+        ACCEPTED = "accepted", _("Accepted the order")
+        DECLINED = "declined", _("Declined the order")
+        NOTE = "note", _("Progress")
+        COMPLETED = "completed", _("Reported the work done")
+
+    job = models.ForeignKey(Job, on_delete=models.CASCADE, related_name="updates")
+    account = models.ForeignKey(ContractorAccount, on_delete=models.SET_NULL, null=True, related_name="updates")
+    kind = models.CharField(_("what"), max_length=10, choices=Kind.choices)
+    text = models.TextField(_("note"), blank=True)
+    photo = models.ImageField(_("photo"), upload_to=_update_photo_path, blank=True, validators=[validate_image])
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["created_at", "pk"]
+        verbose_name = _("contractor update")
+        verbose_name_plural = _("contractor updates")
+
+    def __str__(self):
+        return f"{self.job.reference}: {self.get_kind_display()}"
+
+    def save(self, *args, **kwargs):
+        if self.photo and not getattr(self.photo, "_committed", True):
+            self.photo = process_image(self.photo)
+        super().save(*args, **kwargs)
 # ------------------------------------------------------------------ condition surveys and backlog
 
 
