@@ -29,7 +29,7 @@ class SpendSheet(Sheet):
                guidance="The budget line's description, exactly as on the project page."),
         Column("Financial year", "year_ref", "year_ref", required=True, example="2026/27",
                guidance="April to March, for example 2026/27."),
-        Column("Actual", "actual", "decimal", required=True, example="182500.00",
+        Column("Actual", "actual", "decimal", required=True, total=True, example="182500.00",
                guidance="Total spent (or, for an income line, received) in that year, in pounds. It replaces the "
                         "figure already in PHAEMA."),
     ]

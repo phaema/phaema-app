@@ -142,11 +142,43 @@ def load(today=None):
                           "lock reset.", "HWM-1180")
         j.status = Job.Status.CLOSED
         j.save()
+    _portal(c, today)
     return Job.objects.count()
 
 
+def _portal(c, today):
+    """The contractor portal, switched on, with an account at the roofing contractor, who has accepted the Suite 3
+    roof leak and added a progress note. Sign in as roofer@contractor.example (codes are shown on a test site)."""
+    from django.utils import timezone
+
+    from apps.core.models import ModuleSettings
+
+    from .models import ContractorAccount, JobUpdate
+
+    modules = ModuleSettings.load()
+    if not modules.contractor_portal_enabled:
+        modules.contractor_portal_enabled = True
+        modules.save(update_fields=["contractor_portal_enabled"])
+    roofer = c.get("roofing")
+    if roofer is None:
+        return
+    account, _ = ContractorAccount.objects.get_or_create(email="roofer@contractor.example", defaults={
+        "contractor": roofer, "name": "Jo Slater", "invited_at": timezone.now()})
+    job = Job.objects.filter(contractor=roofer, status=Job.Status.ORDERED, title__startswith="Roof leak").first()
+    if job and not job.updates.exists():
+        job.contractor_response, job.contractor_response_at = "accepted", timezone.now() - timedelta(days=6)
+        job.attend_on = today + timedelta(days=1)
+        job.save(update_fields=["contractor_response", "contractor_response_at", "attend_on"])
+        JobUpdate.objects.create(job=job, account=account, kind=JobUpdate.Kind.ACCEPTED, text="Booked in.")
+        JobUpdate.objects.create(job=job, account=account, kind=JobUpdate.Kind.NOTE,
+                                 text="Temporary repair made to the felt; full patch repair once it is dry.")
+
+
 def remove():
+    from .models import ConditionSurvey
+
     refs = Property.objects.filter(reference__startswith="DM-")
+    ConditionSurvey.objects.filter(property__in=refs).delete()
     Job.objects.filter(property__in=refs).delete()
     PlannedTask.objects.filter(property__in=refs).delete()
     Component.objects.filter(property__in=refs).delete()

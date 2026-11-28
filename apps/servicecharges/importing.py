@@ -20,7 +20,7 @@ class ExpenditureSheet(Sheet):
         Column("Invoice reference", "invoice_reference", example="INV-4471",
                guidance="The supplier's invoice or the finance system's reference. A row with a reference already in "
                         "the same year is updated, not added twice."),
-        Column("Amount", "amount", "decimal", required=True, example="420.00",
+        Column("Amount", "amount", "decimal", required=True, total=True, example="420.00",
                guidance="In pounds, net of any VAT the council recovers. Always positive, for income too."),
         Column("Type", "kind", "choice", example="Cost",
                guidance="Cost (the default), or Income for interest, rebates and commissions credited to the "

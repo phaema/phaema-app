@@ -1,0 +1,38 @@
+{% load i18n %}
+{% if outcome %}
+<p class="govuk-body"><a class="govuk-link" href="{% url 'imports:check-report' adapter.key %}?token={{ check_token }}">{% translate "Download this check as Excel" %}</a> {% translate "(every row, with what would happen to it, its problems and warnings)." %}</p>
+{% if outcome.warning_count %}
+<div class="govuk-warning-text"><span class="govuk-warning-text__icon" aria-hidden="true">!</span>
+  <strong class="govuk-warning-text__text"><span class="govuk-visually-hidden">{% translate "Warning" %}</span>
+  {% blocktranslate count n=outcome.warning_count %}{{ n }} row has a warning, such as a possible duplicate. Warnings do not stop the import, but check them first.{% plural %}{{ n }} rows have warnings, such as possible duplicates. Warnings do not stop the import, but check them first.{% endblocktranslate %}</strong></div>
+{% endif %}
+{% endif %}
+{% if result.ok %}
+<form method="post">{% csrf_token %}
+  <input type="hidden" name="token" value="{{ token }}">
+  <h2 class="govuk-heading-m">{% translate "Check the totals against the old system" %}</h2>
+  <p class="govuk-body">{% translate "Optional. Type in the figures from the old system's own reports. PHAEMA compares them with the file, and with what it holds after the import, and keeps the result with the import record." %}</p>
+  <table class="govuk-table">
+    <thead class="govuk-table__head"><tr class="govuk-table__row">
+      <th scope="col" class="govuk-table__header">{% translate "Control total" %}</th>
+      <th scope="col" class="govuk-table__header govuk-table__header--numeric">{% translate "In the file" %}</th>
+      <th scope="col" class="govuk-table__header">{% translate "In the old system" %}</th>
+    </tr></thead>
+    <tbody class="govuk-table__body">
+    {% for c in outcome.controls %}
+      <tr class="govuk-table__row">
+        <th scope="row" class="govuk-table__header"><label for="expected-{{ forloop.counter }}">{{ c.label }}</label></th>
+        <td class="govuk-table__cell govuk-table__cell--numeric">{{ c.in_file|floatformat:c.places }}</td>
+        <td class="govuk-table__cell"><input class="govuk-input govuk-input--width-10" id="expected-{{ forloop.counter }}" name="expected:{{ c.key }}" type="text" inputmode="decimal" spellcheck="false"></td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  <p class="govuk-body">{% if adapter.supports_trial %}{% translate "A trial run imports the file and then undoes it, so you can see exactly what PHAEMA would hold, with nothing saved. " %}{% endif %}{% translate "Each import is kept under Migration runs with its report, for an administrator to sign off." %}</p>
+  <div class="govuk-button-group">
+    <button class="govuk-button" name="confirm" value="1" data-module="govuk-button">{% translate "Import these records" %}</button>
+    {% if adapter.supports_trial %}<button class="govuk-button govuk-button--secondary" name="trial" value="1" data-module="govuk-button">{% translate "Trial run first" %}</button>{% endif %}
+    <a class="govuk-link" href="{{ request.path }}">{% translate "Cancel" %}</a>
+  </div>
+</form>
+{% endif %}

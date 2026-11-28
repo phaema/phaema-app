@@ -46,6 +46,46 @@ Some rules apply to every import:
 - A CSV file holds one sheet only. Use Excel to import several sheets at once.
 - Every import is recorded in the [change log](change-log.md).
 
+### Moving from another system
+
+When a council moves its records into PHAEMA from another estates system, the import pages help show that nothing
+was lost or changed on the way.
+
+- **Warnings.** Some rows are not wrong but are worth a look before importing: a new party whose name looks like
+  one already in PHAEMA ("Example Ltd" and "Example Limited"), or a new property with the same address and postcode
+  as another. Warnings are shown in yellow and do not stop the import.
+- **The check as Excel.** On any preview, select **Download this check as Excel** for a list of every row with
+  what would happen to it, its problems and its warnings. Use it to work through a large file away from the screen,
+  or to send the problems back to whoever made the file.
+- **Control totals.** On a clean preview, PHAEMA lists the number of rows on each sheet and the totals of the
+  money and area columns (rents, deposits, amounts, values, site areas, GIA and NIA). Type in the same figures
+  from the old system's own reports, if you have them. After a trial run or an import, each total is shown three
+  ways: in the old system, in the file, and in PHAEMA, marked **Matches** or **Does not match**.
+- **Trial run first.** A trial run imports the file and then undoes it, so you see exactly what PHAEMA would hold
+  with nothing saved. From the trial's page you can import the same file for real, with the same old-system
+  figures, as long as you have not uploaded another file in between.
+- **Migration runs.** Every trial run and import is kept under **Import**, **Migration runs**: who ran it and
+  when, the file's name and fingerprint (which proves which file it was), the counts, the control totals and an
+  Excel report. An administrator other than the person who ran it can **sign it off** with a note, for example
+  which old-system reports they checked against. A sign-off cannot be undone.
+
+- **Files exported from another system.** You do not have to retype an export into the PHAEMA template. Upload
+  it as it is: if its columns are not named as PHAEMA's, PHAEMA asks you to match each of your columns to a PHAEMA
+  column (or ignore it). Give the matching a name, such as "Old system: lease export", to save it: the next file
+  with the same columns is matched for you, and you can also choose a saved matching when you upload. Matching
+  works for CSV files and for Excel files with one sheet. Values still have to be in a form PHAEMA accepts, such
+  as dd/mm/yyyy dates and the wording of fixed choices.
+- **Documents in bulk.** Under **Import**, **Documents**, upload a zip file holding the documents and an index
+  (download the **Index template**, fill it in and save it in the zip as `index.xlsx`). Each row names a file in
+  the zip, what it is attached to (an agreement, a title, a floor plan or a building document), the record's
+  reference, the type of document, a description and a date. Every row is checked first: the file must be in the
+  zip, the record must exist, and the file must be one that record's own upload page would accept. A document
+  already held under the same file name is a warning. Up to 500 documents and 50 MB go in one zip; split larger
+  sets. There is no trial run for documents.
+
+A sensible order for a migration is: properties, parties, leases and breaks, then the rest, and documents last; a trial run of each
+file; correct the old system or the file until the totals match; import; then a second person signs off each run.
+
 ### Properties
 
 Rows are matched by **Reference**. Use **Part of** to give the reference of the estate, site or building a property

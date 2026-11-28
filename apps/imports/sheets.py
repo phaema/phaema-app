@@ -50,6 +50,36 @@ class PartySheet(Sheet):
         if not obj.pk and not obj.party_type:
             result.errors.append("Type is missing (needed for a new party).")
 
+    def warn(self, obj, values, result):
+        """A new party whose name looks like an existing one ("Example Ltd" and "Example Limited")."""
+        if obj.pk:
+            return
+        key = party_key(obj.name)
+        if not key:
+            return
+        seen = self.context.setdefault("_party_keys", {})
+        if key in seen:
+            result.warnings.append(f"Possibly the same as row {seen[key]} of this file.")
+        else:
+            seen[key] = result.number
+        for other in Party.objects.filter(name__icontains=key.split(" ")[0])[:200]:
+            if party_key(other.name) == key:
+                ref = f", finance reference {other.finance_customer_ref}" if other.finance_customer_ref else ""
+                result.warnings.append(f"Possibly the same as {other.name}, already in PHAEMA{ref}. If it is, use "
+                                       "the same name or finance customer reference so it is updated, not added.")
+                break
+
+
+SUFFIXES = {"ltd", "limited", "plc", "llp", "lp", "co", "company", "the", "and", "uk", "group", "cic", "inc"}
+
+
+def party_key(name):
+    """A name reduced for comparing: lower case, no punctuation, no Ltd, Limited, plc and the like."""
+    import re
+
+    words = re.sub(r"[^a-z0-9 ]", " ", (name or "").lower().replace("&", " and ")).split()
+    return " ".join(w for w in words if w not in SUFFIXES)
+
 
 def find_party(text, context):
     """A party already in PHAEMA, by finance customer reference or name, or one in this file's Parties sheet."""
@@ -91,12 +121,12 @@ class LeaseSheet(Sheet):
         Column("Term end", "term_end", "date", example="24/03/2034", guidance="Leave blank for periodic agreements."),
         Column("Actual end", "actual_end", "date", guidance="The date an agreement actually ended."),
         Column("Security of tenure", "security_of_tenure", "choice", example="Contracted out of the 1954 Act"),
-        Column("Annual rent", "annual_rent", "decimal", example="12500",
+        Column("Annual rent", "annual_rent", "decimal", example="12500", total=True,
                guidance="Rent per year in pounds. For an existing agreement with a rent schedule, change the rent "
                         "on its rent schedule instead."),
         Column("Rent frequency", "rent_frequency", "choice", example="Quarterly in advance (usual quarter days)"),
         Column("VAT chargeable", "vat_chargeable", "bool", example="Yes"),
-        Column("Deposit", "deposit", "decimal"),
+        Column("Deposit", "deposit", "decimal", total=True),
         Column("Review basis", "review_basis", "choice", example="Open market, upwards only"),
         Column("Review interval (years)", "review_interval_years", "int", example="5"),
         Column("Next review date", "next_review_date", "date", example="25/03/2029"),
@@ -273,13 +303,13 @@ class LeaseWorkbook(Workbook):
 
 def _workbooks():
     from apps.ledger.importing import ReceiptWorkbook
-    from apps.maintenance.importing import MaintenanceWorkbook
+    from apps.maintenance.importing import MaintenanceWorkbook, SurveyWorkbook
     from apps.projects.importing import SpendWorkbook
     from apps.servicecharges.importing import ExpenditureWorkbook
     from apps.valuations.importing import ValuationWorkbook
 
     return {wb.key: wb for wb in (PartyWorkbook, LeaseWorkbook, ReceiptWorkbook, ExpenditureWorkbook,
-                                  MaintenanceWorkbook, ValuationWorkbook, SpendWorkbook)}  # in the order to import them
+                                  MaintenanceWorkbook, SurveyWorkbook, ValuationWorkbook, SpendWorkbook)}  # in the order to import them
 
 
 class _LazyWorkbooks(dict):

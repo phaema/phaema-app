@@ -12,7 +12,7 @@ from django.utils.translation import gettext_lazy as _
 
 from apps.cases.models import validate_case_file
 from apps.core.dates import add_months, add_working_days
-from apps.core.files import process_image, validate_image
+from apps.core.files import process_image, validate_image, validate_pdf
 from apps.core.models import TimeStampedModel
 from apps.leases.models import Lease
 from apps.properties.models import Property
@@ -260,6 +260,10 @@ class Job(TimeStampedModel):
     completion_notes = models.TextField(_("work done"), blank=True)
     actual_cost = models.DecimalField(_("final cost (£, net)"), max_digits=12, decimal_places=2, null=True, blank=True)
     invoice_reference = models.CharField(_("contractor's invoice"), max_length=60, blank=True)
+    contractor_response = models.CharField(_("contractor's answer"), max_length=10, blank=True, choices=[
+        ("accepted", _("Accepted")), ("declined", _("Declined"))])
+    contractor_response_at = models.DateTimeField(_("answered"), null=True, blank=True)
+    attend_on = models.DateField(_("contractor expects to attend"), null=True, blank=True)
     approval_status = models.CharField(_("order approval"), max_length=10, blank=True,
                                        choices=[("pending", _("Waiting")), ("approved", _("Approved")),
                                                 ("returned", _("Returned"))])
@@ -337,6 +341,7 @@ class JobDocument(TimeStampedModel):
     description = models.CharField(_("description"), max_length=200)
     file = models.FileField(_("file"), upload_to=_job_document_path, validators=[validate_case_file])
     original_filename = models.CharField(_("original file name"), max_length=255, blank=True)
+    from_contractor = models.BooleanField(_("sent by the contractor"), default=False)
 
     class Meta:
         ordering = ["created_at"]
@@ -434,3 +439,256 @@ class RepairPhoto(models.Model):
         if self.image and not getattr(self.image, "_committed", True):
             self.image = process_image(self.image)
         super().save(*args, **kwargs)
+
+
+
+# ------------------------------------------------------------------ contractor portal
+
+
+class ContractorAccount(TimeStampedModel):
+    """A person at a contractor who may sign in at /contractor/ to see and answer the works orders sent to their
+    firm. Not a PHAEMA user: no role, and no staff page."""
+
+    contractor = models.ForeignKey(Contractor, on_delete=models.CASCADE, related_name="portal_accounts",
+                                   verbose_name=_("contractor"))
+    name = models.CharField(_("name"), max_length=200)
+    email = models.EmailField(_("email"), unique=True,
+                              help_text=_("Sign-in codes are sent here. Each person needs their own address."))
+    active = models.BooleanField(_("active"), default=True, help_text=_("Untick to stop this person signing in."))
+    invited_by = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL,
+                                   related_name="+", verbose_name=_("invited by"))
+    invited_at = models.DateTimeField(_("invitation sent"), null=True, blank=True)
+    last_sign_in = models.DateTimeField(_("last signed in"), null=True, blank=True)
+
+    class Meta:
+        ordering = ["contractor__name", "name"]
+        verbose_name = _("contractor portal account")
+        verbose_name_plural = _("contractor portal accounts")
+
+    def __str__(self):
+        return f"{self.name} ({self.contractor})"
+
+    def save(self, *args, **kwargs):
+        self.email = self.email.strip().lower()
+        super().save(*args, **kwargs)
+
+
+class ContractorSignInCode(models.Model):
+    """A one-time sign-in code for the contractor portal, kept only as a keyed hash."""
+
+    MINUTES = 15
+    TRIES = 5
+
+    account = models.ForeignKey(ContractorAccount, on_delete=models.CASCADE, related_name="codes")
+    code_hash = models.CharField(max_length=64)
+    created_at = models.DateTimeField(auto_now_add=True)
+    expires_at = models.DateTimeField()
+    tries = models.PositiveSmallIntegerField(default=0)
+    used_at = models.DateTimeField(null=True, blank=True)
+
+    @staticmethod
+    def digest(account_id, code):
+        import hashlib
+        import hmac
+
+        return hmac.new(settings.SECRET_KEY.encode(), f"contractor-code:{account_id}:{code}".encode(),
+                        hashlib.sha256).hexdigest()
+
+    @classmethod
+    def issue(cls, account):
+        import secrets
+        from datetime import timedelta
+
+        from django.utils import timezone
+
+        account.codes.filter(used_at__isnull=True).update(used_at=timezone.now())
+        code = f"{secrets.randbelow(1_000_000):06d}"
+        row = cls.objects.create(account=account, code_hash=cls.digest(account.pk, code),
+                                 expires_at=timezone.now() + timedelta(minutes=cls.MINUTES))
+        return row, code
+
+    @classmethod
+    def purge(cls):
+        from datetime import timedelta
+
+        from django.utils import timezone
+
+        return cls.objects.filter(created_at__lt=timezone.now() - timedelta(days=1)).delete()[0]
+
+    def matches(self, code):
+        import hmac
+
+        from django.utils import timezone
+
+        if self.used_at or self.expires_at < timezone.now() or self.tries >= self.TRIES:
+            return False
+        self.tries += 1
+        ok = hmac.compare_digest(self.code_hash, self.digest(self.account_id, code.strip()))
+        if ok:
+            self.used_at = timezone.now()
+        self.save(update_fields=["tries", "used_at"])
+        return ok
+
+
+def _update_photo_path(instance, filename):
+    return f"maintenance/{instance.job_id}/updates/{uuid.uuid4().hex}.jpg"
+
+
+class JobUpdate(models.Model):
+    """What a contractor said about a job in the portal: accepted, declined, progress (with a photo) or done."""
+
+    class Kind(models.TextChoices):
+        ACCEPTED = "accepted", _("Accepted the order")
+        DECLINED = "declined", _("Declined the order")
+        NOTE = "note", _("Progress")
+        COMPLETED = "completed", _("Reported the work done")
+
+    job = models.ForeignKey(Job, on_delete=models.CASCADE, related_name="updates")
+    account = models.ForeignKey(ContractorAccount, on_delete=models.SET_NULL, null=True, related_name="updates")
+    kind = models.CharField(_("what"), max_length=10, choices=Kind.choices)
+    text = models.TextField(_("note"), blank=True)
+    photo = models.ImageField(_("photo"), upload_to=_update_photo_path, blank=True, validators=[validate_image])
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["created_at", "pk"]
+        verbose_name = _("contractor update")
+        verbose_name_plural = _("contractor updates")
+
+    def __str__(self):
+        return f"{self.job.reference}: {self.get_kind_display()}"
+
+    def save(self, *args, **kwargs):
+        if self.photo and not getattr(self.photo, "_committed", True):
+            self.photo = process_image(self.photo)
+        super().save(*args, **kwargs)
+# ------------------------------------------------------------------ condition surveys and backlog
+
+
+def _survey_report_path(instance, filename):
+    return f"maintenance/surveys/{instance.property_id}/{uuid.uuid4().hex}.pdf"
+
+
+class ConditionSurvey(TimeStampedModel):
+    """A dated condition survey of a building or site: who carried it out, the overall grade and the work it found.
+    The work found is its items, each graded and given a priority and a cost; open items make up the backlog."""
+
+    class Kind(models.TextChoices):
+        FULL = "full", _("Full condition survey")
+        VISUAL = "visual", _("Visual inspection")
+        DESKTOP = "desktop", _("Desktop review")
+        SPECIALIST = "specialist", _("Specialist survey (for example roofs or services)")
+
+    class Status(models.TextChoices):
+        DRAFT = "draft", _("Being entered")
+        FINISHED = "finished", _("Finished")
+
+    property = models.ForeignKey(Property, on_delete=models.PROTECT, related_name="condition_surveys",
+                                 verbose_name=_("property"))
+    kind = models.CharField(_("kind of survey"), max_length=12, choices=Kind.choices, default=Kind.FULL)
+    surveyed_on = models.DateField(_("surveyed on"))
+    surveyor = models.CharField(_("surveyor"), max_length=150,
+                                help_text=_("The person and firm, or the council's own surveyor."))
+    overall_grade = models.CharField(_("overall condition"), max_length=1, choices=Property.Condition.choices,
+                                     blank=True)
+    next_due = models.DateField(_("next survey due"), null=True, blank=True,
+                                help_text=_("Usually five years after this one."))
+    notes = models.TextField(_("summary"), blank=True)
+    report = models.FileField(_("survey report (PDF)"), upload_to=_survey_report_path, blank=True,
+                              validators=[validate_pdf])
+    status = models.CharField(_("status"), max_length=10, choices=Status.choices, default=Status.DRAFT)
+    finished_on = models.DateField(_("finished on"), null=True, blank=True)
+
+    class Meta:
+        ordering = ["-surveyed_on", "-pk"]
+        verbose_name = _("condition survey")
+        verbose_name_plural = _("condition surveys")
+
+    def __str__(self):
+        return f"{self.get_kind_display()}, {self.property.reference}, {self.surveyed_on:%d %b %Y}"
+
+    def get_absolute_url(self):
+        return reverse("maintenance:survey", args=[self.pk])
+
+    def save(self, *args, **kwargs):
+        if self.next_due is None and self.surveyed_on:
+            self.next_due = add_months(self.surveyed_on, 60)
+        super().save(*args, **kwargs)
+
+    @builtins.property
+    def open_items(self):
+        return [i for i in self.items.all() if i.is_open]
+
+    @builtins.property
+    def backlog(self):
+        return sum((i.estimated_cost or 0 for i in self.open_items if i.priority in SurveyItem.BACKLOG), 0)
+
+
+class SurveyItem(TimeStampedModel):
+    """One piece of work a condition survey found, element by element, with its grade, priority and cost."""
+
+    class Priority(models.IntegerChoices):
+        URGENT = 1, _("1 Urgent: health and safety, or to keep the building open (within a year)")
+        ESSENTIAL = 2, _("2 Essential: to stop serious deterioration (within two years)")
+        DESIRABLE = 3, _("3 Desirable: to stop further deterioration (within five years)")
+        LONG_TERM = 4, _("4 Long term: beyond five years")
+
+    class State(models.TextChoices):
+        OPEN = "open", _("To do")
+        DONE = "done", _("Done")
+        NOT_NEEDED = "not_needed", _("No longer needed")
+
+    BACKLOG = (1, 2, 3)  # priorities counted as backlog maintenance: work needed within five years
+    YEARS = {1: 0, 2: 1, 3: 3, 4: 5}  # years after the survey the work falls due, if no year is given
+
+    survey = models.ForeignKey(ConditionSurvey, on_delete=models.CASCADE, related_name="items")
+    element = models.CharField(_("element"), max_length=12, choices=Category.choices)
+    location = models.CharField(_("location"), max_length=150, blank=True)
+    description = models.CharField(_("work needed"), max_length=400)
+    grade = models.CharField(_("condition"), max_length=1, choices=Component.Condition.choices)
+    priority = models.PositiveSmallIntegerField(_("priority"), choices=Priority.choices)
+    estimated_cost = models.DecimalField(_("estimated cost (£)"), max_digits=12, decimal_places=0, null=True,
+                                         blank=True)
+    capital = models.BooleanField(_("capital spending"), default=False)
+    due_year = models.PositiveSmallIntegerField(_("year due"), null=True, blank=True,
+                                                help_text=_("Left blank, set from the priority."))
+    component = models.ForeignKey(Component, on_delete=models.SET_NULL, null=True, blank=True,
+                                  related_name="survey_items", verbose_name=_("component"))
+    job = models.ForeignKey(Job, on_delete=models.SET_NULL, null=True, blank=True, related_name="survey_items",
+                            verbose_name=_("job"))
+    state = models.CharField(_("state"), max_length=12, choices=State.choices, default=State.OPEN)
+    state_note = models.CharField(_("note"), max_length=255, blank=True)
+
+    class Meta:
+        ordering = ["priority", "element", "pk"]
+        verbose_name = _("condition survey item")
+        verbose_name_plural = _("condition survey items")
+
+    def __str__(self):
+        return f"{self.get_element_display()}: {self.description[:60]}"
+
+    def save(self, *args, **kwargs):
+        if self.due_year is None and self.priority and self.survey_id:
+            self.due_year = self.survey.surveyed_on.year + self.YEARS.get(int(self.priority), 0)
+        super().save(*args, **kwargs)
+
+    @builtins.property
+    def is_open(self):
+        if self.state != self.State.OPEN:
+            return False
+        return not (self.job_id and self.job.status in (Job.Status.COMPLETED, Job.Status.CLOSED))
+
+    @builtins.property
+    def status_label(self):
+        if self.state != self.State.OPEN:
+            return self.get_state_display()
+        if self.job_id:
+            if self.job.status in (Job.Status.COMPLETED, Job.Status.CLOSED):
+                return _("Done (job completed)")
+            if self.job.status == Job.Status.CANCELLED:
+                return _("To do (job cancelled)")
+            return _("Job raised")
+        return self.get_state_display()
+
+    def job_priority(self):
+        return {1: Job.Priority.URGENT, 2: Job.Priority.ROUTINE}.get(int(self.priority), Job.Priority.PLANNED)

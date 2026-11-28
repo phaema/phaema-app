@@ -13,9 +13,9 @@ class ValuationSheet(Sheet):
                guidance="The property's asset reference. The row updates the valuation instructed for this "
                         "property at the valuation date."),
         Column("Valuation date", "valuation_date", "date", required=True, example="31/03/2027"),
-        Column("Value", "value", "decimal", required=True, example="4250000"),
-        Column("Land", "land_value", "decimal", example="850000"),
-        Column("Buildings", "building_value", "decimal", example="3400000"),
+        Column("Value", "value", "decimal", required=True, total=True, example="4250000"),
+        Column("Land", "land_value", "decimal", total=True, example="850000"),
+        Column("Buildings", "building_value", "decimal", total=True, example="3400000"),
         Column("Remaining life (years)", "remaining_life", "int", example="35"),
         Column("Method", "method", "choice", example="Depreciated replacement cost"),
         Column("Inspected", "inspection_date", "date", example="12/01/2027"),
