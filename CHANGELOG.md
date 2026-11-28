@@ -32,6 +32,9 @@ Everything since 0.9.0 (10 to 27 November 2026).
   system, file and PHAEMA; a downloadable **check report** of every row with its problems and warnings;
   **warnings** for possible duplicate parties and properties; and **migration runs** kept with their reports and
   signed off by a second administrator. Help, Importing and exporting.
+- Map layers for desktop GIS: PHAEMA's property boundaries as an OGC API - Features service at `/api/ogc/`, for
+  QGIS, ArcGIS and other GIS, signed in with an API token. Two layers (every property, and top-level holdings
+  only), in WGS 84 or British National Grid, with paging, bounding box and simple filters. Help, Maps.
 - Tenant portal (optional, off by default) at `/tenant/`: tenants the estates team invites sign in with a code
   emailed each time and see, for their own agreements, the rent account with arrears by age, interest and the next
   credit control step, demands with Pay now links, the statement, key dates, documents the council shares, service
