@@ -154,8 +154,9 @@ class ImportResult:
         return self.count("unchanged")
 
 
-def read_rows(uploaded):
-    """Return the data rows as lists of dicts keyed by model field name."""
+def read_rows(uploaded, mapping=None):
+    """Return the data rows as lists of dicts keyed by model field name. ``mapping`` matches another system's
+    headings (lower case) to PHAEMA's fields."""
     name = uploaded.name.lower()
     if name.endswith(".csv"):
         text = uploaded.read().decode("utf-8-sig", errors="replace")
@@ -173,10 +174,14 @@ def read_rows(uploaded):
 
     by_heading = {h.lower(): f for h, f, _r, _g in COLUMNS}
     by_heading.update({f: f for _h, f, _r, _g in COLUMNS})
-    headers = [by_heading.get(str(h or "").strip().lower().rstrip("*").strip()) for h in table[0]]
+    by_heading.update(mapping or {})
+    headers = [by_heading.get(str(h or "").strip().lower().rstrip("*").strip()) or None for h in table[0]]
     missing = [h for h, f, req, _g in COLUMNS if req and f not in headers]
     if missing:
-        raise ValidationError(f"Missing column(s): {', '.join(missing)}. Use the PHAEMA template.")
+        from apps.imports.engine import MissingColumns
+
+        raise MissingColumns(f"Missing column(s): {', '.join(missing)}. Use the PHAEMA template, or match your "
+                             "columns to PHAEMA's.", "Properties", [str(h or "").strip() for h in table[0]])
     rows = []
     for number, raw in enumerate(table[1:], start=2):
         values = {}
