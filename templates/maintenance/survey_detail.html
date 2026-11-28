@@ -1,0 +1,78 @@
+{% extends "base.html" %}{% load i18n humanize %}
+{% block title %}{% translate "Condition survey" %}: {{ property.reference }}{% endblock %}
+{% block help_page %}maintenance{% endblock %}
+{% block breadcrumbs %}<nav class="govuk-breadcrumbs" aria-label="Breadcrumb"><ol class="govuk-breadcrumbs__list"><li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="{% url 'maintenance:surveys' %}">{% translate "Condition surveys" %}</a></li><li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="{% url 'maintenance:property' property.pk %}">{{ property.reference }}</a></li></ol></nav>{% endblock %}
+{% block content %}
+<span class="govuk-caption-l"><a class="govuk-link" href="{% url 'maintenance:property' property.pk %}">{{ property.reference }} {{ property.name }}</a></span>
+<h1 class="govuk-heading-l">{{ survey.get_kind_display }}, {{ survey.surveyed_on|date:"j F Y" }}</h1>
+{% if survey.status == "draft" %}<p class="govuk-body"><strong class="govuk-tag govuk-tag--yellow">{% translate "Being entered" %}</strong></p>{% else %}<p class="govuk-body"><strong class="govuk-tag govuk-tag--green">{% translate "Finished" %}</strong> {{ survey.finished_on|date:"j M Y" }}</p>{% endif %}
+<dl class="govuk-summary-list">
+  <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Surveyor" %}</dt><dd class="govuk-summary-list__value">{{ survey.surveyor }}</dd></div>
+  <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Overall condition" %}</dt><dd class="govuk-summary-list__value">{% include "maintenance/_grade.html" with g=survey.overall_grade %} {{ survey.get_overall_grade_display|default:"" }}</dd></div>
+  <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Next survey due" %}</dt><dd class="govuk-summary-list__value">{{ survey.next_due|date:"j F Y"|default:"–" }}</dd></div>
+  {% if survey.notes %}<div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Summary" %}</dt><dd class="govuk-summary-list__value">{{ survey.notes|linebreaksbr }}</dd></div>{% endif %}
+  {% if survey.report %}<div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">{% translate "Report" %}</dt><dd class="govuk-summary-list__value"><a class="govuk-link" href="{{ survey.report.url }}">{% translate "Open the survey report (PDF)" %}</a></dd></div>{% endif %}
+</dl>
+{% if editable %}
+<details class="govuk-details" data-module="govuk-details"{% if editing %} open{% endif %}><summary class="govuk-details__summary"><span class="govuk-details__summary-text">{% translate "Change the survey details" %}</span></summary><div class="govuk-details__text">
+<form method="post" enctype="multipart/form-data" novalidate>{% csrf_token %}<input type="hidden" name="action" value="edit">
+  {% with form=edit_form %}{% include "core/_form_errors.html" %}{% for field in form %}{% include "core/_field.html" %}{% endfor %}{% endwith %}
+  <button class="govuk-button govuk-button--secondary" data-module="govuk-button">{% translate "Save" %}</button>
+</form></div></details>
+{% endif %}
+
+<h2 class="govuk-heading-m" id="items">{% translate "Work found" %}</h2>
+<p class="govuk-body">{% blocktranslate with t=summary.total|floatformat:0|intcomma %}Backlog still to do (priorities 1 to 3): £{{ t }}.{% endblocktranslate %}</p>
+{% if items %}
+<table class="govuk-table govuk-table--small-text-until-tablet">
+  <thead class="govuk-table__head"><tr class="govuk-table__row">
+    <th scope="col" class="govuk-table__header">{% translate "Element and work" %}</th>
+    <th scope="col" class="govuk-table__header">{% translate "Condition" %}</th>
+    <th scope="col" class="govuk-table__header">{% translate "Priority" %}</th>
+    <th scope="col" class="govuk-table__header">{% translate "Year" %}</th>
+    <th scope="col" class="govuk-table__header govuk-table__header--numeric">{% translate "Cost" %}</th>
+    <th scope="col" class="govuk-table__header">{% translate "Status" %}</th>
+  </tr></thead>
+  <tbody class="govuk-table__body">
+  {% for i in items %}
+    <tr class="govuk-table__row">
+      <td class="govuk-table__cell"><strong>{{ i.get_element_display }}</strong>{% if i.location %}, {{ i.location }}{% endif %}<br>{{ i.description }}{% if i.component %}<br><span class="govuk-body-s">{% translate "Component:" %} {{ i.component.name }}</span>{% endif %}</td>
+      <td class="govuk-table__cell">{% include "maintenance/_grade.html" with g=i.grade %}</td>
+      <td class="govuk-table__cell"><strong class="govuk-tag govuk-tag--{% if i.priority == 1 %}red{% elif i.priority == 2 %}orange{% elif i.priority == 3 %}yellow{% else %}grey{% endif %}" title="{{ i.get_priority_display }}">{{ i.priority }}</strong></td>
+      <td class="govuk-table__cell">{{ i.due_year|default:"–" }}</td>
+      <td class="govuk-table__cell govuk-table__cell--numeric">{% if i.estimated_cost %}£{{ i.estimated_cost|floatformat:0|intcomma }}{% else %}–{% endif %}{% if i.capital %}<br><span class="govuk-body-s">{% translate "capital" %}</span>{% endif %}</td>
+      <td class="govuk-table__cell">{% if i.job %}<a class="govuk-link" href="{{ i.job.get_absolute_url }}">{{ i.status_label }}: {{ i.job.reference }}</a>{% else %}{{ i.status_label }}{% endif %}{% if i.state_note %}<br><span class="govuk-body-s">{{ i.state_note }}</span>{% endif %}
+        {% if editable %}<form method="post" action="{% url 'maintenance:survey-item' i.pk %}" class="govuk-!-margin-top-1">{% csrf_token %}
+          {% if i.is_open %}{% if can_raise and not i.job or can_raise and i.job.status == "cancelled" %}<button class="govuk-button govuk-button--secondary govuk-!-margin-bottom-1" name="action" value="job" data-module="govuk-button">{% translate "Raise a job" %}</button>{% endif %}
+          <button class="govuk-button govuk-button--secondary govuk-!-margin-bottom-1" name="action" value="done" data-module="govuk-button">{% translate "Done" %}</button>
+          <button class="govuk-button govuk-button--secondary govuk-!-margin-bottom-1" name="action" value="not_needed" data-module="govuk-button">{% translate "Not needed" %}</button>
+          {% elif i.state != "open" %}<button class="govuk-button govuk-button--secondary govuk-!-margin-bottom-1" name="action" value="open" data-module="govuk-button">{% translate "Back to do" %}</button>{% endif %}
+          {% if survey.status == "draft" %}<button class="govuk-button govuk-button--warning govuk-!-margin-bottom-1" name="action" value="delete" data-module="govuk-button">{% translate "Remove" %}</button>{% endif %}
+        </form>{% endif %}</td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% else %}<p class="govuk-body">{% translate "No work recorded yet." %}</p>{% endif %}
+
+{% if editable %}
+<details class="govuk-details" data-module="govuk-details"{% if item_form.errors or not items %} open{% endif %}><summary class="govuk-details__summary"><span class="govuk-details__summary-text">{% translate "Add work found" %}</span></summary><div class="govuk-details__text">
+<form method="post" novalidate>{% csrf_token %}<input type="hidden" name="action" value="add_item">
+  {% with form=item_form %}{% include "core/_form_errors.html" %}{% for field in form %}{% include "core/_field.html" %}{% endfor %}{% endwith %}
+  <button class="govuk-button" data-module="govuk-button">{% translate "Add" %}</button>
+</form></div></details>
+
+{% if survey.status == "draft" %}
+<h2 class="govuk-heading-m">{% translate "Finish the survey" %}</h2>
+<form method="post">{% csrf_token %}<input type="hidden" name="action" value="finish">
+  <p class="govuk-body">{% translate "The property takes the survey's overall condition and date, unless a later survey has been finished." %}</p>
+  {% if linked %}<div class="govuk-checkboxes govuk-checkboxes--small govuk-!-margin-bottom-4" data-module="govuk-checkboxes"><div class="govuk-checkboxes__item">
+    <input class="govuk-checkboxes__input" id="update_components" name="update_components" type="checkbox" value="1" checked>
+    <label class="govuk-label govuk-checkboxes__label" for="update_components">{% blocktranslate count n=linked %}Also update the condition grade of the component named on {{ n }} item{% plural %}Also update the condition grades of the components named on {{ n }} items{% endblocktranslate %}</label></div></div>{% endif %}
+  <button class="govuk-button" data-module="govuk-button">{% translate "Finish the survey" %}</button>
+</form>
+{% else %}
+<form method="post">{% csrf_token %}<input type="hidden" name="action" value="reopen"><button class="govuk-button govuk-button--secondary" data-module="govuk-button">{% translate "Reopen to add or remove items" %}</button></form>
+{% endif %}
+{% endif %}
+{% endblock %}

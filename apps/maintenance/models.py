@@ -12,7 +12,7 @@ from django.utils.translation import gettext_lazy as _
 
 from apps.cases.models import validate_case_file
 from apps.core.dates import add_months, add_working_days
-from apps.core.files import process_image, validate_image
+from apps.core.files import process_image, validate_image, validate_pdf
 from apps.core.models import TimeStampedModel
 from apps.leases.models import Lease
 from apps.properties.models import Property
@@ -434,3 +434,135 @@ class RepairPhoto(models.Model):
         if self.image and not getattr(self.image, "_committed", True):
             self.image = process_image(self.image)
         super().save(*args, **kwargs)
+
+
+# ------------------------------------------------------------------ condition surveys and backlog
+
+
+def _survey_report_path(instance, filename):
+    return f"maintenance/surveys/{instance.property_id}/{uuid.uuid4().hex}.pdf"
+
+
+class ConditionSurvey(TimeStampedModel):
+    """A dated condition survey of a building or site: who carried it out, the overall grade and the work it found.
+    The work found is its items, each graded and given a priority and a cost; open items make up the backlog."""
+
+    class Kind(models.TextChoices):
+        FULL = "full", _("Full condition survey")
+        VISUAL = "visual", _("Visual inspection")
+        DESKTOP = "desktop", _("Desktop review")
+        SPECIALIST = "specialist", _("Specialist survey (for example roofs or services)")
+
+    class Status(models.TextChoices):
+        DRAFT = "draft", _("Being entered")
+        FINISHED = "finished", _("Finished")
+
+    property = models.ForeignKey(Property, on_delete=models.PROTECT, related_name="condition_surveys",
+                                 verbose_name=_("property"))
+    kind = models.CharField(_("kind of survey"), max_length=12, choices=Kind.choices, default=Kind.FULL)
+    surveyed_on = models.DateField(_("surveyed on"))
+    surveyor = models.CharField(_("surveyor"), max_length=150,
+                                help_text=_("The person and firm, or the council's own surveyor."))
+    overall_grade = models.CharField(_("overall condition"), max_length=1, choices=Property.Condition.choices,
+                                     blank=True)
+    next_due = models.DateField(_("next survey due"), null=True, blank=True,
+                                help_text=_("Usually five years after this one."))
+    notes = models.TextField(_("summary"), blank=True)
+    report = models.FileField(_("survey report (PDF)"), upload_to=_survey_report_path, blank=True,
+                              validators=[validate_pdf])
+    status = models.CharField(_("status"), max_length=10, choices=Status.choices, default=Status.DRAFT)
+    finished_on = models.DateField(_("finished on"), null=True, blank=True)
+
+    class Meta:
+        ordering = ["-surveyed_on", "-pk"]
+        verbose_name = _("condition survey")
+        verbose_name_plural = _("condition surveys")
+
+    def __str__(self):
+        return f"{self.get_kind_display()}, {self.property.reference}, {self.surveyed_on:%d %b %Y}"
+
+    def get_absolute_url(self):
+        return reverse("maintenance:survey", args=[self.pk])
+
+    def save(self, *args, **kwargs):
+        if self.next_due is None and self.surveyed_on:
+            self.next_due = add_months(self.surveyed_on, 60)
+        super().save(*args, **kwargs)
+
+    @builtins.property
+    def open_items(self):
+        return [i for i in self.items.all() if i.is_open]
+
+    @builtins.property
+    def backlog(self):
+        return sum((i.estimated_cost or 0 for i in self.open_items if i.priority in SurveyItem.BACKLOG), 0)
+
+
+class SurveyItem(TimeStampedModel):
+    """One piece of work a condition survey found, element by element, with its grade, priority and cost."""
+
+    class Priority(models.IntegerChoices):
+        URGENT = 1, _("1 Urgent: health and safety, or to keep the building open (within a year)")
+        ESSENTIAL = 2, _("2 Essential: to stop serious deterioration (within two years)")
+        DESIRABLE = 3, _("3 Desirable: to stop further deterioration (within five years)")
+        LONG_TERM = 4, _("4 Long term: beyond five years")
+
+    class State(models.TextChoices):
+        OPEN = "open", _("To do")
+        DONE = "done", _("Done")
+        NOT_NEEDED = "not_needed", _("No longer needed")
+
+    BACKLOG = (1, 2, 3)  # priorities counted as backlog maintenance: work needed within five years
+    YEARS = {1: 0, 2: 1, 3: 3, 4: 5}  # years after the survey the work falls due, if no year is given
+
+    survey = models.ForeignKey(ConditionSurvey, on_delete=models.CASCADE, related_name="items")
+    element = models.CharField(_("element"), max_length=12, choices=Category.choices)
+    location = models.CharField(_("location"), max_length=150, blank=True)
+    description = models.CharField(_("work needed"), max_length=400)
+    grade = models.CharField(_("condition"), max_length=1, choices=Component.Condition.choices)
+    priority = models.PositiveSmallIntegerField(_("priority"), choices=Priority.choices)
+    estimated_cost = models.DecimalField(_("estimated cost (£)"), max_digits=12, decimal_places=0, null=True,
+                                         blank=True)
+    capital = models.BooleanField(_("capital spending"), default=False)
+    due_year = models.PositiveSmallIntegerField(_("year due"), null=True, blank=True,
+                                                help_text=_("Left blank, set from the priority."))
+    component = models.ForeignKey(Component, on_delete=models.SET_NULL, null=True, blank=True,
+                                  related_name="survey_items", verbose_name=_("component"))
+    job = models.ForeignKey(Job, on_delete=models.SET_NULL, null=True, blank=True, related_name="survey_items",
+                            verbose_name=_("job"))
+    state = models.CharField(_("state"), max_length=12, choices=State.choices, default=State.OPEN)
+    state_note = models.CharField(_("note"), max_length=255, blank=True)
+
+    class Meta:
+        ordering = ["priority", "element", "pk"]
+        verbose_name = _("condition survey item")
+        verbose_name_plural = _("condition survey items")
+
+    def __str__(self):
+        return f"{self.get_element_display()}: {self.description[:60]}"
+
+    def save(self, *args, **kwargs):
+        if self.due_year is None and self.priority and self.survey_id:
+            self.due_year = self.survey.surveyed_on.year + self.YEARS.get(int(self.priority), 0)
+        super().save(*args, **kwargs)
+
+    @builtins.property
+    def is_open(self):
+        if self.state != self.State.OPEN:
+            return False
+        return not (self.job_id and self.job.status in (Job.Status.COMPLETED, Job.Status.CLOSED))
+
+    @builtins.property
+    def status_label(self):
+        if self.state != self.State.OPEN:
+            return self.get_state_display()
+        if self.job_id:
+            if self.job.status in (Job.Status.COMPLETED, Job.Status.CLOSED):
+                return _("Done (job completed)")
+            if self.job.status == Job.Status.CANCELLED:
+                return _("To do (job cancelled)")
+            return _("Job raised")
+        return self.get_state_display()
+
+    def job_priority(self):
+        return {1: Job.Priority.URGENT, 2: Job.Priority.ROUTINE}.get(int(self.priority), Job.Priority.PLANNED)

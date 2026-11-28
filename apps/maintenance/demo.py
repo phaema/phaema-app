@@ -146,7 +146,10 @@ def load(today=None):
 
 
 def remove():
+    from .models import ConditionSurvey
+
     refs = Property.objects.filter(reference__startswith="DM-")
+    ConditionSurvey.objects.filter(property__in=refs).delete()
     Job.objects.filter(property__in=refs).delete()
     PlannedTask.objects.filter(property__in=refs).delete()
     Component.objects.filter(property__in=refs).delete()

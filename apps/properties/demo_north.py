@@ -806,7 +806,60 @@ def load_district_maintenance(d, today):
     j.save()
     job("05", "Hall heating not reaching temperature", category="mechanical", priority="routine",
         reported_on=today - timedelta(days=4), how_reported="email", reported_by="Hall bookings secretary")
+    load_district_surveys(d, today, P, comp)
     return Job.objects.filter(property__reference__startswith=p).count()
+
+
+def load_district_surveys(d, today, P, comp):
+    """Condition surveys: the library and leisure centre surveyed last year (finished, with work outstanding), the
+    market hall surveyed six years ago (overdue for another) and a survey of the community hall still being entered."""
+    from apps.core.dates import add_months
+    from apps.maintenance import surveys
+    from apps.maintenance.models import ConditionSurvey, SurveyItem
+
+    p, town = d.prefix, d.town
+    firm = "J Patel MRICS, Example Building Surveyors LLP (fictional)"
+    plans = [
+        ("03", add_months(today, -14), "C", "finished", [
+            ("roof", "Flat roof", "Strip and renew the asphalt roof covering with insulation to current standards",
+             "D", 1, 95000, True, "Flat roof (asphalt)"),
+            ("electrical", "Whole building", "Replace the 1999 distribution boards and test the installation",
+             "B", 3, 18000, True, "Electrical distribution"),
+            ("internal", "Children's library", "Make good water-damaged ceiling after the roof is renewed",
+             "C", 2, 4500, False, None),
+            ("external", "Rear entrance", "Ramp and handrails for step-free access", "C", 2, 12500, True, None),
+            ("external", "First floor", "Overhaul window ironmongery and seals", "B", 4, 3200, False, None)]),
+        ("04", add_months(today, -10), "C", "finished", [
+            ("mechanical", "Pool plant room", "Replace pool filtration and dosing plant", "C", 2, 240000, True,
+             "Pool filtration and dosing plant"),
+            ("roof", "Sports hall", "Overclad the profiled metal roof; renew gutters and outlets", "C", 2, 310000, True,
+             "Main hall roof (profiled metal)"),
+            ("internal", "Changing rooms", "Refit changing rooms and showers", "C", 3, 85000, True, None),
+            ("fire", "Plant room door", "Replace damaged fire door and closer", "D", 1, 1800, False, None)]),
+        ("09", add_months(today, -74), "B", "finished", [
+            ("roof", "Market floor", "Repair cracked panes in the glazed roof lantern", "C", 2, 14800, False,
+             "Glazed roof lantern")]),
+        ("05", today - timedelta(days=6), "", "draft", [
+            ("mechanical", "Main hall", "Replace the gas boiler, near the end of its life", "C", 2, 9500, True,
+             None)]),
+    ]
+    for ref, when, grade, status, items in plans:
+        survey = ConditionSurvey.objects.create(property=P[p + ref], surveyed_on=when, surveyor=firm,
+                                                overall_grade=grade,
+                                                notes=f"Fictional survey of {P[p + ref].name}, {town}.")
+        for element, location, text, g, priority, cost, capital, component in items:
+            SurveyItem.objects.create(survey=survey, element=element, location=location, description=text, grade=g,
+                                      priority=priority, estimated_cost=d.rent(cost), capital=capital,
+                                      component=comp.get(component) if component else None)
+        if status == "finished":
+            surveys.finish(survey, update_components=False)
+            survey.finished_on = when + timedelta(days=21)
+            survey.save(update_fields=["finished_on"])
+    # The leisure centre's fire door has since been replaced.
+    door = SurveyItem.objects.filter(survey__property=P[p + "04"], element="fire").first()
+    if door:
+        door.state, door.state_note = SurveyItem.State.DONE, "Replaced by the leisure trust's contractor."
+        door.save(update_fields=["state", "state_note"])
 
 
 def load_compliance(today):
