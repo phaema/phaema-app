@@ -17,6 +17,8 @@ Work required:
 Agreed estimate: £{{ job.estimate|floatformat:2 }} plus VAT. Do not exceed it without written approval.
 {% endif %}
 Quote the works order number on your invoice, and send photographs and any certificates with it.
-{% if job.owner %}
+{% if portal_url %}
+Accept or decline this order, add progress notes and tell us when it is done in the contractor portal: {{ portal_url }}
+{% endif %}{% if job.owner %}
 Contact: {{ job.owner.get_full_name|default:job.owner.username }}{% if job.owner.email %}, {{ job.owner.email }}{% endif %}
 {% endif %}{% endautoescape %}

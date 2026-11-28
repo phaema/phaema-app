@@ -102,6 +102,12 @@
   <form method="post">{% csrf_token %}<input type="hidden" name="action" value="close"><button class="govuk-button govuk-button--secondary" data-module="govuk-button">{% translate "Close the job" %}</button></form>
 {% endif %}
 
+{% if job.updates.exists or job.contractor_response %}
+<h2 class="govuk-heading-m govuk-!-margin-top-6" id="contractor-updates">{% translate "From the contractor" %}</h2>
+{% if job.contractor_response == "accepted" %}<p class="govuk-body"><strong class="govuk-tag govuk-tag--green">{% translate "Accepted" %}</strong> {{ job.contractor_response_at|date:"j M Y H:i" }}{% if job.attend_on %}. {% blocktranslate with d=job.attend_on|date:"j F Y" %}Expects to attend on {{ d }}.{% endblocktranslate %}{% endif %}</p>
+{% elif job.contractor_response == "declined" %}<p class="govuk-body"><strong class="govuk-tag govuk-tag--red">{% translate "Declined" %}</strong> {{ job.contractor_response_at|date:"j M Y H:i" }}. {% translate "Choose another contractor and issue the order again." %}</p>{% endif %}
+{% for u in job.updates.all %}<div class="govuk-!-margin-bottom-3"><p class="govuk-body govuk-!-margin-bottom-1"><strong>{{ u.get_kind_display }}</strong> <span class="govuk-body-s">{{ u.created_at|date:"j M Y H:i" }}{% if u.account %}, {{ u.account.name }}{% endif %}</span></p>{% if u.text %}<p class="govuk-body">{{ u.text|linebreaksbr }}</p>{% endif %}{% if u.photo %}<a class="govuk-link" href="{{ u.photo.url }}">{% translate "Photo" %}</a>{% endif %}</div>{% endfor %}
+{% endif %}
 <h2 class="govuk-heading-m govuk-!-margin-top-6">{% translate "Photos and documents" %}</h2>
 <ul class="govuk-list">{% for d in job.documents.all %}<li><a class="govuk-link" href="{{ d.file.url }}">{{ d.description }}</a> <span class="govuk-body-s">({{ d.file|file_size }}, {{ d.created_at|date:"j M Y" }})</span></li>{% empty %}<li class="govuk-body">{% translate "None yet." %}</li>{% endfor %}</ul>
 {% if can_work %}<details class="govuk-details" data-module="govuk-details"><summary class="govuk-details__summary"><span class="govuk-details__summary-text">{% translate "Add a photo or document" %}</span></summary><div class="govuk-details__text">

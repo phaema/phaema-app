@@ -1,0 +1,16 @@
+{% load i18n humanize %}{% if jobs %}
+<table class="govuk-table">
+  <thead class="govuk-table__head"><tr class="govuk-table__row">
+    <th scope="col" class="govuk-table__header">{% translate "Order" %}</th>
+    <th scope="col" class="govuk-table__header">{% translate "Where and what" %}</th>
+    <th scope="col" class="govuk-table__header">{% translate "Target" %}</th>
+  </tr></thead>
+  <tbody class="govuk-table__body">{% for job in jobs %}
+    <tr class="govuk-table__row">
+      <td class="govuk-table__cell"><a class="govuk-link" href="{% url 'contractor:job' job.pk %}">{{ job.reference }}</a><br><span class="govuk-body-s">{{ job.ordered_on|date:"j M Y" }}</span></td>
+      <td class="govuk-table__cell">{{ job.title }}<br><span class="govuk-body-s">{{ job.property.name }}{% if job.property.postcode %}, {{ job.property.postcode }}{% endif %}</span></td>
+      <td class="govuk-table__cell">{% if job.priority == "emergency" %}<strong class="govuk-tag govuk-tag--red">{% translate "Emergency" %}</strong><br>{% endif %}{{ job.target_date|date:"j M Y"|default:"–" }}</td>
+    </tr>{% endfor %}
+  </tbody>
+</table>
+{% else %}<p class="govuk-body">{{ empty }}</p>{% endif %}

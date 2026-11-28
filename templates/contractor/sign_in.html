@@ -1,0 +1,18 @@
+{% extends "contractor/base.html" %}{% load i18n %}
+{% block title %}{% translate "Sign in" %}{% endblock %}
+{% block content %}
+<div class="govuk-grid-row"><div class="govuk-grid-column-two-thirds">
+{% include "portal/_errors.html" %}
+<h1 class="govuk-heading-l">{% translate "Sign in to the contractor portal" %}</h1>
+<p class="govuk-body">{% translate "For contractors the council has given an account. Enter your email address and we will email you a sign-in code." %}</p>
+<form method="post" novalidate>{% csrf_token %}
+  <div class="govuk-form-group{% if form.email.errors %} govuk-form-group--error{% endif %}">
+    <label class="govuk-label" for="id_email">{% translate "Email address" %}</label>
+    {% for e in form.email.errors %}<p class="govuk-error-message">{{ e }}</p>{% endfor %}
+    <input class="govuk-input" id="id_email" name="email" type="email" autocomplete="email" spellcheck="false" value="{{ form.email.value|default:'' }}">
+  </div>
+  <button class="govuk-button" data-module="govuk-button">{% translate "Continue" %}</button>
+</form>
+<p class="govuk-body">{% translate "No account? Ask the council officer who sends you works orders." %}</p>
+</div></div>
+{% endblock %}
